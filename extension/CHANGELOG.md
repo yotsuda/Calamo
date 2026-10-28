@@ -4,6 +4,15 @@ Notable changes to Lily# Scan Import are recorded here, newest first. Release no
 taken from this file: the topmost section is the version being tagged, and the release
 workflow (`.github/workflows/release.yml`) attaches that section to the GitHub Release.
 
+## Unreleased
+
+- **Open source.** The reader and this extension are now under the Apache License 2.0, and the
+  source is public: <https://github.com/yotsuda/LilySharp-Omr>. Reports of misread pages are
+  welcome there as issues. The extension's own terms of use are gone.
+- The `.lys` the reader writes begins `// Read by Lily# Scan Import <version> …`, and
+  `x.omr.json` names the reader the same way.
+- Needs Lily# 0.14.0 or later (it carries `lysc`, which checks a reading against the scan).
+
 ## 0.4.0
 
 - Old prints and scans read much better: the nineteenth-century songs on IMSLP, scanned at about

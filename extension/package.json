@@ -1,7 +1,7 @@
 {
   "name": "lilysharp-omr",
   "displayName": "Lily# Scan Import (Beta)",
-  "description": "Optical music recognition (OMR) for Lily#: reads a page image or PDF of printed sheet music into editable Lily# (.lys) text, with the uncertain places marked. Free while in beta. Adds to the Lily# extension; runs locally on Windows.",
+  "description": "Optical music recognition (OMR) for Lily#: reads a page image or PDF of printed sheet music into editable Lily# (.lys) text, with the uncertain places marked. Open source (Apache-2.0). Adds to the Lily# extension; runs locally on Windows.",
   "version": "0.4.0",
   "publisher": "yotsuda",
   "preview": true,

@@ -2,9 +2,10 @@
 
 Optical music recognition for [Lily#](https://yotsuda.github.io/LilySharp/): reads a page image or
 a PDF of printed sheet music and writes editable Lily# text (`.lys`), with the places it is unsure
-of marked for a look. Everything runs on your computer: a small learnt symbol detector (ONNX), the
-rules of notation and Windows' own text recognition read the page; nothing is sent anywhere, and
-no large language model is involved.
+of marked for a look. The reading runs on your computer: a small learnt symbol detector (ONNX), the
+rules of notation and Windows' own text recognition read the page; the reader sends nothing
+anywhere and uses no large language model. (Lily#'s optional *Fix OMR Marks with AI…* sends the
+marked bars to the language model you choose in VS Code.)
 
 ![A scanned page: the first two systems of Tchaikovsky's March of the Wooden Soldiers](docs/figures/readme-scan.png)
 
