@@ -139,7 +139,8 @@ sealed class SvgPage
         bool FormSign(int src, params string[] signs) => lys != null && src >= 0 && signs.Any(sg => string.CompareOrdinal(lys, src, sg, 0, sg.Length) == 0);
         // the mark a source position starts: "@cresc", "@!sustain", or "" (not a mark's '@')
         string MarkAt(int src) => lys != null && src >= 0 && src < lys.Length && lys[src] == '@'
-            ? Regex.Match(lys.Substring(src, Math.Min(24, lys.Length - src)), @"^@!?[A-Za-z]+").Value : "";
+            ? Regex.Match(lys.Substring(src, Math.Min(24, lys.Length - src)), @"^@!?[A-Za-z0-9]+").Value : "";
+        static bool Ottava(string mark) => mark.TrimStart('@', '!') is "8va" or "8vb" or "15ma" or "15mb";
         foreach (Match m in tag.Matches(s))
         {
             string name = m.Groups[2].Value;
@@ -196,7 +197,7 @@ sealed class SvgPage
                     // (a pedal bracket's long level line is no staff line: kept out of Lines)
                     string mark = MarkAt(Src());
                     // (an octave line's dashes and its end hook: no staff line, no one-line staff; kept for Ottavas)
-                    if (mark.TrimStart('@', '!') is "ottava" or "quindicesima")
+                    if (Ottava(mark))
                     {
                         ottLines.Add((Math.Min(p1.X, p2.X), p1.X <= p2.X ? p1.Y : p2.Y, Math.Max(p1.X, p2.X), p1.X <= p2.X ? p2.Y : p1.Y, a.ContainsKey("stroke-dasharray"), Src()));
                         break;
@@ -283,7 +284,7 @@ sealed class SvgPage
                         // an octave line's sign: bold italic 8va, 8vb, 15ma or 15mb (in brackets where the
                         // line goes on from a system's start), set from its left on its baseline, at the mark's '@'
                         if (a.GetValueOrDefault("font-style") == "italic" && a.GetValueOrDefault("font-weight") == "bold"
-                            && Regex.IsMatch(content, @"^\(?(8|15)(va|vb|ma|mb)\)?$") && MarkAt(Src()).TrimStart('@') is "ottava" or "quindicesima")
+                            && Regex.IsMatch(content, @"^\(?(8|15)(va|vb|ma|mb)\)?$") && Ottava(MarkAt(Src())))
                         {
                             var o = P(N(a["x"]), N(a["y"]));
                             ottTexts.Add((o.X, o.Y, N(a["font-size"]) * tr.Sx * page.Ppu, content, Src()));

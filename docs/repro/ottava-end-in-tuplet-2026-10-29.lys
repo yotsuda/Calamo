@@ -1,0 +1,21 @@
+// An octave line that ends inside a tuplet goes on transposing the tuplet's notes after its end:
+// bar 1's `d'''8@!15ma` is the triplet's first note, but c'' and b' after it are drawn two octaves
+// down (four and five ledger lines under the staff), as if still under the 15ma; bar 2's 8va the
+// same, an octave down. The dashes and the hook end where they should (over the d'''). Out of a
+// tuplet (bar 3) the end is right. LilyPond 2.26.0 (lysc ly) draws c'' and b' in the staff in all
+// three bars. Found by the OMR (2026-10-29, OmrGen --ottava seed 7 basic001 bar 10, after the
+// @! end moved onto the last note under the line, Lily#'s bc1e6983d): before that the end stood on
+// the note after the line, out of the tuplet here.
+// lysc png --scale 3 ottava-end-in-tuplet-2026-10-29.lys
+octave absolute
+time 4/4
+part p1 { clef treble }
+section A {
+  p1 {
+    c'''4@15ma tuplet 3/2 { d'''8@!15ma c''8 b'8 } r2 |
+    c'''4@8va tuplet 3/2 { d'''8@!8va c''8 b'8 } r2 |
+    c'''4@8va d'''8@!8va c''8 b'8 r8 r4 |
+  }
+}
+score { staff p1 }
+form { ~A }

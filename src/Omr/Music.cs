@@ -112,7 +112,7 @@ sealed class Ev
     public string GraceKind;                    // OMR: how they are written (acciaccatura, appoggiatura, grace), or null: by their count
     public int GraceValue;                      // OMR: their written value (8, 16), or 0: by their count
     public int OttavaStart;                     // OMR: an octave line starts at it: 1, 2 octaves up (8va, 15ma), -1, -2 down (8vb, 15mb); 0 none (its pitches are as sounded)
-    public int OttavaEnd;                       // OMR: the first event after an octave line: the octaves of the line it closes (1 @!ottava, 2 @!quindicesima: Lily# closes a span by its opening name), 0 none
+    public int OttavaEnd;                       // OMR: the last event under an octave line: the line it closes, as OttavaStart (1 @!8va, -2 @!15mb: Lily# closes a span by its opening name), 0 none
     public string Dynamic;                      // OMR: its dynamic as the .lys writes it after the '@' (mf, p.up), or null
     public string HairpinStart, HairpinEnd;     // OMR: a hairpin ("cresc", "decresc") starts at it / ends on it (no dynamic there to end it)
     public bool PedalDown, PedalUp;             // OMR: the pedal pressed at it (again, while down: a change) / released at it

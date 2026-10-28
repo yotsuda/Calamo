@@ -52,7 +52,7 @@ static class Articulations
         // space from it: piano004's at 0.50 in gen-s2)
         static bool Dot(Detection a, Detection b) => a.Class == "art_portato" && b.Class == "art_staccato" || b.Class == "art_portato" && a.Class == "art_staccato";
         marks = marks.Where(t => !marks.Any(o => o.Class != t.Class && o.Score > t.Score && Math.Abs(o.X - t.X) < 0.3 * s && Math.Abs(o.Y - t.Y) < (Dot(o, t) ? 0.6 : 0.3) * s)).ToList();
-        // (a trill's wavy line after its "tr": a trill line, @startTrillSpan; an ornament the detector sees
+        // (a trill's wavy line after its "tr": a trill line, @trillSpan; an ornament the detector sees
         // in the wave, a prall's or a mordent's zigzag, is the wave's)
         var waves = new Dictionary<Detection, (double X0, double X1, double Y)>();
         var ink = InkOf(res);
@@ -170,15 +170,19 @@ static class Articulations
         // alone. That "tr" and its wave are the line going on, not a line of their own: a trill mark on the
         // first chord of a part's staff in a system, when the same part's line in the system before, or on
         // the page before, ran out to its end. Its wave is kept for WaveEnd, and it is put as no mark)
+        // (or over a rest, the staff's first event: no note of its own, the staff under it -- seed 7's basic002,
+        // bar 6's r8 after a line run out over bar 5)
         var contAt = new Dictionary<Staff, (double X0, double X1)>();
         var staffOf = waves.Keys.Where(chordOf.ContainsKey).ToDictionary(k => k, k => chordOf[k][0].St);
+        foreach (var k in left.Where(waves.ContainsKey))
+            if (res.Systems.SelectMany(q => q.Staves).Where(st => st.Top > k.Y && st.Top - k.Y < 10 * s).MinBy(st => st.Top) is { } under) staffOf[k] = under;
         foreach (var k in staffOf.Keys.OrderBy(k => k.Y).ThenBy(k => k.X).ToList())
         {
             var st = staffOf[k];
             var sys = res.Systems.FirstOrDefault(q => q.Staves.Contains(st));
             if (sys == null) continue;
             double first = res.Sym.Heads.Where(h => h.St == st && !h.Grace).Select(h => h.L).DefaultIfEmpty(double.MaxValue).Min();
-            if (chordOf[k].Min(h => h.L) > first + 0.5 * s) continue;
+            if ((chordOf.TryGetValue(k, out var own) ? own.Min(h => h.L) : k.X) > first + 0.5 * s || k.X < sys.Bars[0]) continue;
             bool goingOn;
             if (Continuation.Next(res, sys, st.Part, out var prev, out var on, by: -1))
                 goingOn = staffOf.Where(p => p.Key != k && p.Value == on).Any(p => RunsOut(res, on, prev, waves[p.Key].X1, s));
@@ -208,7 +212,7 @@ static class Articulations
                 if (Verbose) res.Notes.Add($"trill line {t.Score:F2} at {t.X:F0},{t.Y:F0}: the wave {wave.X0:F0} to {wave.X1:F0}, "
                                            + (end == null ? "no note it ends at" : $"ending at the note at {end.X:F0},{end.Y:F0}") + (off ? ", on past the page's end" : ""));
             }
-            if (end != null || off) name = "startTrillSpan";
+            if (end != null || off) name = "trillSpan";
             if (Verbose) res.Notes.Add($"articulation {name} {t.Score:F2} at {t.X:F0},{t.Y:F0}: part {chord[0].St.Part}, " + (evs.Count == 0 ? "no event" : $"the note at {evs[0].X:F0}"));
             // (a line run out past the page's last system: on the next page, or as it is without one)
             if (off)
@@ -226,7 +230,7 @@ static class Articulations
         {
             if (!Continuation.First(res, o.Part, out var sys, out var on)) continue;
             double lead = res.Sym.Heads.Where(h => h.St == on && !h.Grace).Select(h => h.L).DefaultIfEmpty(sys.Bars[^1]).Min();
-            if ((ContinuedWave(res, on, sys, lead, s) ?? (contAt.TryGetValue(on, out var c) ? c : null)) is not { } cont)
+            if ((contAt.TryGetValue(on, out var c) ? c : ContinuedWave(res, on, sys, lead, s)) is not { } cont)
             {
                 // (none drawn: a line run out to the end of the page before ends on this page's first note,
                 // its piece here too short to draw: piano003's bar 13 in seed 11)
@@ -254,18 +258,21 @@ static class Articulations
         }
     }
 
-    // a trill line from a chord's events to the note it ends at (at: that note's page); with no end, the
-    // trill alone (name)
+    /// <summary>On the note a trill line's wave ends before: not written, the program puts the line's
+    /// @!trillSpan on the event before it in its voice (the last under the line, maybe on the page before).</summary>
+    internal const string TrillEndsBefore = "trill line ends before";
+
+    // a trill line from a chord's events to the note it ends before (at: that note's page); with no end,
+    // the trill alone (name)
     static void PutLine(List<Ev> evs, PageResult at, Head end, string name = "trill")
     {
         if (end == null) { Put(evs, name); return; }
         foreach (var e in Events(at, end, at.S))
         {
             e.Articulations ??= new List<string>();
-            // (before anything else on it: the next line may start on the note this one ends on)
-            if (!e.Articulations.Contains("stopTrillSpan")) e.Articulations.Insert(0, "stopTrillSpan");
+            if (!e.Articulations.Contains(TrillEndsBefore)) e.Articulations.Add(TrillEndsBefore);
         }
-        Put(evs, "startTrillSpan");
+        Put(evs, "trillSpan");
     }
 
     /// <summary>The page's ink without its staff lines' rows, for following a wave: a staff line runs
@@ -343,7 +350,7 @@ static class Articulations
     }
 
     /// <summary>
-    /// The note a trill line ends on (its @stopTrillSpan): Lily# runs the wave in whole elements to
+    /// The note a trill line ends before (<see cref="TrillEndsBefore"/>): Lily# runs the wave in whole elements to
     /// before that note's column, a quarter of a space to a space short of its head. A wave run out to
     /// the system's end goes on in the next system over the same part's staff, from before its first
     /// note, without the "tr": its end is read there. So does one whose wave ends before the system's
@@ -382,7 +389,9 @@ static class Articulations
             }
             // (the continuation: a wave over the staff, starting before its first head)
             double lead = res.Sym.Heads.Where(h => h.St == on && !h.Grace).Select(h => h.L).DefaultIfEmpty(next.Bars[^1]).Min();
-            var cont = ContinuedWave(res, on, next, lead, s) ?? (contAt != null && contAt.TryGetValue(on, out var c) ? c : null);
+            // (the wave of the continuation's own "tr" first: searched from the system's start, the wave may be
+            // taken in the "tr"'s letters)
+            var cont = contAt != null && contAt.TryGetValue(on, out var c) ? c : ContinuedWave(res, on, next, lead, s);
             if (Verbose) res.Notes.Add($"trill line on into system {next.Index + 1}: " + (cont == null ? "no wave" : $"a wave {cont.Value.X0:F0} to {cont.Value.X1:F0}"));
             // (none: the line ends on its last note, or on the next system's first note, Lily# running its wave out to the end of this one)
             if (cont == null) return end ?? res.Sym.Heads.Where(h => h.St == on && !h.Grace).MinBy(h => h.L);

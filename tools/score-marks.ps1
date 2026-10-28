@@ -33,11 +33,11 @@ function Marks([string]$path) {
             $m.Add("grace:$($x.Groups[1].Value){$($notes -join ' ')}")
             $m.Add("gracekind:$($x.Groups[1].Value)/$($notes.Count)")
         }
-        foreach ($x in [regex]::Matches($music, '@(!?)([A-Za-z]+)(?:\.(?:up|down))?(?:\((?:"([^"]*)"|(\w+))\))?')) {
+        foreach ($x in [regex]::Matches($music, '@(!?)([A-Za-z0-9]+)(?:\.(?:up|down))?(?:\((?:"([^"]*)"|(\w+))\))?')) {
             $neg = $x.Groups[1].Value -eq '!'; $name = $x.Groups[2].Value
             if ($name -in 'cresc', 'decresc', 'dim') { if (-not $neg) { $m.Add("hairpin:$name") } }
-            # (an octave line's start, by kind: ottava, ottava(bassa), quindicesima, quindicesima(bassa); its end is not counted, as a hairpin's)
-            elseif ($name -in 'ottava', 'quindicesima') { if (-not $neg) { $m.Add("ottava:$name$(if ($x.Groups[4].Success) { '(' + $x.Groups[4].Value + ')' })") } }
+            # (an octave line's start, by kind: 8va, 8vb, 15ma, 15mb; its end is not counted, as a hairpin's)
+            elseif ($name -in '8va', '8vb', '15ma', '15mb') { if (-not $neg) { $m.Add("ottava:$name") } }
             # (a text by its words, over or under alike)
             elseif ($name -eq 'text') { $m.Add("text:$($x.Groups[3].Value)") }
             # (a text spanner (S25) by its words, @rit the same as @textSpan("rit."), at the bar it starts;
@@ -46,8 +46,7 @@ function Marks([string]$path) {
                 if ($neg) { $m.Add('spanend:') } else { $m.Add("span:$(if ($name -eq 'textSpan') { $x.Groups[3].Value } else { "$name." })") }
             }
             # (a trill line's start and the bar it ends, as a text spanner's)
-            elseif ($name -eq 'startTrillSpan') { $m.Add('trill:') }
-            elseif ($name -eq 'stopTrillSpan') { $m.Add('trillend:') }
+            elseif ($name -eq 'trillSpan') { if ($neg) { $m.Add('trillend:') } else { $m.Add('trill:') } }
             elseif ($name -eq 'arpeggio') { $m.Add('arpeggio:') }
             elseif ($name -eq 'glissando') { $m.Add('glissando:') }
             elseif ($name -eq 'sustain') { $m.Add($(if ($neg) { 'pedal:up' } else { 'pedal:down' })) }

@@ -389,7 +389,7 @@ static class Gen
 
     // OmrGen --trills: trill lines (a "tr" and a wavy line after it) over stretches of a part's first
     // voice, from a stream of their own after the music like --spans. Lily# sets the "tr" over the
-    // staff at the first note and runs the wave to just before the note the @stopTrillSpan stands on,
+    // staff at the first note and runs the wave to just before the note after the @!trillSpan's,
     // across barlines and systems. A line of one to six notes, one open at a time, now and then. On
     // every part's staff (until Lily#'s 1aca41cd2, 2026-10-20, a lower staff's line was drawn from the
     // upper staff's columns and the first part's only were written:
@@ -405,9 +405,10 @@ static class Gen
                 double r = rng.NextDouble();
                 int len = rng.Next(1, 7);
                 if (r >= 0.06 || i + len >= notes.Count) continue;
-                notes[i].Marks += "@startTrillSpan";
-                notes[i + len].Marks += "@stopTrillSpan";
-                // (the next may start on the note this one ends on: Lily# pairs the stop before the start)
+                notes[i].Marks += "@trillSpan";
+                // (closed on the last note under the wave: Lily#'s @! end since 2026-10-28. The next may
+                // start on the note after, the wave run to it)
+                notes[i + len - 1].Marks += "@!trillSpan";
                 i += len - 1;
             }
         }
@@ -466,7 +467,7 @@ static class Gen
     // them where the music had them: the same seed draws the same page with the line added, and the
     // truth's pitches move with it. A treble (or alto) staff's lines run mostly up, a bass staff's
     // mostly down; one in five is 15ma or 15mb. A line starts at a note and ends before a note (Lily#'s
-    // @!ottava or @!quindicesima goes on the first note back at written pitch; a line left open is an error, LYS4018),
+    // @!8va goes on the last event under the line; a line left open is an error, LYS4018),
     // over bars of one voice (Lily# would move the other voice's notes too), cutting no tie, over no
     // grace note (its pitches are written beside the note's and would not move)
     // (--ottava-15: the share of the lines that are 15ma or 15mb. A fifth by default; the detector's
@@ -502,9 +503,11 @@ static class Gen
                     if (line[j - 1].Tie || line.Skip(i).Take(j - i + 1).Any(e => e.Grace != "")) { i = j + 1; continue; }
                     int by = 7 * octaves * (up ? 1 : -1);
                     for (int k = i; k < j; k++) line[k].Pitches = line[k].Pitches.Select(q => new GPitch(q.Dia + by, q.Alter)).ToList();
-                    line[i].Marks += (octaves == 2 ? "@quindicesima" : "@ottava") + (up ? "" : "(bassa)");
-                    // (closed by the name it was opened with: Lily#'s LYS4032 since 2026-10-28)
-                    line[j].Marks += octaves == 2 ? "@!quindicesima" : "@!ottava";
+                    // (named by the letters printed, closed by the name it was opened with, on the last event
+                    // under it, a rest maybe: Lily#'s since 2026-10-28)
+                    string name = (octaves == 2 ? "15m" : "8v") + (up ? "a" : "b");
+                    line[i].Marks += "@" + name;
+                    line[j - 1].Marks += "@!" + name;
                     i = j + 1;
                 }
         }

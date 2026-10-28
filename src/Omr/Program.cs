@@ -609,12 +609,12 @@ string formLine = Form.Line(sections, formSigns, all.Keys.DefaultIfEmpty(firstBa
         ("slur", e => e.SlurStart, e => e.SlurEnd, (e, o) => e.SlurEnd = true, e => e.SlurStart = false, e => e.SlurEnd = false, false),
         ("hairpin", e => e.HairpinStart != null, e => e.HairpinEnd != null || e.Dynamic != null, (e, o) => e.HairpinEnd = o.HairpinStart, e => e.HairpinStart = null, e => e.HairpinEnd = null, true),
         ("pedal", e => e.PedalDown, e => e.PedalUp, (e, o) => e.PedalUp = true, e => e.PedalDown = false, e => e.PedalUp = false, true),
-        ("octave line", e => e.OttavaStart != 0, e => e.OttavaEnd != 0, (e, o) => e.OttavaEnd = Math.Abs(o.OttavaStart), e => e.OttavaStart = 0, e => e.OttavaEnd = 0, true),
-        Named("trill line", "startTrillSpan", "stopTrillSpan"),
+        ("octave line", e => e.OttavaStart != 0, e => e.OttavaEnd != 0, (e, o) => e.OttavaEnd = o.OttavaStart, e => e.OttavaStart = 0, e => e.OttavaEnd = 0, true),
+        Named("trill line", "trillSpan", "!trillSpan"),
         Named("rit. line", "rit", "!rit"), Named("accel. line", "accel", "!accel"), Named("rall. line", "rall", "!rall"),
         Named("text line", "textSpan", "!textSpan"),
     };
-    // (the spans written among the articulations, by their names: @startTrillSpan … @stopTrillSpan, @rit … @!rit, @textSpan("…") … @!textSpan)
+    // (the spans written among the articulations, by their names: @trillSpan … @!trillSpan, @rit … @!rit, @textSpan("…") … @!textSpan)
     static (string, Func<Ev, bool>, Func<Ev, bool>, Action<Ev, Ev>, Action<Ev>, Action<Ev>, bool) Named(string name, string open, string close)
     {
         static bool Is(string a, string n) => a == n || a.StartsWith(n + "(");
@@ -625,6 +625,26 @@ string formLine = Form.Line(sections, formSigns, all.Keys.DefaultIfEmpty(firstBa
     for (int pi = 0; pi < cfg.Parts.Count && all.Count > 0; pi++)
     {
         List<List<Ev>> Voices(int bar) => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() };
+        // (a trill line's end, on the note its wave ends before: its @!trillSpan on the event before that in
+        // its voice, the last under the line, maybe in a bar or a page before, the next line starting on the
+        // note or not. On a note: a trill is a note's, the rests after it are passed over, as a whole-bar rest
+        // or a slash, which writes no mark)
+        var lastIn = new List<Ev>();
+        foreach (int bar in all.Keys)
+        {
+            var vs = Voices(bar);
+            for (int vi = 0; vi < vs.Count; vi++)
+                foreach (var e in vs[vi])
+                {
+                    if (e.Articulations?.Remove(Articulations.TrillEndsBefore) == true
+                        && (vi < lastIn.Count ? lastIn[vi] : lastIn.FirstOrDefault()) is { } before)
+                        (before.Articulations ??= new List<string>()).Add("!trillSpan");
+                    if (e.IsRest || e.FullBar || e.Slash) continue;
+                    while (lastIn.Count <= vi) lastIn.Add(null);
+                    lastIn[vi] = e;
+                }
+            foreach (var e in all[bar][pi] ?? new List<Ev>()) e.Articulations?.Remove(Articulations.TrillEndsBefore);
+        }
         // (the staff's every voice left to right: lysc pairs a slur opened in a bar's second voice with
         // the close in a bar of one voice after it, kinkel10-4's right hand)
         foreach (var f in families)
@@ -647,8 +667,14 @@ string formLine = Form.Line(sections, formSigns, all.Keys.DefaultIfEmpty(firstBa
                 // (a whole-bar rest's or a rhythm slash's marks are not written: no span opens or closes there)
                 foreach (var e in Voices(bar).SelectMany(v => v).Where(e => !e.FullBar && !e.Slash).OrderBy(e => e.X))
                 {
-                    if (f.Closes(e)) { if (open != null) open = null; else if (drop && e.Dynamic == null) f.Unclose(e); drop = false; }
-                    if (f.Opens(e)) { open = e; drop = false; }
+                    // (an octave or trill line over this one event: opened and closed on it, its end the last
+                    // event under the line)
+                    if (f.Name is "octave line" or "trill line" && f.Opens(e) && f.Closes(e)) { open = null; drop = false; }
+                    else
+                    {
+                        if (f.Closes(e)) { if (open != null) open = null; else if (drop && e.Dynamic == null) f.Unclose(e); drop = false; }
+                        if (f.Opens(e)) { open = e; drop = false; }
+                    }
                     // (a slur ends on a note; the others on any event)
                     if (!(f.Name == "slur" && (e.IsRest || e.FullBar))) { last = e; lastBar = bar; }
                 }
@@ -1126,8 +1152,11 @@ static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
     + (e.FullBar ? "" : string.Concat((e.Articulations ?? new()).Select(a => "@" + a)))
     + (e.FullBar || e.Slash ? "" : (e.Dynamic != null ? "@" + e.Dynamic : "") + (e.HairpinEnd != null ? "@!" + e.HairpinEnd : "")
         + (e.HairpinStart != null ? "@" + e.HairpinStart : "") + (e.PedalUp ? "@!sustain" : "") + (e.PedalDown ? "@sustain" : ""))
-    + (e.OttavaStart != 0 ? (Math.Abs(e.OttavaStart) == 2 ? "@quindicesima" : "@ottava") + (e.OttavaStart < 0 ? "(bassa)" : "") : "") + (e.OttavaEnd switch { 0 => "", 2 => "@!quindicesima", _ => "@!ottava" })
+    + (e.OttavaStart != 0 ? "@" + OttavaName(e.OttavaStart) : "") + (e.OttavaEnd != 0 ? "@!" + OttavaName(e.OttavaEnd) : "")
     + (e.FullBar || e.Slash || e.IsRest ? "" : (e.Tie ? "~" : "") + (e.SlurEnd ? ")" : "") + (e.SlurStart ? "(" : ""));
+
+// an octave line by the letters printed (1 8va, -1 8vb, 2 15ma, -2 15mb): Lily#'s names for it since 2026-10-28
+static string OttavaName(int ottava) => (Math.Abs(ottava) == 2 ? "15m" : "8v") + (ottava > 0 ? "a" : "b");
 
 // the event itself, without its tie or slur: what an @todo is put after, and what a candidate replaces
 static string EvCore(Ev e, int barTicks) => e.FullBar ? FullRest(barTicks, e.MultiBars)

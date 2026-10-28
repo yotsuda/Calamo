@@ -451,7 +451,7 @@ static class Ottavas
                 {
                     if (at != null) return;
                     m.NoEnd = false;
-                    foreach (var e in m.Ends) e.OttavaEnd = Math.Abs(m.Ottava);
+                    foreach (var e in m.Ends) e.OttavaEnd = m.Ottava;
                 }));
             }
             else f.Mark.NoEnd = false;
@@ -516,8 +516,8 @@ static class Ottavas
 
     // An octave line over a staff (or under it: Ottava < 0): the notes under it, from its sign to its
     // dashes' end, sound so many octaves up (down). Their pitches are raised (the .lys writes what
-    // sounds), the first marked @ottava and the event after the last @!ottava (Lily#'s end is the first
-    // note no longer under the line; the last note when none follows), in the bars as read and in their
+    // sounds), the first marked @8va and the last @!8va (Lily#'s end is the last event under the line,
+    // since 2026-10-28), in the bars as read and in their
     // voices alike. A line that goes on into the next system (NoEnd) is not closed: the piece that goes
     // on from there (Continued) is not started again, and closes it
     public static void Apply(PageResult res, Tempo.Mark m)
@@ -555,12 +555,13 @@ static class Ottavas
             if (m.NoEnd && m.Ends == null) return;
             int last = evs.IndexOf(under[^1]);
             // (the rests after the last note, short of the line's end, are under it too: the end is written
-            // after them, where the page's hook stands. piano006's bar 8, fisis,,,8. r16 | e,,8)
-            while (last + 1 < evs.Count && evs[last + 1].IsRest && res.Dark.ToSource(evs[last + 1].X, evs[last + 1].Y).X <= x1) last++;
-            var end = last + 1 < evs.Count ? evs[last + 1] : evs[last];
+            // on the last of them, where the page's hook stands. piano006's bar 8, fisis,,,8. r16 | e,,8.
+            // Not a whole-bar rest: its marks are not written)
+            while (last + 1 < evs.Count && evs[last + 1].IsRest && !evs[last + 1].FullBar && res.Dark.ToSource(evs[last + 1].X, evs[last + 1].Y).X <= x1) last++;
+            var end = evs[last];
             // (a line left open for the next page: its end there, or here should that page not go on with it)
             if (m.NoEnd) m.Ends.Add(end);
-            else end.OttavaEnd = Math.Abs(m.Ottava);
+            else end.OttavaEnd = m.Ottava;
         }
         // (the part's events in order over the bars: the line may run across barlines; its system's bars
         // only, and the bar after, where its end may fall, while that is the system's: another system's
