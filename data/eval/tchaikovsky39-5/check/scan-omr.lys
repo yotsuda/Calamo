@@ -1,0 +1,119 @@
+// Read by OmrProto from page images 1-1.
+title ""
+octave absolute
+paper { breaksOnly }
+time 2/4
+key d major
+
+part staffu { clef treble pedal text }
+part staffl { clef treble }
+
+section Piece {
+  staffu {
+    <a' d''>8@pp r8 d''8 r8 |
+    b'8.@decresc~ ais'16 b'8 r16 cis''16( |
+    <a' d''>8) r8 d''8 r8 |
+    b'8.@decresc~ ais'16 b'8 r16 cis''16( |
+    <a' d''>8) r8 <cis'' e''>8 r8 |
+    fis''8 r8 <d'' fis''>8 r8 |
+    <e'' g''>8 r16 <d'' fis''>16( <cis'' e''>8) r16 <b' d''>16~ | break
+    <cis'' e''>8 r8 r4 |
+    <a' d''>8 r8 d''8 r8 |
+    b'8.@decresc~ ais'16 b'8 r16 cis''16( |
+    <a' d''>8@todo(b11 "bar 11: a quarter short of 2/4: a note or rest missed, or a duration misread?")) d''8 |
+    b'8.~ ais'16 b'8 r16 cis''16( |
+    <a' d''>8) r8 <cis'' e''>8 r8 |
+    fis''8 r8 <d'' fis''>8 r8 |
+    voice { <a' cis''>8@todo(b15 "bar 15: the upper voice is a quarter short, the lower voice is a dotted eighth short (bar of 2/4)") <gis' b'>8 s4 } { <cis'' e''>8 r16 <b' d''>16 r16 s8 s16 } | break
+    a'8 r8 r4 |
+    <e' a'>8@p r8 a'8 r8 |
+    bes'8.@decresc( a'16 bes'8) r16 gis'16( |
+    a'8) r8 a'8 r8 |
+    bes'8.@decresc( a'16 bes'8) r16 gis'16@cresc( |
+    a'8) r8 b'8 r8 |
+    <gis' cis''>8 r8@!cresc <a' cis''>8@staccatissimo r8 |
+    <b' d'' g''>8@decresc r16 cis''16 b'8 r16@!decresc a'16~ | break
+    g'8 r8 r4 |
+    <e' a'>8@mf r8 a'8 r8 |
+    bes'8.@decresc a'16 bes'8 r16 gis'16( |
+    a'8) r8 a'8 r8 |
+    voice { b'8.@decresc a'16 b'8) r16 gis'16( } { b'2( } |
+    a'8@cresc) r8 b'8 r8 |
+    <gis' cis''>8 r8 <a' cis''>8@staccatissimo@!cresc r8 |
+    <b' d''>8 r16 cis''16 b'8@sustain r16 cis''16~ | break
+    a'8 r8 r4 |
+    <a' d''>8@p r8 d''8 r8 |
+    b'8.@todo(b34-staffu-n1 "bar 34: no dot? the dot may be a speck on the scan")@decresc~ ais'16 b'8 r16 cis''16( |
+    <a' d''>8) r8 d''8 r8 |
+    b'8.@decresc( ais'16 b'8) r16 cis''16( |
+    <a' d''>8) r8 <cis'' e''>8 r8 |
+    fis''8 r8 <d'' fis''>8 r8 |
+    <e'' g''>8@todo(b39 "bar 39: a 16th short of 2/4: a note or rest missed, or a duration misread?") r16 <d'' fis''>16 <cis'' e''>16 r16 <b' d''>16( | break
+    <cis'' e''>8) r8 r4 |
+    <a' d''>8@pp r8 d''8 r8 |
+    b'8@todo(b42 "bar 42: a 16th short of 2/4: a note or rest missed, or a duration misread?")@decresc( ais'16 b'8) r16 cis''16 |
+    <a' d''>8 r8 d''8 r8 |
+    b'8.@decresc( ais'16 b'8) r16 cis''16( |
+    <a' d''>8) r8 <cis'' e''>8 r8 |
+    fis''8 r8 <d'' fis''>8 r8 |
+    e''8 r16 dis''16( e''8) r16 fis''16( |
+    d''8@!sustain) r8 r4 |
+  }
+  staffl {
+    <d' fis'>8 r8 r4 |
+    <d' g'>8.( fis'16 g'8) r16 e'16( |
+    <d' fis'>8 r8 r4 |
+    <d' g'>8. fis'16 g'8) r16 e'16 |
+    <d' fis'>8 r8 a'8 r8 |
+    d''8 r8 r4 |
+    <d' a'>8 r8 r4 | break
+    a'8@staccato a'16@staccato a'16@staccato a'8@staccato a'8@staccatissimo@staccato |
+    <d' fis'>8 r8 r4 |
+    <d' g'>8.( fis'16) g'8 r16 e'16( |
+    <d' fis'>8 r8 r4 |
+    <d' g'>8. fis'16 g'8) r16 e'16 |
+    <d' fis'>8 r8 a'8 r8 |
+    d''8 r8 d'8 r8 |
+    e'2 | break
+    a8 a16 a16 a8 a8@staccatissimo |
+    <a cis'>8 r8 r4 |
+    <a d' f'>2 |
+    <a cis' e'>8 r8 r4 |
+    <a d' f'>2 |
+    <a cis' e'>8 r8 <e' gis'>8@staccatissimo r8 |
+    <cis' eis'>8@staccatissimo r8 fis'8 r8 |
+    <a fis'>8 r8 r4 | break
+    e'8@staccatissimo r16 d'16 cis'8 r16 b16 |
+    <a cis'>8 r8 r4 |
+    <a d' f'>2 |
+    <a cis' e'>8 r8 r4 |
+    <a d' f'>2 |
+    <a cis' e'>8 r8 <e' gis'>8@staccatissimo r8 |
+    <cis' eis'>8@staccatissimo r8 fis'8 r8 |
+    <b fis'>8 r8 <e' gis'>8@staccatissimo r8 | break
+    a8 r16 a16( b8) r16 cis'16( |
+    <d' fis'>8) r8 r4 |
+    <d' g'>8. fis'16 g'8 r16 e'16( |
+    <d' fis'>8) r8 r4 |
+    <d' g'>8.( fis'16 g'8) r16 e'16 |
+    <d' fis'>8 r8 a'8 r8 |
+    d''8 r8 r4 |
+    <d' a'>8 r8 r4 | break
+    a'8@staccato a'16@staccato a'16 a'8@staccato a'8@staccatissimo |
+    <d' fis'>8 r8 r4 |
+    <d' g'>8. fis'16 g'8 r16 e'16( |
+    <d' fis'>8.@todo(b43-staffl-n1 "bar 43: a 16th short of 2/4: a note or rest missed, or a duration misread?; no dot? the dot may be a speck on the scan") r4 |
+    <d' g'>8. fis'16 g'8) r16 e'16 |
+    <d' fis'>8 r8 a'8 r8 |
+    d''8 r8 <b' g''>8 r8 |
+    <g' b'>8 r8 <a' cis''>8 r8 |
+    d'8 r8 r4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff staffu "Right"
+  staff staffl "Left"
+}

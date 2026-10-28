@@ -1,0 +1,31 @@
+// Under an octave line, whether an accidental is printed again goes by the SOUNDING pitch, not the
+// written (drawn) one. Bar 1: the 8va's cisis'' is drawn on the cis' line (an octave down, as it
+// should be), with its double sharp. After the line, cis'8 on that same line in the same bar should
+// print its sharp (the double sharp drawn there is still in force on the page), but none is printed,
+// so the page reads cisis' there. Bar 2 the other way: ais' under the line is drawn in the a space
+// (A4's place) with its sharp; the a8 after the line, in that same space, gets no natural, and reads
+// as ais. (Lily#'s octave absolute: c is C4, so ais' sounds A#5 and is drawn at A4 under the 8va.)
+// NOT checked against LilyPond: its default rule (same-octave) remembers pitches with their octave,
+// and \ottava moves the drawing, not the pitch, so LilyPond may well draw the same. If so this is
+// LilyPond's own behaviour; still, a reader (or a player) of the page takes the drawn place as altered.
+// Found by the OMR (S18, 2026-10-18; OmrGen --ottava, basic008 bar 11 and basic002 bar 14 of seed 7).
+// (lysc png this file: bar 1's cis'8 after the line and bar 2's a8 after the line have no accidental)
+octave absolute
+time 4/4
+key a major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    fis''8@ottava cisis'''8 r16 b'16@!ottava cis''8 d''2 |
+    d''8@ottava ais''8 b''8 r16 b'16@!ottava a'8 d''4. |
+    a''1 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

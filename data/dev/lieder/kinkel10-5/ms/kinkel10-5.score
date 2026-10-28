@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.10/5 Traumdeutung (OpenScore Lieder, CC0; lc6178990.mscx; IMSLP #618113).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Traumdeutung
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

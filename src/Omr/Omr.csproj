@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- (a Windows version: the PDF import draws pages with Windows.Data.Pdf, Pdf.cs) -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Omr</RootNamespace>
+    <!-- the reader is omr.exe in development as in the extension's bin -->
+    <AssemblyName>omr</AssemblyName>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <!-- the learnt symbol detector runs locally through ONNX Runtime (approved 2026-09-28) -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.20.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\data\emmentaler-bbox.tsv" Link="emmentaler-bbox.tsv" CopyToOutputDirectory="PreserveNewest" />
+    <!-- the SMuFL fonts Lily# draws in (tools/smufl-tables.ps1) -->
+    <None Include="..\..\data\smufl-bbox-*.tsv" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\data\glyph-train.tsv" Link="glyph-train.tsv" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\data\glyph-train.tsv')" />
+    <None Include="..\..\data\detector.onnx" Link="detector.onnx" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\..\data\detector.onnx')" />
+  </ItemGroup>
+</Project>

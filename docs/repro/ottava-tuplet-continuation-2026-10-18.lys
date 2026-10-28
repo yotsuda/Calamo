@@ -1,0 +1,27 @@
+// An octave line broken at a system's end whose continuation ends inside a tuplet in the next
+// system's first bar: the "(15ma)" there is drawn over the first note only, with no dashes and no
+// hook, and the tuplet's first note, still under the line (@!ottava is on the note after it), is
+// drawn at its sounding pitch -- des''' on six ledger lines over the staff, beside the c'8 and bes8
+// in the staff, which knees the beam. The reader takes what is drawn: c' under the "(15ma)" reads
+// as c''' and the des''' as itself, so the pitches come out right by accident, but the kneed beam
+// splits the bar into two voices.
+// Expected: "(15ma)" with dashes over c'4 and des'8 (written two octaves down), the hook before c'8.
+// (Cut down from OmrGen's basic001 of seed 7, bars 9-10 -- the same in the generated page; lysc 0.13.0,
+// 2026-10-18. lysc png --scale 5.6 ottava-tuplet-continuation-2026-10-18.lys)
+title "ott-tuplet"
+octave absolute
+time 4/4
+key aes major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    c''4 d''4 ees''4 f''4 |
+    fis'''4@quindicesima ges'''4. aes'''8 tuplet 3/2 { g'''8 c''''8 bes'''8 } | break
+    c''''4 tuplet 3/2 { des''''8 c''8@!ottava bes'8 } r4 aes'4 |
+    c''1 |
+  }
+}
+
+score { staff p1 }

@@ -1,0 +1,18 @@
+# OpenScore Lieder (CC0) songs for the held-out set: slug, the corpus path, the MuseScore id (lc<id>.mscx), the IMSLP file it was typed from
+# (Special:ImagefromIndex/<imslp>), and that file's pages holding the song (first-last, filled in once the PDF is downloaded by hand).
+slug	path	id	imslp	pages
+kinkel10-3	Kinkel,_Johanna/6_Lieder,_Op.10/3_So_wahr_die_Sonne_scheinet	6177271	618113	6-7
+kinkel19-3	Kinkel,_Johanna/6_Lieder,_Op.19/3_Liebesmacht	5988388	171873	5-6
+kinkel7-2	Kinkel,_Johanna/6_Lieder,_Op.7/2_Wunsch	6150402	617921	6-7
+kinkel7-4	Kinkel,_Johanna/6_Lieder,_Op.7/4_Die_Lorelei	6151982	617921	10-11
+faisst4-5	Faisst,_Clara_Mathilda/5_Lieder,_Op.4/5_Lied_aus_Bosnien	6179338	621606	14-15
+lang36-1	Lang,_Josephine/3_Lieder,_Op.36/1_Es_sang_vor_langen_Jahren_wohl_auch_die_Nachtigall	6112984	617782	2-5
+lang36-2	Lang,_Josephine/3_Lieder,_Op.36/2_Rausche,_rausche,_froher_Bach!	6114679	617782	6-7
+lehmann-flapper1	Lehmann,_Liza/Songs_of_a_“Flapper”/1_In_the_garden	6751462	627144	9-11
+lehmann-flapper5	Lehmann,_Liza/Songs_of_a_“Flapper”/5_Good-night_little_stars	6753355	627144	23-25
+holmes-melodies16	Holmès,_Augusta_Mary_Anne/20_Mélodies/16_La_princesse_sans_cœur	5986322	295514	94-99
+boulanger-clairieres02	Boulanger,_Lili/Clairières_dans_le_ciel/02_Elle_est_gravement_gaie	5854283	25057	4-5
+butterworth-shropshire1	Butterworth,_George/6_Songs_from_A_Shropshire_Lad/1_Loveliest_of_trees,_the_Cherry_now	6214840	239744	5-8
+chaminade-paysbleu	Chaminade,_Cécile/_/Au_pays_bleu	6261607	154300	1-6
+elgar60-1	Elgar,_Edward/2_Songs,_Op.60/1_The_Torch	6233544	555775	4-7
+gonzaga-broma	Gonzaga,_Chiquinha/_/Ai_que_broma!	6609555	605868	2-3

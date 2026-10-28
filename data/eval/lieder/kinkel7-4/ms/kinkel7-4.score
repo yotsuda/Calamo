@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.7/4 Die Lorelei (OpenScore Lieder, CC0; lc6151982.mscx; IMSLP #617921).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Die Lorelei
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

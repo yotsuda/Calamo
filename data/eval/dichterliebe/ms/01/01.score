@@ -1,0 +1,6 @@
+# Schumann, Dichterliebe Op.48 No.1: Im wunderschönen Monat Mai (OpenScore Lieder, CC0; drawn by MuseScore 4 at 300 dpi).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Im wunderschönen Monat Mai
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

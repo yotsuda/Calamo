@@ -1,0 +1,17 @@
+title "ottava over a beam and a tuplet"
+octave absolute
+time 2/4
+
+part lh { clef bass }
+
+section Piece {
+  lh {
+    bes,8 ges,8@ottava(bassa) f,16@!ottava ees,16 bes,8 |
+    tuplet 3/2 { des,8@ottava(bassa) ces,8 <f ges>8@!ottava } ees4 |
+    d,8@ottava(bassa) tuplet 3/2 { ees,8 d,8 <ees, g, bes,>8 } f,8@!ottava |
+  }
+}
+
+score {
+  staff lh "Left"
+}

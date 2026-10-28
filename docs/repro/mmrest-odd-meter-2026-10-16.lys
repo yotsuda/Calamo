@@ -1,0 +1,25 @@
+// Full-bar rests in a meter whose bar is no one value (2026-10-16, found by OmrGen --mmrests).
+// In 4/4, 3/4, 6/8, 12/8, 7/4 (R1..) the multi-bar rest R<bar>*N draws as LilyPond does. In 5/4
+// (and 9/8, 5/8, ...) no form draws right:
+//   R4*5      warns LYS2001 "Measure duration 1/4 is less than time signature 5/4"; the bar shows
+//             five quarter rests, and R4*40 draws 8 such bars then 32 empty bars more (56 in all
+//             for a piece of 24).
+//   R1*5/4    no warning, but drawn over three bars: two half rests, two half rests, a half rest and a slash.
+//   R1*10/4   likewise (a multiplier of a fraction).
+//   R1*5/4*2  a syntax error (LYS0030).
+// Expected (LilyPond): R4*5 and R1*5/4 are one 5/4 bar's rest (a whole rest centred in the bar),
+// R4*40 or R1*5/4*8 a multi-bar rest of 8 with the count 8 over the staff (church rests: longa x2).
+// The OMR's .lys writes R4*5N for these meters (FullRest), so what it writes draws wrong too.
+title ""
+time 5/4
+key c major
+octave absolute
+
+part a { clef treble }
+
+section A {
+  a { c''4 d'' e'' f'' g'' | R4*5 | c''4 d'' e'' f'' g'' | R1*5/4 | c''4 d'' e'' f'' g'' | R4*40 | c''4 d'' e'' f'' g'' | }
+}
+
+form { ~A |. }
+score { staff a }

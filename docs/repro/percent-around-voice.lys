@@ -1,0 +1,18 @@
+// repeat percent around a bar of two voices: the first bar is drawn empty (outer),
+// while a repeat inside each voice draws it (inner)
+octave absolute
+time 4/4
+part outer { clef percussion }
+part inner { clef percussion }
+section A {
+  outer {
+    repeat percent 3 { voice { cymc8 hh8 hh8 hh8 hh8 hh8 hh8 hh8 } { bd4 sn4 bd8 bd sn4 } | }
+    voice { hh8 hh8 hh8 hh8 hh8 hh8 hh8 hh8 } { bd4 sn4 bd sn } |
+  }
+  inner {
+    voice { repeat percent 3 { cymc8 hh8 hh8 hh8 hh8 hh8 hh8 hh8 | } hh8 hh8 hh8 hh8 hh8 hh8 hh8 hh8 | }
+          { repeat percent 3 { bd4 sn4 bd8 bd sn4 | } bd4 sn4 bd sn | }
+  }
+}
+form main { A }
+score main { staff outer "outer" staff inner "inner" }

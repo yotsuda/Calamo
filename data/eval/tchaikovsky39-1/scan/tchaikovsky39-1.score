@@ -1,0 +1,5 @@
+# tchaikovsky39-1 (G. Schirmer 1904, ed. Ruthardt, IMSLP #07996 p.1 (a scan)).
+# Held-out evaluation (data/eval): never debug the reader on it. Truth: ../truth/page-{part}.notes (LilyPond 2.26 event listener on the Mutopia source).
+part upper treble "Right"
+part lower bass "Left"
+bar 1 time 3/4 key g

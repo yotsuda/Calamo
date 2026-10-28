@@ -1,0 +1,165 @@
+// Tchaikovsky Op.39-5: the bars where the Schirmer scan's truth (truth/, p1) differs from Mutopia's
+// (truth-mutopia/, p2), written out from the truths' events. Absolute octaves: c' = C4. Both staves are in
+// the treble clef. Bar 43 up: the scan opens with <a d'>8; every other bar: r8 r4 for r4.
+title "tchaikovsky39-5 scan"
+
+time 2/4
+key d major
+
+section B01_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B03_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B06_down {
+  p1 { octave absolute d''8 r8 r4 }
+  p2 { octave absolute d''8 r4. }
+}
+
+section B07_down {
+  p1 { octave absolute <d' a'>8 r8 r4 }
+  p2 { octave absolute <d' a'>8 r4. }
+}
+
+section B08_up {
+  p1 { octave absolute <cis'' e''>8 r8 r4 }
+  p2 { octave absolute <cis'' e''>8 r4. }
+}
+
+section B09_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B11_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B16_up {
+  p1 { octave absolute a'8 r8 r4 }
+  p2 { octave absolute a'8 r4. }
+}
+
+section B17_down {
+  p1 { octave absolute <a cis'>8 r8 r4 }
+  p2 { octave absolute <a cis'>8 r4. }
+}
+
+section B19_down {
+  p1 { octave absolute <a cis' e'>8 r8 r4 }
+  p2 { octave absolute <a cis' e'>8 r4. }
+}
+
+section B23_down {
+  p1 { octave absolute <b fis'>8 r8 r4 }
+  p2 { octave absolute <b fis'>8 r4. }
+}
+
+section B24_up {
+  p1 { octave absolute gis'8 r8 r4 }
+  p2 { octave absolute gis'8 r4. }
+}
+
+section B25_down {
+  p1 { octave absolute <a cis'>8 r8 r4 }
+  p2 { octave absolute <a cis'>8 r4. }
+}
+
+section B27_down {
+  p1 { octave absolute <a cis' e'>8 r8 r4 }
+  p2 { octave absolute <a cis' e'>8 r4. }
+}
+
+section B32_up {
+  p1 { octave absolute a'8 r8 r4 }
+  p2 { octave absolute a'8 r4. }
+}
+
+section B33_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B35_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B38_down {
+  p1 { octave absolute d''8 r8 r4 }
+  p2 { octave absolute d''8 r4. }
+}
+
+section B39_down {
+  p1 { octave absolute <d' a'>8 r8 r4 }
+  p2 { octave absolute <d' a'>8 r4. }
+}
+
+section B40_up {
+  p1 { octave absolute <cis'' e''>8 r8 r4 }
+  p2 { octave absolute <cis'' e''>8 r4. }
+}
+
+section B43_up {
+  p1 { octave absolute <a' d''>8 r8 d''8 r8 }
+  p2 { octave absolute d''8 r8 d''8 r8 }
+}
+
+section B41_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B43_down {
+  p1 { octave absolute <d' fis'>8 r8 r4 }
+  p2 { octave absolute <d' fis'>8 r4. }
+}
+
+section B48_up {
+  p1 { octave absolute d''8 r8 r4 }
+  p2 { octave absolute d''8 r4. }
+}
+
+section B48_down {
+  p1 { octave absolute d'8 r8 r4 }
+  p2 { octave absolute d'8 r4. }
+}
+
+form {
+  B01_down
+  B03_down
+  B06_down
+  B07_down break
+  B08_up
+  B09_down
+  B11_down
+  B16_up break
+  B17_down
+  B19_down
+  B23_down
+  B24_up break
+  B25_down
+  B27_down
+  B32_up
+  B33_down break
+  B35_down
+  B38_down
+  B39_down
+  B40_up break
+  B43_up
+  B41_down
+  B43_down break
+  B48_up
+  B48_down
+}
+
+score {
+  staff p1
+  staff p2
+}

@@ -1,0 +1,156 @@
+// The ten bars where truth-rje/page.ly (p1: what the Johnson edition is taken to have) differs from
+// truth/page.ly (p2: Mutopia), written out from the two truths' events. Absolute octaves: c' = C4.
+title "schumann15-7 truth-rje"
+
+time 4/4
+key c major
+
+section B03_up {
+  key f major
+  p1 {
+    octave absolute
+    voice { s4 f''2 e''8 d''8 } { c''8 f''8 f'2. }
+  }
+  p2 {
+    octave absolute
+    voice { c''8 f''8 f''2 e''8 d''8 } { r4 f'2. }
+  }
+}
+
+section B05_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { s4 g2 s4 } { <f a>4 c8 d8 c8 bes,8 g,8 a,8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { a4 g2 r4 } { f4 c8 d8 c8 bes,8 g,8 a,8 }
+  }
+}
+
+section B07_up {
+  key f major
+  p1 {
+    octave absolute
+    voice { s4 a''4. g''8 f''8 e''8 } { c''8 a''8 <g' a'>2. }
+  }
+  p2 {
+    octave absolute
+    voice { c''8 a''8 a''4. g''8 f''8 e''8 } { r4 <g' a'>2. }
+  }
+}
+
+section B09_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { b8 g'8 a8 b8 s2 } { g2 <c c'>8 d8 bes,8 g,8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { b8 g'8 a8 b8 c'8 r8 r4 } { g2 c8 d8 bes,8 g,8 }
+  }
+}
+
+section B12_up {
+  key f major
+  p1 {
+    octave absolute
+    voice { bes'8 d''8 g'8 a'8 bes'4. a'8 } { g'4. ees'8 d'8 g'8 bes4 }
+  }
+  p2 {
+    octave absolute
+    voice { bes'8 d''8 g'8 a'8 bes'4. a'8 } { g'4. ees'8 d'8 g'8 bes8 c'8 }
+  }
+}
+
+section B12_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { d'4. s8 s4. c'8 } { g4. <c fis>8 <d g>4. ees8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { d'4. s8 s2 } { g4. <c fis>8 <d g>4. ees8 }
+  }
+}
+
+section B17_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { s4 d'8 <cis' e'>8 d'4 s4 } { a2~ a8 bes8 <b c'>8 c8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { s4 d'8 <cis' e'>8 d'4 c'8 r8 } { a2~ a8 bes8~ bes8 c8 }
+  }
+}
+
+section B19_up {
+  key f major
+  p1 {
+    octave absolute
+    voice { s4 f''2 e''8 d''8 } { c''8 f''8 f'2. }
+  }
+  p2 {
+    octave absolute
+    voice { c''8 f''8 f''2 e''8 d''8 } { r4 f'2. }
+  }
+}
+
+section B21_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { s4 g2 s4 } { <f a>4 c8 d8 c8 bes,8 g,8 a,8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { a4 g2 r4 } { f4 c8 d8 c8 bes,8 g,8 a,8 }
+  }
+}
+
+section B24_down {
+  key f major
+  p1 {
+    octave absolute
+    clef bass
+    voice { s4 bes8 a8 g4 s4 } { <c a c'>4 <c c'>2 <bes, g>8 <d a>8 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { s4 bes8 a8 g4 s4 } { <c a c'>4 c2 <bes, g>8 <d a>8 }
+  }
+}
+
+form {
+  B03_up
+  B05_down
+  B07_up
+  B09_down break
+  B12_up
+  B12_down
+  B17_down break
+  B19_up
+  B21_down
+  B24_down
+}
+
+score {
+  staff p1
+  staff p2
+}

@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.10/2 Der Kuss (OpenScore Lieder, CC0; lc6177233.mscx; IMSLP #618113).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Der Kuss
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

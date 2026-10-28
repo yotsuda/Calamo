@@ -1,0 +1,14 @@
+// Lily# collision: the lower voice's portato set over its note (.up) lands on the upper voice's
+// quarter rest; the portato's dot is hidden inside the rest. From gen-s2 piano003, rh bar 7.
+title "portato-over-rest"
+octave absolute
+time 2/4
+
+part rh { clef treble }
+score { staff rh }
+
+section Piece {
+  rh {
+    voice { cis''16 d''16 d''8 r4 } { a'16 g'16 fis'8 a'8@portato.up g'8@portato.up } |
+  }
+}

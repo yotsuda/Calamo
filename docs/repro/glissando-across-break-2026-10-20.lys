@@ -1,0 +1,30 @@
+// A glissando over a system break (bar 2's e'2 to bar 3's c'''2, lysc built from 1aca41cd2):
+// - the second piece is not drawn on the second system at all: it lands above the FIRST system,
+//   at the page's top left (SVG: <line x1="3.37" y1="4.19" x2="5.30" ...>, while system 1's staff
+//   lines are at y 9.69-13.69 and system 2's at 21.69-25.69). GlissandoEngraver's own comment says
+//   as much: a later segment resolves its staff middle from the start note's measure (system 1).
+// - both pieces are level (the first at e', the second at c'''): GlissandoEngraver's LILYSHARP-OWN
+//   choice, disclosed there. LilyPond slopes the pieces as one line (lily/line-spanner.cc
+//   calc_bound_info), so each still points from one note toward the other.
+// Expected: the second piece on system 2, from its start to just before c'''2.
+// (lysc png --scale 3 glissando-across-break-2026-10-20.lys)
+octave absolute
+time 4/4
+key c major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    c''4 d''4 e''4 f''4 |
+    g''2 e''2@glissando | break
+    c''''2 b'''2 |
+    c'''1 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

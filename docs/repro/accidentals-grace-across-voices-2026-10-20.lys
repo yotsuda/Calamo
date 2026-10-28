@@ -1,0 +1,28 @@
+// After 1aca41cd2 (accidentals per staff, not per voice), a grace note still goes by its own voice.
+// Bar 1: the lower voice's b'4 after the upper voice's bes'4 gets its natural (fixed).
+// Bar 2: the lower voice's grace { b'16 } after the upper voice's bes'4 gets none, and reads as bes.
+// Bar 3: the same with a b' earlier in the lower voice: still none.
+// Bar 4: a grace in the upper voice itself, after its own bes': natural printed.
+// LilyPond 2.26.0 (\grace in << { } \\ { } >>) prints the natural in bars 1-4.
+// Found by the OMR (S21, 2026-10-20; OmrGen --graces seed 7, piano009 bar 1: grace { b16 a16 g16 }
+// after the upper voice's beses8 read as beses).
+octave absolute
+time 4/4
+key c major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    voice { c'''4 bes''4 c'''4 c'''4 } { g''4 g''4 g''4 b''4 } |
+    voice { c'''4 bes''4 c'''4 c'''4 } { g''4 g''4 g''4 grace { b''16 } a''4 } |
+    voice { c'''4 bes''4 c'''4 c'''4 } { b''4 g''4 g''4 grace { b''16 } a''4 } |
+    voice { c'''4 bes''4 grace { b''16 } c'''4 c'''4 } { g''4 g''4 g''4 g''4 } |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

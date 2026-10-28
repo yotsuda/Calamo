@@ -1,0 +1,4 @@
+title piano002
+part rh treble "Right"
+part lh bass "Left"
+bar 1 time 5/4 key g

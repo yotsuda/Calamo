@@ -1,0 +1,23 @@
+bin/
+obj/
+out/
+*.png
+*.log
+tools/train-model/.venv/
+# scanned pages are data, not output
+!data/print/**/*.png
+# not redistributable (data/LICENSES.md): kept on the maintainer's disk only
+data/scans/
+data/bohemian/
+data/ninetofive/
+data/eval/schumann15-1/imslp/rje-2010.pdf
+data/eval/tchaikovsky39-*/imslp/hapebe-2011.pdf
+tools/train-model/*.npz
+tools/train-model/*.pt
+tools/train-model/*.onnx
+tools/train-model/*.err
+tools/train-model/__pycache__/
+# (a set's IMSLP file is committed once, with its first song: prep-eval.ps1 copies it to the others)
+data/eval/lieder/kinkel7-4/scan/imslp.pdf
+data/eval/lieder/lang36-2/scan/imslp.pdf
+data/eval/lieder/lehmann-flapper5/scan/imslp.pdf

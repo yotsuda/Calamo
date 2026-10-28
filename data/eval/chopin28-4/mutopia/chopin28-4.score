@@ -1,0 +1,5 @@
+# Chopin, Prelude Op.28 No.4 (Mutopia, LilyPond, after Peters/Scholtz; public domain): the published A4 PDF at 300 dpi.
+# Held-out evaluation (data/eval): never debug the reader on it. Truth: ../truth/page-{up,down}.notes (LilyPond 2.26 event listener).
+title Prelude Op.28 No.4
+part up treble "Right"
+part down bass "Left"

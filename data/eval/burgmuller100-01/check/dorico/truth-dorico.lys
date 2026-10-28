@@ -1,0 +1,32 @@
+// Burgmuller Op.100-1: the bars where the Dorico edition's truth (truth-dorico/, p1) differs from
+// Mutopia's (truth/, p2), written out from the truths' events. Absolute octaves: c' = C4.
+title "burgmuller100-01 truth-dorico"
+
+time 4/4
+key c major
+
+section B08_up {
+  p1 { octave absolute g'8 b'8 c''8 d''8 g'4 r4 }
+  p2 { octave absolute g'8 b'8 c''8 d''8 g''4 r4 }
+}
+
+section B08_down {
+  p1 { octave absolute clef bass <g b>2~ <g b>4 r4 }
+  p2 { octave absolute clef bass <g b>2. r4 }
+}
+
+section B16_up {
+  p1 { octave absolute clef treble c''2~ c''4 r4 }
+  p2 { octave absolute clef treble e''2. r4 }
+}
+
+form {
+  B08_up
+  B08_down
+  B16_up
+}
+
+score {
+  staff p1
+  staff p2
+}

@@ -1,0 +1,19 @@
+// Lily# feedback #20 (docs/repro/lilysharp-feedback-2026-10-04.md): after a change to a longer
+// meter (4/4 -> 12/8), the upper voice's notes past the old bar length (from the 9th eighth) are
+// drawn with their stems down, and the lower voice's last c'4. is not drawn. With 12/8 from the
+// start both voices are drawn right.
+title "voice stems 4/4 to 12/8"
+octave absolute
+time 4/4
+key c major
+part rh { clef treble }
+section Piece {
+  rh {
+    voice { c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 a'''8 } { c''2 c''2 } |
+    time 12/8 voice { c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 a'''8 g'''8 f'''8 e'''8 d'''8 } { c''4. c''4. c''4. c''4. } |
+  }
+}
+form main { ~Piece }
+score main {
+  staff rh "Piano"
+}

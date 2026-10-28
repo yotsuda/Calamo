@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.7/2 Wunsch (OpenScore Lieder, CC0; lc6150402.mscx; IMSLP #617921).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Wunsch
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

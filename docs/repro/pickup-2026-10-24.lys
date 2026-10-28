@@ -1,0 +1,31 @@
+// A pickup: the piece's first bar a quarter long on both staves, the right hand's an eighth rest
+// and an eighth, the left hand's an eighth rest only (its other eighth a spacer: the page shows one
+// rest, as MuseScore hides the other -- kinkel19-6). The second system's printed number, 3, is the
+// count less one (the pickup is bar 0). The last bar completes the pickup, a half note long. Read
+// back, omr.lys opens its section with "partial 4", the left hand's pickup is "r8 s8", and the short
+// last bar has no todo. lysc png --scale 5.6.
+octave absolute
+paper { breaksOnly }
+time 3/4
+key f major
+part rh { clef treble }
+part lh { clef bass }
+score { grandStaff { staff rh staff lh } }
+section Piece {
+  partial 4
+  rh {
+    r8 c''8 |
+    f''4 e''4 d''4 |
+    c''2 a'4 | break
+    bes'4 g'4 e'4 |
+    f'2 |
+  }
+  lh {
+    s8 r8 |
+    f4 a4 c'4 |
+    f2. | break
+    c4 e4 g4 |
+    f,2 |
+  }
+}
+form { ~Piece }

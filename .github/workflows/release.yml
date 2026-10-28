@@ -1,0 +1,123 @@
+name: Release
+
+# Tag-driven release, after Lily#'s release.yml: pushing a tag like v0.3.0 packs the
+# extension (tools/pack-extension.ps1: omr.exe published self-contained for win-x64, the
+# version check, `vsce package --target win32-x64`), attaches the .vsix to a GitHub
+# Release, and publishes it to the VS Code Marketplace.
+#
+# Run by hand (workflow_dispatch) it only packs and keeps the .vsix as a workflow
+# artifact: no Release, no Marketplace. Do that once before the first tag, so that the
+# runner is proven before a version is spent -- THE MARKETPLACE NEVER ACCEPTS A VERSION
+# TWICE (Lily#'s 0.4.0 had to be finished by hand for that reason).
+#
+# One target only (win32-x64): the reader draws PDF pages and reads words with Windows'
+# own APIs (net10.0-windows10.0.19041.0), so there is nothing to publish for other
+# platforms, and no race between legs on the first publish.
+#
+# Windows runner: pack-extension.ps1 runs the published omr.exe (`--version --json`) to
+# write bin/omr.json and to check that extension/package.json names the same version, and
+# a Windows TFM is simplest to publish from Windows.
+#
+# Secret: VSCE_PAT. A Marketplace -> Manage token belonging to the Microsoft account that
+# OWNS the publisher `yotsuda` (https://marketplace.visualstudio.com/manage/publishers/yotsuda).
+# Made at https://dev.azure.com/ -> User settings -> Personal access tokens, organization
+# "All accessible organizations", scope Marketplace: Manage. An Entra ID token for the same
+# e-mail address is a different principal and is refused (Lily#'s editors/vscode/DEPLOY.md
+# measured it, 2026-08-23). A PAT lasts a year at most: THIS ONE EXPIRES 2027-10-16 (made
+# 2026-10-17; the same token is Lily#'s VSCE_PAT). When a release fails at verify-pat, that
+# is the first thing to renew: regenerate it in Azure DevOps and update the secret in BOTH
+# repositories (Settings -> Secrets and variables -> Actions).
+#
+# The repository is private; the Marketplace does not mind (package.json has no repository
+# field, and pack-extension.ps1 packs with --allow-missing-repository). The readme's figure
+# is served from the Lily# site, so the site must be pushed before the tag.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # create the GitHub Release + upload the .vsix
+
+jobs:
+  vsix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Tag matches the version
+        # v0.3.0 must be extension/package.json's 0.3.0 (pack-extension.ps1 then checks that
+        # the reader's own `--version` says the same). The version is not rewritten from the
+        # tag: the reader's version is compiled in (ReadCommand.Version) and the extension's
+        # must be one with it, so a wrong tag is a mistake to stop on, not to paper over.
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          $tag = $env:GITHUB_REF_NAME -replace '^v', ''
+          $pkg = (Get-Content extension/package.json -Raw | ConvertFrom-Json).version
+          if ($tag -ne $pkg) { throw "tag $env:GITHUB_REF_NAME, extension/package.json $pkg : make them one before tagging" }
+          "version $pkg"
+
+      - name: Publish rights
+        # One request before the build: a wrong or expired PAT fails here, not after the
+        # publish and the pack (Lily#'s publish-marketplace.ps1 does the same).
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          $publisher = (Get-Content extension/package.json -Raw | ConvertFrom-Json).publisher
+          npx --yes @vscode/vsce verify-pat $publisher
+          if ($LASTEXITCODE -ne 0) { throw "verify-pat failed for '$publisher': nothing was published" }
+
+      - name: Pack
+        # The same script the local deploy uses.
+        run: pwsh -NoProfile -File tools/pack-extension.ps1 -Out "$PWD/out/extension"
+
+      - name: Keep the .vsix
+        uses: actions/upload-artifact@v4
+        with:
+          name: lilysharp-omr-vsix
+          path: out/extension/*.vsix
+          if-no-files-found: error
+
+      - name: Extract release notes
+        # The topmost section of extension/CHANGELOG.md is the version being tagged (the
+        # Marketplace shows the same file on its Changelog tab). The heading is dropped: the
+        # Release is already titled with the tag.
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          $n = 0
+          $notes = foreach ($line in Get-Content extension/CHANGELOG.md) {
+            if ($line -match '^## ') { $n++; continue }
+            if ($n -eq 1) { $line }
+          }
+          Set-Content RELEASE_NOTES.md ($notes -join "`n")
+          Get-Content RELEASE_NOTES.md
+
+      - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: out/extension/*.vsix
+
+      - name: Publish to VS Code Marketplace
+        # The packed .vsix as it is (its target is inside it), no --pre-release: a
+        # pre-release version reaches only users who opted into pre-releases for this
+        # extension, which would make "installable from the extension page" quietly false.
+        # "preview": true in package.json is the Beta label, a different thing.
+        # Re-running this job for a published version fails here by design on the
+        # Marketplace's side: bump the version rather than retry.
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          $vsix = Get-ChildItem out/extension/*.vsix | Select-Object -First 1
+          npx --yes @vscode/vsce publish --packagePath $vsix.FullName --allow-missing-repository
+          if ($LASTEXITCODE -ne 0) { throw "vsce publish failed" }

@@ -1,0 +1,40 @@
+// The space between systems does not count a trill line: its "tr" and wave run into the notes
+// of the system above. Bar 16 (the last system): the line over a8 (three ledger lines above the
+// staff) is drawn among bar 13's notes hanging below the staff above (ais,,,16 on its ledger lines).
+// Bar 7: the line over the system's first notes runs through bar 5's low notes (b,,,8. under the
+// staff above). LilyPond 2.26.0 (lysc ly of this file, the same line breaks) spaces the systems so
+// that neither touches. The OMR cannot see the "tr" among the other system's notes.
+// Found by the OMR (S26, 2026-10-20; OmrGen --trills seed 11, ledger002 bars 7 and 16).
+title "ledger002"
+octave absolute
+time 12/8
+key g major
+
+part p1 { clef bass }
+
+section Piece {
+  p1 {
+    r4 c8 b,4 g,8 a,8 c16 des16 c8 b,4. |
+    a,4. g,8 a,8 e8 c8. r16 a8 bes8.@startTrillSpan e16 g8@stopTrillSpan |
+    d8 c8 b,8 b,8 fis,16 e,16@startTrillSpan d,8 c,16 r16 g,16 b,16 g,8@stopTrillSpan g,8 e16 c'16 e'8 |
+    fis'4 b8 fis4. e8 bes,16 g16 r8 b,8 a,8 g,8 |
+    a,8. d,16 e,8 b,,8. fis,16 fisis,8 des4.@startTrillSpan eis8 r16 d16 c8 |
+    b,8.@stopTrillSpan r16 gis8 d'16 fis16 d'16 d'16 cis'8 a8 b16 r16 r8 r8. ces'16 fis'8 |
+    a4.@startTrillSpan f'16 r16 r16 g'16 e'8 a'4 d'8 r8 r8 ces'8@stopTrillSpan@startTrillSpan |
+    d'1. |
+    c'8. b16 c'8@stopTrillSpan d'16 c'16 g'16 r16 fis'8 g'8 ais'16 e'16 fis'8 b8@startTrillSpan c'16 des'16 eis'8@stopTrillSpan |
+    g16 g16 r16 b16 ges'8 c'8. fis'16 g'8 e'8 fis'8 g'8 b4. |
+    e'4@startTrillSpan d'8 r4. fis'16 fis'16@stopTrillSpan a16 c'16 b8 c'16 gis16 b,16@startTrillSpan d,16@stopTrillSpan g,8 |
+    fis,16 ges,16 c,16 c,16 ges,,8 e,16 a,,16 g,,16 b,,16 c,8 c,16 r16 b,,16 c,16 d,8 e,8 a,16 r16 g,8 |
+    c,8. d,16 b,8 d,16 c,16 b,,16 c,16 d,8@startTrillSpan c,16 r16 ais,,16 b,,16 g,8 fis,16@stopTrillSpan b,16 a,16 g,16 r8 |
+    fis,8 b,,8 f,8 e,4. f,8 g,8 c,8 g,4 f,8 |
+    r8 r16 c16 ees8 r16 fisis16 g16 fis16 bes8 e4 fis8 e16 c'16 g16 r16 fis8 |
+    d'4 d'8 d'4 a'8@startTrillSpan g'4 e'8@stopTrillSpan fis'8 a16 g16 fis8 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

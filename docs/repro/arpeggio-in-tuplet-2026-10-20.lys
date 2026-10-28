@@ -1,0 +1,22 @@
+// Lily# (2026-10-20, lysc Release): an arpeggio on a chord inside a tuplet is not drawn, with no
+// warning. Four chords below carry @arpeggio; the SVG has the wiggles (U+E06F) of the two outside
+// the tuplet only. LilyPond draws all four. Found by the OMR's generated pieces (OmrGen --arpeggios):
+// all five arpeggios inside tuplets in out/gen-arp went undrawn, every other was drawn.
+title "arpeggio in a tuplet"
+octave absolute
+time 4/4
+key c major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    <c'' e'' g''>4@arpeggio tuplet 3/2 { <c'' e'' g''>8@arpeggio <d'' f''>8 <e'' g''>8@arpeggio } <c'' e'' g''>2@arpeggio |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

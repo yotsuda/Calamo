@@ -1,0 +1,31 @@
+// A pickup of an eighth whose voice and rest sound at once: the song's d'8 over a second voice's
+// eighth rest at the same x, below it (as MuseScore prints kinkel19-6's opening). The reader took
+// them as "r8 d'8", a quarter, and the pickup as partial 4. Read back, omr.lys opens with
+// "partial 8" and the bar is two voices. lysc png --scale 5.6.
+octave absolute
+paper { breaksOnly }
+time 4/4
+key bes major
+part song { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+score { staff song grandStaff { staff rh staff lh } }
+section Piece {
+  partial 8
+  song {
+    voice { d''8 } { r8 } |
+    d'''4 c'''8 bes''8 a''4. bes''8 |
+    g''4. a''8 bes''2 |
+  }
+  rh {
+    r8 |
+    <d'' f'' bes''>2 <c'' f'' a''>2 |
+    <bes' d'' g''>2 <d'' f'' bes''>2 |
+  }
+  lh {
+    r8 |
+    bes2 f2 |
+    g2 bes2 |
+  }
+}
+form { ~Piece }

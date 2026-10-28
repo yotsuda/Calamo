@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.7/6 Die Zigeuner (OpenScore Lieder, CC0; lc6153442.mscx; IMSLP #617921).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Die Zigeuner
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

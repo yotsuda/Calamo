@@ -1,0 +1,10 @@
+# Bach, "Jesu, meine Freude" BWV 610 (LilyPond's own example, Mutopia, public domain).
+# Organ: two manual staves (the upper with two voices, voices crossing staves) and pedal.
+# Pages: lilypond --png -dresolution=560 -o page bwv610.ly; truth: page-<staff>.notes.
+title Jesu, meine Freude
+part right treble "Right"
+part left bass "Left"
+part pedal bass "Pedal"
+
+# stated only to check what is read from the page
+bar 1 time 4/4 key ees

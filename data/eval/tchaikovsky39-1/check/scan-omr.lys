@@ -1,0 +1,71 @@
+// Read by OmrProto from page images 1-1.
+title ""
+octave absolute
+paper { breaksOnly }
+time 3/4
+key g major
+
+part upper { clef treble pedal text }
+part lower { clef bass pedal text }
+
+section Piece {
+  upper {
+    <g' b'>4@tenuto@p <g' b'>4. <fis' a'>8 |
+    <g' c''>4 <g' b'>2~ |
+    <fis' a'>4@cresc( <e' g'>4 <e' a'>4 |
+    <dis' b'>2. |
+    voice { b'4@todo(b5 "bar 5: the upper voice is a dotted eighth short (bar of 3/4)")@decresc e'8. s16 a'8@!decresc s8 } { d'4 cis'2 } |
+    voice { a'4 d'4. fis'8 } { c'4@cresc a4 c'4@staccatissimo } |
+    voice { g'4 g'4 e''8. a'16@!cresc } { d'4 e'4 g'4 } | break
+    voice { a'2. } { g'4( fis'8 e'8 fis'4) } |
+    voice { b'4 b'4. a'8 } { g'4@p g'4. fis'8 } |
+    voice { c''4 b'4. b'8 } { g'4@cresc g'4. g'8 } |
+    voice { c''4 d''4 e''4 } { g'4 <g' b'>4 <g' c''>4@!cresc } |
+    voice { fis''2@f e''4 } { <fis' cis''>2. } |
+    voice { dis''4@todo(b13 "bar 13: the upper voice is a quarter and a 32th short (bar of 3/4)")( <e'' g''>16. s8 s32 cis''8 s8 } { b'4 b'4 a'4 } | break
+    voice { d''4) b'4 c''4 } { a'4@decresc g'4 g'4 } |
+    voice { b'8.( a'16 a'4) fis'4 } { e'2 d'8@!decresc c'8@staccatissimo } |
+    voice { g'4 r4 g''4@f } { b16 s4 s8 s16 b'4 } |  // bar 16: the lower voice is a double-dotted quarter short (bar of 3/4)
+    voice { fis''8.( c''16 c''4 b'8 a'8@!decresc } { c''8.@decresc c''16 c''4 fis'4 } |
+    voice { b'4@todo(b18 "bar 18: the upper voice is 1⅓ quarters short (bar of 3/4)")) s4 tuplet 3/2 { g'4@mf } s16 s64 } { g'4 r4 b4 } | break
+    voice { fis'32.@todo(b19 "bar 19: the upper voice is 5.44 quarters too long (bar of 3/4)") s8 s64 c'16 c'4 e''1.@todo(b19-upper-n1 "bar 19: no dot? the dot may be a speck on the scan") g''8 fis''8 } { c'8.@decresc <c' b' e''>16 c'4 d''4@!decresc } |
+    voice { g''4)( c'''4@tenuto b''4 } { e''8 s8 e''4 e''4@sustain } |  // bar 20: the lower voice is an eighth short (bar of 3/4)
+    voice { e'1@todo(b21 "bar 21: the upper voice is a half note too long (bar of 3/4)") fis'4 } { cis'2 c'4 } |
+    voice { g'2) r4 } { b2 b4( } |
+    voice { g'4@todo(b23 "bar 23: upper: the upper voice is a quarter short (bar of 3/4); lower: the upper voice is a quarter short (bar of 3/4)") s4 <g' b'>4 } { <b d'>2) r4 } |  // bar 23: the upper voice is a quarter short (bar of 3/4)
+    voice { d''2.@tenuto@pp@!sustain } { <g' b'>2.@!sustain } |
+  }
+  lower {
+    <g d'>4 <g d'>4. <d d'>8 |
+    <e c'>4 <g d'>2 |
+    <d d'>4( <e b>4) <c e>4 |
+    <b, fis>2. |
+    voice { e4 e2 } { gis,4 a,4( g,4 } |
+    voice { d4 d2 } { fis,4 g,8 s8 a,4 } |  // bar 6: the lower voice is an eighth short (bar of 3/4)
+    voice { g4 g4 a4 } { b,4) c4 cis8 s8 } | break  // bar 7: the lower voice is an eighth short (bar of 3/4)
+    voice { a2( d'4 } { d2.@mf.up@decresc } |
+    <g d'>4 <g d'>4. <d d'>8 |
+    voice { e2@todo(b10 "bar 10: the upper voice is a quarter short (bar of 3/4)") s4 } { <e c'>4 <g d'>4 f'4 } |
+    e'4@staccatissimo d'4 c'8@staccatissimo b8 |
+    ais2@todo(b12 "bar 12: a quarter short of 3/4: a note or rest missed, or a duration misread?")) |
+    voice { fis'4 e'2 } { a4 gis4 g4 } | break
+    voice { d'4 d'4 c'4 } { fis4 g4 e4 } |
+    voice { g2 d4@staccatissimo } { c2 d4~( } |
+    voice { d4 r4 d4 } { g,8) g,8 g,8 g,8 g,8 g,8 } |
+    voice { ees2. } { g,8 g,8 g,8 g,8 g,8 g,8 } |
+    voice { d4 r4 d4( } { g,8 g,8 g,8 g,8 g,8 g,8 } | break
+    voice { ees2. } { g,8 g,8 g,8 g,8 g,8 g,8 } |
+    voice { d4( c4 b,4 } { g,8 g,8 g,8 g,8 g,8 g,8 } |
+    voice { bes,2 a,4 } { g,8 g,8 g,8 g,8 g,8 g,8 } |
+    voice { r4 d2 } { g,2.@sustain) } |
+    voice { d2 s4 } { g,2. } |  // bar 23: the upper voice is a quarter short (bar of 3/4)
+    voice { d2.@!sustain } { g,2. } |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff upper "Right"
+  staff lower "Left"
+}

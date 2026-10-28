@@ -1,0 +1,28 @@
+// Lily#: a text spanner on a grand staff's lower staff is drawn from the wrong column (found
+// 2026-10-19 by the OMR, ROADMAP S25).
+//
+// lh's `e4@rit` is lh's second note, but the "rit." is set at the second COLUMN of the measure as
+// the upper staff has it (rh's d''8), five spaces too early; the dashes end at rh's third column
+// (e''8) instead of lh's `g4@!rit`. TextSpannerEngraver takes StartItemIndex/EndItemIndex (the
+// mark's AnchorItemIndex, counted in its own staff) as an index into the measure's layout items,
+// which are the upper staff's. LilyPond binds the span to lh's note columns.
+//
+// Expected: "rit." over lh's e (beat 3 of bar 1), the dashes to just before lh's g in bar 2.
+// lysc png --scale 3 textspan-grandstaff-lower-2026-10-19.lys
+title "textspan grand staff"
+octave absolute
+time 4/4
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 c''''8 | c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 c''''8 | c'''1 |
+  }
+  lh {
+    c'2 e'4@rit g'4 | c'2 e'4 g'4@!rit | c'1 |
+  }
+}
+
+score { grandStaff { staff rh staff lh } }

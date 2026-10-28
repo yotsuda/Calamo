@@ -1,0 +1,30 @@
+// Lily#: a trill line that starts on the note where a broken trill line's continuation stops is stacked
+// one level further out (found 2026-10-21 by the OMR in the generated piece piano006 of seed 11, bar 11's
+// left hand, where the raised "tr" runs into the right hand's lower-voice beams).
+//
+// Bar 1's f'4@startTrillSpan runs over the break to bar 2's b'8. The second line starts on that b'8
+// (@stopTrillSpan@startTrillSpan). The continuation's wave ends before b'8, yet the second line's "tr"
+// and wave are drawn about a space higher than the continuation. With no break (the same notes in one
+// system) both lines are drawn at one height. LilyPond 2.26.0 (lysc ly, then lilypond) draws the
+// second line level with the continuation.
+//
+// Expected: the second line at the continuation's height, as without the break.
+// lysc png --scale 3 trillspan-chained-after-break-2026-10-21.lys
+title "trill spans chained after a break"
+octave absolute
+time 4/4
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    c''4 d''4 e''4 f''4@startTrillSpan | break
+    g''4 a''8 b''8@stopTrillSpan@startTrillSpan c'''8 b''8 a''4@stopTrillSpan |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

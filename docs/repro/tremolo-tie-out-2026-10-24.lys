@@ -1,0 +1,15 @@
+// A tie out of a two-note tremolo's last note unfolds the tremolo (OMR, 2026-10-24).
+// Bar 1: no tie, drawn as two dotted quarters joined by the tremolo beams (right).
+// Bar 2: the same with b'16~ tied into the chord after it: Lily# 0.14.0 draws six beamed
+// sixteenths (g'' b' g'' b' g'' b') and the tie. LilyPond 2.26.0 keeps the tremolo.
+// From kinkel10-4 (MuseScore), bar 9's right hand: g''. b'.~ <b' g''>4 with a fermata.
+octave absolute
+time 6/8
+part rh { clef treble }
+section A {
+  rh {
+    repeat tremolo 3 { g'''16 b''16 } <b'' g'''>4 r8 |
+    repeat tremolo 3 { g'''16 b''16~ } <b'' g'''>4 r8 |
+  }
+}
+score { staff rh }

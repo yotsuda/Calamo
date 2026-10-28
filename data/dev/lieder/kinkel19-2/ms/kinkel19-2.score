@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.19/2 Durch Carthago’s Trümmerhallen (OpenScore Lieder, CC0; lc5988341.mscx; IMSLP #171873).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Durch Carthago's Trümmerhallen
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

@@ -1,0 +1,38 @@
+// On a grand staff, an octave line over the lower staff is not counted when the two staves are
+// spaced: the line lands on the upper staff's lower voice. Bar 1: the left hand's 8va starts at g8;
+// its "8va" and dashes are drawn at y 19.03 (svg), across the right hand's beams of c16 d16 ees8
+// (bar 1) and c8 d8 ees8 / aes16 ges16 g16 c16 d8 (bar 3), which hang below the upper staff.
+// The staves are 7.65 spaces apart (13.43 -> 21.08); without the 8va (same notes, drawn an octave
+// higher on ledger lines) they are 10.29 apart -- the line makes the gap narrower, not wider.
+// (With notes that leave room, the gap is the same with and without a line: the line is not in it.)
+// LilyPond 2.26.0 (the same music, \ottava #1 in a PianoStaff) puts the line clear under the beams.
+// The OMR cannot read the "8va" under the beam.
+// Found by the OMR (S18, 2026-10-20; OmrGen --ottava seed 11, piano007 bars 2-5).
+octave absolute
+time 6/8
+key ees major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    voice { <bes' d'' f''>8. g''16 f''8 ees''8 d''16 c''16 r8 } { g'8 r16 ges'16 g'8 g'8 c'16 d'16 ees'8 } |
+    voice { f''8. aes''16 g''8 c''4 ees''8 } { d'8 d'16 c'16 d'8 d'4 r8 } |
+    voice { f''8 bes'16 d''16 ees''8 <aes'' c'''>8. g''16 g''8 } { c'8 d'8 ees'8 aes'16 ges'16 g'16 c'16 d'8 } |
+  }
+  lh {
+    g,8 <f, aes,>16 aes,16 r8 f8 g'8@ottava ees'8 |
+    dis'4 ees'8 d'4. |
+    c'4. bes4 r8@!ottava |
+  }
+}
+
+form { ~Piece }
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}

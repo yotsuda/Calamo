@@ -1,0 +1,26 @@
+// An acciaccatura of two (or more) notes is drawn with no slash: the beamed pair in bar 1 comes
+// out the same as the plain grace group in bar 2. LilyPond draws the acciaccatura's slash through
+// the beam (the stroke that a lone acciaccatura gets through its flag). Found by the OMR's grace
+// note work (S21, 2026-10-18): the reading cannot tell the two apart on the page, and the
+// generator writes no beamed acciaccatura until the slash is drawn.
+// (lysc png this file: bar 1's pair and bar 2's pair look alike; a lone acciaccatura in bar 3 has its slash)
+// (2026-10-20: written again in the current score syntax, with octave absolute; the drawing is the same)
+octave absolute
+time 4/4
+key c major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    acciaccatura { e'16 f'16 } g'4 a'4 b'4 c''4 |
+    grace { e'16 f'16 } g'4 a'4 b'4 c''4 |
+    acciaccatura { f'8 } g'4 a'4 b'4 c''4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

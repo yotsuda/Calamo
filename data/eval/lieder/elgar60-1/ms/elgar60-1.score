@@ -1,0 +1,6 @@
+# Elgar, Edward/2 Songs, Op.60/1 The Torch (OpenScore Lieder, CC0; lc6233544.mscx; IMSLP #555775).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title The Torch
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

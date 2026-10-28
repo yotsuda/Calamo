@@ -1,0 +1,90 @@
+// Tchaikovsky Op.39-1: the bars where an edition's truth (p1) differs from Mutopia's (p2), written out
+// from the truths' events. Absolute octaves: c' = C4.
+//   B12-B23 (not B18): the abc edition (Hapebe), truth-abc/ against truth/
+//   B18: the Schirmer scan, truth/ against truth-mutopia/
+title "tchaikovsky39-1 truth-abc"
+
+time 3/4
+key g major
+
+section B12_upper {
+  p1 {
+    octave absolute
+    voice { fis''2 e''4 } { <fis' cis''>2. }
+  }
+  p2 {
+    octave absolute
+    voice { fis''2 fis''4 } { <fis' cis''>2. }
+  }
+}
+
+section B15_lower {
+  p1 {
+    octave absolute
+    clef bass
+    voice { g2 d4 } { c2 r4 }
+  }
+  p2 {
+    octave absolute
+    clef bass
+    voice { g2 d4 } { c2 d4 }
+  }
+}
+
+section B17_upper {
+  p1 {
+    octave absolute
+    voice { <c'' fis''>8. c''16 c''4 b'8 a'8 } { s2 fis'4 }
+  }
+  p2 {
+    octave absolute
+    voice { fis''8. c''16 c''4 b'8 a'8 } { c''8. c''16 c''4 fis'4 }
+  }
+}
+
+section B18_upper_scan {
+  p1 {
+    octave absolute
+    voice { b'4 r4 g'4 } { g'4 s4 b4 }
+  }
+  p2 {
+    octave absolute
+    voice { b'4 r4 g'4 } { g'4 r4 b4 }
+  }
+}
+
+section B19_upper {
+  p1 {
+    octave absolute
+    voice { <c' fis'>8. c'16 c'4 clef bass b8 a8 } { s2 clef bass fis4 }
+  }
+  p2 {
+    octave absolute
+    voice { fis'8. c'16 c'4 clef bass b8 a8 } { c'8. c'16 c'4 clef bass fis4 }
+  }
+}
+
+section B23_upper {
+  p1 {
+    octave absolute
+    voice { r4 g'4 <g' b'>4 } { <b d'>2 r4 }
+  }
+  p2 {
+    octave absolute
+    voice { r4 g'4 <g' b'>4 } { <b d'>2 s4 }
+  }
+}
+
+form {
+  B12_upper
+  B15_lower
+  B17_upper break
+  B18_upper_scan
+  B19_upper
+  B23_upper
+}
+
+score {
+  staff p1
+  staff p2
+}

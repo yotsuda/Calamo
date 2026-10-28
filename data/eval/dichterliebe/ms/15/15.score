@@ -1,0 +1,6 @@
+# Schumann, Dichterliebe Op.48 No.15: Aus alten Märchen winkt es (OpenScore Lieder, CC0; drawn by MuseScore 4 at 300 dpi).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Aus alten Märchen winkt es
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

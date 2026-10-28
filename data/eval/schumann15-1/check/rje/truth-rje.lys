@@ -1,0 +1,107 @@
+// New to Lily#? Type "lesson" on a new line and pick lesson-01. Preview: Ctrl+K V.
+title "Untitled"
+
+tempo 100
+time 2/4
+key c major
+
+section B05_lower {
+  p1 {
+    clef bass
+    voice { b8 d g, d' } { g8 r g4 } { s4 b,8 r8 } 
+  }
+  p2 {
+    clef bass
+    voice { b8 d g, d' } { g8 r <g b,>8 r }
+  }
+}
+
+section B06_lower {
+  p1 {
+    clef bass
+    voice { g8 e' g, c } { g4 e8 r8 } { c8 r8 s4 }
+  }
+  p2 {
+    clef bass
+    voice { g8 e' g, c } { <c' g>,8 r8 e r8 }
+  }
+}
+
+section B10_lower {
+  p1 {
+    clef bass
+    // 元画像では、最初の d,8 と d,8. は、notehead を共有している
+    // また、knee beam ? の最後の音符は元画像から見切れていて読み取れなかったのでここには書いていない
+    voice { d8 a'8 b, g' } { d8. c16 b4 }
+  }
+  p2 {
+    clef bass
+    // 元画像も、最初のd,8 と d,8. は notehead を共有していない
+    // また、knee beam ? の最後の音符は元画像から見切れていて読み取れなかったのでここには書いていない
+    voice { d8 a'8 b, g' } { d8. c16 b4 }
+  }
+}
+
+// section B12_lower
+// p1 は、先頭の b が notehead を共有している
+// p2 は、先頭の b が notehead を共有していない
+
+section B14_lower {
+  p1 {
+    clef bass
+    voice { d8 g8 g, a' } { b,8. a16 g8 a' } { d2 }
+  }
+  p2 {
+    clef bass
+    // 最初の b,8 と b,8. は notehead を共有している
+    voice { b,8 g' g, a' } { b,8. a16 g4 } { d2 }
+  }
+}
+
+section B19_lower {
+  p1 {
+    clef bass
+    voice { b8 d8 g, d' } { g8 s g4 } { s8 r b,8 r8 } |
+  }
+  p2 {
+    clef bass
+    voice { b8 d8 g, d' } { g8 r <g b,>8 r } |
+  }
+}
+
+section B20_lower {
+  p1 {
+    clef bass
+    voice { g8 e' g, c } { g4 s } { c8@stemDown r e@stemDown r }
+  }
+  p2 {
+    clef bass
+    voice { g8 e' g, c } { <g c,>8 r e r }
+  }
+}
+
+section B22_lower {
+  p1 {
+    clef bass
+    voice { d2 } { <d g,>2 } { s8 b b b }
+  }
+  p2 {
+    clef bass
+    voice { d8 b' b8 b8 } { <d g,>2 }
+  }
+}
+
+form {
+  B05_lower
+  B06_lower
+  B10_lower break
+  B14_lower
+  B19_lower
+  B20_lower
+  B22_lower
+}
+
+score {
+  staff p1
+  staff p2
+}

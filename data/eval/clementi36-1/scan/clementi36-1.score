@@ -1,0 +1,5 @@
+# clementi36-1 (G. Schirmer c.1893, ed. Koehler, IMSLP #73600 p.3, the first movement (a scan)).
+# Held-out evaluation (data/eval): never debug the reader on it. Truth: ../truth/page-{part}.notes (LilyPond 2.26 event listener on the Mutopia source).
+part upper treble "Right"
+part lower bass "Left"
+bar 1 time 2/2 key c

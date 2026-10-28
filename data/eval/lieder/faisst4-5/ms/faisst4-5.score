@@ -1,0 +1,6 @@
+# Faisst, Clara Mathilda/5 Lieder, Op.4/5 Lied aus Bosnien (OpenScore Lieder, CC0; lc6179338.mscx; IMSLP #621606).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Lied aus Bosnien
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

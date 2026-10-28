@@ -1,0 +1,10 @@
+# The learnt symbol detector's training environment (approved 2026-09-28; ROADMAP §5).
+# Set up once:
+#   python -m venv tools/train-model/.venv
+#   tools/train-model/.venv/Scripts/python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+#   tools/train-model/.venv/Scripts/python -m pip install -r tools/train-model/requirements.txt
+# Training runs locally on the GPU; the model is exported to ONNX and read by omr (Microsoft.ML.OnnxRuntime).
+onnx
+onnxscript
+numpy
+pillow

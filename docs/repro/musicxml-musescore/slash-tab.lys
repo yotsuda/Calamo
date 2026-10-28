@@ -1,0 +1,19 @@
+title "slash-tab"
+octave absolute
+time 4/4
+
+part gt "Guitar" { clef treble  tuning guitar }
+
+section A {
+  gt {
+    <e' g' b'>4 <e' g' b'>4 <e' g' b'>4 <e' g' b'>4 |
+    /4 4 8 8 4 |
+  }
+}
+
+form main { A }
+
+score main {
+  staff gt
+  tab gt
+}

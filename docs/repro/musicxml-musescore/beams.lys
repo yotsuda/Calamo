@@ -1,0 +1,18 @@
+// Lily#'s MusicXML has no <beam>: the reader of the file beams by its own rules.
+// The first two bars of the generated piece meters010 (out/train-meters): Lily# leaves most of
+// the 7/4 eighths flagged, MuseScore beams them.
+title "beams"
+octave absolute
+time 7/4
+key ees major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    ces''4. d''8 ees''8. ees''16 fes''16 f''16 ees''16 r16 ees''8 ees''8 r16 f''16 ees''16 dis''16 r8 r8 |
+    d''8 c''8 f''16 d''16 d''8 r8 c''8 aes'8. bes'16 c''16 f'16 c''8 bes'8 bes'8 c''8. bes'16 |
+  }
+}
+
+form main { ~Piece }

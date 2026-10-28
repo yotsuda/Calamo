@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.7/5 An den Mond (OpenScore Lieder, CC0; lc6153376.mscx; IMSLP #617921).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title An den Mond
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

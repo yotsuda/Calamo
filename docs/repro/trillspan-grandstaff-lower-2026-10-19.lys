@@ -1,0 +1,29 @@
+// Lily#: a trill spanner on a grand staff's lower staff is drawn from the wrong columns (found
+// 2026-10-19 by the OMR; the same as textspan-grandstaff-lower-2026-10-19.lys, in TrillSpannerEngraver).
+//
+// lh's `d4@startTrillSpan` is lh's second note, but the "tr" is set at the second COLUMN of the
+// measure as the upper staff has it (rh's d''8), two and a half spaces too early, and the wave ends
+// before rh's fourth column (f''8) instead of before lh's `f4@stopTrillSpan`. In bar 2 the "tr" is
+// right (the first column is both staves'), but the wave stops before rh's third column (e''8),
+// not before lh's b,4 at beat 4. LilyPond binds the spanner to lh's note columns.
+//
+// Expected: "tr" at lh's d (beat 2 of bar 1), the wave to just before lh's f; in bar 2 the wave to
+// just before lh's b,.
+// lysc png --scale 3 trillspan-grandstaff-lower-2026-10-19.lys
+title "trill span grand staff"
+octave absolute
+time 4/4
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 c''''8 | c'''8 d'''8 e'''8 f'''8 g'''8 a'''8 b'''8 c''''8 | c'''1 |
+  }
+  lh {
+    c'4 d'4@startTrillSpan e'4 f'4@stopTrillSpan | g2@startTrillSpan a4 b4@stopTrillSpan | c'1 |
+  }
+}
+
+score { grandStaff { staff rh staff lh } }

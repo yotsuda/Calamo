@@ -1,0 +1,9 @@
+# Schumann, Dichterliebe Op.48, all sixteen songs: Breitkopf & Haertel, Robert Schumanns Werke Serie 13 Band 2
+# (IMSLP #270924, public domain; 34 pages, the scan's own images at 600 dpi). Read as one piece: the songs
+# follow on in the systems. Truth: the sixteen OpenScore MusicXMLs (../ms/NN/truth.musicxml) numbered on;
+# an edition's differences from OpenScore's source are not corrected yet.
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Dichterliebe
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

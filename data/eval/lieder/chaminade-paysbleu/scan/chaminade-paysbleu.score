@@ -1,0 +1,6 @@
+# Chaminade, Cécile/ /Au pays bleu (OpenScore Lieder, CC0; lc6261607.mscx; IMSLP #154300).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Au pays bleu
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

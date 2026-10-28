@@ -1,0 +1,13 @@
+LilySharp-Omr (Lily# Scan Import)
+Copyright 2026 Yoshifumi Tsuda
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The data under data/ is not all under that license: each file keeps the license of its
+source, listed in data/LICENSES.md. In particular, the event-listener*.ly files are part of
+LilyPond and are under the GNU General Public License, version 3 or later.
+
+The symbol detector (data/detector.onnx) and the shape classifier's samples
+(data/glyph-train.tsv) were trained on generated music engraved with the Emmentaler, Leland,
+MuseJazz, Bravura, Petaluma, Finale Maestro, Finale Broadway and Gonville fonts. No font file is
+included. Their licenses are listed in extension/THIRD-PARTY-NOTICES.md.

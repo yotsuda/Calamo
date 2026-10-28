@@ -1,0 +1,6 @@
+# Gonzaga, Chiquinha/ /Ai que broma! (OpenScore Lieder, CC0; lc6609555.mscx; IMSLP #605868).
+# Held-out evaluation (data/eval): never debug the reader on it.
+title Ai que broma!
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

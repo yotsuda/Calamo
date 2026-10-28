@@ -1,0 +1,18 @@
+// Multi-bar rests as lysc draws them (2026-10-14, for the OMR's MultiRests): church rests up to ten
+// bars (longa 4, breve 2, whole 1), a thick bar past ten, the count over the staff. Engrave at
+// --scale 5.6 and read with --config (part a treble) --mmrests: every count reads, bars 1-75.
+time 4/4
+key c major
+octave absolute
+
+part a { instrument piano-right }
+
+section A {
+  a { c''4 d'' e'' f'' | R1*3 | g''1 | R1*4 | a''1 | break
+      R1*8 | b''1 | R1*12 | c'''1 | R1*10 | d'''1 | R1*20 | break
+      time 3/4 R2.*2 | c'''2. | R2.*5 | d'''2. | break
+      time 6/8 R2.*3 | e'''2. | R2. | }
+}
+
+form { ~A |. }
+score { staff a }

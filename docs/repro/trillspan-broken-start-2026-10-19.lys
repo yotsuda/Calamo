@@ -1,0 +1,45 @@
+// Lily#: a trill spanner that starts near a system's end draws neither its "tr" nor its wave on that
+// system (found 2026-10-19 by the OMR; the generated piece basic006 with its other trill lines taken out).
+//
+// Bar 4's `b,,16@startTrillSpan` is the system's second-to-last note, and the line runs to bar 5's
+// `a,,16@stopTrillSpan`. The first system shows nothing over bar 4: no "tr", no wave. The second system
+// starts with the continuation's wave (no "tr", rightly), which ends before a,,16. LilyPond draws the
+// first segment as "tr" and a wave to the system's end. (A line that starts earlier in a system and runs
+// on, bar 12's in the full piece, is drawn: the "tr" and the wave to the end, then the continuation.)
+// The reader reads what is drawn, and finds no start for the line.
+//
+// Expected: "tr" over bar 4's b,,16, its wave to the end of the first system, the continuation as now.
+// lysc png --scale 3 trillspan-broken-start-2026-10-19.lys
+title "trill span broken start"
+octave absolute
+time 3/4
+key g major
+
+part p1 { clef bass }
+
+section Piece {
+  p1 {
+    d8. a16 a8 bes8 e16 r16 d16 e16 |
+    d16 e16 b8 c'4 b16 a16 b8 |
+    tuplet 3/2 { c'8 b8 c'8 } b4. b8 |
+    a8 b16 c'16 b8. d16 c16 b,16@startTrillSpan a,8 |
+    a,8 g,16 a,16@stopTrillSpan b,4. a,8 |
+    r2. |
+    g,2. |
+    r16 fis,16 g,16 a,16 b,8 c16 fis,16 c4 |
+    b,4 a,8. b,16 a,8. g,16 |
+    f,4 e,8 c8 b,4 |
+    a,8 e8 fis2 |
+    g4 a16 d16 c8 bes,8. b,16 |
+    e,4 fis,2 |
+    e,2. |
+    r2. |
+    fis,4. e,8 fis,8 g,16 e16 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

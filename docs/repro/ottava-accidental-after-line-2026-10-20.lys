@@ -1,0 +1,25 @@
+// The other way from ottava-accidental-reminder-2026-10-20.lys (fixed in 1aca41cd2, where Lily# chose
+// to print accidentals by the DRAWN place under an octave line). Here the flat is printed under the
+// 8vb, on the drawn G2, and the same sounding ges,,, after the line is drawn at G1 with no flat: the
+// page reads g,,, there (G1 has had no flat in this bar on the page). LilyPond 2.26.0 draws the same
+// (it remembers the sounding pitch), so this is only about Lily#'s own rule of 1aca41cd2: by the drawn
+// place, the G1 wants its flat.
+// Found by the OMR (S18, 2026-10-20; OmrGen --ottava, seed 11's ledger002 bar 12).
+// (lysc 0.14.0 png this file: the ges,,,8 after the line has no flat)
+octave absolute
+time 4/4
+key g major
+
+part p1 { clef bass }
+
+section Piece {
+  p1 {
+    fis,,16@ottava(bassa) ges,,16 c,,16 c,,16 ges,,8@!ottava r8 r2 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}

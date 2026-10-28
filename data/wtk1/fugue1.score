@@ -1,0 +1,9 @@
+# Bach, WTC I, Fugue 1 in C, BWV 846 (Mutopia, public domain; converted to 2.26 with convert-ly).
+# Four voices on a piano staff, two on each staff; staves named upper/lower for the truth.
+# Pages: lilypond --png -dresolution=560 -o page fugue1.ly; truth: page-<staff>-v<voice>.notes.
+title Das Wohltemperierte Clavier I, Fuga I
+part upper treble "Upper"
+part lower bass "Lower"
+
+# stated only to check what is read from the page
+bar 1 time 4/4 key c

@@ -1,0 +1,45 @@
+title "band001"
+octave absolute
+time 4/4
+key g major
+
+part vo "Vocal" { clef treble }
+part gt "Guitar" { clef treble  tuning guitar }
+part ba "Bass" { clef bass  tuning bass }
+part kit "Drums" { clef percussion }
+
+section A {
+  vo {
+    b''4@chord(Em7) a''8 g''8 e''4 r4 |
+    d''8@chord(C) e''8 g''4 a''2 |
+    b''4@chord(Em7) a''8 g''8 e''4 r4 |
+    d''8@chord(C) e''8 g''4 a''2 |
+  }
+  gt {
+    <e' g' b'>8@staccato <e' g' b'>8@staccato r8 <e' g' b'>8 r8 <e' g' b'>8 r4 |
+    repeat percent 3 { <e' g' b'>8@staccato <e' g' b'>8@staccato r8 <e' g' b'>8 r8 <e' g' b'>8 r4 | }
+  }
+  ba {
+    e4 r8. e16 e4 r8 d'8 |
+    c4 r8. c16 c4 r8 b,8 |
+    repeat percent 2 { e4 r8. e16 e4 r8 d'8 | }
+  }
+  kit {
+    voice { hh8 hh hh hh hh hh hh hh | hh8 hh hh hh hh hh hh hh | hh8 hh hh hh hh hh hh hh | cymc4 hh8 hh hh hh hho hhc | }
+    { bd4 sn4 bd8 bd sn4 | bd4 sn4 bd8 bd sn4 | bd4 sn4 bd8 bd sn4 | bd4 sn8 bd sn4 bd | }
+  }
+}
+
+lyrics words sings vo { So if you find | your- self in need | why don't you lis- | ten to these words | }
+
+form main { |: A :| }
+
+score main {
+  staff vo
+  lyrics words
+  staff gt
+  tab gt
+  staff ba
+  tab ba
+  staff kit
+}

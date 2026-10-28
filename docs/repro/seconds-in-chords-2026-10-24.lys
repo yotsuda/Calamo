@@ -1,0 +1,35 @@
+// Seconds in chords: the head of a second set on the far side of its chord's stem. A down stem's
+// lower head stands left of it (lh bars 1-4, rh bar 3), an up stem's upper head right of it (rh
+// bar 7, lh bars 5-7). The reader read a down stem's lower head at the chord's tip end as an up
+// stem of its own to the chord's top head: a voice apart, its bar spaced out (Lily#'s request
+// lilysharp-requests-2026-10-24-seconds-in-chords.md). lysc png --scale 5.6; read back, the text
+// is this file's.
+octave absolute
+time 4/4
+key g major
+part rh { clef treble }
+part lh { clef bass }
+score { staff rh staff lh }
+section Piece {
+  rh {
+    b''2 c'''2 |
+    b''1 |
+    <e'' fis'' c'''>8 <e'' fis'' c'''>8 <e'' fis'' c'''>8 <e'' fis'' c'''>8 <a'' b'' d'''>4 <a'' b'' d'''>4 |
+    <c''' d''' f'''>8 <c''' d''' f'''>8 <g'' a'' c'''>8 <g'' a'' c'''>8 <d''' e''' g'''>2 |
+    b''1 |
+    a''1 |
+    <fis''' g''' b'''>4 <fis''' g''' b'''>4 <c'' d'' f''>4 <c'' d'' f''>4 |
+    g''1 |
+  }
+  lh {
+    <g b e'>8 <g b e'>8 <g b e'>8 <g b e'>8 <f gis d'>8 <f gis d'>8 <f gis d'>8 <f gis d'>8 |
+    <g b e'>8 <g b e'>8 <g b e'>8 <g b e'>8 <e fis c'>8 <e fis c'>8 <e fis c'>8 <e fis c'>8 |
+    <e fis c'>8 <e fis c'>8 <e fis c'>8 <e fis c'>8 <a c' e'>8 <a c' e'>8 a,8 <e fis c'>8 |
+    <bes, c g>2 r2 |
+    <b cis' d'>4 <b cis' d'>4 <g a c'>4 <g a c'>4 |
+    <c d g>2 <d' e' g'>2 |
+    <a, b, e>4 <a, b, e>4 <fis gis b>4 <fis gis b>4 |
+    <e, e>1 |
+  }
+}
+form { ~Piece }

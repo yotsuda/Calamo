@@ -1,0 +1,26 @@
+octave absolute
+time 4/4
+key ges major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    voice { aes''8. ges''16 fes''16 <fis'' ges''>16 <ges'' aes''>8 <ces'' ees''>8 des''16 des''16 ees''8. f''16 } { r8. ees'16 f'4 aes'16 <f' aes' ces''>16 ees'16 aes'16 <f' aes' ces''>8. ces'16 } |
+    voice { r16 ges''16 f''16 f''16 r8 f''8 f''8. <ees'' f''>16 f''8. ges''16 } { ges'4. f'8 aes'4 ges'16 f'16 r8 } |
+  }
+  lh {
+    tuplet 3/2 { g8 ges,8@ottava(bassa) f,8 } ees,4. f,8 bes,8 ces8 |
+    bes,8 <ges, bes, des>16 <f, aes,>16 tuplet 3/2 { des,8 ces,8 <f ges>8@!ottava } ees4 r8 f8 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}

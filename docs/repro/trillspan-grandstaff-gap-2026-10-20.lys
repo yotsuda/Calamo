@@ -1,0 +1,63 @@
+// On a grand staff, a trill line over the lower staff is not kept clear of the upper staff's lower
+// voice: its wave runs through that voice's beams. Bar 4: the left hand's line from <cis eis>8 to
+// bar 5's ais,,16 is drawn between the staves, straight through the right hand's lower voice's
+// sixteenth-note beams (and in piano007, bars 7-8, through its beams and an eighth's flag). LilyPond
+// keeps a spanner clear of what it would cross, as Lily# now does for the octave line (78164829a).
+// The excerpt of bars 4-5 alone does not show it (the staves get room); the whole piece does.
+// The OMR cannot follow the wave across the beams, and reads the rest of it as pralls.
+// Found by the OMR (S26, 2026-10-20; OmrGen --trills seed 11, piano003 bars 4-5, piano007 bars 7-8).
+title "piano003"
+octave absolute
+time 12/8
+key fis major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    voice { gis''4. ais''8 g''16 b'16 <cis'' eis'' gis''>8 dis''16 cis''16 cis''16 dis''16 eis''8 dis''4 cis''8 } { cis'8. dis'16 cis'8 cis'8. dis'16 <eis' gis'>8 r8. cis'16 <dis' fis' ais'>8 a'4 gis'8 } |
+    voice { dis''4. eis''4 dis''8 dis''16 r16 cis''16 bis'16 cis''8 dis''8 eis''8 fis''8@startTrillSpan } { ais'4. gis'8 a'8 gis'8 fis'8 eis'16 eis'16 dis'8 r8. cis'16 dis'8 } |
+    voice { <gis'' ais''>16 r16 ais''16 gis''16 fis''8 cis''8@stopTrillSpan r8 dis''8 cis''8. b'16 <bis' dis''>8 dis''8 r8 r8 } { fis'8 r16 dis'16 <cis' eis'>8 dis'4. ais'4 cis'8 ais'16 cis'16 <dis' fis' ais'>16 cis'16 gis'8 } |
+    voice { cisis''8 dis''16 cis''16 b'8@startTrillSpan gis''16 ais''16 gis''16 b'16@stopTrillSpan c''8 b'8 cis''8 disis''8@startTrillSpan cis''4 fis''8 } { fis'16 eis'16 dis'16 eis'16 dis'8 r16 cis'16 dis'16 cis'16 dis'8 dis'8. eis'16 eis'8 cis'8 d'8 eis'8 } |
+    voice { eis''4. fis''4. gis''8@stopTrillSpan cis''8 gis''8 ais''16 ais''16 g''16 gis''16 fis''8 } { eis'8 disis'8 cis'8 dis'8 fis'8 gis'8 dis'4 e'8 <dis' fis'>8 gis'16 ais'16 gis'8 } |
+    voice { gis''8 fis''16 r16 g''8 ais''16 gis''16 r16 gis''16@startTrillSpan ais''8 gis''4 ais''8@stopTrillSpan gis''8 gis''16 fis''16 gis''8 } { fis'4. eis'16 fis'16 cis'16 cis'16 cis'8 dis'4. fis'4 dis'8 } |
+    voice { ais''8. gis''16 f''8 b'4 cis''8 b'8 cis''8 b'8 fis''4 gis''8 } { cis'8 disis'8 cis'8 cis'4. cis'4 cis'8 <dis' fis' ais'>4. } |
+    voice { cisis''8. b'16 <cis'' eis''>8@startTrillSpan dis''4. eis''4. fis''8@stopTrillSpan <fis'' ais'' cis'''>8 <gis'' b''>8 } { cis'16 dis'16 eis'16 fis'16 fis'8 r8 r16 <gis' b'>16 fis'8 ais'4 r8 ais'4 gis'8 } |
+    ais'8. b'16 cis''8 dis''8 eis''8 <fis'' ais''>8 gis''4 fis''8 eis''4. |
+    fis''8. gis''16 ais''8 dis''8. cis''16 <b' dis''>8 r8. cis''16 r8 r8 b'16 fis''16 fis''8 |
+    gis''4 ais''8 gis''16 gis''16 ais''16@startTrillSpan <gis'' b''>16 eis''8 dis''8@stopTrillSpan r8 gis''8 ais''16 gisis''16 ais''16 r16 gis''8 |
+    ais''8@startTrillSpan gis''8 <fis'' ais'' cis'''>8 eis''4. gis'16 gis'16 ais'16@stopTrillSpan <gis' b'>16@startTrillSpan ais'8 gis'4 gis'8 |
+    voice { fis''4.@stopTrillSpan eis''8 r16 dis''16 cis''8 e''4 b'8 <cis'' dis''>8 b'8 cis''8 } { fis'4 gisis'8 fis'4 eis'8 ais'8. gis'16 fis'8 gis'4 fis'8 } |
+    voice { cis''8.@startTrillSpan r16 dis''8 eis''4@stopTrillSpan dis''8 cis''8. dis''16 cis''8 b'8 b'16 cis''16 cis''8 } { gis'8 fis'8 eis'8 fis'4. fis'16 r16 eisis'16 eis'16 fis'8 eis'16 <ais' cis''>16 r16 g'16 ais'8 } |
+    voice { dis''4. eis''8 f''8 r8 fis''4 gis''8 fis''8. gis''16 ais''8 } { gis'8 fis'16 cis'16 eis'8 fis'4. <ais' cis''>8. <gis' b'>16 r8 g'4. } |
+    voice { <cis'' eis'' gis''>8. <ais'' cis'''>16 gis''8 cis''16 b'16 gis''16 ais''16@startTrillSpan gis''8 cis''8. r16 b'8 gis''16@stopTrillSpan r16 ais''16 eis''16 dis''8 } { fis'8. eis'16 dis'8 eis'8. dis'16 eis'8 r4 gis'8 fis'16 cis'16 dis'16 cis'16 dis'8 } |
+  }
+  lh {
+    <cis eis>4 dis8 dis4 cis8 f,8 r8 gis,8 fis,16 eis,16 fis,16 <e, fis,>16 <fis, ais, cis>8 |
+    dis1. |
+    <eis gis b>8 <eis gis>8 <fis ais cis'>8 <eis gis>8 fis8 <gis b>8 ais8. ais16 eis8 gis16@startTrillSpan gis16@stopTrillSpan fis16 <b cis'>16 r8 |
+    <cis' eis'>8@startTrillSpan b8 ais8 <eis gis b>8 fis8 r8 r4 r8 <aisis, cis>4. |
+    ais,16@stopTrillSpan d16 cis16 <bes, dis fis>16 cis8 r8 b,8 gis8 ais4. b16 <eis fis>16 r16 dis16 c8 |
+    b,8. <cis eis>16@startTrillSpan <dis eis>8 gis,4 gis,8 r8. ais,16 b,8@stopTrillSpan eis,8 gis,8 <ais, cis eis>8 |
+    <bes, dis>16 cis16 dis16 r16 <cis eis gis>8 b,4. r8. r16 eis,8 fis,4. |
+    gis,16 <ais, cis>16 b,16 <eis gis b>16@startTrillSpan fis8 <dis fis>8 dis8 <b dis'>8 <ais b>4. <dis fis>4.@stopTrillSpan |
+    b4. cis'4. bes4.@startTrillSpan cis'8 b8 gis8 |
+    r4. <fis ais cis'>8 eis8 fis8@stopTrillSpan gis4 <ais cis' eis'>8 ais8 fis8 eis8 |
+    fis4. <eisis gis>8.@startTrillSpan <eis fis>16 dis8 fis16 r16 eis16 dis16 cis8@stopTrillSpan b,8 b,8 ais,8 |
+    b,8. cis16 <b, dis fis>8 b,16 cis16 ais16 gis16 ais8 gis16 <aisis cis'>16 b16 cis'16 eis8 r4. |
+    ais,8 ais,16 r16 fis8 gis16 r16 b16 ais16 gisis8 ais4. b8 r8 cis'8 |
+    b4. gis8. ais16 <b dis'>8 cis'8. b16 fis8 gis8. fis16 <gis b>8 |
+    fisis8 gis8@startTrillSpan dis8 cis4@stopTrillSpan eis8 dis16 fis,16 gis,16 ais,16 r8 cis8 bis,16 cis16 b,8 |
+    cis4. cis4. r8 dis16 c16 r8 dis8 dis8 r8 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}

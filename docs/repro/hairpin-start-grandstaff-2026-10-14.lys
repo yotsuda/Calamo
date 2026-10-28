@@ -1,0 +1,35 @@
+// lysc 0.12.0 (2026-10-14 12:40 build): in a grand staff, a hairpin whose note starts at a moment where
+// the other staff starts nothing is drawn from another column, not from its note.
+// - Here (right hand resting): bar 2's crescendo on its last note (fis,,16, x 96.15 in the SVG) is drawn
+//   from x 4.48, the system's start, to 101.43. Expected: from 96.15.
+// - Without the break (one system): the decrescendo on <c, d,>16 (x 22.91) is drawn from 32.86 (the
+//   r4 after it, where the right hand's r4 starts) and the crescendo (73.01) from 38.60 (bar 2's start,
+//   where the right hand's r1 starts).
+// - The right hand with the left hand's rhythm (c'16 … at the same moments): both start at their notes.
+// - A single staff (drop rh and grandStaff): right.
+// In OmrGen's pieces (seed 7, --marks) the wrong start is a few spaces off: piano006 bar 3 lh
+// `gis,8@cresc` drawn from 31.40 for a note at 45.17, piano002 bar 14 lh `fis,,16@cresc` from 50.83,
+// its note at 53.55. Found by the OMR (its reader takes a hairpin's left end as its first note), not a request.
+octave absolute
+time 5/4
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    r1 r4 | break
+    r1 r4 |
+  }
+  lh {
+    r2. <c d>16@decresc c8 aes16 r4 |
+    r16 g16 <d fis a>8 b8 c'16 b16 g4.@!decresc c8 fis,16 e,16 e,16 fis,16@cresc |
+  }
+}
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}

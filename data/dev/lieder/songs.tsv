@@ -1,0 +1,18 @@
+# OpenScore Lieder (CC0) songs for development, outside the held-out set: siblings of data/eval/lieder's songs typed from the
+# same IMSLP files (the same print, already downloaded there), so the reader may be debugged on them. Columns as data/eval/lieder/songs.tsv.
+slug	path	id	imslp	pages
+lang36-3	Lang,_Josephine/3_Lieder,_Op.36/3_Seid_mir_gegrüsst	6115317	617782	8-11
+kinkel7-1	Kinkel,_Johanna/6_Lieder,_Op.7/1_Nachtlied	6151215	617921	4-5
+kinkel7-3	Kinkel,_Johanna/6_Lieder,_Op.7/3_Vorüberfahrt	6151337	617921	8-9
+kinkel7-5	Kinkel,_Johanna/6_Lieder,_Op.7/5_An_den_Mond	6153376	617921	12-13
+kinkel7-6	Kinkel,_Johanna/6_Lieder,_Op.7/6_Die_Zigeuner	6153442	617921	14-15
+kinkel10-1	Kinkel,_Johanna/6_Lieder,_Op.10/1_Nachgefühl	6177220	618113	3-3
+kinkel10-2	Kinkel,_Johanna/6_Lieder,_Op.10/2_Der_Kuss	6177233	618113	4-5
+kinkel10-4	Kinkel,_Johanna/6_Lieder,_Op.10/4_Wiegenlied	6177442	618113	8-10
+kinkel10-5	Kinkel,_Johanna/6_Lieder,_Op.10/5_Traumdeutung	6178990	618113	11-13
+kinkel10-6	Kinkel,_Johanna/6_Lieder,_Op.10/6_Der_Müllerinn_Nachbar	6179021	618113	14-15
+kinkel19-1	Kinkel,_Johanna/6_Lieder,_Op.19/1_Die_Mandoline	5988112	171873	2-2
+kinkel19-2	Kinkel,_Johanna/6_Lieder,_Op.19/2_Durch_Carthago’s_Trümmerhallen	5988341	171873	3-4
+kinkel19-4	Kinkel,_Johanna/6_Lieder,_Op.19/4_Beduinen-Romanze	5988442	171873	7-8
+kinkel19-5	Kinkel,_Johanna/6_Lieder,_Op.19/5_Abschied	5988489	171873	9-10
+kinkel19-6	Kinkel,_Johanna/6_Lieder,_Op.19/6_Turm_und_Flut	5989459	171873	11-12

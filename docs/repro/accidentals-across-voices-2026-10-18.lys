@@ -1,0 +1,25 @@
+// Accidentals are remembered per voice, where LilyPond remembers them per staff. In bar 1 the
+// upper voice's fes' (its flat printed) and then the lower voice's f' at the same octave:
+// LilyPond's default accidental style (the Accidental_engraver lives in Staff) prints a natural
+// on that f', since the flat is in force on the staff; Lily# prints none, so the page shows a
+// plain f' that reads as fes'. Bar 2 the other way: the upper voice's g' with its natural, then
+// the lower voice's ges' (in the key): LilyPond prints the flat again, Lily# nothing, and the
+// page reads as g'.
+// Found by the OMR's grace note work (S21, 2026-10-18, gen-grace piano009 bar 1: the lower voice's
+// grace { b16 a16 g16 } read as beses after the upper voice's beses8, its ges8 as g after the
+// upper voice's acciaccatura { g8 }). The reading follows the staff-wide rule most engravers
+// use; if Lily# means the per-voice rule (LilyPond's \accidentalStyle voice), the OMR cannot
+// tell from the page which was meant.
+// (lysc png this file: bar 1's lower f' has no natural, bar 2's lower ges' no flat)
+octave absolute
+time 4/4
+key des major
+part p1 { clef treble }
+score { staff p1 }
+section Piece {
+  p1 {
+    voice { fes''4 ges''4 aes''4 bes''4 } { des''4 ees''4 f''4 ges''4 } |
+    voice { g''4 aes''4 bes''4 c'''4 } { des''4 ges''4 aes''4 bes''4 } |
+  }
+}
+form { ~Piece }

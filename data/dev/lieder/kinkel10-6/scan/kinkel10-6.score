@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.10/6 Der Müllerinn Nachbar (OpenScore Lieder, CC0; lc6179021.mscx; IMSLP #618113).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Der Müllerinn Nachbar
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

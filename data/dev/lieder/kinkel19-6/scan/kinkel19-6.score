@@ -1,0 +1,6 @@
+# Kinkel, Johanna/6 Lieder, Op.19/6 Turm und Flut (OpenScore Lieder, CC0; lc5989459.mscx; IMSLP #171873).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Turm und Flut
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

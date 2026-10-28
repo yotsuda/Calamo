@@ -1,0 +1,18 @@
+// lysc 0.12.0 (2026-10-14): in bar 3 the crescendo starting at the note where the pedal bracket ends is drawn
+// with its tip on the bracket's end hook (the hairpin and the bracket overlap). In bar 1, with a
+// decrescendo before it, the bracket stands lower and nothing overlaps. Found by the OMR, not a request.
+octave absolute
+time 5/4
+key g major
+
+part lh { clef bass pedal mixed }
+
+section Piece {
+  lh {
+    r16 g16@sustain@decresc <d fis a>8 b8 c'16 b16 g4.@!decresc c8 fis,16 e,16 e,16 fis,16@cresc@!sustain |
+    g,8. fis,16 fis,8. r16 g,4 fis,4@p g,16 g,16 a,16 g,16 |
+    r16 g16@sustain <d fis a>8 b8 c'16 b16 g4. c8 fis,16 e,16 e,16 fis,16@cresc@!sustain |
+    g,8. fis,16 fis,8. r16 g,4 fis,4@p g,16 g,16 a,16 g,16 |
+  }
+}
+score { staff lh }

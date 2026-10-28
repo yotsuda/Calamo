@@ -1,0 +1,1927 @@
+# made by ms_frets.py: the fret numbers 0..24 of a TAB, per face
+font	class	hash	subpaths	w	h	cx	cy	name
+fret:default	Fret	3692b862	2	0.842	1.328	0.434	0.468	fret.0
+fret:default	Fret	c5dd6880	1	0.444	1.286	0.521	0.207	fret.1
+fret:default	Fret	2e5c7f8e	1	0.865	1.286	0.508	0.418	fret.2
+fret:default	Fret	52867cb8	1	0.860	1.328	0.607	0.487	fret.3
+fret:default	Fret	0307fb3b	2	0.893	1.286	0.600	0.619	fret.4
+fret:default	Fret	fbf984cb	1	0.867	1.328	0.447	0.695	fret.5
+fret:default	Fret	747fc220	2	0.853	1.328	0.502	0.443	fret.6
+fret:default	Fret	82de43b9	1	0.860	1.286	0.536	0.507	fret.7
+fret:default	Fret	81139e3c	3	0.864	1.328	0.502	0.471	fret.8
+fret:default	Fret	747fc220	2	0.854	1.328	0.497	0.555	fret.9
+fret:default	Fret	cf8898d4	3	1.739	1.328	0.637	0.428	fret.10
+fret:default	Fret	ee3c7f04	2	1.448	1.286	0.507	0.207	fret.11
+fret:default	Fret	f96efa73	2	1.746	1.286	0.647	0.381	fret.12
+fret:default	Fret	89914165	2	1.737	1.328	0.728	0.454	fret.13
+fret:default	Fret	30167869	3	1.762	1.286	0.379	0.361	fret.14
+fret:default	Fret	34d4415d	2	1.750	1.328	0.655	0.636	fret.15
+fret:default	Fret	81c24924	3	1.750	1.328	0.697	0.420	fret.16
+fret:default	Fret	f3e9a251	2	1.762	1.286	0.536	0.396	fret.17
+fret:default	Fret	61308fb9	4	1.750	1.328	0.703	0.449	fret.18
+fret:default	Fret	81c24924	3	1.742	1.328	0.694	0.521	fret.19
+fret:default	Fret	334953fb	3	1.862	1.328	0.513	0.439	fret.20
+fret:default	Fret	c0f3ae96	2	1.572	1.286	0.382	0.381	fret.21
+fret:default	Fret	4816b310	2	1.869	1.286	0.504	0.418	fret.22
+fret:default	Fret	da461242	2	1.860	1.328	0.596	0.455	fret.23
+fret:default	Fret	dceeee04	3	1.886	1.286	0.298	0.440	fret.24
+fret:Arial	Fret	25de027e	2	0.847	1.326	0.530	0.467	fret.0
+fret:Arial	Fret	3f2f4dd4	1	0.478	1.304	0.444	0.262	fret.1
+fret:Arial	Fret	208688ec	1	0.859	1.304	0.514	0.424	fret.2
+fret:Arial	Fret	ac6cd37d	1	0.850	1.327	0.571	0.468	fret.3
+fret:Arial	Fret	0307fb3b	2	0.898	1.299	0.614	0.633	fret.4
+fret:Arial	Fret	68caee0c	1	0.861	1.303	0.530	0.649	fret.5
+fret:Arial	Fret	67134e9a	2	0.857	1.326	0.522	0.506	fret.6
+fret:Arial	Fret	73f09bfb	1	0.841	1.282	0.505	0.517	fret.7
+fret:Arial	Fret	8bef1e8c	3	0.856	1.326	0.491	0.488	fret.8
+fret:Arial	Fret	cea02afe	2	0.854	1.326	0.529	0.527	fret.9
+fret:Arial	Fret	c79e494d	3	1.729	1.326	0.650	0.428	fret.10
+fret:Arial	Fret	7aa98ead	2	1.349	1.304	0.480	0.262	fret.11
+fret:Arial	Fret	5ccc7087	2	1.720	1.304	0.631	0.391	fret.12
+fret:Arial	Fret	93d0fe5f	2	1.733	1.327	0.694	0.438	fret.13
+fret:Arial	Fret	98eec5d8	3	1.728	1.304	0.297	0.358	fret.14
+fret:Arial	Fret	205c1baf	2	1.743	1.326	0.622	0.566	fret.15
+fret:Arial	Fret	0dae8367	3	1.732	1.326	0.671	0.471	fret.16
+fret:Arial	Fret	caf7627f	2	1.733	1.304	0.498	0.417	fret.17
+fret:Arial	Fret	a77a9333	4	1.736	1.326	0.673	0.460	fret.18
+fret:Arial	Fret	390d2b11	3	1.736	1.326	0.680	0.490	fret.19
+fret:Arial	Fret	453f703a	3	1.871	1.326	0.524	0.443	fret.20
+fret:Arial	Fret	e05a9182	2	1.625	1.304	0.384	0.391	fret.21
+fret:Arial	Fret	93bc80e4	2	1.862	1.304	0.507	0.424	fret.22
+fret:Arial	Fret	ff5d5644	2	1.876	1.327	0.576	0.447	fret.23
+fret:Arial	Fret	b758a56f	3	1.870	1.304	0.282	0.440	fret.24
+fret:Arial|italic	Fret	61a60862	2	0.897	1.326	0.477	0.457	fret.0
+fret:Arial|italic	Fret	68b30f36	1	0.602	1.304	0.493	0.224	fret.1
+fret:Arial|italic	Fret	72b01342	1	0.913	1.304	0.556	0.390	fret.2
+fret:Arial|italic	Fret	c3e39478	1	0.911	1.326	0.599	0.488	fret.3
+fret:Arial|italic	Fret	0307fb3b	2	0.902	1.299	0.618	0.625	fret.4
+fret:Arial|italic	Fret	d0ff6675	1	0.912	1.303	0.460	0.662	fret.5
+fret:Arial|italic	Fret	4912f8ee	2	0.879	1.326	0.501	0.470	fret.6
+fret:Arial|italic	Fret	0b0ab734	1	0.860	1.281	0.403	0.531	fret.7
+fret:Arial|italic	Fret	ab66fc18	3	0.889	1.327	0.506	0.478	fret.8
+fret:Arial|italic	Fret	7168c481	2	0.878	1.326	0.494	0.488	fret.9
+fret:Arial|italic	Fret	15e584e9	3	1.761	1.326	0.640	0.418	fret.10
+fret:Arial|italic	Fret	5d70959b	2	1.472	1.304	0.497	0.224	fret.11
+fret:Arial|italic	Fret	9a25dba0	2	1.755	1.304	0.654	0.359	fret.12
+fret:Arial|italic	Fret	f98e39b3	2	1.746	1.326	0.698	0.448	fret.13
+fret:Arial|italic	Fret	9646ea03	3	1.720	1.304	0.334	0.328	fret.14
+fret:Arial|italic	Fret	02d9c6aa	2	1.774	1.326	0.629	0.593	fret.15
+fret:Arial|italic	Fret	000c9ce0	3	1.766	1.326	0.670	0.435	fret.16
+fret:Arial|italic	Fret	5db1e8f0	2	1.815	1.304	0.467	0.397	fret.17
+fret:Arial|italic	Fret	ee5ba170	4	1.760	1.327	0.682	0.447	fret.18
+fret:Arial|italic	Fret	af2bfadf	3	1.736	1.326	0.667	0.452	fret.19
+fret:Arial|italic	Fret	995ec20a	3	1.923	1.326	0.531	0.423	fret.20
+fret:Arial|italic	Fret	2be3449b	2	1.767	1.304	0.390	0.359	fret.21
+fret:Arial|italic	Fret	3caf37a3	2	1.917	1.304	0.527	0.390	fret.22
+fret:Arial|italic	Fret	6d8937ed	2	1.908	1.326	0.578	0.443	fret.23
+fret:Arial|italic	Fret	958a8ecc	3	1.882	1.304	0.311	0.408	fret.24
+fret:Times New Roman	Fret	eaf104f7	2	0.777	1.247	0.499	0.484	fret.0
+fret:Times New Roman	Fret	ecbc7fef	1	0.473	1.226	0.422	0.609	fret.1
+fret:Times New Roman	Fret	d8285180	1	0.793	1.226	0.567	0.427	fret.2
+fret:Times New Roman	Fret	ce4750dc	1	0.683	1.247	0.499	0.565	fret.3
+fret:Times New Roman	Fret	0307fb3b	2	0.816	1.226	0.632	0.600	fret.4
+fret:Times New Roman	Fret	28900452	1	0.701	1.223	0.468	0.743	fret.5
+fret:Times New Roman	Fret	896842b0	2	0.759	1.247	0.511	0.524	fret.6
+fret:Times New Roman	Fret	08e705d6	1	0.759	1.226	0.273	0.194	fret.7
+fret:Times New Roman	Fret	c46782f4	3	0.693	1.247	0.491	0.485	fret.8
+fret:Times New Roman	Fret	2f0c3b2f	2	0.758	1.251	0.489	0.453	fret.9
+fret:Times New Roman	Fret	016af519	3	1.537	1.247	0.537	0.523	fret.10
+fret:Times New Roman	Fret	a16cbbed	2	1.308	1.226	0.472	0.609	fret.11
+fret:Times New Roman	Fret	c1ae7b86	2	1.526	1.226	0.521	0.499	fret.12
+fret:Times New Roman	Fret	4bb3640b	2	1.451	1.247	0.595	0.574	fret.13
+fret:Times New Roman	Fret	7a2626f7	3	1.539	1.226	0.216	0.608	fret.14
+fret:Times New Roman	Fret	6918261d	2	1.482	1.247	0.522	0.693	fret.15
+fret:Times New Roman	Fret	2b680012	3	1.532	1.247	0.569	0.547	fret.16
+fret:Times New Roman	Fret	5c549575	2	1.521	1.251	0.238	0.516	fret.17
+fret:Times New Roman	Fret	6e4333ae	4	1.497	1.247	0.606	0.514	fret.18
+fret:Times New Roman	Fret	f9f01d77	3	1.524	1.251	0.550	0.499	fret.19
+fret:Times New Roman	Fret	b887b942	3	1.711	1.247	0.548	0.456	fret.20
+fret:Times New Roman	Fret	e5026e71	2	1.554	1.226	0.501	0.499	fret.21
+fret:Times New Roman	Fret	6df023ff	2	1.700	1.226	0.531	0.427	fret.22
+fret:Times New Roman	Fret	4634d722	2	1.625	1.247	0.604	0.512	fret.23
+fret:Times New Roman	Fret	9b06f1bb	3	1.712	1.226	0.312	0.442	fret.24
+fret:Times New Roman|bold	Fret	ac414ffc	2	0.775	1.251	0.496	0.526	fret.0
+fret:Times New Roman|bold	Fret	eef6997d	1	0.648	1.226	0.420	0.626	fret.1
+fret:Times New Roman|bold	Fret	729bea82	1	0.774	1.226	0.597	0.394	fret.2
+fret:Times New Roman|bold	Fret	bd25e7e6	1	0.773	1.252	0.506	0.538	fret.3
+fret:Times New Roman|bold	Fret	0307fb3b	2	0.788	1.226	0.537	0.611	fret.4
+fret:Times New Roman|bold	Fret	f33dab61	1	0.778	1.226	0.454	0.753	fret.5
+fret:Times New Roman|bold	Fret	70cb4238	2	0.785	1.251	0.522	0.575	fret.6
+fret:Times New Roman|bold	Fret	7d13e45b	1	0.803	1.226	0.244	0.298	fret.7
+fret:Times New Roman|bold	Fret	8bef1e8c	3	0.780	1.246	0.491	0.497	fret.8
+fret:Times New Roman|bold	Fret	70cb4238	2	0.787	1.251	0.475	0.423	fret.9
+fret:Times New Roman|bold	Fret	d5823070	3	1.628	1.251	0.579	0.553	fret.10
+fret:Times New Roman|bold	Fret	7e4443cc	2	1.459	1.226	0.464	0.626	fret.11
+fret:Times New Roman|bold	Fret	b9c6cf21	2	1.606	1.226	0.542	0.490	fret.12
+fret:Times New Roman|bold	Fret	193253bd	2	1.590	1.252	0.590	0.560	fret.13
+fret:Times New Roman|bold	Fret	0ebb783c	3	1.621	1.226	0.244	0.624	fret.14
+fret:Times New Roman|bold	Fret	2c1db9c1	2	1.626	1.251	0.525	0.704	fret.15
+fret:Times New Roman|bold	Fret	a5b56883	3	1.640	1.251	0.587	0.587	fret.16
+fret:Times New Roman|bold	Fret	564f6263	2	1.651	1.251	0.259	0.553	fret.17
+fret:Times New Roman|bold	Fret	1cec4371	4	1.631	1.251	0.609	0.528	fret.18
+fret:Times New Roman|bold	Fret	a5b56883	3	1.630	1.251	0.570	0.481	fret.19
+fret:Times New Roman|bold	Fret	b529630b	3	1.703	1.251	0.579	0.472	fret.20
+fret:Times New Roman|bold	Fret	b2c943da	2	1.631	1.226	0.485	0.490	fret.21
+fret:Times New Roman|bold	Fret	0a7375a6	2	1.681	1.226	0.544	0.394	fret.22
+fret:Times New Roman|bold	Fret	c190da5c	2	1.666	1.252	0.590	0.483	fret.23
+fret:Times New Roman|bold	Fret	bd203483	3	1.696	1.226	0.320	0.414	fret.24
+fret:Times New Roman|italic	Fret	5ed143d3	2	0.788	1.247	0.500	0.507	fret.0
+fret:Times New Roman|italic	Fret	60f1c840	1	0.647	1.226	0.514	0.555	fret.1
+fret:Times New Roman|italic	Fret	40b92c4e	1	0.822	1.226	0.677	0.378	fret.2
+fret:Times New Roman|italic	Fret	706ce94b	1	0.763	1.247	0.534	0.552	fret.3
+fret:Times New Roman|italic	Fret	0307fb3b	2	0.826	1.223	0.616	0.534	fret.4
+fret:Times New Roman|italic	Fret	f33dab61	1	0.804	1.223	0.428	0.724	fret.5
+fret:Times New Roman|italic	Fret	06084085	2	0.839	1.247	0.466	0.535	fret.6
+fret:Times New Roman|italic	Fret	08e705d6	1	0.744	1.223	0.263	0.185	fret.7
+fret:Times New Roman|italic	Fret	232368c2	3	0.818	1.247	0.534	0.479	fret.8
+fret:Times New Roman|italic	Fret	c25e813e	2	0.838	1.247	0.524	0.491	fret.9
+fret:Times New Roman|italic	Fret	16186996	3	1.692	1.247	0.568	0.520	fret.10
+fret:Times New Roman|italic	Fret	2f3b50fd	2	1.421	1.226	0.507	0.555	fret.11
+fret:Times New Roman|italic	Fret	5f8a9c81	2	1.647	1.226	0.554	0.457	fret.12
+fret:Times New Roman|italic	Fret	59ec2963	2	1.619	1.247	0.614	0.550	fret.13
+fret:Times New Roman|italic	Fret	57ea1f0a	3	1.680	1.247	0.271	0.545	fret.14
+fret:Times New Roman|italic	Fret	483536c0	2	1.665	1.247	0.519	0.658	fret.15
+fret:Times New Roman|italic	Fret	e3764fff	3	1.750	1.247	0.551	0.539	fret.16
+fret:Times New Roman|italic	Fret	f97dee80	2	1.746	1.247	0.288	0.478	fret.17
+fret:Times New Roman|italic	Fret	aca4a2a8	4	1.683	1.247	0.619	0.497	fret.18
+fret:Times New Roman|italic	Fret	4f3abd48	3	1.687	1.247	0.577	0.509	fret.19
+fret:Times New Roman|italic	Fret	9c9d2b5a	3	1.774	1.247	0.593	0.453	fret.20
+fret:Times New Roman|italic	Fret	ebc4ebf2	2	1.636	1.226	0.549	0.457	fret.21
+fret:Times New Roman|italic	Fret	757d140d	2	1.729	1.226	0.584	0.378	fret.22
+fret:Times New Roman|italic	Fret	71032223	2	1.702	1.247	0.636	0.492	fret.23
+fret:Times New Roman|italic	Fret	7bded7c7	3	1.762	1.247	0.365	0.389	fret.24
+fret:Georgia	Fret	94f28bb0	2	0.931	1.007	0.502	0.501	fret.0
+fret:Georgia	Fret	3bfce758	1	0.601	0.979	0.502	0.628	fret.1
+fret:Georgia	Fret	7e446577	1	0.830	0.979	0.413	0.393	fret.2
+fret:Georgia	Fret	5d7e4ed3	1	0.852	1.302	0.474	0.494	fret.3
+fret:Georgia	Fret	0307fb3b	2	0.917	1.297	0.630	0.574	fret.4
+fret:Georgia	Fret	7b0a5c8c	1	0.830	1.274	0.450	0.698	fret.5
+fret:Georgia	Fret	7fe319dd	2	0.861	1.316	0.482	0.618	fret.6
+fret:Georgia	Fret	44a2ba38	1	0.833	1.274	0.243	0.180	fret.7
+fret:Georgia	Fret	9bbc5fac	3	0.897	1.320	0.514	0.498	fret.8
+fret:Georgia	Fret	b0f6eb26	2	0.861	1.307	0.562	0.457	fret.9
+fret:Georgia	Fret	6c7cf224	3	1.680	1.007	0.534	0.539	fret.10
+fret:Georgia	Fret	27a00cb4	2	1.375	0.979	0.501	0.628	fret.11
+fret:Georgia	Fret	ac6546f8	2	1.586	0.979	0.543	0.463	fret.12
+fret:Georgia	Fret	cee0f5c0	2	1.567	1.302	0.614	0.490	fret.13
+fret:Georgia	Fret	2f7ca2f7	3	1.618	1.302	0.253	0.484	fret.14
+fret:Georgia	Fret	0f6996a9	2	1.540	1.302	0.545	0.632	fret.15
+fret:Georgia	Fret	c7f64639	3	1.610	1.316	0.546	0.646	fret.16
+fret:Georgia	Fret	15557ed6	2	1.569	1.302	0.303	0.397	fret.17
+fret:Georgia	Fret	046a6a18	4	1.648	1.320	0.584	0.554	fret.18
+fret:Georgia	Fret	e4210a4c	3	1.594	1.307	0.574	0.461	fret.19
+fret:Georgia	Fret	3f77215a	3	1.941	1.007	0.435	0.435	fret.20
+fret:Georgia	Fret	d1a86bed	2	1.635	0.979	0.391	0.463	fret.21
+fret:Georgia	Fret	dae14c60	2	1.846	0.979	0.461	0.393	fret.22
+fret:Georgia	Fret	2cdc8ae9	2	1.827	1.302	0.551	0.423	fret.23
+fret:Georgia	Fret	b2fd3ff0	3	1.879	1.302	0.214	0.309	fret.24
+fret:Georgia|bold	Fret	680c2285	2	1.090	1.012	0.501	0.502	fret.0
+fret:Georgia|bold	Fret	03784971	1	0.734	0.981	0.488	0.557	fret.1
+fret:Georgia|bold	Fret	1b9fd025	1	0.960	0.982	0.430	0.376	fret.2
+fret:Georgia|bold	Fret	23e15951	1	0.996	1.309	0.506	0.489	fret.3
+fret:Georgia|bold	Fret	0307fb3b	2	1.074	1.304	0.609	0.593	fret.4
+fret:Georgia|bold	Fret	751534ea	1	0.961	1.281	0.450	0.678	fret.5
+fret:Georgia|bold	Fret	319853c3	2	1.010	1.323	0.484	0.546	fret.6
+fret:Georgia|bold	Fret	44a2ba38	1	0.935	1.281	0.238	0.242	fret.7
+fret:Georgia|bold	Fret	df43dcfa	3	1.043	1.326	0.504	0.490	fret.8
+fret:Georgia|bold	Fret	2f1b5413	2	1.010	1.315	0.494	0.461	fret.9
+fret:Georgia|bold	Fret	a844e617	3	1.960	1.012	0.551	0.515	fret.10
+fret:Georgia|bold	Fret	e8dcfc75	2	1.617	0.981	0.494	0.557	fret.11
+fret:Georgia|bold	Fret	cf5b237f	2	1.837	0.982	0.519	0.442	fret.12
+fret:Georgia|bold	Fret	7bc5a382	2	1.821	1.309	0.600	0.472	fret.13
+fret:Georgia|bold	Fret	1ca3a73c	3	1.897	1.307	0.246	0.435	fret.14
+fret:Georgia|bold	Fret	5bb34354	2	1.790	1.307	0.523	0.589	fret.15
+fret:Georgia|bold	Fret	4854c4c4	3	1.881	1.323	0.530	0.583	fret.16
+fret:Georgia|bold	Fret	1ac8b653	2	1.793	1.307	0.299	0.378	fret.17
+fret:Georgia|bold	Fret	66b62ddc	4	1.914	1.326	0.571	0.536	fret.18
+fret:Georgia|bold	Fret	d1d7dabe	3	1.864	1.315	0.541	0.446	fret.19
+fret:Georgia|bold	Fret	c36f3e7b	3	2.220	1.012	0.498	0.440	fret.20
+fret:Georgia|bold	Fret	37fdf791	2	1.877	0.982	0.429	0.442	fret.21
+fret:Georgia|bold	Fret	ca63957a	2	2.097	0.982	0.468	0.376	fret.22
+fret:Georgia|bold	Fret	d2265433	2	2.081	1.309	0.558	0.414	fret.23
+fret:Georgia|bold	Fret	3c3d2dd1	3	2.157	1.309	0.226	0.300	fret.24
+fret:Georgia|italic	Fret	edb514a3	2	0.980	1.007	0.504	0.499	fret.0
+fret:Georgia|italic	Fret	43d815ff	1	0.624	0.979	0.620	0.655	fret.1
+fret:Georgia|italic	Fret	f13e693d	1	0.954	0.979	0.498	0.390	fret.2
+fret:Georgia|italic	Fret	d4e8c780	1	0.958	1.302	0.533	0.493	fret.3
+fret:Georgia|italic	Fret	0307fb3b	2	0.952	1.297	0.656	0.541	fret.4
+fret:Georgia|italic	Fret	df425892	1	1.010	1.274	0.428	0.673	fret.5
+fret:Georgia|italic	Fret	7fe319dd	2	0.874	1.316	0.512	0.576	fret.6
+fret:Georgia|italic	Fret	116213c9	1	1.033	1.274	0.343	0.176	fret.7
+fret:Georgia|italic	Fret	9bbc5fac	3	0.985	1.320	0.534	0.496	fret.8
+fret:Georgia|italic	Fret	fdbd79be	2	0.874	1.307	0.480	0.410	fret.9
+fret:Georgia|italic	Fret	01bb9462	3	1.832	1.007	0.534	0.551	fret.10
+fret:Georgia|italic	Fret	76d1ef3c	2	1.398	0.979	0.554	0.655	fret.11
+fret:Georgia|italic	Fret	dea8bf28	2	1.718	0.979	0.558	0.477	fret.12
+fret:Georgia|italic	Fret	22504da1	2	1.708	1.302	0.621	0.493	fret.13
+fret:Georgia|italic	Fret	cf61be62	3	1.741	1.302	0.279	0.497	fret.14
+fret:Georgia|italic	Fret	189880cf	2	1.751	1.302	0.509	0.613	fret.15
+fret:Georgia|italic	Fret	8a0f0082	3	1.732	1.316	0.562	0.629	fret.16
+fret:Georgia|italic	Fret	cc6a7b76	2	1.810	1.302	0.315	0.419	fret.17
+fret:Georgia|italic	Fret	d85f75b5	4	1.833	1.320	0.586	0.565	fret.18
+fret:Georgia|italic	Fret	bbe06a36	3	1.746	1.307	0.561	0.438	fret.19
+fret:Georgia|italic	Fret	e37a415f	3	2.084	1.007	0.466	0.432	fret.20
+fret:Georgia|italic	Fret	ad65ebca	2	1.651	0.979	0.475	0.477	fret.21
+fret:Georgia|italic	Fret	152503ef	2	1.970	0.979	0.499	0.390	fret.22
+fret:Georgia|italic	Fret	43263627	2	1.960	1.302	0.572	0.418	fret.23
+fret:Georgia|italic	Fret	6b66cf34	3	1.993	1.302	0.268	0.306	fret.24
+fret:Palatino Linotype	Fret	5ef6a9ad	2	0.787	1.283	0.451	0.515	fret.0
+fret:Palatino Linotype	Fret	a529bd60	1	0.644	1.264	0.485	0.591	fret.1
+fret:Palatino Linotype	Fret	43ebb12b	1	0.816	1.253	0.567	0.466	fret.2
+fret:Palatino Linotype	Fret	18cf64d3	1	0.804	1.282	0.513	0.527	fret.3
+fret:Palatino Linotype	Fret	cb27dda7	2	0.847	1.260	0.651	0.742	fret.4
+fret:Palatino Linotype	Fret	d4ecaa56	1	0.805	1.265	0.488	0.494	fret.5
+fret:Palatino Linotype	Fret	839796e2	2	0.784	1.289	0.499	0.569	fret.6
+fret:Palatino Linotype	Fret	82e2e429	1	0.815	1.247	0.308	0.359	fret.7
+fret:Palatino Linotype	Fret	533bf6e7	3	0.783	1.273	0.526	0.490	fret.8
+fret:Palatino Linotype	Fret	caa9eb34	2	0.788	1.280	0.493	0.447	fret.9
+fret:Palatino Linotype	Fret	afa7418b	3	1.638	1.293	0.475	0.547	fret.10
+fret:Palatino Linotype	Fret	5ec51e3e	2	1.551	1.264	0.494	0.591	fret.11
+fret:Palatino Linotype	Fret	299e571b	2	1.643	1.266	0.505	0.528	fret.12
+fret:Palatino Linotype	Fret	9a1673c6	2	1.634	1.288	0.528	0.550	fret.13
+fret:Palatino Linotype	Fret	736f0f45	3	1.654	1.264	0.503	0.667	fret.14
+fret:Palatino Linotype	Fret	8c867187	2	1.630	1.290	0.529	0.534	fret.15
+fret:Palatino Linotype	Fret	9cb7f14b	3	1.643	1.290	0.534	0.573	fret.16
+fret:Palatino Linotype	Fret	9d8c45cd	2	1.695	1.264	0.389	0.497	fret.17
+fret:Palatino Linotype	Fret	95afbcf8	4	1.636	1.288	0.558	0.527	fret.18
+fret:Palatino Linotype	Fret	c1a36607	3	1.631	1.293	0.492	0.511	fret.19
+fret:Palatino Linotype	Fret	85d72e54	3	1.719	1.283	0.505	0.486	fret.20
+fret:Palatino Linotype	Fret	3b8d7d5f	2	1.632	1.266	0.525	0.528	fret.21
+fret:Palatino Linotype	Fret	925e1596	2	1.723	1.253	0.532	0.466	fret.22
+fret:Palatino Linotype	Fret	75822eb1	2	1.714	1.282	0.552	0.498	fret.23
+fret:Palatino Linotype	Fret	1834d421	3	1.735	1.262	0.530	0.597	fret.24
+fret:Palatino Linotype|bold	Fret	4d88aff5	2	0.791	1.249	0.480	0.490	fret.0
+fret:Palatino Linotype|bold	Fret	6f6443c4	1	0.765	1.241	0.466	0.574	fret.1
+fret:Palatino Linotype|bold	Fret	9b17d07d	1	0.808	1.219	0.585	0.513	fret.2
+fret:Palatino Linotype|bold	Fret	9323fdc9	1	0.785	1.251	0.501	0.478	fret.3
+fret:Palatino Linotype|bold	Fret	b46c7b7b	2	0.835	1.239	0.618	0.689	fret.4
+fret:Palatino Linotype|bold	Fret	5d63242a	1	0.781	1.243	0.530	0.481	fret.5
+fret:Palatino Linotype|bold	Fret	defb286f	2	0.781	1.251	0.518	0.518	fret.6
+fret:Palatino Linotype|bold	Fret	61a09b74	1	0.805	1.211	0.334	0.379	fret.7
+fret:Palatino Linotype|bold	Fret	a688d8a6	3	0.782	1.252	0.503	0.491	fret.8
+fret:Palatino Linotype|bold	Fret	6eddbe60	2	0.781	1.251	0.485	0.473	fret.9
+fret:Palatino Linotype|bold	Fret	31b32994	3	1.695	1.272	0.483	0.529	fret.10
+fret:Palatino Linotype|bold	Fret	5d181e21	2	1.673	1.241	0.484	0.574	fret.11
+fret:Palatino Linotype|bold	Fret	621e7938	2	1.701	1.243	0.514	0.547	fret.12
+fret:Palatino Linotype|bold	Fret	70b4befb	2	1.675	1.272	0.533	0.517	fret.13
+fret:Palatino Linotype|bold	Fret	91b7e9f0	3	1.703	1.241	0.510	0.631	fret.14
+fret:Palatino Linotype|bold	Fret	fe8c926f	2	1.667	1.272	0.523	0.523	fret.15
+fret:Palatino Linotype|bold	Fret	ca91dc6b	3	1.696	1.272	0.523	0.541	fret.16
+fret:Palatino Linotype|bold	Fret	8bb5bd7a	2	1.737	1.241	0.411	0.496	fret.17
+fret:Palatino Linotype|bold	Fret	c874509f	4	1.690	1.271	0.560	0.522	fret.18
+fret:Palatino Linotype|bold	Fret	23922c87	3	1.682	1.272	0.520	0.516	fret.19
+fret:Palatino Linotype|bold	Fret	21ed8c8c	3	1.709	1.249	0.511	0.496	fret.20
+fret:Palatino Linotype|bold	Fret	98dc6ebf	2	1.687	1.243	0.513	0.547	fret.21
+fret:Palatino Linotype|bold	Fret	2f773223	2	1.715	1.219	0.540	0.513	fret.22
+fret:Palatino Linotype|bold	Fret	f3451ce8	2	1.689	1.251	0.556	0.488	fret.23
+fret:Palatino Linotype|bold	Fret	ab7f4443	3	1.717	1.242	0.537	0.603	fret.24
+fret:Palatino Linotype|italic	Fret	5daf0f02	2	0.796	1.272	0.518	0.492	fret.0
+fret:Palatino Linotype|italic	Fret	c41458b1	1	0.617	1.257	0.520	0.701	fret.1
+fret:Palatino Linotype|italic	Fret	7e25337d	1	0.765	1.244	0.618	0.457	fret.2
+fret:Palatino Linotype|italic	Fret	abfaf028	1	0.763	1.270	0.597	0.501	fret.3
+fret:Palatino Linotype|italic	Fret	f2965ded	2	0.844	1.257	0.578	0.677	fret.4
+fret:Palatino Linotype|italic	Fret	3d286414	1	0.857	1.248	0.509	0.564	fret.5
+fret:Palatino Linotype|italic	Fret	30699ffa	2	0.756	1.270	0.539	0.563	fret.6
+fret:Palatino Linotype|italic	Fret	ffd6df5c	1	0.810	1.228	0.378	0.416	fret.7
+fret:Palatino Linotype|italic	Fret	59e838ad	3	0.780	1.266	0.531	0.503	fret.8
+fret:Palatino Linotype|italic	Fret	70998afb	2	0.783	1.268	0.469	0.493	fret.9
+fret:Palatino Linotype|italic	Fret	41aab7cf	3	1.661	1.278	0.538	0.572	fret.10
+fret:Palatino Linotype|italic	Fret	d6823115	2	1.524	1.257	0.508	0.701	fret.11
+fret:Palatino Linotype|italic	Fret	96c6c96c	2	1.560	1.257	0.520	0.577	fret.12
+fret:Palatino Linotype|italic	Fret	52c4ac40	2	1.559	1.283	0.594	0.569	fret.13
+fret:Palatino Linotype|italic	Fret	eb9c0209	3	1.634	1.257	0.536	0.687	fret.14
+fret:Palatino Linotype|italic	Fret	33ed9471	2	1.657	1.283	0.547	0.616	fret.15
+fret:Palatino Linotype|italic	Fret	bd9b131a	3	1.618	1.283	0.581	0.609	fret.16
+fret:Palatino Linotype|italic	Fret	4606791c	2	1.678	1.257	0.417	0.581	fret.17
+fret:Palatino Linotype|italic	Fret	9f48f366	4	1.617	1.280	0.600	0.563	fret.18
+fret:Palatino Linotype|italic	Fret	af5c3f64	3	1.615	1.279	0.565	0.560	fret.19
+fret:Palatino Linotype|italic	Fret	8a4b6adf	3	1.773	1.272	0.567	0.475	fret.20
+fret:Palatino Linotype|italic	Fret	92c12b8f	2	1.636	1.257	0.544	0.577	fret.21
+fret:Palatino Linotype|italic	Fret	b2b61c82	2	1.672	1.244	0.554	0.457	fret.22
+fret:Palatino Linotype|italic	Fret	24bd44fa	2	1.671	1.270	0.621	0.482	fret.23
+fret:Palatino Linotype|italic	Fret	d44f4938	3	1.745	1.257	0.566	0.583	fret.24
+fret:Cambria	Fret	eaf104f7	2	0.776	1.238	0.459	0.429	fret.0
+fret:Cambria	Fret	d5c8e7d3	1	0.705	1.223	0.496	0.640	fret.1
+fret:Cambria	Fret	f0439eca	1	0.744	1.223	0.635	0.433	fret.2
+fret:Cambria	Fret	2669c358	1	0.732	1.238	0.605	0.484	fret.3
+fret:Cambria	Fret	3de5657a	2	0.868	1.215	0.680	0.716	fret.4
+fret:Cambria	Fret	361f2758	1	0.736	1.282	0.591	0.588	fret.5
+fret:Cambria	Fret	2c8b1989	2	0.801	1.238	0.503	0.566	fret.6
+fret:Cambria	Fret	e9580a0c	1	0.778	1.215	0.243	0.192	fret.7
+fret:Cambria	Fret	afbd980f	3	0.808	1.238	0.491	0.510	fret.8
+fret:Cambria	Fret	05813e86	2	0.800	1.238	0.502	0.412	fret.9
+fret:Cambria	Fret	7867b4f3	3	1.737	1.238	0.528	0.513	fret.10
+fret:Cambria	Fret	66cc9a0b	2	1.709	1.223	0.498	0.640	fret.11
+fret:Cambria	Fret	2645f33f	2	1.705	1.223	0.602	0.511	fret.12
+fret:Cambria	Fret	6c4d1481	2	1.706	1.238	0.627	0.533	fret.13
+fret:Cambria	Fret	a49e0b72	3	1.783	1.223	0.511	0.678	fret.14
+fret:Cambria	Fret	08fbe7e3	2	1.715	1.282	0.574	0.611	fret.15
+fret:Cambria	Fret	22bd0576	3	1.762	1.238	0.589	0.587	fret.16
+fret:Cambria	Fret	5128b9d9	2	1.755	1.230	0.318	0.526	fret.17
+fret:Cambria	Fret	9d465073	4	1.752	1.238	0.628	0.540	fret.18
+fret:Cambria	Fret	5c79559d	3	1.735	1.238	0.595	0.480	fret.19
+fret:Cambria	Fret	6eb355ba	3	1.780	1.238	0.495	0.429	fret.20
+fret:Cambria	Fret	7ec7dc30	2	1.752	1.223	0.468	0.511	fret.21
+fret:Cambria	Fret	927d8dce	2	1.748	1.223	0.557	0.433	fret.22
+fret:Cambria	Fret	dc08c127	2	1.749	1.238	0.583	0.459	fret.23
+fret:Cambria	Fret	208673e9	3	1.826	1.223	0.472	0.536	fret.24
+fret:Cambria|bold	Fret	51067a40	2	0.874	1.238	0.483	0.504	fret.0
+fret:Cambria|bold	Fret	d5c8e7d3	1	0.818	1.223	0.490	0.645	fret.1
+fret:Cambria|bold	Fret	dbd0715d	1	0.832	1.223	0.554	0.392	fret.2
+fret:Cambria|bold	Fret	3b4abcc7	1	0.814	1.238	0.589	0.475	fret.3
+fret:Cambria|bold	Fret	62119427	2	0.974	1.215	0.650	0.758	fret.4
+fret:Cambria|bold	Fret	1f0c4a79	1	0.817	1.282	0.557	0.612	fret.5
+fret:Cambria|bold	Fret	75fc86a8	2	0.895	1.238	0.512	0.598	fret.6
+fret:Cambria|bold	Fret	e9580a0c	1	0.872	1.212	0.251	0.256	fret.7
+fret:Cambria|bold	Fret	108e0e46	3	0.905	1.238	0.496	0.521	fret.8
+fret:Cambria|bold	Fret	27614e60	2	0.895	1.238	0.505	0.453	fret.9
+fret:Cambria|bold	Fret	2f9155ee	3	1.911	1.238	0.563	0.552	fret.10
+fret:Cambria|bold	Fret	66cc9a0b	2	1.894	1.223	0.496	0.645	fret.11
+fret:Cambria|bold	Fret	3a20df10	2	1.864	1.223	0.576	0.489	fret.12
+fret:Cambria|bold	Fret	3d717dc1	2	1.863	1.238	0.609	0.532	fret.13
+fret:Cambria|bold	Fret	6ebc0c99	3	1.956	1.223	0.507	0.701	fret.14
+fret:Cambria|bold	Fret	478dd46f	2	1.892	1.282	0.568	0.627	fret.15
+fret:Cambria|bold	Fret	1e0edd68	3	1.929	1.238	0.584	0.611	fret.16
+fret:Cambria|bold	Fret	5128b9d9	2	1.920	1.226	0.324	0.547	fret.17
+fret:Cambria|bold	Fret	867e7c21	4	1.927	1.238	0.608	0.554	fret.18
+fret:Cambria|bold	Fret	be021c63	3	1.914	1.238	0.596	0.510	fret.19
+fret:Cambria|bold	Fret	f9213bf6	3	1.955	1.238	0.514	0.448	fret.20
+fret:Cambria|bold	Fret	41c9531f	2	1.938	1.223	0.448	0.489	fret.21
+fret:Cambria|bold	Fret	a3f71fd0	2	1.908	1.223	0.523	0.392	fret.22
+fret:Cambria|bold	Fret	c7818b92	2	1.907	1.238	0.555	0.435	fret.23
+fret:Cambria|bold	Fret	0e84ffc2	3	2.000	1.223	0.453	0.528	fret.24
+fret:Cambria|italic	Fret	381b0f4d	2	0.820	1.238	0.478	0.481	fret.0
+fret:Cambria|italic	Fret	04e1d9df	1	0.658	1.223	0.556	0.589	fret.1
+fret:Cambria|italic	Fret	3862e04e	1	0.904	1.223	0.655	0.422	fret.2
+fret:Cambria|italic	Fret	972c1eab	1	0.892	1.238	0.632	0.477	fret.3
+fret:Cambria|italic	Fret	62119427	2	0.889	1.215	0.622	0.756	fret.4
+fret:Cambria|italic	Fret	e177b3da	1	0.912	1.282	0.573	0.599	fret.5
+fret:Cambria|italic	Fret	d9756220	2	0.805	1.238	0.440	0.600	fret.6
+fret:Cambria|italic	Fret	5afff545	1	0.856	1.215	0.295	0.202	fret.7
+fret:Cambria|italic	Fret	9de513d7	3	0.903	1.238	0.493	0.496	fret.8
+fret:Cambria|italic	Fret	8eaa84df	2	0.788	1.238	0.527	0.437	fret.9
+fret:Cambria|italic	Fret	5984cc2b	3	1.787	1.238	0.568	0.516	fret.10
+fret:Cambria|italic	Fret	b3e08266	2	1.614	1.223	0.523	0.589	fret.11
+fret:Cambria|italic	Fret	b33a28a2	2	1.752	1.223	0.578	0.489	fret.12
+fret:Cambria|italic	Fret	5fa6f662	2	1.766	1.238	0.607	0.513	fret.13
+fret:Cambria|italic	Fret	d55bb688	3	1.791	1.223	0.480	0.666	fret.14
+fret:Cambria|italic	Fret	be972b89	2	1.830	1.282	0.524	0.598	fret.15
+fret:Cambria|italic	Fret	024f7f3b	3	1.791	1.238	0.575	0.595	fret.16
+fret:Cambria|italic	Fret	fb5b6ee8	2	1.888	1.230	0.288	0.513	fret.17
+fret:Cambria|italic	Fret	e2c9f2f4	4	1.822	1.238	0.609	0.518	fret.18
+fret:Cambria|italic	Fret	d9b7ec6b	3	1.769	1.238	0.607	0.482	fret.19
+fret:Cambria|italic	Fret	25913088	3	1.895	1.238	0.569	0.452	fret.20
+fret:Cambria|italic	Fret	9131ca10	2	1.722	1.223	0.537	0.489	fret.21
+fret:Cambria|italic	Fret	d7300b39	2	1.860	1.223	0.575	0.422	fret.22
+fret:Cambria|italic	Fret	5b8f5467	2	1.874	1.238	0.601	0.451	fret.23
+fret:Cambria|italic	Fret	9478c370	3	1.899	1.223	0.493	0.541	fret.24
+fret:Sitka Text	Fret	10fbc1b0	2	0.940	0.989	0.493	0.513	fret.0
+fret:Sitka Text	Fret	16626f6c	1	0.623	0.958	0.537	0.616	fret.1
+fret:Sitka Text	Fret	2df452f3	1	0.829	0.980	0.520	0.374	fret.2
+fret:Sitka Text	Fret	b4bc5b75	1	0.834	1.262	0.563	0.515	fret.3
+fret:Sitka Text	Fret	4fe92d6c	1	0.963	1.246	0.633	0.813	fret.4
+fret:Sitka Text	Fret	6a70c886	1	0.819	1.232	0.501	0.703	fret.5
+fret:Sitka Text	Fret	e782bf1a	2	0.868	1.247	0.491	0.467	fret.6
+fret:Sitka Text	Fret	643348b4	1	0.859	1.243	0.303	0.243	fret.7
+fret:Sitka Text	Fret	41dffd5c	3	0.885	1.257	0.511	0.490	fret.8
+fret:Sitka Text	Fret	7a58e538	2	0.869	1.260	0.510	0.535	fret.9
+fret:Sitka Text	Fret	84d0854e	3	1.748	0.989	0.613	0.533	fret.10
+fret:Sitka Text	Fret	eed4eefa	2	1.458	0.958	0.516	0.616	fret.11
+fret:Sitka Text	Fret	66db7922	2	1.627	0.980	0.622	0.435	fret.12
+fret:Sitka Text	Fret	22fbe60b	2	1.615	1.262	0.680	0.508	fret.13
+fret:Sitka Text	Fret	fc6d169f	2	1.723	1.247	0.461	0.624	fret.14
+fret:Sitka Text	Fret	0967b6d2	2	1.610	1.255	0.623	0.654	fret.15
+fret:Sitka Text	Fret	953989f1	3	1.685	1.247	0.647	0.503	fret.16
+fret:Sitka Text	Fret	c6df8669	2	1.672	1.267	0.301	0.418	fret.17
+fret:Sitka Text	Fret	3155973c	4	1.713	1.257	0.663	0.520	fret.18
+fret:Sitka Text	Fret	c9c39587	3	1.675	1.260	0.654	0.525	fret.19
+fret:Sitka Text	Fret	792db648	3	1.990	1.005	0.511	0.450	fret.20
+fret:Sitka Text	Fret	46ca0e16	2	1.700	0.980	0.393	0.435	fret.21
+fret:Sitka Text	Fret	e55dab58	2	1.869	0.980	0.509	0.374	fret.22
+fret:Sitka Text	Fret	14be2048	2	1.857	1.278	0.584	0.431	fret.23
+fret:Sitka Text	Fret	208c540e	2	1.965	1.269	0.341	0.396	fret.24
+fret:Sitka Text|bold	Fret	10fbc1b0	2	0.940	0.989	0.493	0.513	fret.0
+fret:Sitka Text|bold	Fret	16626f6c	1	0.623	0.958	0.537	0.616	fret.1
+fret:Sitka Text|bold	Fret	2df452f3	1	0.829	0.980	0.520	0.374	fret.2
+fret:Sitka Text|bold	Fret	b4bc5b75	1	0.834	1.262	0.563	0.515	fret.3
+fret:Sitka Text|bold	Fret	4fe92d6c	1	0.963	1.246	0.633	0.813	fret.4
+fret:Sitka Text|bold	Fret	6a70c886	1	0.819	1.232	0.501	0.703	fret.5
+fret:Sitka Text|bold	Fret	e782bf1a	2	0.868	1.247	0.491	0.467	fret.6
+fret:Sitka Text|bold	Fret	643348b4	1	0.859	1.243	0.303	0.243	fret.7
+fret:Sitka Text|bold	Fret	41dffd5c	3	0.885	1.257	0.511	0.490	fret.8
+fret:Sitka Text|bold	Fret	7a58e538	2	0.869	1.260	0.510	0.535	fret.9
+fret:Sitka Text|bold	Fret	84d0854e	3	1.748	0.989	0.613	0.533	fret.10
+fret:Sitka Text|bold	Fret	eed4eefa	2	1.458	0.958	0.516	0.616	fret.11
+fret:Sitka Text|bold	Fret	66db7922	2	1.627	0.980	0.622	0.435	fret.12
+fret:Sitka Text|bold	Fret	22fbe60b	2	1.615	1.262	0.680	0.508	fret.13
+fret:Sitka Text|bold	Fret	fc6d169f	2	1.723	1.247	0.461	0.624	fret.14
+fret:Sitka Text|bold	Fret	0967b6d2	2	1.610	1.255	0.623	0.654	fret.15
+fret:Sitka Text|bold	Fret	953989f1	3	1.685	1.247	0.647	0.503	fret.16
+fret:Sitka Text|bold	Fret	c6df8669	2	1.672	1.267	0.301	0.418	fret.17
+fret:Sitka Text|bold	Fret	3155973c	4	1.713	1.257	0.663	0.520	fret.18
+fret:Sitka Text|bold	Fret	c9c39587	3	1.675	1.260	0.654	0.525	fret.19
+fret:Sitka Text|bold	Fret	792db648	3	1.990	1.005	0.511	0.450	fret.20
+fret:Sitka Text|bold	Fret	46ca0e16	2	1.700	0.980	0.393	0.435	fret.21
+fret:Sitka Text|bold	Fret	e55dab58	2	1.869	0.980	0.509	0.374	fret.22
+fret:Sitka Text|bold	Fret	14be2048	2	1.857	1.278	0.584	0.431	fret.23
+fret:Sitka Text|bold	Fret	208c540e	2	1.965	1.269	0.341	0.396	fret.24
+fret:Sitka Text|italic	Fret	b1a8064b	2	0.945	0.989	0.500	0.504	fret.0
+fret:Sitka Text|italic	Fret	cbabc166	1	0.613	0.958	0.631	0.615	fret.1
+fret:Sitka Text|italic	Fret	44f6bd48	1	0.901	0.980	0.644	0.340	fret.2
+fret:Sitka Text|italic	Fret	d8c9981a	1	0.952	1.262	0.614	0.485	fret.3
+fret:Sitka Text|italic	Fret	e8e4cfc1	1	0.985	1.244	0.595	0.818	fret.4
+fret:Sitka Text|italic	Fret	f281dd7f	1	1.009	1.232	0.465	0.682	fret.5
+fret:Sitka Text|italic	Fret	b9457fb3	2	0.913	1.248	0.489	0.503	fret.6
+fret:Sitka Text|italic	Fret	643348b4	1	1.009	1.243	0.362	0.241	fret.7
+fret:Sitka Text|italic	Fret	d793bf12	1	0.945	1.257	0.522	0.497	fret.8
+fret:Sitka Text|italic	Fret	949b719f	2	0.919	1.260	0.497	0.521	fret.9
+fret:Sitka Text|italic	Fret	69532318	3	1.824	0.989	0.637	0.523	fret.10
+fret:Sitka Text|italic	Fret	84802a4b	2	1.447	0.958	0.555	0.615	fret.11
+fret:Sitka Text|italic	Fret	3b2ccec9	2	1.676	0.980	0.674	0.406	fret.12
+fret:Sitka Text|italic	Fret	b9638a86	2	1.677	1.262	0.691	0.483	fret.13
+fret:Sitka Text|italic	Fret	3b5fa03f	2	1.742	1.245	0.466	0.626	fret.14
+fret:Sitka Text|italic	Fret	cfb325ee	2	1.761	1.255	0.581	0.636	fret.15
+fret:Sitka Text|italic	Fret	2d434c98	3	1.805	1.248	0.660	0.530	fret.16
+fret:Sitka Text|italic	Fret	aa72b622	2	1.807	1.267	0.312	0.417	fret.17
+fret:Sitka Text|italic	Fret	1a8c88a7	2	1.825	1.257	0.685	0.520	fret.18
+fret:Sitka Text|italic	Fret	0110c280	3	1.740	1.260	0.658	0.514	fret.19
+fret:Sitka Text|italic	Fret	cdf023a3	3	2.077	1.005	0.553	0.431	fret.20
+fret:Sitka Text|italic	Fret	c9ff088d	2	1.700	0.980	0.464	0.406	fret.21
+fret:Sitka Text|italic	Fret	6dae80df	2	1.930	0.980	0.567	0.340	fret.22
+fret:Sitka Text|italic	Fret	2a412c6a	2	1.930	1.278	0.611	0.401	fret.23
+fret:Sitka Text|italic	Fret	684bb724	2	1.995	1.268	0.390	0.372	fret.24
+fret:Courier New	Fret	0a7f3e44	2	0.683	1.165	0.504	0.500	fret.0
+fret:Courier New	Fret	a567d47b	1	0.684	1.127	0.327	0.639	fret.1
+fret:Courier New	Fret	6fcb9cfb	1	0.719	1.138	0.578	0.394	fret.2
+fret:Courier New	Fret	dc255bd9	1	0.735	1.165	0.484	0.478	fret.3
+fret:Courier New	Fret	c5b15711	2	0.681	1.112	0.785	0.837	fret.4
+fret:Courier New	Fret	c0d54cbf	1	0.734	1.139	0.493	0.554	fret.5
+fret:Courier New	Fret	54b5b7fe	2	0.688	1.165	0.549	0.462	fret.6
+fret:Courier New	Fret	6e46a1f2	1	0.683	1.113	0.325	0.575	fret.7
+fret:Courier New	Fret	232368c2	3	0.680	1.165	0.503	0.492	fret.8
+fret:Courier New	Fret	1ddce653	2	0.684	1.165	0.453	0.541	fret.9
+fret:Courier New	Fret	b68ddc12	3	1.773	1.165	0.576	0.543	fret.10
+fret:Courier New	Fret	b85934a4	2	1.773	1.127	0.433	0.639	fret.11
+fret:Courier New	Fret	38429e5a	2	1.757	1.138	0.583	0.481	fret.12
+fret:Courier New	Fret	2fecd851	2	1.795	1.165	0.605	0.519	fret.13
+fret:Courier New	Fret	deaeb470	3	1.757	1.127	0.522	0.739	fret.14
+fret:Courier New	Fret	f97993df	2	1.795	1.154	0.558	0.583	fret.15
+fret:Courier New	Fret	73250791	3	1.817	1.165	0.608	0.514	fret.16
+fret:Courier New	Fret	88b971f9	2	1.756	1.129	0.382	0.614	fret.17
+fret:Courier New	Fret	5dfc200b	4	1.772	1.165	0.605	0.533	fret.18
+fret:Courier New	Fret	808eaadd	3	1.814	1.165	0.593	0.567	fret.19
+fret:Courier New	Fret	07ad4a2c	3	1.823	1.165	0.526	0.443	fret.20
+fret:Courier New	Fret	c88a81c2	2	1.823	1.138	0.409	0.481	fret.21
+fret:Courier New	Fret	5cbd3a22	2	1.808	1.138	0.531	0.394	fret.22
+fret:Courier New	Fret	61a70ba2	2	1.845	1.165	0.558	0.439	fret.23
+fret:Courier New	Fret	aff1d074	3	1.808	1.138	0.471	0.550	fret.24
+fret:Courier New|bold	Fret	e0e0d55d	2	0.792	1.202	0.504	0.499	fret.0
+fret:Courier New|bold	Fret	a567d47b	1	0.792	1.175	0.339	0.630	fret.1
+fret:Courier New|bold	Fret	5b9274e4	1	0.827	1.175	0.542	0.375	fret.2
+fret:Courier New|bold	Fret	b7346a35	1	0.844	1.202	0.497	0.504	fret.3
+fret:Courier New|bold	Fret	68946b5d	2	0.787	1.146	0.757	0.816	fret.4
+fret:Courier New|bold	Fret	e99674d1	1	0.847	1.173	0.498	0.568	fret.5
+fret:Courier New|bold	Fret	bb5bf0a8	2	0.791	1.202	0.566	0.471	fret.6
+fret:Courier New|bold	Fret	6361e602	1	0.788	1.148	0.337	0.599	fret.7
+fret:Courier New|bold	Fret	f3e12882	3	0.792	1.202	0.502	0.524	fret.8
+fret:Courier New|bold	Fret	6b218699	2	0.793	1.202	0.409	0.535	fret.9
+fret:Courier New|bold	Fret	83a7ccc8	3	1.880	1.202	0.515	0.549	fret.10
+fret:Courier New|bold	Fret	b85934a4	2	1.881	1.175	0.432	0.630	fret.11
+fret:Courier New|bold	Fret	af9dccb3	2	1.864	1.175	0.542	0.475	fret.12
+fret:Courier New|bold	Fret	f61abbd8	2	1.903	1.202	0.608	0.533	fret.13
+fret:Courier New|bold	Fret	d75c86e7	3	1.862	1.175	0.515	0.724	fret.14
+fret:Courier New|bold	Fret	9f1d4cff	2	1.903	1.202	0.547	0.592	fret.15
+fret:Courier New|bold	Fret	bb7e6669	3	1.921	1.202	0.603	0.518	fret.16
+fret:Courier New|bold	Fret	6c004a0d	2	1.862	1.177	0.382	0.620	fret.17
+fret:Courier New|bold	Fret	4e620fd1	4	1.881	1.202	0.604	0.550	fret.18
+fret:Courier New|bold	Fret	663dcd2d	3	1.922	1.202	0.543	0.563	fret.19
+fret:Courier New|bold	Fret	0431b62a	3	1.932	1.202	0.494	0.428	fret.20
+fret:Courier New|bold	Fret	844be422	2	1.933	1.175	0.426	0.475	fret.21
+fret:Courier New|bold	Fret	b3af0866	2	1.916	1.175	0.518	0.375	fret.22
+fret:Courier New|bold	Fret	a578aab9	2	1.955	1.202	0.583	0.454	fret.23
+fret:Courier New|bold	Fret	4480eb5d	3	1.914	1.175	0.490	0.546	fret.24
+fret:Courier New|italic	Fret	714b697c	2	0.758	1.165	0.504	0.499	fret.0
+fret:Courier New|italic	Fret	a567d47b	1	0.686	1.127	0.442	0.640	fret.1
+fret:Courier New|italic	Fret	3b3a125c	1	0.899	1.138	0.648	0.408	fret.2
+fret:Courier New|italic	Fret	dc255bd9	1	0.856	1.165	0.550	0.467	fret.3
+fret:Courier New|italic	Fret	c5b15711	2	0.739	1.112	0.687	0.836	fret.4
+fret:Courier New|italic	Fret	585a9fc3	1	0.858	1.139	0.527	0.543	fret.5
+fret:Courier New|italic	Fret	ccdc91e9	2	0.818	1.165	0.526	0.477	fret.6
+fret:Courier New|italic	Fret	08972c88	1	0.716	1.113	0.151	0.537	fret.7
+fret:Courier New|italic	Fret	e7d34d0e	3	0.788	1.165	0.509	0.482	fret.8
+fret:Courier New|italic	Fret	f3a90b49	2	0.814	1.165	0.501	0.577	fret.9
+fret:Courier New|italic	Fret	63c12fa4	3	1.921	1.165	0.572	0.546	fret.10
+fret:Courier New|italic	Fret	b85934a4	2	1.774	1.127	0.477	0.640	fret.11
+fret:Courier New|italic	Fret	5f1eaac3	2	1.930	1.138	0.598	0.491	fret.12
+fret:Courier New|italic	Fret	2fecd851	2	1.935	1.165	0.623	0.512	fret.13
+fret:Courier New|italic	Fret	deaeb470	3	1.874	1.127	0.519	0.739	fret.14
+fret:Courier New|italic	Fret	0996fbde	2	1.943	1.154	0.588	0.573	fret.15
+fret:Courier New|italic	Fret	43eabd88	3	2.036	1.165	0.607	0.523	fret.16
+fret:Courier New|italic	Fret	4e33d9b5	2	1.986	1.129	0.391	0.597	fret.17
+fret:Courier New|italic	Fret	54960048	4	1.928	1.165	0.619	0.523	fret.18
+fret:Courier New|italic	Fret	dcfe9ab4	3	1.948	1.165	0.601	0.593	fret.19
+fret:Courier New|italic	Fret	721a77aa	3	1.979	1.165	0.547	0.448	fret.20
+fret:Courier New|italic	Fret	b041a1ee	2	1.832	1.138	0.484	0.491	fret.21
+fret:Courier New|italic	Fret	dbef3a90	2	1.988	1.138	0.567	0.408	fret.22
+fret:Courier New|italic	Fret	6b407d79	2	1.992	1.165	0.594	0.439	fret.23
+fret:Courier New|italic	Fret	f4274fa5	3	1.932	1.138	0.504	0.559	fret.24
+fret:Bahnschrift	Fret	2d15da71	2	0.735	1.317	0.500	0.505	fret.0
+fret:Bahnschrift	Fret	a5cb1553	1	0.364	1.288	0.564	0.311	fret.1
+fret:Bahnschrift	Fret	66eb709d	1	0.742	1.301	0.595	0.244	fret.2
+fret:Bahnschrift	Fret	79b4672c	1	0.756	1.315	0.585	0.511	fret.3
+fret:Bahnschrift	Fret	57238043	2	0.828	1.288	0.560	0.655	fret.4
+fret:Bahnschrift	Fret	2c84be88	1	0.722	1.301	0.530	0.634	fret.5
+fret:Bahnschrift	Fret	f5a3ecec	2	0.718	1.301	0.482	0.686	fret.6
+fret:Bahnschrift	Fret	348df511	1	0.701	1.288	0.502	0.295	fret.7
+fret:Bahnschrift	Fret	8e9d1300	3	0.781	1.315	0.500	0.519	fret.8
+fret:Bahnschrift	Fret	a20b4522	2	0.718	1.301	0.518	0.337	fret.9
+fret:Bahnschrift	Fret	796e0882	3	1.393	1.317	0.709	0.496	fret.10
+fret:Bahnschrift	Fret	c220c1d2	2	0.969	1.288	0.524	0.311	fret.11
+fret:Bahnschrift	Fret	ffbe0c8b	2	1.365	1.301	0.743	0.248	fret.12
+fret:Bahnschrift	Fret	ff139896	2	1.360	1.315	0.751	0.505	fret.13
+fret:Bahnschrift	Fret	e3b19db3	3	1.468	1.289	0.519	0.524	fret.14
+fret:Bahnschrift	Fret	cda1bd5d	2	1.380	1.301	0.727	0.619	fret.15
+fret:Bahnschrift	Fret	7be930a9	3	1.350	1.301	0.700	0.669	fret.16
+fret:Bahnschrift	Fret	40d28a81	2	1.323	1.288	0.478	0.302	fret.17
+fret:Bahnschrift	Fret	9571a808	4	1.426	1.315	0.713	0.514	fret.18
+fret:Bahnschrift	Fret	b36f53a5	3	1.350	1.301	0.720	0.336	fret.19
+fret:Bahnschrift	Fret	33f9189a	3	1.702	1.317	0.552	0.389	fret.20
+fret:Bahnschrift	Fret	c301fdb7	2	1.278	1.301	0.376	0.248	fret.21
+fret:Bahnschrift	Fret	dda9602c	2	1.674	1.301	0.542	0.244	fret.22
+fret:Bahnschrift	Fret	2d306ad6	2	1.669	1.315	0.628	0.420	fret.23
+fret:Bahnschrift	Fret	8bff84e6	3	1.729	1.302	0.303	0.281	fret.24
+fret:Bahnschrift|italic	Fret	2d15da71	2	0.884	1.317	0.498	0.505	fret.0
+fret:Bahnschrift|italic	Fret	a5cb1553	1	0.455	1.288	0.463	0.311	fret.1
+fret:Bahnschrift|italic	Fret	66eb709d	1	0.935	1.301	0.679	0.244	fret.2
+fret:Bahnschrift|italic	Fret	79b4672c	1	0.884	1.315	0.576	0.511	fret.3
+fret:Bahnschrift|italic	Fret	57238043	2	0.864	1.288	0.598	0.655	fret.4
+fret:Bahnschrift|italic	Fret	2c84be88	1	0.894	1.301	0.466	0.634	fret.5
+fret:Bahnschrift|italic	Fret	f5a3ecec	2	0.772	1.301	0.472	0.686	fret.6
+fret:Bahnschrift|italic	Fret	348df511	1	0.799	1.288	0.462	0.295	fret.7
+fret:Bahnschrift|italic	Fret	8e9d1300	3	0.905	1.315	0.506	0.519	fret.8
+fret:Bahnschrift|italic	Fret	a20b4522	2	0.766	1.301	0.518	0.337	fret.9
+fret:Bahnschrift|italic	Fret	796e0882	3	1.421	1.317	0.663	0.496	fret.10
+fret:Bahnschrift|italic	Fret	c220c1d2	2	1.059	1.288	0.484	0.311	fret.11
+fret:Bahnschrift|italic	Fret	ffbe0c8b	2	1.390	1.301	0.748	0.248	fret.12
+fret:Bahnschrift|italic	Fret	ff139896	2	1.372	1.315	0.710	0.505	fret.13
+fret:Bahnschrift|italic	Fret	e3b19db3	3	1.363	1.289	0.520	0.524	fret.14
+fret:Bahnschrift|italic	Fret	cda1bd5d	2	1.433	1.301	0.644	0.619	fret.15
+fret:Bahnschrift|italic	Fret	7be930a9	3	1.286	1.301	0.661	0.669	fret.16
+fret:Bahnschrift|italic	Fret	40d28a81	2	1.414	1.288	0.453	0.302	fret.17
+fret:Bahnschrift|italic	Fret	9571a808	4	1.430	1.315	0.676	0.514	fret.18
+fret:Bahnschrift|italic	Fret	b36f53a5	3	1.373	1.301	0.708	0.336	fret.19
+fret:Bahnschrift|italic	Fret	33f9189a	3	1.898	1.317	0.575	0.389	fret.20
+fret:Bahnschrift|italic	Fret	c301fdb7	2	1.536	1.301	0.438	0.248	fret.21
+fret:Bahnschrift|italic	Fret	dda9602c	2	1.867	1.301	0.590	0.244	fret.22
+fret:Bahnschrift|italic	Fret	2d306ad6	2	1.848	1.315	0.644	0.420	fret.23
+fret:Bahnschrift|italic	Fret	8bff84e6	3	1.791	1.302	0.395	0.281	fret.24
+fret:Trebuchet MS	Fret	7419f475	2	0.841	1.339	0.535	0.478	fret.0
+fret:Trebuchet MS	Fret	48de7139	1	0.441	1.303	0.504	0.231	fret.1
+fret:Trebuchet MS	Fret	a1a0361b	1	0.806	1.321	0.479	0.216	fret.2
+fret:Trebuchet MS	Fret	4f45d0f2	1	0.737	1.339	0.584	0.521	fret.3
+fret:Trebuchet MS	Fret	0307fb3b	2	0.890	1.303	0.663	0.583	fret.4
+fret:Trebuchet MS	Fret	7682fe43	1	0.736	1.321	0.517	0.602	fret.5
+fret:Trebuchet MS	Fret	fcb13089	2	0.802	1.343	0.547	0.562	fret.6
+fret:Trebuchet MS	Fret	782f12f9	1	0.842	1.303	0.522	0.579	fret.7
+fret:Trebuchet MS	Fret	d7d8361e	3	0.798	1.339	0.509	0.477	fret.8
+fret:Trebuchet MS	Fret	fcb13089	2	0.802	1.343	0.453	0.438	fret.9
+fret:Trebuchet MS	Fret	1c5a6bd0	3	1.676	1.339	0.671	0.442	fret.10
+fret:Trebuchet MS	Fret	903f7a97	2	1.397	1.303	0.501	0.231	fret.11
+fret:Trebuchet MS	Fret	e9925014	2	1.637	1.321	0.612	0.222	fret.12
+fret:Trebuchet MS	Fret	dfac2c02	2	1.612	1.339	0.725	0.485	fret.13
+fret:Trebuchet MS	Fret	fb4071e2	3	1.691	1.303	0.389	0.362	fret.14
+fret:Trebuchet MS	Fret	48a71c2e	2	1.630	1.321	0.642	0.521	fret.15
+fret:Trebuchet MS	Fret	ab4ebd7a	3	1.655	1.343	0.689	0.516	fret.16
+fret:Trebuchet MS	Fret	b93e82b0	2	1.694	1.303	0.581	0.479	fret.17
+fret:Trebuchet MS	Fret	8df8fb82	4	1.655	1.339	0.705	0.455	fret.18
+fret:Trebuchet MS	Fret	ab4ebd7a	3	1.646	1.343	0.648	0.409	fret.19
+fret:Trebuchet MS	Fret	8efe1d51	3	1.800	1.339	0.560	0.374	fret.20
+fret:Trebuchet MS	Fret	e7d3b14e	2	1.521	1.321	0.384	0.222	fret.21
+fret:Trebuchet MS	Fret	ee1f49a2	2	1.762	1.321	0.490	0.216	fret.22
+fret:Trebuchet MS	Fret	9f0106e1	2	1.737	1.339	0.616	0.415	fret.23
+fret:Trebuchet MS	Fret	9d5b9e2a	3	1.816	1.321	0.300	0.269	fret.24
+fret:Trebuchet MS|bold	Fret	db4cb36a	2	0.929	1.339	0.484	0.536	fret.0
+fret:Trebuchet MS|bold	Fret	73441b03	1	0.494	1.303	0.496	0.297	fret.1
+fret:Trebuchet MS|bold	Fret	15c7e601	1	0.865	1.321	0.508	0.234	fret.2
+fret:Trebuchet MS|bold	Fret	7a230e81	1	0.797	1.339	0.554	0.471	fret.3
+fret:Trebuchet MS|bold	Fret	0307fb3b	2	0.943	1.303	0.654	0.584	fret.4
+fret:Trebuchet MS|bold	Fret	6993c895	1	0.796	1.321	0.530	0.592	fret.5
+fret:Trebuchet MS|bold	Fret	fcb13089	2	0.855	1.341	0.551	0.558	fret.6
+fret:Trebuchet MS|bold	Fret	d98ef99a	1	0.895	1.303	0.547	0.593	fret.7
+fret:Trebuchet MS|bold	Fret	d6325540	3	0.851	1.339	0.501	0.481	fret.8
+fret:Trebuchet MS|bold	Fret	d5238c7d	2	0.855	1.346	0.444	0.423	fret.9
+fret:Trebuchet MS|bold	Fret	fe192453	3	1.820	1.339	0.672	0.511	fret.10
+fret:Trebuchet MS|bold	Fret	7a970927	2	1.559	1.303	0.499	0.297	fret.11
+fret:Trebuchet MS|bold	Fret	88872cca	2	1.812	1.321	0.663	0.246	fret.12
+fret:Trebuchet MS|bold	Fret	e558a428	2	1.748	1.339	0.736	0.456	fret.13
+fret:Trebuchet MS|bold	Fret	754b07d9	3	1.827	1.303	0.467	0.436	fret.14
+fret:Trebuchet MS|bold	Fret	95349a65	2	1.766	1.321	0.700	0.551	fret.15
+fret:Trebuchet MS|bold	Fret	5450c8c8	3	1.796	1.341	0.725	0.534	fret.16
+fret:Trebuchet MS|bold	Fret	7971b51c	2	1.844	1.303	0.632	0.525	fret.17
+fret:Trebuchet MS|bold	Fret	9b39b3ae	4	1.779	1.339	0.727	0.471	fret.18
+fret:Trebuchet MS|bold	Fret	392aeebd	3	1.782	1.346	0.674	0.410	fret.19
+fret:Trebuchet MS|bold	Fret	3e2488ee	3	1.937	1.339	0.551	0.419	fret.20
+fret:Trebuchet MS|bold	Fret	65c7a8ee	2	1.676	1.321	0.357	0.246	fret.21
+fret:Trebuchet MS|bold	Fret	63c1dfba	2	1.929	1.321	0.503	0.234	fret.22
+fret:Trebuchet MS|bold	Fret	10ac7ddc	2	1.865	1.339	0.611	0.388	fret.23
+fret:Trebuchet MS|bold	Fret	ab065b5d	3	1.944	1.321	0.319	0.289	fret.24
+fret:Trebuchet MS|italic	Fret	5a442a72	2	0.906	1.339	0.466	0.533	fret.0
+fret:Trebuchet MS|italic	Fret	73441b03	1	0.496	1.303	0.487	0.285	fret.1
+fret:Trebuchet MS|italic	Fret	cc5a37c9	1	0.827	1.321	0.677	0.254	fret.2
+fret:Trebuchet MS|italic	Fret	adecafb9	1	0.852	1.339	0.608	0.497	fret.3
+fret:Trebuchet MS|italic	Fret	0307fb3b	2	0.927	1.303	0.669	0.584	fret.4
+fret:Trebuchet MS|italic	Fret	ae5feb56	1	0.870	1.321	0.517	0.598	fret.5
+fret:Trebuchet MS|italic	Fret	eb840497	2	0.805	1.343	0.540	0.554	fret.6
+fret:Trebuchet MS|italic	Fret	4ab641cb	1	0.951	1.303	0.431	0.531	fret.7
+fret:Trebuchet MS|italic	Fret	7a36fcd9	3	0.879	1.339	0.525	0.467	fret.8
+fret:Trebuchet MS|italic	Fret	65d46953	2	0.805	1.343	0.475	0.403	fret.9
+fret:Trebuchet MS|italic	Fret	b49da895	3	1.618	1.339	0.638	0.505	fret.10
+fret:Trebuchet MS|italic	Fret	7a970927	2	1.452	1.303	0.495	0.285	fret.11
+fret:Trebuchet MS|italic	Fret	c45a6ac0	2	1.535	1.321	0.735	0.259	fret.12
+fret:Trebuchet MS|italic	Fret	c41074f1	2	1.546	1.339	0.731	0.480	fret.13
+fret:Trebuchet MS|italic	Fret	754b07d9	3	1.600	1.303	0.470	0.430	fret.14
+fret:Trebuchet MS|italic	Fret	f6510d68	2	1.592	1.321	0.663	0.558	fret.15
+fret:Trebuchet MS|italic	Fret	4ee4b300	3	1.558	1.343	0.710	0.531	fret.16
+fret:Trebuchet MS|italic	Fret	5b679f4f	2	1.692	1.303	0.468	0.433	fret.17
+fret:Trebuchet MS|italic	Fret	abc4270d	4	1.605	1.339	0.710	0.458	fret.18
+fret:Trebuchet MS|italic	Fret	939e4110	3	1.613	1.343	0.690	0.394	fret.19
+fret:Trebuchet MS|italic	Fret	44839e83	3	1.866	1.339	0.542	0.406	fret.20
+fret:Trebuchet MS|italic	Fret	afa2b937	2	1.700	1.321	0.400	0.259	fret.21
+fret:Trebuchet MS|italic	Fret	bd4ec642	2	1.783	1.321	0.582	0.254	fret.22
+fret:Trebuchet MS|italic	Fret	4122a871	2	1.794	1.339	0.628	0.406	fret.23
+fret:Trebuchet MS|italic	Fret	54a0c9db	3	1.849	1.321	0.372	0.297	fret.24
+fret:Candara	Fret	0f79bcad	2	0.784	0.965	0.504	0.501	fret.0
+fret:Candara	Fret	ccf7ffae	1	0.395	0.943	0.780	0.552	fret.1
+fret:Candara	Fret	c435b6b4	1	0.661	0.943	0.506	0.406	fret.2
+fret:Candara	Fret	645f2ead	1	0.722	1.293	0.609	0.403	fret.3
+fret:Candara	Fret	0e8be3fb	2	0.826	1.227	0.557	0.451	fret.4
+fret:Candara	Fret	712fab34	1	0.678	1.258	0.523	0.517	fret.5
+fret:Candara	Fret	6a1d96db	2	0.788	1.228	0.526	0.609	fret.6
+fret:Candara	Fret	d5829bdc	1	0.716	1.227	0.544	0.466	fret.7
+fret:Candara	Fret	76da777f	3	0.786	1.229	0.495	0.481	fret.8
+fret:Candara	Fret	ccd51fc3	2	0.782	1.301	0.472	0.354	fret.9
+fret:Candara	Fret	2dc8a709	3	1.457	0.965	0.618	0.509	fret.10
+fret:Candara	Fret	913ecf1d	2	1.024	0.943	0.608	0.552	fret.11
+fret:Candara	Fret	7acea38c	2	1.317	0.943	0.595	0.450	fret.12
+fret:Candara	Fret	0ed6024b	2	1.342	1.293	0.673	0.403	fret.13
+fret:Candara	Fret	23bf0891	3	1.455	1.235	0.590	0.445	fret.14
+fret:Candara	Fret	104a5082	2	1.352	1.266	0.608	0.489	fret.15
+fret:Candara	Fret	9f047c3f	3	1.462	1.228	0.633	0.613	fret.16
+fret:Candara	Fret	50a28e69	2	1.345	1.235	0.555	0.451	fret.17
+fret:Candara	Fret	544fb51d	4	1.459	1.229	0.654	0.504	fret.18
+fret:Candara	Fret	410f3160	3	1.456	1.301	0.606	0.364	fret.19
+fret:Candara	Fret	4d1467c0	3	1.636	0.965	0.542	0.459	fret.20
+fret:Candara	Fret	6fce262a	2	1.203	0.943	0.475	0.450	fret.21
+fret:Candara	Fret	7542e83a	2	1.495	0.943	0.503	0.406	fret.22
+fret:Candara	Fret	aea3b190	2	1.521	1.293	0.590	0.362	fret.23
+fret:Candara	Fret	d1dda51c	3	1.634	1.235	0.496	0.384	fret.24
+fret:Candara|bold	Fret	bf9ff845	2	0.810	0.990	0.506	0.507	fret.0
+fret:Candara|bold	Fret	ccf7ffae	1	0.421	0.935	0.697	0.571	fret.1
+fret:Candara|bold	Fret	ce0fbfd5	1	0.693	0.943	0.507	0.383	fret.2
+fret:Candara|bold	Fret	1af343e7	1	0.739	1.296	0.593	0.410	fret.3
+fret:Candara|bold	Fret	0e8be3fb	2	0.850	1.227	0.541	0.453	fret.4
+fret:Candara|bold	Fret	132e2705	1	0.699	1.259	0.484	0.530	fret.5
+fret:Candara|bold	Fret	096d998e	2	0.800	1.226	0.554	0.621	fret.6
+fret:Candara|bold	Fret	f787ade2	1	0.737	1.227	0.541	0.461	fret.7
+fret:Candara|bold	Fret	76da777f	3	0.813	1.232	0.497	0.480	fret.8
+fret:Candara|bold	Fret	c06205b2	2	0.798	1.302	0.480	0.398	fret.9
+fret:Candara|bold	Fret	aa9d07cb	3	1.450	0.990	0.597	0.520	fret.10
+fret:Candara|bold	Fret	913ecf1d	2	1.026	0.935	0.581	0.571	fret.11
+fret:Candara|bold	Fret	ca8f7011	2	1.342	0.943	0.575	0.445	fret.12
+fret:Candara|bold	Fret	f6295b7e	2	1.335	1.296	0.654	0.411	fret.13
+fret:Candara|bold	Fret	23bf0891	3	1.454	1.228	0.576	0.448	fret.14
+fret:Candara|bold	Fret	666109ac	2	1.339	1.260	0.574	0.498	fret.15
+fret:Candara|bold	Fret	cd26b7c4	3	1.440	1.226	0.626	0.626	fret.16
+fret:Candara|bold	Fret	6841807b	2	1.342	1.228	0.527	0.451	fret.17
+fret:Candara|bold	Fret	544fb51d	4	1.453	1.232	0.644	0.505	fret.18
+fret:Candara|bold	Fret	105e263f	3	1.438	1.302	0.610	0.402	fret.19
+fret:Candara|bold	Fret	62c5de31	3	1.672	0.990	0.539	0.454	fret.20
+fret:Candara|bold	Fret	6302a841	2	1.247	0.943	0.481	0.445	fret.21
+fret:Candara|bold	Fret	03917265	2	1.563	0.943	0.503	0.383	fret.22
+fret:Candara|bold	Fret	7722e9b6	2	1.557	1.296	0.593	0.361	fret.23
+fret:Candara|bold	Fret	b89df1e6	3	1.676	1.235	0.507	0.380	fret.24
+fret:Candara|italic	Fret	0f79bcad	2	0.757	0.965	0.505	0.501	fret.0
+fret:Candara|italic	Fret	ccf7ffae	1	0.415	0.923	0.655	0.551	fret.1
+fret:Candara|italic	Fret	7dfa3824	1	0.642	0.943	0.609	0.412	fret.2
+fret:Candara|italic	Fret	46881735	1	0.735	1.295	0.653	0.406	fret.3
+fret:Candara|italic	Fret	0e8be3fb	2	0.789	1.227	0.571	0.451	fret.4
+fret:Candara|italic	Fret	704660e3	1	0.690	1.258	0.537	0.517	fret.5
+fret:Candara|italic	Fret	5646bb08	2	0.747	1.228	0.507	0.592	fret.6
+fret:Candara|italic	Fret	4ec68bcf	1	0.746	1.227	0.482	0.442	fret.7
+fret:Candara|italic	Fret	9cbf7539	3	0.757	1.229	0.549	0.475	fret.8
+fret:Candara|italic	Fret	00e99f26	2	0.740	1.301	0.496	0.375	fret.9
+fret:Candara|italic	Fret	2dc8a709	3	1.401	0.965	0.613	0.511	fret.10
+fret:Candara|italic	Fret	913ecf1d	2	1.031	0.923	0.562	0.551	fret.11
+fret:Candara|italic	Fret	5f4e6594	2	1.215	0.943	0.632	0.454	fret.12
+fret:Candara|italic	Fret	15997b14	2	1.272	1.295	0.665	0.406	fret.13
+fret:Candara|italic	Fret	23bf0891	3	1.362	1.227	0.589	0.443	fret.14
+fret:Candara|italic	Fret	11fa6206	2	1.263	1.258	0.584	0.485	fret.15
+fret:Candara|italic	Fret	3b4b970a	3	1.372	1.228	0.629	0.599	fret.16
+fret:Candara|italic	Fret	f202be67	2	1.327	1.227	0.477	0.434	fret.17
+fret:Candara|italic	Fret	5ed6cb0e	4	1.383	1.229	0.671	0.501	fret.18
+fret:Candara|italic	Fret	4bde51c7	3	1.366	1.301	0.621	0.381	fret.19
+fret:Candara|italic	Fret	5c0309e6	3	1.614	0.965	0.549	0.460	fret.20
+fret:Candara|italic	Fret	708f08cf	2	1.245	0.943	0.476	0.454	fret.21
+fret:Candara|italic	Fret	b97d4571	2	1.428	0.943	0.549	0.412	fret.22
+fret:Candara|italic	Fret	c869003d	2	1.486	1.295	0.586	0.361	fret.23
+fret:Candara|italic	Fret	ec328712	3	1.575	1.235	0.509	0.383	fret.24
+fret:Franklin Gothic Medium	Fret	fe28b58c	2	0.934	1.246	0.557	0.527	fret.0
+fret:Franklin Gothic Medium	Fret	23354940	1	0.926	1.234	0.320	0.282	fret.1
+fret:Franklin Gothic Medium	Fret	86e40658	1	0.895	1.228	0.591	0.320	fret.2
+fret:Franklin Gothic Medium	Fret	8e610a2b	1	0.934	1.246	0.612	0.494	fret.3
+fret:Franklin Gothic Medium	Fret	1d033561	2	0.943	1.234	0.592	0.486	fret.4
+fret:Franklin Gothic Medium	Fret	3a86da51	1	0.946	1.228	0.564	0.650	fret.5
+fret:Franklin Gothic Medium	Fret	bc425dfe	2	0.933	1.246	0.503	0.539	fret.6
+fret:Franklin Gothic Medium	Fret	b995bf3b	1	0.877	1.209	0.583	0.496	fret.7
+fret:Franklin Gothic Medium	Fret	1e3a8ff4	3	0.962	1.246	0.493	0.500	fret.8
+fret:Franklin Gothic Medium	Fret	eca5ad82	2	0.926	1.246	0.475	0.485	fret.9
+fret:Franklin Gothic Medium	Fret	c5aa5be2	3	1.916	1.253	0.649	0.475	fret.10
+fret:Franklin Gothic Medium	Fret	8c97648f	2	1.990	1.234	0.416	0.282	fret.11
+fret:Franklin Gothic Medium	Fret	2995ebaf	2	1.936	1.234	0.614	0.311	fret.12
+fret:Franklin Gothic Medium	Fret	85c5dd99	2	1.920	1.253	0.692	0.457	fret.13
+fret:Franklin Gothic Medium	Fret	111714b0	3	1.944	1.234	0.380	0.354	fret.14
+fret:Franklin Gothic Medium	Fret	fc124943	2	1.957	1.253	0.620	0.556	fret.15
+fret:Franklin Gothic Medium	Fret	7cdb5515	3	1.920	1.253	0.648	0.493	fret.16
+fret:Franklin Gothic Medium	Fret	f76d0bad	2	1.813	1.234	0.429	0.376	fret.17
+fret:Franklin Gothic Medium	Fret	935e0c11	4	1.978	1.253	0.660	0.468	fret.18
+fret:Franklin Gothic Medium	Fret	ef0cf465	3	1.931	1.253	0.643	0.451	fret.19
+fret:Franklin Gothic Medium	Fret	37e581c8	3	1.988	1.246	0.586	0.444	fret.20
+fret:Franklin Gothic Medium	Fret	8b03bac3	2	1.990	1.234	0.391	0.311	fret.21
+fret:Franklin Gothic Medium	Fret	7a2b0093	2	1.959	1.228	0.542	0.320	fret.22
+fret:Franklin Gothic Medium	Fret	5922cc75	2	1.968	1.246	0.629	0.433	fret.23
+fret:Franklin Gothic Medium	Fret	d88636f2	3	1.943	1.234	0.372	0.354	fret.24
+fret:Franklin Gothic Medium|bold	Fret	fe28b58c	2	0.934	1.246	0.557	0.527	fret.0
+fret:Franklin Gothic Medium|bold	Fret	23354940	1	0.926	1.234	0.320	0.282	fret.1
+fret:Franklin Gothic Medium|bold	Fret	86e40658	1	0.895	1.228	0.591	0.320	fret.2
+fret:Franklin Gothic Medium|bold	Fret	8e610a2b	1	0.934	1.246	0.612	0.494	fret.3
+fret:Franklin Gothic Medium|bold	Fret	1d033561	2	0.943	1.234	0.592	0.486	fret.4
+fret:Franklin Gothic Medium|bold	Fret	3a86da51	1	0.946	1.228	0.564	0.650	fret.5
+fret:Franklin Gothic Medium|bold	Fret	bc425dfe	2	0.933	1.246	0.503	0.539	fret.6
+fret:Franklin Gothic Medium|bold	Fret	b995bf3b	1	0.877	1.209	0.583	0.496	fret.7
+fret:Franklin Gothic Medium|bold	Fret	1e3a8ff4	3	0.962	1.246	0.493	0.500	fret.8
+fret:Franklin Gothic Medium|bold	Fret	eca5ad82	2	0.926	1.246	0.475	0.485	fret.9
+fret:Franklin Gothic Medium|bold	Fret	c5aa5be2	3	1.916	1.253	0.649	0.475	fret.10
+fret:Franklin Gothic Medium|bold	Fret	8c97648f	2	1.990	1.234	0.416	0.282	fret.11
+fret:Franklin Gothic Medium|bold	Fret	2995ebaf	2	1.936	1.234	0.614	0.311	fret.12
+fret:Franklin Gothic Medium|bold	Fret	85c5dd99	2	1.920	1.253	0.692	0.457	fret.13
+fret:Franklin Gothic Medium|bold	Fret	111714b0	3	1.944	1.234	0.380	0.354	fret.14
+fret:Franklin Gothic Medium|bold	Fret	fc124943	2	1.957	1.253	0.620	0.556	fret.15
+fret:Franklin Gothic Medium|bold	Fret	7cdb5515	3	1.920	1.253	0.648	0.493	fret.16
+fret:Franklin Gothic Medium|bold	Fret	f76d0bad	2	1.813	1.234	0.429	0.376	fret.17
+fret:Franklin Gothic Medium|bold	Fret	935e0c11	4	1.978	1.253	0.660	0.468	fret.18
+fret:Franklin Gothic Medium|bold	Fret	ef0cf465	3	1.931	1.253	0.643	0.451	fret.19
+fret:Franklin Gothic Medium|bold	Fret	37e581c8	3	1.988	1.246	0.586	0.444	fret.20
+fret:Franklin Gothic Medium|bold	Fret	8b03bac3	2	1.990	1.234	0.391	0.311	fret.21
+fret:Franklin Gothic Medium|bold	Fret	7a2b0093	2	1.959	1.228	0.542	0.320	fret.22
+fret:Franklin Gothic Medium|bold	Fret	5922cc75	2	1.968	1.246	0.629	0.433	fret.23
+fret:Franklin Gothic Medium|bold	Fret	d88636f2	3	1.943	1.234	0.372	0.354	fret.24
+fret:Franklin Gothic Medium|italic	Fret	879e5db0	2	0.950	1.275	0.520	0.515	fret.0
+fret:Franklin Gothic Medium|italic	Fret	9fa76d9a	1	0.943	1.254	0.384	0.341	fret.1
+fret:Franklin Gothic Medium|italic	Fret	62fb1f8c	1	1.002	1.252	0.599	0.352	fret.2
+fret:Franklin Gothic Medium|italic	Fret	84499360	1	0.972	1.268	0.610	0.520	fret.3
+fret:Franklin Gothic Medium|italic	Fret	92dca35a	2	0.953	1.249	0.562	0.456	fret.4
+fret:Franklin Gothic Medium|italic	Fret	774909a2	1	0.959	1.245	0.519	0.663	fret.5
+fret:Franklin Gothic Medium|italic	Fret	bc425dfe	2	0.956	1.273	0.506	0.527	fret.6
+fret:Franklin Gothic Medium|italic	Fret	3d7447c4	1	0.889	1.209	0.441	0.566	fret.7
+fret:Franklin Gothic Medium|italic	Fret	00c3a2b2	3	0.980	1.268	0.526	0.495	fret.8
+fret:Franklin Gothic Medium|italic	Fret	41cc4fe3	2	0.948	1.271	0.491	0.477	fret.9
+fret:Franklin Gothic Medium|italic	Fret	95deb53f	3	2.003	1.287	0.639	0.478	fret.10
+fret:Franklin Gothic Medium|italic	Fret	885ac06b	2	2.007	1.254	0.446	0.341	fret.11
+fret:Franklin Gothic Medium|italic	Fret	9080adcd	2	2.028	1.254	0.643	0.350	fret.12
+fret:Franklin Gothic Medium|italic	Fret	789ada7e	2	1.998	1.283	0.703	0.493	fret.13
+fret:Franklin Gothic Medium|italic	Fret	bffa89da	3	1.971	1.254	0.473	0.397	fret.14
+fret:Franklin Gothic Medium|italic	Fret	fefd5058	2	1.995	1.286	0.621	0.588	fret.15
+fret:Franklin Gothic Medium|italic	Fret	e74d0693	3	1.999	1.285	0.657	0.495	fret.16
+fret:Franklin Gothic Medium|italic	Fret	cf7be549	2	1.956	1.254	0.523	0.486	fret.17
+fret:Franklin Gothic Medium|italic	Fret	66b76753	4	2.022	1.282	0.684	0.476	fret.18
+fret:Franklin Gothic Medium|italic	Fret	4ef5e693	3	2.008	1.283	0.654	0.454	fret.19
+fret:Franklin Gothic Medium|italic	Fret	2150e2ac	3	2.089	1.285	0.555	0.438	fret.20
+fret:Franklin Gothic Medium|italic	Fret	bd29ad5e	2	2.021	1.254	0.403	0.350	fret.21
+fret:Franklin Gothic Medium|italic	Fret	c097fc88	2	2.066	1.252	0.548	0.352	fret.22
+fret:Franklin Gothic Medium|italic	Fret	67804afb	2	2.060	1.281	0.620	0.457	fret.23
+fret:Franklin Gothic Medium|italic	Fret	99bd636b	3	2.009	1.252	0.417	0.377	fret.24
+fret:Segoe Print	Fret	51067a40	2	1.275	1.212	0.532	0.432	fret.0
+fret:Segoe Print	Fret	909fe10a	1	1.096	1.241	0.450	0.622	fret.1
+fret:Segoe Print	Fret	c7cd33f1	1	1.245	1.292	0.499	0.526	fret.2
+fret:Segoe Print	Fret	7e5e7089	1	1.073	1.184	0.472	0.442	fret.3
+fret:Segoe Print	Fret	e5823d2e	2	1.228	1.324	0.605	0.562	fret.4
+fret:Segoe Print	Fret	c6148889	1	1.281	1.199	0.478	0.446	fret.5
+fret:Segoe Print	Fret	9526e43c	2	1.073	1.183	0.463	0.537	fret.6
+fret:Segoe Print	Fret	f43a6324	1	1.041	1.193	0.499	0.354	fret.7
+fret:Segoe Print	Fret	7ae1d358	3	0.866	1.185	0.530	0.466	fret.8
+fret:Segoe Print	Fret	bea5702f	2	0.914	1.172	0.535	0.391	fret.9
+fret:Segoe Print	Fret	3fa96874	3	2.498	1.243	0.454	0.542	fret.10
+fret:Segoe Print	Fret	b1761283	2	2.426	1.241	0.478	0.622	fret.11
+fret:Segoe Print	Fret	c18649c7	2	2.471	1.313	0.508	0.557	fret.12
+fret:Segoe Print	Fret	6d7ec011	2	2.395	1.241	0.516	0.531	fret.13
+fret:Segoe Print	Fret	0a50d716	3	2.462	1.324	0.529	0.585	fret.14
+fret:Segoe Print	Fret	ce77e431	2	2.608	1.241	0.475	0.541	fret.15
+fret:Segoe Print	Fret	5eaf0f20	3	2.418	1.241	0.496	0.580	fret.16
+fret:Segoe Print	Fret	ebd19f79	2	2.480	1.246	0.463	0.513	fret.17
+fret:Segoe Print	Fret	e6bd4979	4	2.318	1.241	0.565	0.546	fret.18
+fret:Segoe Print	Fret	6cf8ec2f	3	2.355	1.241	0.515	0.513	fret.19
+fret:Segoe Print	Fret	b094f46f	3	2.603	1.292	0.449	0.481	fret.20
+fret:Segoe Print	Fret	22291641	2	2.531	1.313	0.471	0.557	fret.21
+fret:Segoe Print	Fret	9dc7e036	2	2.575	1.292	0.499	0.526	fret.22
+fret:Segoe Print	Fret	5c170750	2	2.500	1.292	0.508	0.475	fret.23
+fret:Segoe Print	Fret	70d975b8	3	2.566	1.353	0.517	0.549	fret.24
+fret:Segoe Print|bold	Fret	17974aa0	2	1.291	1.215	0.509	0.463	fret.0
+fret:Segoe Print|bold	Fret	567ca408	1	1.120	1.242	0.449	0.617	fret.1
+fret:Segoe Print|bold	Fret	95cc681e	1	1.262	1.291	0.494	0.555	fret.2
+fret:Segoe Print|bold	Fret	554d7e42	1	1.098	1.176	0.465	0.401	fret.3
+fret:Segoe Print|bold	Fret	36963f0a	2	1.249	1.324	0.613	0.567	fret.4
+fret:Segoe Print|bold	Fret	ffd68c3e	1	1.297	1.202	0.492	0.412	fret.5
+fret:Segoe Print|bold	Fret	cf07e96a	2	1.098	1.186	0.481	0.537	fret.6
+fret:Segoe Print|bold	Fret	9f4b834e	1	1.067	1.197	0.468	0.377	fret.7
+fret:Segoe Print|bold	Fret	9a09ad3c	3	0.899	1.189	0.507	0.493	fret.8
+fret:Segoe Print|bold	Fret	2a6017dd	2	0.946	1.207	0.511	0.403	fret.9
+fret:Segoe Print|bold	Fret	4c973f81	3	2.482	1.244	0.455	0.551	fret.10
+fret:Segoe Print|bold	Fret	7cfef494	2	2.439	1.242	0.477	0.617	fret.11
+fret:Segoe Print|bold	Fret	f7b84ad1	2	2.491	1.311	0.488	0.573	fret.12
+fret:Segoe Print|bold	Fret	c9db4491	2	2.384	1.242	0.490	0.518	fret.13
+fret:Segoe Print|bold	Fret	3b8674cd	3	2.483	1.324	0.497	0.588	fret.14
+fret:Segoe Print|bold	Fret	809195ee	2	2.592	1.242	0.469	0.524	fret.15
+fret:Segoe Print|bold	Fret	3bae2f03	3	2.408	1.242	0.486	0.579	fret.16
+fret:Segoe Print|bold	Fret	62c45e5a	2	2.399	1.247	0.435	0.528	fret.17
+fret:Segoe Print|bold	Fret	5459ef5a	4	2.311	1.242	0.567	0.557	fret.18
+fret:Segoe Print|bold	Fret	aa6deadd	3	2.348	1.249	0.486	0.526	fret.19
+fret:Segoe Print|bold	Fret	c29631f7	3	2.572	1.291	0.467	0.506	fret.20
+fret:Segoe Print|bold	Fret	0a1f9448	2	2.528	1.311	0.487	0.573	fret.21
+fret:Segoe Print|bold	Fret	54ac5775	2	2.581	1.291	0.497	0.555	fret.22
+fret:Segoe Print|bold	Fret	bfab12d7	2	2.474	1.291	0.500	0.476	fret.23
+fret:Segoe Print|bold	Fret	25e1c2b3	3	2.573	1.349	0.505	0.566	fret.24
+fret:Segoe Print|italic	Fret	51067a40	2	1.382	1.212	0.552	0.432	fret.0
+fret:Segoe Print|italic	Fret	909fe10a	1	1.142	1.241	0.505	0.622	fret.1
+fret:Segoe Print|italic	Fret	c7cd33f1	1	1.291	1.292	0.573	0.526	fret.2
+fret:Segoe Print|italic	Fret	7e5e7089	1	1.176	1.184	0.528	0.442	fret.3
+fret:Segoe Print|italic	Fret	e5823d2e	2	1.239	1.324	0.612	0.562	fret.4
+fret:Segoe Print|italic	Fret	c6148889	1	1.490	1.199	0.484	0.446	fret.5
+fret:Segoe Print|italic	Fret	9526e43c	2	1.105	1.183	0.499	0.537	fret.6
+fret:Segoe Print|italic	Fret	f43a6324	1	1.054	1.193	0.429	0.354	fret.7
+fret:Segoe Print|italic	Fret	7ae1d358	3	1.025	1.185	0.542	0.466	fret.8
+fret:Segoe Print|italic	Fret	bea5702f	2	0.983	1.172	0.512	0.391	fret.9
+fret:Segoe Print|italic	Fret	3fa96874	3	2.650	1.243	0.468	0.542	fret.10
+fret:Segoe Print|italic	Fret	b1761283	2	2.472	1.241	0.502	0.622	fret.11
+fret:Segoe Print|italic	Fret	c18649c7	2	2.497	1.313	0.539	0.557	fret.12
+fret:Segoe Print|italic	Fret	6d7ec011	2	2.511	1.241	0.535	0.531	fret.13
+fret:Segoe Print|italic	Fret	0a50d716	3	2.556	1.324	0.546	0.585	fret.14
+fret:Segoe Print|italic	Fret	ce77e431	2	2.834	1.241	0.474	0.541	fret.15
+fret:Segoe Print|italic	Fret	5eaf0f20	3	2.500	1.241	0.517	0.580	fret.16
+fret:Segoe Print|italic	Fret	ebd19f79	2	2.707	1.246	0.465	0.513	fret.17
+fret:Segoe Print|italic	Fret	e6bd4979	4	2.500	1.241	0.566	0.546	fret.18
+fret:Segoe Print|italic	Fret	6cf8ec2f	3	2.551	1.241	0.519	0.513	fret.19
+fret:Segoe Print|italic	Fret	b094f46f	3	2.775	1.292	0.468	0.481	fret.20
+fret:Segoe Print|italic	Fret	22291641	2	2.597	1.313	0.503	0.557	fret.21
+fret:Segoe Print|italic	Fret	9dc7e036	2	2.622	1.292	0.536	0.526	fret.22
+fret:Segoe Print|italic	Fret	5c170750	2	2.636	1.292	0.532	0.475	fret.23
+fret:Segoe Print|italic	Fret	70d975b8	3	2.680	1.353	0.539	0.549	fret.24
+fret:Segoe Script	Fret	49ada79f	2	1.275	1.212	0.545	0.457	fret.0
+fret:Segoe Script	Fret	b83280d6	1	1.096	1.241	0.457	0.587	fret.1
+fret:Segoe Script	Fret	f7e863d5	1	1.245	1.292	0.474	0.509	fret.2
+fret:Segoe Script	Fret	f57feb86	1	1.073	1.184	0.458	0.464	fret.3
+fret:Segoe Script	Fret	84be4d74	2	1.228	1.324	0.577	0.492	fret.4
+fret:Segoe Script	Fret	1d49ca46	1	1.281	1.199	0.473	0.427	fret.5
+fret:Segoe Script	Fret	e972f633	2	1.073	1.183	0.503	0.549	fret.6
+fret:Segoe Script	Fret	ae6669de	1	1.041	1.193	0.516	0.323	fret.7
+fret:Segoe Script	Fret	9302a10b	3	0.866	1.185	0.538	0.485	fret.8
+fret:Segoe Script	Fret	d917ebbe	2	0.914	1.172	0.587	0.405	fret.9
+fret:Segoe Script	Fret	86a4467b	3	2.498	1.243	0.414	0.543	fret.10
+fret:Segoe Script	Fret	5ddc33a7	2	2.423	1.264	0.433	0.594	fret.11
+fret:Segoe Script	Fret	af1eb2e1	2	2.471	1.313	0.469	0.536	fret.12
+fret:Segoe Script	Fret	93c610d7	2	2.395	1.241	0.494	0.531	fret.13
+fret:Segoe Script	Fret	32c7c37c	3	2.462	1.324	0.528	0.531	fret.14
+fret:Segoe Script	Fret	ebf48f3b	2	2.608	1.241	0.483	0.513	fret.15
+fret:Segoe Script	Fret	489c9f31	3	2.419	1.241	0.514	0.569	fret.16
+fret:Segoe Script	Fret	7174c867	2	2.480	1.246	0.509	0.465	fret.17
+fret:Segoe Script	Fret	42f31c70	4	2.318	1.241	0.573	0.541	fret.18
+fret:Segoe Script	Fret	f040d4df	3	2.355	1.241	0.505	0.508	fret.19
+fret:Segoe Script	Fret	cb5eff6f	3	2.603	1.292	0.434	0.481	fret.20
+fret:Segoe Script	Fret	6c45afbe	2	2.531	1.313	0.499	0.536	fret.21
+fret:Segoe Script	Fret	fe68020d	2	2.521	1.292	0.441	0.508	fret.22
+fret:Segoe Script	Fret	6446f82b	2	2.500	1.292	0.512	0.475	fret.23
+fret:Segoe Script	Fret	2f13237c	3	2.566	1.353	0.544	0.504	fret.24
+fret:Segoe Script|bold	Fret	8c10a820	2	1.291	1.215	0.541	0.464	fret.0
+fret:Segoe Script|bold	Fret	6442e3ed	1	1.097	1.242	0.448	0.559	fret.1
+fret:Segoe Script|bold	Fret	3ad6eb45	1	1.245	1.291	0.503	0.545	fret.2
+fret:Segoe Script|bold	Fret	defe33af	1	1.092	1.176	0.457	0.432	fret.3
+fret:Segoe Script|bold	Fret	ec2af4f1	2	1.249	1.324	0.562	0.520	fret.4
+fret:Segoe Script|bold	Fret	acef2a0a	1	1.297	1.202	0.490	0.437	fret.5
+fret:Segoe Script|bold	Fret	5e3db582	2	1.098	1.186	0.474	0.601	fret.6
+fret:Segoe Script|bold	Fret	43249082	1	1.067	1.197	0.497	0.339	fret.7
+fret:Segoe Script|bold	Fret	cac413ff	3	0.899	1.189	0.535	0.512	fret.8
+fret:Segoe Script|bold	Fret	e6151158	2	0.946	1.186	0.568	0.395	fret.9
+fret:Segoe Script|bold	Fret	33c7bdfa	3	2.500	1.244	0.454	0.522	fret.10
+fret:Segoe Script|bold	Fret	96ca4781	2	2.432	1.259	0.461	0.576	fret.11
+fret:Segoe Script|bold	Fret	3e529149	2	2.491	1.311	0.497	0.542	fret.12
+fret:Segoe Script|bold	Fret	9abb714a	2	2.402	1.242	0.496	0.503	fret.13
+fret:Segoe Script|bold	Fret	8edbf361	3	2.501	1.324	0.507	0.536	fret.14
+fret:Segoe Script|bold	Fret	a63318c7	2	2.610	1.242	0.467	0.507	fret.15
+fret:Segoe Script|bold	Fret	cc91bbc6	3	2.425	1.242	0.471	0.580	fret.16
+fret:Segoe Script|bold	Fret	dba52e6e	2	2.417	1.247	0.466	0.470	fret.17
+fret:Segoe Script|bold	Fret	08ea3342	4	2.329	1.242	0.566	0.544	fret.18
+fret:Segoe Script|bold	Fret	4e22315b	3	2.365	1.242	0.503	0.489	fret.19
+fret:Segoe Script|bold	Fret	f14488a5	3	2.584	1.291	0.461	0.503	fret.20
+fret:Segoe Script|bold	Fret	c1e12035	2	2.511	1.311	0.483	0.542	fret.21
+fret:Segoe Script|bold	Fret	62cce67a	2	2.548	1.291	0.500	0.536	fret.22
+fret:Segoe Script|bold	Fret	3f80f9fd	2	2.486	1.291	0.501	0.484	fret.23
+fret:Segoe Script|bold	Fret	c4d9d628	3	2.585	1.349	0.510	0.538	fret.24
+fret:Segoe Script|italic	Fret	49ada79f	2	1.382	1.212	0.560	0.457	fret.0
+fret:Segoe Script|italic	Fret	b83280d6	1	1.142	1.241	0.519	0.587	fret.1
+fret:Segoe Script|italic	Fret	f7e863d5	1	1.291	1.292	0.553	0.509	fret.2
+fret:Segoe Script|italic	Fret	f57feb86	1	1.175	1.184	0.510	0.464	fret.3
+fret:Segoe Script|italic	Fret	84be4d74	2	1.239	1.324	0.600	0.492	fret.4
+fret:Segoe Script|italic	Fret	1d49ca46	1	1.491	1.199	0.483	0.427	fret.5
+fret:Segoe Script|italic	Fret	e972f633	2	1.102	1.183	0.535	0.549	fret.6
+fret:Segoe Script|italic	Fret	ae6669de	1	1.053	1.193	0.453	0.323	fret.7
+fret:Segoe Script|italic	Fret	9302a10b	3	1.025	1.185	0.544	0.485	fret.8
+fret:Segoe Script|italic	Fret	d917ebbe	2	0.983	1.172	0.557	0.405	fret.9
+fret:Segoe Script|italic	Fret	86a4467b	3	2.650	1.243	0.430	0.543	fret.10
+fret:Segoe Script|italic	Fret	5ddc33a7	2	2.478	1.264	0.462	0.594	fret.11
+fret:Segoe Script|italic	Fret	af1eb2e1	2	2.497	1.313	0.503	0.536	fret.12
+fret:Segoe Script|italic	Fret	93c610d7	2	2.511	1.241	0.514	0.531	fret.13
+fret:Segoe Script|italic	Fret	32c7c37c	3	2.556	1.324	0.550	0.531	fret.14
+fret:Segoe Script|italic	Fret	ebf48f3b	2	2.834	1.241	0.484	0.513	fret.15
+fret:Segoe Script|italic	Fret	489c9f31	3	2.500	1.241	0.537	0.569	fret.16
+fret:Segoe Script|italic	Fret	7174c867	2	2.706	1.246	0.512	0.465	fret.17
+fret:Segoe Script|italic	Fret	42f31c70	4	2.500	1.241	0.573	0.541	fret.18
+fret:Segoe Script|italic	Fret	f040d4df	3	2.551	1.241	0.511	0.508	fret.19
+fret:Segoe Script|italic	Fret	cb5eff6f	3	2.774	1.292	0.455	0.481	fret.20
+fret:Segoe Script|italic	Fret	6c45afbe	2	2.597	1.313	0.532	0.536	fret.21
+fret:Segoe Script|italic	Fret	fe68020d	2	2.548	1.292	0.477	0.508	fret.22
+fret:Segoe Script|italic	Fret	6446f82b	2	2.636	1.292	0.536	0.475	fret.23
+fret:Segoe Script|italic	Fret	2f13237c	3	2.680	1.353	0.570	0.504	fret.24
+fret:Ink Free	Fret	778f8590	2	0.853	1.214	0.433	0.376	fret.0
+fret:Ink Free	Fret	4fb330e9	1	0.600	1.277	0.641	0.428	fret.1
+fret:Ink Free	Fret	b67c42f8	1	1.098	1.270	0.404	0.553	fret.2
+fret:Ink Free	Fret	59466624	1	0.989	1.390	0.434	0.438	fret.3
+fret:Ink Free	Fret	bc79d8fc	2	1.197	1.324	0.600	0.491	fret.4
+fret:Ink Free	Fret	e76ce321	1	0.814	1.315	0.444	0.481	fret.5
+fret:Ink Free	Fret	93a10c5c	2	0.900	1.377	0.517	0.596	fret.6
+fret:Ink Free	Fret	b332f118	1	0.865	1.292	0.613	0.420	fret.7
+fret:Ink Free	Fret	ac80a0bc	3	1.112	1.384	0.426	0.427	fret.8
+fret:Ink Free	Fret	0a2f06be	2	0.940	1.346	0.637	0.457	fret.9
+fret:Ink Free	Fret	85e7a364	3	1.745	1.277	0.498	0.395	fret.10
+fret:Ink Free	Fret	8dcf63d0	2	1.399	1.277	0.560	0.428	fret.11
+fret:Ink Free	Fret	9c9a115b	2	2.028	1.313	0.504	0.503	fret.12
+fret:Ink Free	Fret	b30ea028	2	1.901	1.390	0.509	0.446	fret.13
+fret:Ink Free	Fret	0044a7d2	3	2.039	1.399	0.548	0.470	fret.14
+fret:Ink Free	Fret	e6be9fe3	2	1.713	1.361	0.561	0.464	fret.15
+fret:Ink Free	Fret	b4789078	3	1.814	1.417	0.542	0.541	fret.16
+fret:Ink Free	Fret	83b7da81	2	1.734	1.299	0.598	0.425	fret.17
+fret:Ink Free	Fret	4910e764	4	1.979	1.406	0.551	0.436	fret.18
+fret:Ink Free	Fret	02ec233f	3	1.811	1.390	0.562	0.456	fret.19
+fret:Ink Free	Fret	cbee74f9	3	2.060	1.270	0.438	0.491	fret.20
+fret:Ink Free	Fret	57b986c6	2	1.714	1.313	0.478	0.503	fret.21
+fret:Ink Free	Fret	ea80bb7e	2	2.343	1.270	0.455	0.553	fret.22
+fret:Ink Free	Fret	ecde14e0	2	2.216	1.390	0.453	0.496	fret.23
+fret:Ink Free	Fret	5a37fcc7	3	2.354	1.355	0.479	0.533	fret.24
+fret:Ink Free|bold	Fret	778f8590	2	0.853	1.214	0.433	0.376	fret.0
+fret:Ink Free|bold	Fret	4fb330e9	1	0.600	1.277	0.641	0.428	fret.1
+fret:Ink Free|bold	Fret	b67c42f8	1	1.098	1.270	0.404	0.553	fret.2
+fret:Ink Free|bold	Fret	59466624	1	0.989	1.390	0.434	0.438	fret.3
+fret:Ink Free|bold	Fret	bc79d8fc	2	1.197	1.324	0.600	0.491	fret.4
+fret:Ink Free|bold	Fret	e76ce321	1	0.814	1.315	0.444	0.481	fret.5
+fret:Ink Free|bold	Fret	93a10c5c	2	0.900	1.377	0.517	0.596	fret.6
+fret:Ink Free|bold	Fret	b332f118	1	0.865	1.292	0.613	0.420	fret.7
+fret:Ink Free|bold	Fret	ac80a0bc	3	1.112	1.384	0.426	0.427	fret.8
+fret:Ink Free|bold	Fret	0a2f06be	2	0.940	1.346	0.637	0.457	fret.9
+fret:Ink Free|bold	Fret	85e7a364	3	1.745	1.277	0.498	0.395	fret.10
+fret:Ink Free|bold	Fret	8dcf63d0	2	1.399	1.277	0.560	0.428	fret.11
+fret:Ink Free|bold	Fret	9c9a115b	2	2.028	1.313	0.504	0.503	fret.12
+fret:Ink Free|bold	Fret	b30ea028	2	1.901	1.390	0.509	0.446	fret.13
+fret:Ink Free|bold	Fret	0044a7d2	3	2.039	1.399	0.548	0.470	fret.14
+fret:Ink Free|bold	Fret	e6be9fe3	2	1.713	1.361	0.561	0.464	fret.15
+fret:Ink Free|bold	Fret	b4789078	3	1.814	1.417	0.542	0.541	fret.16
+fret:Ink Free|bold	Fret	83b7da81	2	1.734	1.299	0.598	0.425	fret.17
+fret:Ink Free|bold	Fret	4910e764	4	1.979	1.406	0.551	0.436	fret.18
+fret:Ink Free|bold	Fret	02ec233f	3	1.811	1.390	0.562	0.456	fret.19
+fret:Ink Free|bold	Fret	cbee74f9	3	2.060	1.270	0.438	0.491	fret.20
+fret:Ink Free|bold	Fret	57b986c6	2	1.714	1.313	0.478	0.503	fret.21
+fret:Ink Free|bold	Fret	ea80bb7e	2	2.343	1.270	0.455	0.553	fret.22
+fret:Ink Free|bold	Fret	ecde14e0	2	2.216	1.390	0.453	0.496	fret.23
+fret:Ink Free|bold	Fret	5a37fcc7	3	2.354	1.355	0.479	0.533	fret.24
+fret:Ink Free|italic	Fret	778f8590	2	0.952	1.214	0.492	0.376	fret.0
+fret:Ink Free|italic	Fret	4fb330e9	1	0.580	1.277	0.617	0.428	fret.1
+fret:Ink Free|italic	Fret	b67c42f8	1	1.075	1.270	0.465	0.553	fret.2
+fret:Ink Free|italic	Fret	59466624	1	0.876	1.390	0.410	0.438	fret.3
+fret:Ink Free|italic	Fret	bc79d8fc	2	1.244	1.324	0.630	0.491	fret.4
+fret:Ink Free|italic	Fret	e76ce321	1	0.951	1.315	0.402	0.481	fret.5
+fret:Ink Free|italic	Fret	93a10c5c	2	0.939	1.377	0.509	0.596	fret.6
+fret:Ink Free|italic	Fret	b332f118	1	0.888	1.292	0.502	0.420	fret.7
+fret:Ink Free|italic	Fret	ac80a0bc	3	1.059	1.384	0.440	0.427	fret.8
+fret:Ink Free|italic	Fret	0a2f06be	2	1.053	1.346	0.599	0.457	fret.9
+fret:Ink Free|italic	Fret	85e7a364	3	1.735	1.277	0.491	0.395	fret.10
+fret:Ink Free|italic	Fret	8dcf63d0	2	1.378	1.277	0.549	0.428	fret.11
+fret:Ink Free|italic	Fret	9c9a115b	2	1.898	1.313	0.516	0.503	fret.12
+fret:Ink Free|italic	Fret	b30ea028	2	1.839	1.390	0.514	0.446	fret.13
+fret:Ink Free|italic	Fret	0044a7d2	3	1.998	1.399	0.547	0.470	fret.14
+fret:Ink Free|italic	Fret	e6be9fe3	2	1.802	1.361	0.518	0.464	fret.15
+fret:Ink Free|italic	Fret	b4789078	3	1.785	1.417	0.526	0.541	fret.16
+fret:Ink Free|italic	Fret	83b7da81	2	1.820	1.299	0.557	0.425	fret.17
+fret:Ink Free|italic	Fret	4910e764	4	1.925	1.406	0.559	0.436	fret.18
+fret:Ink Free|italic	Fret	02ec233f	3	1.875	1.390	0.532	0.456	fret.19
+fret:Ink Free|italic	Fret	cbee74f9	3	2.158	1.270	0.452	0.491	fret.20
+fret:Ink Free|italic	Fret	57b986c6	2	1.802	1.313	0.491	0.503	fret.21
+fret:Ink Free|italic	Fret	ea80bb7e	2	2.321	1.270	0.484	0.553	fret.22
+fret:Ink Free|italic	Fret	ecde14e0	2	2.263	1.390	0.476	0.496	fret.23
+fret:Ink Free|italic	Fret	5a37fcc7	3	2.422	1.355	0.495	0.533	fret.24
+fret:MV Boli	Fret	5e65d2a0	2	1.120	1.304	0.505	0.497	fret.0
+fret:MV Boli	Fret	87f93f8e	1	0.585	1.301	0.395	0.380	fret.1
+fret:MV Boli	Fret	37593bdb	1	1.116	1.323	0.538	0.598	fret.2
+fret:MV Boli	Fret	6f2e35d3	1	1.113	1.299	0.537	0.488	fret.3
+fret:MV Boli	Fret	f4a83a36	1	1.070	1.301	0.597	0.455	fret.4
+fret:MV Boli	Fret	372c6402	1	1.189	1.301	0.478	0.447	fret.5
+fret:MV Boli	Fret	61fa6190	2	1.120	1.304	0.507	0.480	fret.6
+fret:MV Boli	Fret	ea872498	1	0.994	1.308	0.322	0.439	fret.7
+fret:MV Boli	Fret	410489dc	3	1.261	1.304	0.482	0.498	fret.8
+fret:MV Boli	Fret	1304199c	2	1.016	1.304	0.473	0.526	fret.9
+fret:MV Boli	Fret	df43dcfa	3	1.814	1.304	0.443	0.446	fret.10
+fret:MV Boli	Fret	680c2285	2	1.322	1.301	0.454	0.380	fret.11
+fret:MV Boli	Fret	66aac1fa	2	1.707	1.323	0.514	0.525	fret.12
+fret:MV Boli	Fret	67dec0ee	2	1.733	1.301	0.524	0.455	fret.13
+fret:MV Boli	Fret	f5179fd0	2	1.761	1.301	0.533	0.428	fret.14
+fret:MV Boli	Fret	ab72ff45	2	1.804	1.301	0.476	0.424	fret.15
+fret:MV Boli	Fret	75500aeb	3	1.805	1.304	0.484	0.444	fret.16
+fret:MV Boli	Fret	fbbacce5	2	1.785	1.308	0.371	0.410	fret.17
+fret:MV Boli	Fret	c4b7203b	4	1.872	1.304	0.468	0.458	fret.18
+fret:MV Boli	Fret	fcdb0d02	3	1.745	1.304	0.506	0.478	fret.19
+fret:MV Boli	Fret	c8232fbe	3	2.433	1.326	0.446	0.557	fret.20
+fret:MV Boli	Fret	9037737e	2	1.941	1.323	0.476	0.525	fret.21
+fret:MV Boli	Fret	13fb6cf9	2	2.326	1.323	0.518	0.598	fret.22
+fret:MV Boli	Fret	fca24f5c	2	2.351	1.323	0.526	0.538	fret.23
+fret:MV Boli	Fret	2713409b	2	2.380	1.323	0.518	0.528	fret.24
+fret:MV Boli|bold	Fret	5e65d2a0	2	1.120	1.304	0.505	0.497	fret.0
+fret:MV Boli|bold	Fret	87f93f8e	1	0.585	1.301	0.395	0.380	fret.1
+fret:MV Boli|bold	Fret	37593bdb	1	1.116	1.323	0.538	0.598	fret.2
+fret:MV Boli|bold	Fret	6f2e35d3	1	1.113	1.299	0.537	0.488	fret.3
+fret:MV Boli|bold	Fret	f4a83a36	1	1.070	1.301	0.597	0.455	fret.4
+fret:MV Boli|bold	Fret	372c6402	1	1.189	1.301	0.478	0.447	fret.5
+fret:MV Boli|bold	Fret	61fa6190	2	1.120	1.304	0.507	0.480	fret.6
+fret:MV Boli|bold	Fret	ea872498	1	0.994	1.308	0.322	0.439	fret.7
+fret:MV Boli|bold	Fret	410489dc	3	1.261	1.304	0.482	0.498	fret.8
+fret:MV Boli|bold	Fret	1304199c	2	1.016	1.304	0.473	0.526	fret.9
+fret:MV Boli|bold	Fret	df43dcfa	3	1.814	1.304	0.443	0.446	fret.10
+fret:MV Boli|bold	Fret	680c2285	2	1.322	1.301	0.454	0.380	fret.11
+fret:MV Boli|bold	Fret	66aac1fa	2	1.707	1.323	0.514	0.525	fret.12
+fret:MV Boli|bold	Fret	67dec0ee	2	1.733	1.301	0.524	0.455	fret.13
+fret:MV Boli|bold	Fret	f5179fd0	2	1.761	1.301	0.533	0.428	fret.14
+fret:MV Boli|bold	Fret	ab72ff45	2	1.804	1.301	0.476	0.424	fret.15
+fret:MV Boli|bold	Fret	75500aeb	3	1.805	1.304	0.484	0.444	fret.16
+fret:MV Boli|bold	Fret	fbbacce5	2	1.785	1.308	0.371	0.410	fret.17
+fret:MV Boli|bold	Fret	c4b7203b	4	1.872	1.304	0.468	0.458	fret.18
+fret:MV Boli|bold	Fret	fcdb0d02	3	1.745	1.304	0.506	0.478	fret.19
+fret:MV Boli|bold	Fret	c8232fbe	3	2.433	1.326	0.446	0.557	fret.20
+fret:MV Boli|bold	Fret	9037737e	2	1.941	1.323	0.476	0.525	fret.21
+fret:MV Boli|bold	Fret	13fb6cf9	2	2.326	1.323	0.518	0.598	fret.22
+fret:MV Boli|bold	Fret	fca24f5c	2	2.351	1.323	0.526	0.538	fret.23
+fret:MV Boli|bold	Fret	2713409b	2	2.380	1.323	0.518	0.528	fret.24
+fret:MV Boli|italic	Fret	5e65d2a0	2	1.246	1.304	0.504	0.497	fret.0
+fret:MV Boli|italic	Fret	87f93f8e	1	0.839	1.301	0.464	0.380	fret.1
+fret:MV Boli|italic	Fret	37593bdb	1	1.312	1.323	0.530	0.598	fret.2
+fret:MV Boli|italic	Fret	6f2e35d3	1	1.270	1.299	0.538	0.488	fret.3
+fret:MV Boli|italic	Fret	f4a83a36	1	1.193	1.301	0.557	0.455	fret.4
+fret:MV Boli|italic	Fret	372c6402	1	1.399	1.301	0.476	0.447	fret.5
+fret:MV Boli|italic	Fret	61fa6190	2	1.282	1.304	0.495	0.480	fret.6
+fret:MV Boli|italic	Fret	ea872498	1	1.215	1.308	0.355	0.439	fret.7
+fret:MV Boli|italic	Fret	410489dc	3	1.413	1.304	0.486	0.498	fret.8
+fret:MV Boli|italic	Fret	1304199c	2	1.202	1.304	0.492	0.526	fret.9
+fret:MV Boli|italic	Fret	df43dcfa	3	2.005	1.304	0.471	0.446	fret.10
+fret:MV Boli|italic	Fret	680c2285	2	1.577	1.301	0.481	0.380	fret.11
+fret:MV Boli|italic	Fret	66aac1fa	2	1.903	1.323	0.522	0.525	fret.12
+fret:MV Boli|italic	Fret	67dec0ee	2	1.934	1.301	0.541	0.455	fret.13
+fret:MV Boli|italic	Fret	f5179fd0	2	1.996	1.301	0.543	0.428	fret.14
+fret:MV Boli|italic	Fret	ab72ff45	2	2.057	1.301	0.488	0.424	fret.15
+fret:MV Boli|italic	Fret	75500aeb	3	2.032	1.304	0.499	0.444	fret.16
+fret:MV Boli|italic	Fret	fbbacce5	2	2.038	1.308	0.399	0.410	fret.17
+fret:MV Boli|italic	Fret	c4b7203b	4	2.072	1.304	0.489	0.458	fret.18
+fret:MV Boli|italic	Fret	fcdb0d02	3	1.937	1.304	0.524	0.478	fret.19
+fret:MV Boli|italic	Fret	c8232fbe	3	2.623	1.326	0.454	0.557	fret.20
+fret:MV Boli|italic	Fret	9037737e	2	2.195	1.323	0.473	0.525	fret.21
+fret:MV Boli|italic	Fret	13fb6cf9	2	2.521	1.323	0.516	0.598	fret.22
+fret:MV Boli|italic	Fret	fca24f5c	2	2.551	1.323	0.529	0.538	fret.23
+fret:MV Boli|italic	Fret	2713409b	2	2.614	1.323	0.515	0.528	fret.24
+fret:Comic Sans MS	Fret	0f79bcad	2	0.990	1.412	0.501	0.489	fret.0
+fret:Comic Sans MS	Fret	7e0f986b	1	0.570	1.382	0.506	0.522	fret.1
+fret:Comic Sans MS	Fret	7d6a0ebf	1	0.831	1.363	0.505	0.601	fret.2
+fret:Comic Sans MS	Fret	01f73e38	1	0.830	1.393	0.475	0.502	fret.3
+fret:Comic Sans MS	Fret	bc784779	2	1.011	1.405	0.594	0.616	fret.4
+fret:Comic Sans MS	Fret	b6d74673	1	0.910	1.424	0.429	0.381	fret.5
+fret:Comic Sans MS	Fret	ef8ef6ac	2	0.884	1.442	0.508	0.519	fret.6
+fret:Comic Sans MS	Fret	bbd70526	1	1.014	1.394	0.411	0.414	fret.7
+fret:Comic Sans MS	Fret	9c861c2a	3	0.889	1.400	0.514	0.508	fret.8
+fret:Comic Sans MS	Fret	a27144fb	2	0.924	1.445	0.475	0.506	fret.9
+fret:Comic Sans MS	Fret	f9a691e2	3	1.727	1.416	0.374	0.502	fret.10
+fret:Comic Sans MS	Fret	ac9bb2dc	2	1.392	1.382	0.502	0.522	fret.11
+fret:Comic Sans MS	Fret	ee3eea3a	2	1.659	1.384	0.499	0.569	fret.12
+fret:Comic Sans MS	Fret	99f69553	2	1.642	1.422	0.483	0.510	fret.13
+fret:Comic Sans MS	Fret	1ed9ab5d	3	1.736	1.405	0.381	0.550	fret.14
+fret:Comic Sans MS	Fret	70d03f74	2	1.704	1.437	0.486	0.432	fret.15
+fret:Comic Sans MS	Fret	be808d7c	3	1.665	1.445	0.438	0.509	fret.16
+fret:Comic Sans MS	Fret	fac492ed	2	1.758	1.439	0.349	0.475	fret.17
+fret:Comic Sans MS	Fret	424fc8ab	4	1.680	1.429	0.466	0.512	fret.18
+fret:Comic Sans MS	Fret	1e89db14	3	1.706	1.465	0.441	0.502	fret.19
+fret:Comic Sans MS	Fret	9ae89787	3	2.012	1.412	0.383	0.559	fret.20
+fret:Comic Sans MS	Fret	23d5dafe	2	1.677	1.384	0.504	0.569	fret.21
+fret:Comic Sans MS	Fret	3637efd9	2	1.944	1.363	0.502	0.601	fret.22
+fret:Comic Sans MS	Fret	fa05da13	2	1.927	1.402	0.488	0.546	fret.23
+fret:Comic Sans MS	Fret	99616606	3	2.021	1.405	0.387	0.604	fret.24
+fret:Comic Sans MS|bold	Fret	0f79bcad	2	1.061	1.412	0.498	0.490	fret.0
+fret:Comic Sans MS|bold	Fret	89ba67f6	1	0.641	1.382	0.493	0.540	fret.1
+fret:Comic Sans MS|bold	Fret	22998753	1	0.902	1.363	0.469	0.585	fret.2
+fret:Comic Sans MS|bold	Fret	cc5df658	1	0.901	1.393	0.453	0.498	fret.3
+fret:Comic Sans MS|bold	Fret	6e92cfa5	2	1.082	1.405	0.614	0.556	fret.4
+fret:Comic Sans MS|bold	Fret	ad2f6d00	1	0.981	1.417	0.406	0.412	fret.5
+fret:Comic Sans MS|bold	Fret	bc839beb	2	0.955	1.442	0.514	0.489	fret.6
+fret:Comic Sans MS|bold	Fret	27d1fbe1	1	1.084	1.394	0.458	0.385	fret.7
+fret:Comic Sans MS|bold	Fret	0f9a56b2	3	0.960	1.400	0.531	0.506	fret.8
+fret:Comic Sans MS|bold	Fret	61fa6190	2	0.995	1.445	0.461	0.518	fret.9
+fret:Comic Sans MS|bold	Fret	e6ac7794	3	1.984	1.416	0.450	0.509	fret.10
+fret:Comic Sans MS|bold	Fret	8fc1bed9	2	1.753	1.382	0.498	0.540	fret.11
+fret:Comic Sans MS|bold	Fret	53e83abd	2	1.915	1.384	0.562	0.575	fret.12
+fret:Comic Sans MS|bold	Fret	2296f310	2	1.899	1.422	0.544	0.514	fret.13
+fret:Comic Sans MS|bold	Fret	d5ace9de	3	1.992	1.405	0.484	0.544	fret.14
+fret:Comic Sans MS|bold	Fret	d4576123	2	1.961	1.437	0.543	0.450	fret.15
+fret:Comic Sans MS|bold	Fret	c0b50712	3	1.938	1.445	0.531	0.500	fret.16
+fret:Comic Sans MS|bold	Fret	0720e049	2	2.015	1.439	0.474	0.453	fret.17
+fret:Comic Sans MS|bold	Fret	d00b524b	4	1.937	1.429	0.552	0.518	fret.18
+fret:Comic Sans MS|bold	Fret	1b70bcf5	3	1.946	1.465	0.519	0.519	fret.19
+fret:Comic Sans MS|bold	Fret	e1b13b5e	3	2.083	1.412	0.381	0.549	fret.20
+fret:Comic Sans MS|bold	Fret	68b135e1	2	1.852	1.384	0.420	0.575	fret.21
+fret:Comic Sans MS|bold	Fret	b82b1d74	2	2.015	1.363	0.486	0.585	fret.22
+fret:Comic Sans MS|bold	Fret	480c88f3	2	1.998	1.402	0.469	0.537	fret.23
+fret:Comic Sans MS|bold	Fret	f9aea21f	3	2.092	1.405	0.403	0.574	fret.24
+fret:Comic Sans MS|italic	Fret	bf9ff845	2	1.032	1.411	0.543	0.483	fret.0
+fret:Comic Sans MS|italic	Fret	0c5b7c1f	1	0.621	1.381	0.590	0.532	fret.1
+fret:Comic Sans MS|italic	Fret	bd3c660c	1	0.969	1.362	0.522	0.591	fret.2
+fret:Comic Sans MS|italic	Fret	53f863a1	1	0.929	1.392	0.500	0.473	fret.3
+fret:Comic Sans MS|italic	Fret	350468bd	2	1.014	1.407	0.584	0.593	fret.4
+fret:Comic Sans MS|italic	Fret	7e6eb170	1	1.039	1.424	0.449	0.431	fret.5
+fret:Comic Sans MS|italic	Fret	129be2ad	2	0.897	1.442	0.557	0.486	fret.6
+fret:Comic Sans MS|italic	Fret	f1c5db31	1	1.025	1.393	0.347	0.412	fret.7
+fret:Comic Sans MS|italic	Fret	75877a7a	3	0.938	1.399	0.520	0.509	fret.8
+fret:Comic Sans MS|italic	Fret	ee28e874	2	0.989	1.444	0.464	0.466	fret.9
+fret:Comic Sans MS|italic	Fret	6631d5fe	3	1.829	1.416	0.410	0.506	fret.10
+fret:Comic Sans MS|italic	Fret	3b7e843e	2	1.443	1.381	0.539	0.532	fret.11
+fret:Comic Sans MS|italic	Fret	3f5c77f5	2	1.808	1.383	0.514	0.570	fret.12
+fret:Comic Sans MS|italic	Fret	ac111124	2	1.757	1.421	0.504	0.499	fret.13
+fret:Comic Sans MS|italic	Fret	21b6dbbb	3	1.802	1.407	0.411	0.549	fret.14
+fret:Comic Sans MS|italic	Fret	c95fa360	2	1.856	1.437	0.495	0.466	fret.15
+fret:Comic Sans MS|italic	Fret	8962b835	3	1.759	1.445	0.478	0.498	fret.16
+fret:Comic Sans MS|italic	Fret	1d1ff5e2	2	1.951	1.439	0.388	0.477	fret.17
+fret:Comic Sans MS|italic	Fret	ec870cc1	4	1.761	1.428	0.512	0.517	fret.18
+fret:Comic Sans MS|italic	Fret	bac4067b	3	1.849	1.464	0.456	0.488	fret.19
+fret:Comic Sans MS|italic	Fret	688dece2	3	2.102	1.411	0.411	0.551	fret.20
+fret:Comic Sans MS|italic	Fret	16686bab	2	1.717	1.383	0.531	0.569	fret.21
+fret:Comic Sans MS|italic	Fret	8b0b7b6d	2	2.082	1.363	0.510	0.591	fret.22
+fret:Comic Sans MS|italic	Fret	3afe0d78	2	2.030	1.401	0.502	0.528	fret.23
+fret:Comic Sans MS|italic	Fret	cc1e3d7b	3	2.076	1.407	0.410	0.590	fret.24
+fret:MuseJazz Text	Fret	a81d444b	2	0.909	1.314	0.553	0.425	fret.0
+fret:MuseJazz Text	Fret	4529bc92	1	0.432	1.372	0.692	0.414	fret.1
+fret:MuseJazz Text	Fret	1924b398	1	0.782	1.354	0.483	0.527	fret.2
+fret:MuseJazz Text	Fret	3532e9a4	1	0.659	1.346	0.444	0.422	fret.3
+fret:MuseJazz Text	Fret	8c11af87	2	0.773	1.345	0.490	0.525	fret.4
+fret:MuseJazz Text	Fret	f0f1b6b7	1	0.635	1.339	0.489	0.485	fret.5
+fret:MuseJazz Text	Fret	23a6665d	2	0.746	1.393	0.560	0.493	fret.6
+fret:MuseJazz Text	Fret	bd318108	1	0.753	1.303	0.492	0.302	fret.7
+fret:MuseJazz Text	Fret	606fbf63	3	0.611	1.350	0.501	0.478	fret.8
+fret:MuseJazz Text	Fret	d0424637	2	0.671	1.305	0.552	0.453	fret.9
+fret:MuseJazz Text	Fret	991dbc2d	3	1.411	1.375	0.496	0.434	fret.10
+fret:MuseJazz Text	Fret	f16f2d6a	2	0.916	1.372	0.590	0.414	fret.11
+fret:MuseJazz Text	Fret	7e8c6caf	2	1.293	1.375	0.476	0.478	fret.12
+fret:MuseJazz Text	Fret	96fe83e4	2	1.155	1.381	0.539	0.428	fret.13
+fret:MuseJazz Text	Fret	34b145a7	3	1.291	1.376	0.536	0.494	fret.14
+fret:MuseJazz Text	Fret	df46c9a0	2	1.117	1.372	0.561	0.462	fret.15
+fret:MuseJazz Text	Fret	d06275cb	3	1.242	1.395	0.563	0.469	fret.16
+fret:MuseJazz Text	Fret	7f275b1b	2	1.246	1.372	0.502	0.370	fret.17
+fret:MuseJazz Text	Fret	b90a94ed	4	1.101	1.372	0.566	0.461	fret.18
+fret:MuseJazz Text	Fret	7a71e37c	3	1.180	1.372	0.536	0.452	fret.19
+fret:MuseJazz Text	Fret	0cb1dc4c	3	1.747	1.354	0.509	0.482	fret.20
+fret:MuseJazz Text	Fret	b57a76c3	2	1.251	1.375	0.576	0.478	fret.21
+fret:MuseJazz Text	Fret	fb16ffad	2	1.629	1.354	0.492	0.527	fret.22
+fret:MuseJazz Text	Fret	32a9a581	2	1.491	1.359	0.567	0.464	fret.23
+fret:MuseJazz Text	Fret	32f4401f	3	1.627	1.354	0.559	0.528	fret.24
+fret:MuseJazz Text|bold	Fret	a81d444b	2	0.909	1.314	0.553	0.425	fret.0
+fret:MuseJazz Text|bold	Fret	4529bc92	1	0.432	1.372	0.692	0.414	fret.1
+fret:MuseJazz Text|bold	Fret	1924b398	1	0.782	1.354	0.483	0.527	fret.2
+fret:MuseJazz Text|bold	Fret	3532e9a4	1	0.659	1.346	0.444	0.422	fret.3
+fret:MuseJazz Text|bold	Fret	8c11af87	2	0.773	1.345	0.490	0.525	fret.4
+fret:MuseJazz Text|bold	Fret	f0f1b6b7	1	0.635	1.339	0.489	0.485	fret.5
+fret:MuseJazz Text|bold	Fret	23a6665d	2	0.746	1.393	0.560	0.493	fret.6
+fret:MuseJazz Text|bold	Fret	bd318108	1	0.753	1.303	0.492	0.302	fret.7
+fret:MuseJazz Text|bold	Fret	606fbf63	3	0.611	1.350	0.501	0.478	fret.8
+fret:MuseJazz Text|bold	Fret	d0424637	2	0.671	1.305	0.552	0.453	fret.9
+fret:MuseJazz Text|bold	Fret	991dbc2d	3	1.411	1.375	0.496	0.434	fret.10
+fret:MuseJazz Text|bold	Fret	f16f2d6a	2	0.916	1.372	0.590	0.414	fret.11
+fret:MuseJazz Text|bold	Fret	7e8c6caf	2	1.293	1.375	0.476	0.478	fret.12
+fret:MuseJazz Text|bold	Fret	96fe83e4	2	1.155	1.381	0.539	0.428	fret.13
+fret:MuseJazz Text|bold	Fret	34b145a7	3	1.291	1.376	0.536	0.494	fret.14
+fret:MuseJazz Text|bold	Fret	df46c9a0	2	1.117	1.372	0.561	0.462	fret.15
+fret:MuseJazz Text|bold	Fret	d06275cb	3	1.242	1.395	0.563	0.469	fret.16
+fret:MuseJazz Text|bold	Fret	7f275b1b	2	1.246	1.372	0.502	0.370	fret.17
+fret:MuseJazz Text|bold	Fret	b90a94ed	4	1.101	1.372	0.566	0.461	fret.18
+fret:MuseJazz Text|bold	Fret	7a71e37c	3	1.180	1.372	0.536	0.452	fret.19
+fret:MuseJazz Text|bold	Fret	0cb1dc4c	3	1.747	1.354	0.509	0.482	fret.20
+fret:MuseJazz Text|bold	Fret	b57a76c3	2	1.251	1.375	0.576	0.478	fret.21
+fret:MuseJazz Text|bold	Fret	fb16ffad	2	1.629	1.354	0.492	0.527	fret.22
+fret:MuseJazz Text|bold	Fret	32a9a581	2	1.491	1.359	0.567	0.464	fret.23
+fret:MuseJazz Text|bold	Fret	32f4401f	3	1.627	1.354	0.559	0.528	fret.24
+fret:MuseJazz Text|italic	Fret	a81d444b	2	1.008	1.314	0.565	0.425	fret.0
+fret:MuseJazz Text|italic	Fret	4529bc92	1	0.522	1.372	0.565	0.414	fret.1
+fret:MuseJazz Text|italic	Fret	1924b398	1	0.918	1.354	0.518	0.527	fret.2
+fret:MuseJazz Text|italic	Fret	3532e9a4	1	0.850	1.346	0.451	0.422	fret.3
+fret:MuseJazz Text|italic	Fret	8c11af87	2	0.823	1.345	0.509	0.525	fret.4
+fret:MuseJazz Text|italic	Fret	f0f1b6b7	1	0.878	1.339	0.489	0.485	fret.5
+fret:MuseJazz Text|italic	Fret	23a6665d	2	0.818	1.393	0.599	0.493	fret.6
+fret:MuseJazz Text|italic	Fret	bd318108	1	0.790	1.303	0.430	0.302	fret.7
+fret:MuseJazz Text|italic	Fret	606fbf63	3	0.793	1.350	0.515	0.478	fret.8
+fret:MuseJazz Text|italic	Fret	d0424637	2	0.729	1.305	0.487	0.453	fret.9
+fret:MuseJazz Text|italic	Fret	991dbc2d	3	1.428	1.375	0.483	0.434	fret.10
+fret:MuseJazz Text|italic	Fret	f16f2d6a	2	1.005	1.372	0.534	0.414	fret.11
+fret:MuseJazz Text|italic	Fret	7e8c6caf	2	1.292	1.375	0.459	0.478	fret.12
+fret:MuseJazz Text|italic	Fret	96fe83e4	2	1.244	1.381	0.493	0.428	fret.13
+fret:MuseJazz Text|italic	Fret	34b145a7	3	1.261	1.376	0.526	0.494	fret.14
+fret:MuseJazz Text|italic	Fret	df46c9a0	2	1.216	1.372	0.501	0.462	fret.15
+fret:MuseJazz Text|italic	Fret	d06275cb	3	1.218	1.395	0.560	0.469	fret.16
+fret:MuseJazz Text|italic	Fret	7f275b1b	2	1.332	1.372	0.476	0.370	fret.17
+fret:MuseJazz Text|italic	Fret	b90a94ed	4	1.155	1.372	0.524	0.461	fret.18
+fret:MuseJazz Text|italic	Fret	7a71e37c	3	1.230	1.372	0.502	0.452	fret.19
+fret:MuseJazz Text|italic	Fret	0cb1dc4c	3	1.900	1.354	0.526	0.482	fret.20
+fret:MuseJazz Text|italic	Fret	b57a76c3	2	1.478	1.375	0.565	0.478	fret.21
+fret:MuseJazz Text|italic	Fret	fb16ffad	2	1.765	1.354	0.509	0.527	fret.22
+fret:MuseJazz Text|italic	Fret	32a9a581	2	1.717	1.359	0.560	0.464	fret.23
+fret:MuseJazz Text|italic	Fret	32f4401f	3	1.733	1.354	0.581	0.528	fret.24
+fret:Petaluma Text	Fret	a81d444b	2	0.909	1.314	0.553	0.425	fret.0
+fret:Petaluma Text	Fret	4529bc92	1	0.432	1.372	0.692	0.414	fret.1
+fret:Petaluma Text	Fret	1924b398	1	0.782	1.354	0.483	0.527	fret.2
+fret:Petaluma Text	Fret	3532e9a4	1	0.659	1.346	0.444	0.422	fret.3
+fret:Petaluma Text	Fret	8c11af87	2	0.773	1.345	0.490	0.525	fret.4
+fret:Petaluma Text	Fret	f0f1b6b7	1	0.635	1.339	0.489	0.485	fret.5
+fret:Petaluma Text	Fret	23a6665d	2	0.746	1.393	0.560	0.493	fret.6
+fret:Petaluma Text	Fret	bd318108	1	0.753	1.303	0.492	0.302	fret.7
+fret:Petaluma Text	Fret	606fbf63	3	0.611	1.350	0.501	0.478	fret.8
+fret:Petaluma Text	Fret	d0424637	2	0.671	1.305	0.552	0.453	fret.9
+fret:Petaluma Text	Fret	991dbc2d	3	1.411	1.375	0.496	0.434	fret.10
+fret:Petaluma Text	Fret	f16f2d6a	2	0.916	1.372	0.590	0.414	fret.11
+fret:Petaluma Text	Fret	7e8c6caf	2	1.293	1.375	0.476	0.478	fret.12
+fret:Petaluma Text	Fret	96fe83e4	2	1.155	1.381	0.539	0.428	fret.13
+fret:Petaluma Text	Fret	34b145a7	3	1.291	1.376	0.536	0.494	fret.14
+fret:Petaluma Text	Fret	df46c9a0	2	1.117	1.372	0.561	0.462	fret.15
+fret:Petaluma Text	Fret	d06275cb	3	1.242	1.395	0.563	0.469	fret.16
+fret:Petaluma Text	Fret	7f275b1b	2	1.246	1.372	0.502	0.370	fret.17
+fret:Petaluma Text	Fret	b90a94ed	4	1.101	1.372	0.566	0.461	fret.18
+fret:Petaluma Text	Fret	7a71e37c	3	1.180	1.372	0.536	0.452	fret.19
+fret:Petaluma Text	Fret	0cb1dc4c	3	1.747	1.354	0.509	0.482	fret.20
+fret:Petaluma Text	Fret	b57a76c3	2	1.251	1.375	0.576	0.478	fret.21
+fret:Petaluma Text	Fret	fb16ffad	2	1.629	1.354	0.492	0.527	fret.22
+fret:Petaluma Text	Fret	32a9a581	2	1.491	1.359	0.567	0.464	fret.23
+fret:Petaluma Text	Fret	32f4401f	3	1.627	1.354	0.559	0.528	fret.24
+fret:Petaluma Text|bold	Fret	a81d444b	2	0.909	1.314	0.553	0.425	fret.0
+fret:Petaluma Text|bold	Fret	4529bc92	1	0.432	1.372	0.692	0.414	fret.1
+fret:Petaluma Text|bold	Fret	1924b398	1	0.782	1.354	0.483	0.527	fret.2
+fret:Petaluma Text|bold	Fret	3532e9a4	1	0.659	1.346	0.444	0.422	fret.3
+fret:Petaluma Text|bold	Fret	8c11af87	2	0.773	1.345	0.490	0.525	fret.4
+fret:Petaluma Text|bold	Fret	f0f1b6b7	1	0.635	1.339	0.489	0.485	fret.5
+fret:Petaluma Text|bold	Fret	23a6665d	2	0.746	1.393	0.560	0.493	fret.6
+fret:Petaluma Text|bold	Fret	bd318108	1	0.753	1.303	0.492	0.302	fret.7
+fret:Petaluma Text|bold	Fret	606fbf63	3	0.611	1.350	0.501	0.478	fret.8
+fret:Petaluma Text|bold	Fret	d0424637	2	0.671	1.305	0.552	0.453	fret.9
+fret:Petaluma Text|bold	Fret	991dbc2d	3	1.411	1.375	0.496	0.434	fret.10
+fret:Petaluma Text|bold	Fret	f16f2d6a	2	0.916	1.372	0.590	0.414	fret.11
+fret:Petaluma Text|bold	Fret	7e8c6caf	2	1.293	1.375	0.476	0.478	fret.12
+fret:Petaluma Text|bold	Fret	96fe83e4	2	1.155	1.381	0.539	0.428	fret.13
+fret:Petaluma Text|bold	Fret	34b145a7	3	1.291	1.376	0.536	0.494	fret.14
+fret:Petaluma Text|bold	Fret	df46c9a0	2	1.117	1.372	0.561	0.462	fret.15
+fret:Petaluma Text|bold	Fret	d06275cb	3	1.242	1.395	0.563	0.469	fret.16
+fret:Petaluma Text|bold	Fret	7f275b1b	2	1.246	1.372	0.502	0.370	fret.17
+fret:Petaluma Text|bold	Fret	b90a94ed	4	1.101	1.372	0.566	0.461	fret.18
+fret:Petaluma Text|bold	Fret	7a71e37c	3	1.180	1.372	0.536	0.452	fret.19
+fret:Petaluma Text|bold	Fret	0cb1dc4c	3	1.747	1.354	0.509	0.482	fret.20
+fret:Petaluma Text|bold	Fret	b57a76c3	2	1.251	1.375	0.576	0.478	fret.21
+fret:Petaluma Text|bold	Fret	fb16ffad	2	1.629	1.354	0.492	0.527	fret.22
+fret:Petaluma Text|bold	Fret	32a9a581	2	1.491	1.359	0.567	0.464	fret.23
+fret:Petaluma Text|bold	Fret	32f4401f	3	1.627	1.354	0.559	0.528	fret.24
+fret:Petaluma Text|italic	Fret	a81d444b	2	1.008	1.314	0.565	0.425	fret.0
+fret:Petaluma Text|italic	Fret	4529bc92	1	0.522	1.372	0.565	0.414	fret.1
+fret:Petaluma Text|italic	Fret	1924b398	1	0.918	1.354	0.518	0.527	fret.2
+fret:Petaluma Text|italic	Fret	3532e9a4	1	0.850	1.346	0.451	0.422	fret.3
+fret:Petaluma Text|italic	Fret	8c11af87	2	0.823	1.345	0.509	0.525	fret.4
+fret:Petaluma Text|italic	Fret	f0f1b6b7	1	0.878	1.339	0.489	0.485	fret.5
+fret:Petaluma Text|italic	Fret	23a6665d	2	0.818	1.393	0.599	0.493	fret.6
+fret:Petaluma Text|italic	Fret	bd318108	1	0.790	1.303	0.430	0.302	fret.7
+fret:Petaluma Text|italic	Fret	606fbf63	3	0.793	1.350	0.515	0.478	fret.8
+fret:Petaluma Text|italic	Fret	d0424637	2	0.729	1.305	0.487	0.453	fret.9
+fret:Petaluma Text|italic	Fret	991dbc2d	3	1.428	1.375	0.483	0.434	fret.10
+fret:Petaluma Text|italic	Fret	f16f2d6a	2	1.005	1.372	0.534	0.414	fret.11
+fret:Petaluma Text|italic	Fret	7e8c6caf	2	1.292	1.375	0.459	0.478	fret.12
+fret:Petaluma Text|italic	Fret	96fe83e4	2	1.244	1.381	0.493	0.428	fret.13
+fret:Petaluma Text|italic	Fret	34b145a7	3	1.261	1.376	0.526	0.494	fret.14
+fret:Petaluma Text|italic	Fret	df46c9a0	2	1.216	1.372	0.501	0.462	fret.15
+fret:Petaluma Text|italic	Fret	d06275cb	3	1.218	1.395	0.560	0.469	fret.16
+fret:Petaluma Text|italic	Fret	7f275b1b	2	1.332	1.372	0.476	0.370	fret.17
+fret:Petaluma Text|italic	Fret	b90a94ed	4	1.155	1.372	0.524	0.461	fret.18
+fret:Petaluma Text|italic	Fret	7a71e37c	3	1.230	1.372	0.502	0.452	fret.19
+fret:Petaluma Text|italic	Fret	0cb1dc4c	3	1.900	1.354	0.526	0.482	fret.20
+fret:Petaluma Text|italic	Fret	b57a76c3	2	1.478	1.375	0.565	0.478	fret.21
+fret:Petaluma Text|italic	Fret	fb16ffad	2	1.765	1.354	0.509	0.527	fret.22
+fret:Petaluma Text|italic	Fret	32a9a581	2	1.717	1.359	0.560	0.464	fret.23
+fret:Petaluma Text|italic	Fret	32f4401f	3	1.733	1.354	0.581	0.528	fret.24
+fret:Edwin	Fret	5dd1bbc2	2	0.856	1.304	0.525	0.467	fret.0
+fret:Edwin	Fret	7738e8b8	1	0.718	1.277	0.474	0.570	fret.1
+fret:Edwin	Fret	39d8a879	1	0.853	1.277	0.457	0.415	fret.2
+fret:Edwin	Fret	64478dae	1	0.827	1.304	0.422	0.484	fret.3
+fret:Edwin	Fret	d3cbeea9	2	0.905	1.277	0.657	0.722	fret.4
+fret:Edwin	Fret	9432c0e7	1	0.829	1.304	0.440	0.474	fret.5
+fret:Edwin	Fret	89cb7432	2	0.860	1.304	0.577	0.409	fret.6
+fret:Edwin	Fret	37ea91c6	1	0.815	1.303	0.521	0.367	fret.7
+fret:Edwin	Fret	136d59f7	3	0.856	1.304	0.507	0.524	fret.8
+fret:Edwin	Fret	d49eaa07	2	0.860	1.304	0.438	0.583	fret.9
+fret:Edwin	Fret	0ce9ad41	3	1.755	1.304	0.550	0.502	fret.10
+fret:Edwin	Fret	f1cef929	2	1.722	1.277	0.489	0.570	fret.11
+fret:Edwin	Fret	6e0fe196	2	1.739	1.277	0.558	0.466	fret.12
+fret:Edwin	Fret	534da6b2	2	1.726	1.304	0.599	0.502	fret.13
+fret:Edwin	Fret	5a14e474	3	1.778	1.277	0.485	0.640	fret.14
+fret:Edwin	Fret	f6094d31	2	1.733	1.304	0.598	0.495	fret.15
+fret:Edwin	Fret	802168af	3	1.759	1.304	0.601	0.457	fret.16
+fret:Edwin	Fret	0f0dde46	2	1.744	1.303	0.549	0.442	fret.17
+fret:Edwin	Fret	b7646bc4	4	1.753	1.304	0.599	0.533	fret.18
+fret:Edwin	Fret	46ba9c8b	3	1.753	1.304	0.561	0.575	fret.19
+fret:Edwin	Fret	17a75f13	3	1.873	1.304	0.462	0.433	fret.20
+fret:Edwin	Fret	d1eb1fd7	2	1.840	1.277	0.402	0.466	fret.21
+fret:Edwin	Fret	039eea12	2	1.857	1.277	0.480	0.415	fret.22
+fret:Edwin	Fret	30c11911	2	1.844	1.304	0.534	0.454	fret.23
+fret:Edwin	Fret	f83b21f3	3	1.897	1.277	0.392	0.505	fret.24
+fret:Edwin|bold	Fret	5dd1bbc2	2	0.941	1.310	0.522	0.468	fret.0
+fret:Edwin|bold	Fret	c7030e77	1	0.740	1.285	0.445	0.626	fret.1
+fret:Edwin|bold	Fret	3429762f	1	0.929	1.292	0.504	0.486	fret.2
+fret:Edwin|bold	Fret	cc74f296	1	0.918	1.310	0.430	0.475	fret.3
+fret:Edwin|bold	Fret	892c40a7	2	0.956	1.285	0.666	0.721	fret.4
+fret:Edwin|bold	Fret	c0721dff	1	0.914	1.310	0.430	0.462	fret.5
+fret:Edwin|bold	Fret	dcc673c7	2	0.943	1.310	0.529	0.451	fret.6
+fret:Edwin|bold	Fret	b6f06cb0	1	0.909	1.310	0.457	0.421	fret.7
+fret:Edwin|bold	Fret	2a329656	3	0.942	1.310	0.485	0.493	fret.8
+fret:Edwin|bold	Fret	89cb7432	2	0.943	1.310	0.444	0.546	fret.9
+fret:Edwin|bold	Fret	f3ea9c65	3	1.880	1.310	0.556	0.519	fret.10
+fret:Edwin|bold	Fret	53dcb125	2	1.780	1.285	0.477	0.626	fret.11
+fret:Edwin|bold	Fret	4d6d79b8	2	1.853	1.292	0.587	0.525	fret.12
+fret:Edwin|bold	Fret	068119a3	2	1.851	1.310	0.609	0.503	fret.13
+fret:Edwin|bold	Fret	1c2acf2b	3	1.880	1.285	0.500	0.673	fret.14
+fret:Edwin|bold	Fret	28a8a910	2	1.860	1.310	0.597	0.496	fret.15
+fret:Edwin|bold	Fret	100ad9e8	3	1.886	1.310	0.605	0.495	fret.16
+fret:Edwin|bold	Fret	367514f5	2	1.880	1.310	0.526	0.493	fret.17
+fret:Edwin|bold	Fret	d58899af	4	1.880	1.310	0.590	0.526	fret.18
+fret:Edwin|bold	Fret	21127f3e	3	1.878	1.310	0.561	0.566	fret.19
+fret:Edwin|bold	Fret	1e5692cc	3	1.996	1.310	0.465	0.474	fret.20
+fret:Edwin|bold	Fret	e3d1355e	2	1.897	1.292	0.400	0.525	fret.21
+fret:Edwin|bold	Fret	003fbda4	2	1.969	1.292	0.502	0.486	fret.22
+fret:Edwin|bold	Fret	fecdc79a	2	1.967	1.310	0.542	0.476	fret.23
+fret:Edwin|bold	Fret	90bae1d5	3	1.996	1.292	0.406	0.551	fret.24
+fret:Edwin|italic	Fret	f75a05f7	2	0.904	1.304	0.507	0.482	fret.0
+fret:Edwin|italic	Fret	1964d09d	1	0.742	1.285	0.545	0.577	fret.1
+fret:Edwin|italic	Fret	8ff6f604	1	0.985	1.277	0.539	0.414	fret.2
+fret:Edwin|italic	Fret	0c2c71f4	1	0.921	1.304	0.480	0.477	fret.3
+fret:Edwin|italic	Fret	ff20ee3f	2	0.943	1.285	0.616	0.796	fret.4
+fret:Edwin|italic	Fret	e08960dc	1	0.973	1.304	0.482	0.467	fret.5
+fret:Edwin|italic	Fret	89cb7432	2	0.927	1.304	0.573	0.417	fret.6
+fret:Edwin|italic	Fret	8e65d6a9	1	0.893	1.304	0.403	0.429	fret.7
+fret:Edwin|italic	Fret	31bdb3f5	3	0.941	1.304	0.529	0.497	fret.8
+fret:Edwin|italic	Fret	7b0d7b77	2	0.929	1.304	0.415	0.574	fret.9
+fret:Edwin|italic	Fret	2ee15d8f	3	1.869	1.312	0.520	0.520	fret.10
+fret:Edwin|italic	Fret	d66deed1	2	1.746	1.285	0.519	0.577	fret.11
+fret:Edwin|italic	Fret	e2aaa57c	2	1.835	1.285	0.562	0.474	fret.12
+fret:Edwin|italic	Fret	e5679064	2	1.831	1.312	0.619	0.500	fret.13
+fret:Edwin|italic	Fret	794d97ec	3	1.842	1.285	0.442	0.660	fret.14
+fret:Edwin|italic	Fret	9890e44b	2	1.893	1.312	0.595	0.495	fret.15
+fret:Edwin|italic	Fret	5557bd28	3	1.905	1.312	0.606	0.466	fret.16
+fret:Edwin|italic	Fret	9b4897af	2	1.931	1.312	0.492	0.492	fret.17
+fret:Edwin|italic	Fret	fc41fd00	4	1.869	1.312	0.589	0.521	fret.18
+fret:Edwin|italic	Fret	058b4d65	3	1.855	1.312	0.544	0.573	fret.19
+fret:Edwin|italic	Fret	bf2dcb21	3	2.024	1.304	0.475	0.437	fret.20
+fret:Edwin|italic	Fret	f006f6f7	2	1.900	1.285	0.473	0.474	fret.21
+fret:Edwin|italic	Fret	477885bf	2	1.989	1.277	0.519	0.414	fret.22
+fret:Edwin|italic	Fret	386f3d99	2	1.985	1.304	0.587	0.452	fret.23
+fret:Edwin|italic	Fret	acaeb071	3	1.996	1.285	0.407	0.514	fret.24
+fret:Leland Text	Fret	9402258f	2	0.844	1.373	0.502	0.501	fret.0
+fret:Leland Text	Fret	eb219486	1	0.643	1.323	0.348	0.292	fret.1
+fret:Leland Text	Fret	fc29d7cc	1	0.814	1.346	0.501	0.341	fret.2
+fret:Leland Text	Fret	4a133087	1	0.802	1.374	0.595	0.470	fret.3
+fret:Leland Text	Fret	0307fb3b	2	0.910	1.319	0.645	0.544	fret.4
+fret:Leland Text	Fret	6f74d164	1	0.786	1.347	0.537	0.678	fret.5
+fret:Leland Text	Fret	540da302	2	0.856	1.371	0.513	0.529	fret.6
+fret:Leland Text	Fret	a5cb1553	1	0.837	1.319	0.528	0.317	fret.7
+fret:Leland Text	Fret	c377bb8a	3	0.859	1.379	0.484	0.503	fret.8
+fret:Leland Text	Fret	121b97b8	2	0.856	1.371	0.489	0.472	fret.9
+fret:Leland Text	Fret	e7ef147c	3	1.709	1.373	0.684	0.478	fret.10
+fret:Leland Text	Fret	c5574246	2	1.635	1.323	0.440	0.292	fret.11
+fret:Leland Text	Fret	f1102fa8	2	1.702	1.346	0.686	0.337	fret.12
+fret:Leland Text	Fret	a45455bc	2	1.679	1.374	0.757	0.457	fret.13
+fret:Leland Text	Fret	f3eba366	3	1.737	1.323	0.362	0.378	fret.14
+fret:Leland Text	Fret	5909a269	2	1.687	1.351	0.717	0.638	fret.15
+fret:Leland Text	Fret	e8097448	3	1.723	1.371	0.711	0.511	fret.16
+fret:Leland Text	Fret	e62e902d	2	1.717	1.323	0.261	0.298	fret.17
+fret:Leland Text	Fret	404e40a7	4	1.717	1.379	0.696	0.488	fret.18
+fret:Leland Text	Fret	b583592b	3	1.707	1.371	0.698	0.459	fret.19
+fret:Leland Text	Fret	6c61c948	3	1.812	1.374	0.505	0.421	fret.20
+fret:Leland Text	Fret	3713937a	2	1.739	1.346	0.297	0.337	fret.21
+fret:Leland Text	Fret	3beadccd	2	1.806	1.346	0.500	0.341	fret.22
+fret:Leland Text	Fret	99b62d4a	2	1.783	1.374	0.601	0.420	fret.23
+fret:Leland Text	Fret	42ff8b64	3	1.841	1.346	0.261	0.355	fret.24
+fret:Leland Text|bold	Fret	9402258f	2	0.844	1.373	0.502	0.501	fret.0
+fret:Leland Text|bold	Fret	eb219486	1	0.643	1.323	0.348	0.292	fret.1
+fret:Leland Text|bold	Fret	fc29d7cc	1	0.814	1.346	0.501	0.341	fret.2
+fret:Leland Text|bold	Fret	4a133087	1	0.802	1.374	0.595	0.470	fret.3
+fret:Leland Text|bold	Fret	0307fb3b	2	0.910	1.319	0.645	0.544	fret.4
+fret:Leland Text|bold	Fret	6f74d164	1	0.786	1.347	0.537	0.678	fret.5
+fret:Leland Text|bold	Fret	540da302	2	0.856	1.371	0.513	0.529	fret.6
+fret:Leland Text|bold	Fret	a5cb1553	1	0.837	1.319	0.528	0.317	fret.7
+fret:Leland Text|bold	Fret	c377bb8a	3	0.859	1.379	0.484	0.503	fret.8
+fret:Leland Text|bold	Fret	121b97b8	2	0.856	1.371	0.489	0.472	fret.9
+fret:Leland Text|bold	Fret	e7ef147c	3	1.709	1.373	0.684	0.478	fret.10
+fret:Leland Text|bold	Fret	c5574246	2	1.635	1.323	0.440	0.292	fret.11
+fret:Leland Text|bold	Fret	f1102fa8	2	1.702	1.346	0.686	0.337	fret.12
+fret:Leland Text|bold	Fret	a45455bc	2	1.679	1.374	0.757	0.457	fret.13
+fret:Leland Text|bold	Fret	f3eba366	3	1.737	1.323	0.362	0.378	fret.14
+fret:Leland Text|bold	Fret	5909a269	2	1.687	1.351	0.717	0.638	fret.15
+fret:Leland Text|bold	Fret	e8097448	3	1.723	1.371	0.711	0.511	fret.16
+fret:Leland Text|bold	Fret	e62e902d	2	1.717	1.323	0.261	0.298	fret.17
+fret:Leland Text|bold	Fret	404e40a7	4	1.717	1.379	0.696	0.488	fret.18
+fret:Leland Text|bold	Fret	b583592b	3	1.707	1.371	0.698	0.459	fret.19
+fret:Leland Text|bold	Fret	6c61c948	3	1.812	1.374	0.505	0.421	fret.20
+fret:Leland Text|bold	Fret	3713937a	2	1.739	1.346	0.297	0.337	fret.21
+fret:Leland Text|bold	Fret	3beadccd	2	1.806	1.346	0.500	0.341	fret.22
+fret:Leland Text|bold	Fret	99b62d4a	2	1.783	1.374	0.601	0.420	fret.23
+fret:Leland Text|bold	Fret	42ff8b64	3	1.841	1.346	0.261	0.355	fret.24
+fret:Leland Text|italic	Fret	9402258f	2	0.921	1.373	0.502	0.501	fret.0
+fret:Leland Text|italic	Fret	eb219486	1	0.691	1.323	0.612	0.292	fret.1
+fret:Leland Text|italic	Fret	fc29d7cc	1	0.979	1.346	0.609	0.341	fret.2
+fret:Leland Text|italic	Fret	4a133087	1	0.992	1.374	0.620	0.470	fret.3
+fret:Leland Text|italic	Fret	0307fb3b	2	0.940	1.319	0.658	0.544	fret.4
+fret:Leland Text|italic	Fret	6f74d164	1	1.048	1.347	0.475	0.678	fret.5
+fret:Leland Text|italic	Fret	540da302	2	0.927	1.371	0.512	0.529	fret.6
+fret:Leland Text|italic	Fret	a5cb1553	1	1.039	1.319	0.535	0.317	fret.7
+fret:Leland Text|italic	Fret	c377bb8a	3	0.982	1.379	0.496	0.503	fret.8
+fret:Leland Text|italic	Fret	121b97b8	2	0.929	1.371	0.489	0.472	fret.9
+fret:Leland Text|italic	Fret	e7ef147c	3	1.887	1.373	0.697	0.478	fret.10
+fret:Leland Text|italic	Fret	c5574246	2	1.682	1.323	0.546	0.292	fret.11
+fret:Leland Text|italic	Fret	f1102fa8	2	1.867	1.346	0.727	0.337	fret.12
+fret:Leland Text|italic	Fret	a45455bc	2	1.881	1.374	0.757	0.457	fret.13
+fret:Leland Text|italic	Fret	f3eba366	3	1.864	1.323	0.431	0.378	fret.14
+fret:Leland Text|italic	Fret	5909a269	2	1.960	1.351	0.667	0.638	fret.15
+fret:Leland Text|italic	Fret	e8097448	3	1.890	1.371	0.720	0.511	fret.16
+fret:Leland Text|italic	Fret	e62e902d	2	1.997	1.323	0.324	0.298	fret.17
+fret:Leland Text|italic	Fret	404e40a7	4	1.907	1.379	0.702	0.488	fret.18
+fret:Leland Text|italic	Fret	b583592b	3	1.892	1.371	0.710	0.459	fret.19
+fret:Leland Text|italic	Fret	6c61c948	3	1.991	1.374	0.542	0.421	fret.20
+fret:Leland Text|italic	Fret	3713937a	2	1.786	1.346	0.396	0.337	fret.21
+fret:Leland Text|italic	Fret	3beadccd	2	1.971	1.346	0.554	0.341	fret.22
+fret:Leland Text|italic	Fret	99b62d4a	2	1.984	1.374	0.622	0.420	fret.23
+fret:Leland Text|italic	Fret	42ff8b64	3	1.967	1.346	0.338	0.355	fret.24
+fret:Finale Broadway Text	Fret	5399e1f7	2	0.900	1.284	0.583	0.338	fret.0
+fret:Finale Broadway Text	Fret	2df0c95a	1	0.599	1.277	0.474	0.547	fret.1
+fret:Finale Broadway Text	Fret	e720a9f6	1	0.829	1.283	0.510	0.566	fret.2
+fret:Finale Broadway Text	Fret	11e6a743	1	0.811	1.281	0.483	0.444	fret.3
+fret:Finale Broadway Text	Fret	6a02953d	2	0.856	1.279	0.574	0.610	fret.4
+fret:Finale Broadway Text	Fret	8e8cde26	1	0.814	1.277	0.397	0.435	fret.5
+fret:Finale Broadway Text	Fret	d433c4e5	2	0.780	1.324	0.536	0.445	fret.6
+fret:Finale Broadway Text	Fret	87f93f8e	1	0.913	1.279	0.481	0.415	fret.7
+fret:Finale Broadway Text	Fret	34b40c64	3	0.856	1.290	0.503	0.497	fret.8
+fret:Finale Broadway Text	Fret	c4cdd09a	2	0.816	1.285	0.456	0.515	fret.9
+fret:Finale Broadway Text	Fret	42e15082	3	1.520	1.284	0.434	0.456	fret.10
+fret:Finale Broadway Text	Fret	7451dc4b	2	1.240	1.277	0.487	0.547	fret.11
+fret:Finale Broadway Text	Fret	da7b23ae	2	1.523	1.283	0.491	0.557	fret.12
+fret:Finale Broadway Text	Fret	b00964a5	2	1.489	1.281	0.479	0.491	fret.13
+fret:Finale Broadway Text	Fret	1333c325	3	1.486	1.279	0.513	0.582	fret.14
+fret:Finale Broadway Text	Fret	8b65b798	2	1.490	1.277	0.482	0.479	fret.15
+fret:Finale Broadway Text	Fret	6792498b	3	1.408	1.324	0.458	0.503	fret.16
+fret:Finale Broadway Text	Fret	67fa064f	2	1.476	1.279	0.420	0.485	fret.17
+fret:Finale Broadway Text	Fret	527cc42b	4	1.505	1.290	0.473	0.520	fret.18
+fret:Finale Broadway Text	Fret	38b363a0	3	1.409	1.285	0.450	0.530	fret.19
+fret:Finale Broadway Text	Fret	4633147e	3	1.867	1.284	0.444	0.479	fret.20
+fret:Finale Broadway Text	Fret	993c526f	2	1.598	1.283	0.503	0.557	fret.21
+fret:Finale Broadway Text	Fret	199d84f6	2	1.809	1.283	0.505	0.566	fret.22
+fret:Finale Broadway Text	Fret	f5c5f9ba	2	1.787	1.283	0.495	0.507	fret.23
+fret:Finale Broadway Text	Fret	e1cb7a12	3	1.796	1.283	0.524	0.589	fret.24
+fret:Finale Broadway Text|bold	Fret	5399e1f7	2	0.900	1.284	0.583	0.338	fret.0
+fret:Finale Broadway Text|bold	Fret	2df0c95a	1	0.599	1.277	0.474	0.547	fret.1
+fret:Finale Broadway Text|bold	Fret	e720a9f6	1	0.829	1.283	0.510	0.566	fret.2
+fret:Finale Broadway Text|bold	Fret	11e6a743	1	0.811	1.281	0.483	0.444	fret.3
+fret:Finale Broadway Text|bold	Fret	6a02953d	2	0.856	1.279	0.574	0.610	fret.4
+fret:Finale Broadway Text|bold	Fret	8e8cde26	1	0.814	1.277	0.397	0.435	fret.5
+fret:Finale Broadway Text|bold	Fret	d433c4e5	2	0.780	1.324	0.536	0.445	fret.6
+fret:Finale Broadway Text|bold	Fret	87f93f8e	1	0.913	1.279	0.481	0.415	fret.7
+fret:Finale Broadway Text|bold	Fret	34b40c64	3	0.856	1.290	0.503	0.497	fret.8
+fret:Finale Broadway Text|bold	Fret	c4cdd09a	2	0.816	1.285	0.456	0.515	fret.9
+fret:Finale Broadway Text|bold	Fret	42e15082	3	1.520	1.284	0.434	0.456	fret.10
+fret:Finale Broadway Text|bold	Fret	7451dc4b	2	1.240	1.277	0.487	0.547	fret.11
+fret:Finale Broadway Text|bold	Fret	da7b23ae	2	1.523	1.283	0.491	0.557	fret.12
+fret:Finale Broadway Text|bold	Fret	b00964a5	2	1.489	1.281	0.479	0.491	fret.13
+fret:Finale Broadway Text|bold	Fret	1333c325	3	1.486	1.279	0.513	0.582	fret.14
+fret:Finale Broadway Text|bold	Fret	8b65b798	2	1.490	1.277	0.482	0.479	fret.15
+fret:Finale Broadway Text|bold	Fret	6792498b	3	1.408	1.324	0.458	0.503	fret.16
+fret:Finale Broadway Text|bold	Fret	67fa064f	2	1.476	1.279	0.420	0.485	fret.17
+fret:Finale Broadway Text|bold	Fret	527cc42b	4	1.505	1.290	0.473	0.520	fret.18
+fret:Finale Broadway Text|bold	Fret	38b363a0	3	1.409	1.285	0.450	0.530	fret.19
+fret:Finale Broadway Text|bold	Fret	4633147e	3	1.867	1.284	0.444	0.479	fret.20
+fret:Finale Broadway Text|bold	Fret	993c526f	2	1.598	1.283	0.503	0.557	fret.21
+fret:Finale Broadway Text|bold	Fret	199d84f6	2	1.809	1.283	0.505	0.566	fret.22
+fret:Finale Broadway Text|bold	Fret	f5c5f9ba	2	1.787	1.283	0.495	0.507	fret.23
+fret:Finale Broadway Text|bold	Fret	e1cb7a12	3	1.796	1.283	0.524	0.589	fret.24
+fret:Finale Broadway Text|italic	Fret	5399e1f7	2	0.943	1.284	0.634	0.338	fret.0
+fret:Finale Broadway Text|italic	Fret	2df0c95a	1	0.606	1.277	0.528	0.547	fret.1
+fret:Finale Broadway Text|italic	Fret	e720a9f6	1	0.999	1.283	0.527	0.566	fret.2
+fret:Finale Broadway Text|italic	Fret	11e6a743	1	0.901	1.281	0.552	0.444	fret.3
+fret:Finale Broadway Text|italic	Fret	6a02953d	2	0.865	1.279	0.591	0.610	fret.4
+fret:Finale Broadway Text|italic	Fret	8e8cde26	1	0.998	1.277	0.431	0.435	fret.5
+fret:Finale Broadway Text|italic	Fret	d433c4e5	2	0.810	1.324	0.607	0.445	fret.6
+fret:Finale Broadway Text|italic	Fret	87f93f8e	1	0.929	1.279	0.389	0.415	fret.7
+fret:Finale Broadway Text|italic	Fret	34b40c64	3	0.926	1.290	0.540	0.497	fret.8
+fret:Finale Broadway Text|italic	Fret	c4cdd09a	2	0.815	1.285	0.408	0.515	fret.9
+fret:Finale Broadway Text|italic	Fret	42e15082	3	1.583	1.284	0.456	0.456	fret.10
+fret:Finale Broadway Text|italic	Fret	7451dc4b	2	1.247	1.277	0.514	0.547	fret.11
+fret:Finale Broadway Text|italic	Fret	da7b23ae	2	1.620	1.283	0.483	0.557	fret.12
+fret:Finale Broadway Text|italic	Fret	b00964a5	2	1.538	1.281	0.498	0.491	fret.13
+fret:Finale Broadway Text|italic	Fret	1333c325	3	1.493	1.279	0.528	0.582	fret.14
+fret:Finale Broadway Text|italic	Fret	8b65b798	2	1.633	1.277	0.473	0.479	fret.15
+fret:Finale Broadway Text|italic	Fret	6792498b	3	1.432	1.324	0.486	0.503	fret.16
+fret:Finale Broadway Text|italic	Fret	67fa064f	2	1.641	1.279	0.410	0.485	fret.17
+fret:Finale Broadway Text|italic	Fret	527cc42b	4	1.556	1.290	0.486	0.520	fret.18
+fret:Finale Broadway Text|italic	Fret	38b363a0	3	1.491	1.285	0.452	0.530	fret.19
+fret:Finale Broadway Text|italic	Fret	4633147e	3	2.002	1.284	0.478	0.479	fret.20
+fret:Finale Broadway Text|italic	Fret	993c526f	2	1.678	1.283	0.542	0.557	fret.21
+fret:Finale Broadway Text|italic	Fret	199d84f6	2	1.978	1.283	0.514	0.566	fret.22
+fret:Finale Broadway Text|italic	Fret	f5c5f9ba	2	1.908	1.283	0.527	0.507	fret.23
+fret:Finale Broadway Text|italic	Fret	e1cb7a12	3	1.876	1.283	0.553	0.589	fret.24
+fret:Gabriola	Fret	fa8ef5d5	2	0.608	0.677	0.511	0.486	fret.0
+fret:Gabriola	Fret	8d9492be	1	0.309	0.660	0.736	0.356	fret.1
+fret:Gabriola	Fret	d23fc4b9	1	0.516	0.658	0.508	0.459	fret.2
+fret:Gabriola	Fret	d9bad611	1	0.577	0.977	0.488	0.481	fret.3
+fret:Gabriola	Fret	b73b464d	1	0.683	1.049	0.614	0.483	fret.4
+fret:Gabriola	Fret	38198d20	1	0.573	0.967	0.475	0.539	fret.5
+fret:Gabriola	Fret	7d04fc10	1	0.601	0.979	0.573	0.493	fret.6
+fret:Gabriola	Fret	6a8eff5b	1	0.628	0.959	0.369	0.145	fret.7
+fret:Gabriola	Fret	32dc49f4	3	0.590	0.981	0.516	0.490	fret.8
+fret:Gabriola	Fret	cc0ef9c9	1	0.614	0.979	0.457	0.509	fret.9
+fret:Gabriola	Fret	c45ab3f4	3	1.081	0.677	0.515	0.432	fret.10
+fret:Gabriola	Fret	632ca442	2	0.720	0.660	0.601	0.356	fret.11
+fret:Gabriola	Fret	e6eec9d9	2	0.969	0.667	0.565	0.422	fret.12
+fret:Gabriola	Fret	a41f9170	2	0.961	0.977	0.570	0.418	fret.13
+fret:Gabriola	Fret	9fa5e25d	2	1.098	1.049	0.575	0.422	fret.14
+fret:Gabriola	Fret	277aa18a	2	0.967	0.974	0.542	0.445	fret.15
+fret:Gabriola	Fret	5ea8968b	2	1.085	0.979	0.592	0.512	fret.16
+fret:Gabriola	Fret	1c158ee5	2	1.073	0.972	0.430	0.198	fret.17
+fret:Gabriola	Fret	3b3a74cb	4	1.054	0.981	0.583	0.508	fret.18
+fret:Gabriola	Fret	9bdc8f90	2	1.071	0.979	0.545	0.429	fret.19
+fret:Gabriola	Fret	c9359b11	3	1.220	0.679	0.449	0.463	fret.20
+fret:Gabriola	Fret	849f9a55	2	0.859	0.667	0.512	0.422	fret.21
+fret:Gabriola	Fret	73682eaa	2	1.109	0.658	0.504	0.459	fret.22
+fret:Gabriola	Fret	8c7aaaa0	2	1.112	0.978	0.528	0.410	fret.23
+fret:Gabriola	Fret	0438577f	2	1.249	1.049	0.506	0.422	fret.24
+fret:Gabriola|bold	Fret	fa8ef5d5	2	0.608	0.677	0.511	0.486	fret.0
+fret:Gabriola|bold	Fret	8d9492be	1	0.309	0.660	0.736	0.356	fret.1
+fret:Gabriola|bold	Fret	d23fc4b9	1	0.516	0.658	0.508	0.459	fret.2
+fret:Gabriola|bold	Fret	d9bad611	1	0.577	0.977	0.488	0.481	fret.3
+fret:Gabriola|bold	Fret	b73b464d	1	0.683	1.049	0.614	0.483	fret.4
+fret:Gabriola|bold	Fret	38198d20	1	0.573	0.967	0.475	0.539	fret.5
+fret:Gabriola|bold	Fret	7d04fc10	1	0.601	0.979	0.573	0.493	fret.6
+fret:Gabriola|bold	Fret	6a8eff5b	1	0.628	0.959	0.369	0.145	fret.7
+fret:Gabriola|bold	Fret	32dc49f4	3	0.590	0.981	0.516	0.490	fret.8
+fret:Gabriola|bold	Fret	cc0ef9c9	1	0.614	0.979	0.457	0.509	fret.9
+fret:Gabriola|bold	Fret	c45ab3f4	3	1.081	0.677	0.515	0.432	fret.10
+fret:Gabriola|bold	Fret	632ca442	2	0.720	0.660	0.601	0.356	fret.11
+fret:Gabriola|bold	Fret	e6eec9d9	2	0.969	0.667	0.565	0.422	fret.12
+fret:Gabriola|bold	Fret	a41f9170	2	0.961	0.977	0.570	0.418	fret.13
+fret:Gabriola|bold	Fret	9fa5e25d	2	1.098	1.049	0.575	0.422	fret.14
+fret:Gabriola|bold	Fret	277aa18a	2	0.967	0.974	0.542	0.445	fret.15
+fret:Gabriola|bold	Fret	5ea8968b	2	1.085	0.979	0.592	0.512	fret.16
+fret:Gabriola|bold	Fret	1c158ee5	2	1.073	0.972	0.430	0.198	fret.17
+fret:Gabriola|bold	Fret	3b3a74cb	4	1.054	0.981	0.583	0.508	fret.18
+fret:Gabriola|bold	Fret	9bdc8f90	2	1.071	0.979	0.545	0.429	fret.19
+fret:Gabriola|bold	Fret	c9359b11	3	1.220	0.679	0.449	0.463	fret.20
+fret:Gabriola|bold	Fret	849f9a55	2	0.859	0.667	0.512	0.422	fret.21
+fret:Gabriola|bold	Fret	73682eaa	2	1.109	0.658	0.504	0.459	fret.22
+fret:Gabriola|bold	Fret	8c7aaaa0	2	1.112	0.978	0.528	0.410	fret.23
+fret:Gabriola|bold	Fret	0438577f	2	1.249	1.049	0.506	0.422	fret.24
+fret:Gabriola|italic	Fret	fa8ef5d5	2	0.639	0.677	0.513	0.486	fret.0
+fret:Gabriola|italic	Fret	8d9492be	1	0.318	0.660	0.607	0.356	fret.1
+fret:Gabriola|italic	Fret	d23fc4b9	1	0.593	0.658	0.563	0.459	fret.2
+fret:Gabriola|italic	Fret	d9bad611	1	0.697	0.977	0.525	0.481	fret.3
+fret:Gabriola|italic	Fret	b73b464d	1	0.691	1.049	0.671	0.483	fret.4
+fret:Gabriola|italic	Fret	38198d20	1	0.730	0.967	0.469	0.539	fret.5
+fret:Gabriola|italic	Fret	7d04fc10	1	0.719	0.979	0.530	0.493	fret.6
+fret:Gabriola|italic	Fret	6a8eff5b	1	0.726	0.959	0.419	0.145	fret.7
+fret:Gabriola|italic	Fret	32dc49f4	3	0.697	0.981	0.531	0.490	fret.8
+fret:Gabriola|italic	Fret	cc0ef9c9	1	0.734	0.979	0.495	0.509	fret.9
+fret:Gabriola|italic	Fret	c45ab3f4	3	1.042	0.677	0.491	0.432	fret.10
+fret:Gabriola|italic	Fret	632ca442	2	0.730	0.660	0.547	0.356	fret.11
+fret:Gabriola|italic	Fret	e6eec9d9	2	0.928	0.667	0.544	0.422	fret.12
+fret:Gabriola|italic	Fret	a41f9170	2	0.913	0.977	0.523	0.418	fret.13
+fret:Gabriola|italic	Fret	9fa5e25d	2	0.987	1.049	0.578	0.422	fret.14
+fret:Gabriola|italic	Fret	277aa18a	2	0.957	0.974	0.468	0.445	fret.15
+fret:Gabriola|italic	Fret	5ea8968b	2	1.145	0.979	0.539	0.512	fret.16
+fret:Gabriola|italic	Fret	1c158ee5	2	1.082	0.972	0.403	0.198	fret.17
+fret:Gabriola|italic	Fret	3b3a74cb	4	1.075	0.981	0.549	0.508	fret.18
+fret:Gabriola|italic	Fret	9bdc8f90	2	1.020	0.979	0.501	0.429	fret.19
+fret:Gabriola|italic	Fret	c9359b11	3	1.299	0.679	0.474	0.463	fret.20
+fret:Gabriola|italic	Fret	849f9a55	2	0.987	0.667	0.522	0.422	fret.21
+fret:Gabriola|italic	Fret	73682eaa	2	1.186	0.658	0.531	0.459	fret.22
+fret:Gabriola|italic	Fret	8c7aaaa0	2	1.183	0.978	0.539	0.410	fret.23
+fret:Gabriola|italic	Fret	0438577f	2	1.257	1.049	0.548	0.422	fret.24
+fret:Constantia	Fret	0f79bcad	2	0.844	0.865	0.502	0.496	fret.0
+fret:Constantia	Fret	feb28ddf	1	0.523	0.835	0.490	0.643	fret.1
+fret:Constantia	Fret	067d9fd8	1	0.746	0.844	0.510	0.496	fret.2
+fret:Constantia	Fret	8db78cdc	1	0.767	1.249	0.583	0.425	fret.3
+fret:Constantia	Fret	787e2b8c	2	0.892	1.219	0.536	0.557	fret.4
+fret:Constantia	Fret	1ce88cb2	1	0.710	1.230	0.537	0.482	fret.5
+fret:Constantia	Fret	195889bf	2	0.857	1.257	0.512	0.591	fret.6
+fret:Constantia	Fret	3b5a142e	1	0.811	1.185	0.585	0.326	fret.7
+fret:Constantia	Fret	7a8c9552	3	0.870	1.238	0.503	0.484	fret.8
+fret:Constantia	Fret	195889bf	2	0.849	1.249	0.486	0.410	fret.9
+fret:Constantia	Fret	0fb458c8	3	1.457	0.865	0.507	0.548	fret.10
+fret:Constantia	Fret	4a9d5e7b	2	1.092	0.835	0.495	0.643	fret.11
+fret:Constantia	Fret	809c2f18	2	1.350	0.844	0.543	0.548	fret.12
+fret:Constantia	Fret	fb85aa6a	2	1.306	1.249	0.559	0.429	fret.13
+fret:Constantia	Fret	8800451f	3	1.474	1.219	0.463	0.506	fret.14
+fret:Constantia	Fret	44e9923f	2	1.307	1.240	0.506	0.463	fret.15
+fret:Constantia	Fret	b33c961f	3	1.474	1.257	0.532	0.644	fret.16
+fret:Constantia	Fret	6fb102b6	2	1.377	1.196	0.486	0.387	fret.17
+fret:Constantia	Fret	922bd456	4	1.476	1.238	0.568	0.551	fret.18
+fret:Constantia	Fret	b33c961f	3	1.454	1.249	0.522	0.420	fret.19
+fret:Constantia	Fret	4e0a2b76	3	1.736	0.865	0.468	0.490	fret.20
+fret:Constantia	Fret	097a378f	2	1.371	0.844	0.460	0.548	fret.21
+fret:Constantia	Fret	93bb1f13	2	1.629	0.844	0.505	0.496	fret.22
+fret:Constantia	Fret	bddbf4c9	2	1.573	1.249	0.516	0.379	fret.23
+fret:Constantia	Fret	6c0e7782	3	1.753	1.219	0.422	0.423	fret.24
+fret:Constantia|bold	Fret	0f79bcad	2	0.905	0.865	0.502	0.496	fret.0
+fret:Constantia|bold	Fret	cf2e1f84	1	0.604	0.844	0.481	0.637	fret.1
+fret:Constantia|bold	Fret	067d9fd8	1	0.782	0.844	0.509	0.488	fret.2
+fret:Constantia|bold	Fret	1b3dd787	1	0.795	1.249	0.548	0.504	fret.3
+fret:Constantia|bold	Fret	9edd86d9	2	0.939	1.223	0.472	0.523	fret.4
+fret:Constantia|bold	Fret	f47f1b15	1	0.759	1.230	0.531	0.591	fret.5
+fret:Constantia|bold	Fret	7797e1c3	2	0.903	1.257	0.524	0.611	fret.6
+fret:Constantia|bold	Fret	08cf7433	1	0.828	1.185	0.561	0.300	fret.7
+fret:Constantia|bold	Fret	fcd3f560	3	0.864	1.238	0.506	0.485	fret.8
+fret:Constantia|bold	Fret	7797e1c3	2	0.903	1.249	0.477	0.390	fret.9
+fret:Constantia|bold	Fret	355e1af2	3	1.610	0.865	0.480	0.552	fret.10
+fret:Constantia|bold	Fret	f8fd85a1	2	1.270	0.844	0.491	0.637	fret.11
+fret:Constantia|bold	Fret	33b620f9	2	1.451	0.844	0.517	0.548	fret.12
+fret:Constantia|bold	Fret	41987671	2	1.412	1.249	0.548	0.477	fret.13
+fret:Constantia|bold	Fret	46151750	3	1.581	1.223	0.456	0.485	fret.14
+fret:Constantia|bold	Fret	c0743506	2	1.421	1.249	0.512	0.524	fret.15
+fret:Constantia|bold	Fret	a3f099d7	3	1.574	1.257	0.502	0.664	fret.16
+fret:Constantia|bold	Fret	d2f4a600	2	1.464	1.205	0.426	0.391	fret.17
+fret:Constantia|bold	Fret	c73c79cd	4	1.550	1.238	0.559	0.562	fret.18
+fret:Constantia|bold	Fret	a3f099d7	3	1.578	1.249	0.487	0.407	fret.19
+fret:Constantia|bold	Fret	4e0a2b76	3	1.824	0.865	0.465	0.485	fret.20
+fret:Constantia|bold	Fret	0182759d	2	1.483	0.844	0.480	0.548	fret.21
+fret:Constantia|bold	Fret	93bb1f13	2	1.665	0.844	0.504	0.488	fret.22
+fret:Constantia|bold	Fret	01ba2063	2	1.614	1.249	0.535	0.424	fret.23
+fret:Constantia|bold	Fret	85e354cb	3	1.795	1.223	0.446	0.420	fret.24
+fret:Constantia|italic	Fret	0f79bcad	2	0.819	0.865	0.501	0.494	fret.0
+fret:Constantia|italic	Fret	feb28ddf	1	0.485	0.844	0.576	0.643	fret.1
+fret:Constantia|italic	Fret	af0acae6	1	0.767	0.844	0.585	0.473	fret.2
+fret:Constantia|italic	Fret	276d4094	1	0.838	1.249	0.619	0.546	fret.3
+fret:Constantia|italic	Fret	f89847d6	1	0.857	1.219	0.522	0.524	fret.4
+fret:Constantia|italic	Fret	68017ad1	1	0.881	1.228	0.576	0.626	fret.5
+fret:Constantia|italic	Fret	747d47b0	2	0.885	1.257	0.451	0.552	fret.6
+fret:Constantia|italic	Fret	3b5a142e	1	0.846	1.185	0.536	0.326	fret.7
+fret:Constantia|italic	Fret	7a36fcd9	3	0.889	1.238	0.522	0.489	fret.8
+fret:Constantia|italic	Fret	747d47b0	2	0.885	1.247	0.549	0.449	fret.9
+fret:Constantia|italic	Fret	0fb458c8	3	1.479	0.865	0.519	0.546	fret.10
+fret:Constantia|italic	Fret	4a9d5e7b	2	1.041	0.844	0.535	0.643	fret.11
+fret:Constantia|italic	Fret	d2ec8488	2	1.336	0.844	0.556	0.536	fret.12
+fret:Constantia|italic	Fret	2a10b85e	2	1.316	1.249	0.612	0.517	fret.13
+fret:Constantia|italic	Fret	76a4b087	2	1.452	1.219	0.539	0.497	fret.14
+fret:Constantia|italic	Fret	650c50b5	2	1.351	1.247	0.530	0.559	fret.15
+fret:Constantia|italic	Fret	f911a8e4	3	1.557	1.257	0.531	0.612	fret.16
+fret:Constantia|italic	Fret	6fb102b6	2	1.463	1.205	0.475	0.391	fret.17
+fret:Constantia|italic	Fret	bc77cee8	4	1.526	1.238	0.591	0.550	fret.18
+fret:Constantia|italic	Fret	f911a8e4	3	1.468	1.247	0.562	0.445	fret.19
+fret:Constantia|italic	Fret	073049bb	3	1.744	0.865	0.506	0.478	fret.20
+fret:Constantia|italic	Fret	917d1d7c	2	1.307	0.844	0.529	0.536	fret.21
+fret:Constantia|italic	Fret	9fc15e8f	2	1.602	0.844	0.541	0.473	fret.22
+fret:Constantia|italic	Fret	437f9d43	2	1.569	1.249	0.602	0.460	fret.23
+fret:Constantia|italic	Fret	b8ee7e50	2	1.718	1.219	0.529	0.433	fret.24
+fret:Corbel	Fret	680c2285	2	0.772	0.886	0.503	0.500	fret.0
+fret:Corbel	Fret	effaa3c1	1	0.689	0.841	0.443	0.571	fret.1
+fret:Corbel	Fret	843cc66c	1	0.685	0.864	0.519	0.374	fret.2
+fret:Corbel	Fret	d2901bc4	1	0.673	1.229	0.610	0.482	fret.3
+fret:Corbel	Fret	0b03c8b2	1	0.794	1.184	0.532	0.584	fret.4
+fret:Corbel	Fret	a8f94324	1	0.689	1.207	0.558	0.702	fret.5
+fret:Corbel	Fret	8d45ade1	2	0.765	1.229	0.517	0.522	fret.6
+fret:Corbel	Fret	a5cb1553	1	0.695	1.184	0.395	0.300	fret.7
+fret:Corbel	Fret	303b1097	3	0.765	1.229	0.499	0.498	fret.8
+fret:Corbel	Fret	d9574ca4	2	0.765	1.229	0.487	0.486	fret.9
+fret:Corbel	Fret	46e3c3c1	3	1.583	0.886	0.737	0.503	fret.10
+fret:Corbel	Fret	f0407cdd	2	1.500	0.841	0.474	0.571	fret.11
+fret:Corbel	Fret	b57686d5	2	1.553	0.864	0.754	0.386	fret.12
+fret:Corbel	Fret	756cda47	2	1.416	1.229	0.796	0.480	fret.13
+fret:Corbel	Fret	ac5464bc	2	1.606	1.184	0.537	0.513	fret.14
+fret:Corbel	Fret	4448dd2e	2	1.523	1.207	0.770	0.687	fret.15
+fret:Corbel	Fret	969efe69	3	1.594	1.229	0.752	0.526	fret.16
+fret:Corbel	Fret	b15ab8ea	2	1.423	1.184	0.411	0.363	fret.17
+fret:Corbel	Fret	b3900ff8	4	1.580	1.229	0.747	0.502	fret.18
+fret:Corbel	Fret	65948cf3	3	1.585	1.229	0.737	0.484	fret.19
+fret:Corbel	Fret	1fd856c8	3	1.610	0.886	0.556	0.449	fret.20
+fret:Corbel	Fret	047792c0	2	1.563	0.864	0.258	0.386	fret.21
+fret:Corbel	Fret	6fc102e4	2	1.531	0.864	0.508	0.374	fret.22
+fret:Corbel	Fret	928e264d	2	1.479	1.229	0.626	0.408	fret.23
+fret:Corbel	Fret	bc1d46a0	2	1.669	1.206	0.260	0.295	fret.24
+fret:Corbel|bold	Fret	9402258f	2	0.819	0.902	0.504	0.500	fret.0
+fret:Corbel|bold	Fret	effaa3c1	1	0.758	0.858	0.419	0.560	fret.1
+fret:Corbel|bold	Fret	01db13a5	1	0.750	0.880	0.503	0.336	fret.2
+fret:Corbel|bold	Fret	deed3046	1	0.721	1.246	0.560	0.518	fret.3
+fret:Corbel|bold	Fret	a2e17868	1	0.851	1.201	0.484	0.567	fret.4
+fret:Corbel|bold	Fret	e99fd793	1	0.724	1.224	0.537	0.683	fret.5
+fret:Corbel|bold	Fret	169cbd76	2	0.830	1.229	0.539	0.538	fret.6
+fret:Corbel|bold	Fret	a5cb1553	1	0.766	1.201	0.387	0.325	fret.7
+fret:Corbel|bold	Fret	bc34daac	3	0.831	1.229	0.500	0.509	fret.8
+fret:Corbel|bold	Fret	d8aa3844	2	0.831	1.246	0.472	0.466	fret.9
+fret:Corbel|bold	Fret	218ba8ff	3	1.692	0.902	0.733	0.503	fret.10
+fret:Corbel|bold	Fret	f0407cdd	2	1.653	0.858	0.463	0.560	fret.11
+fret:Corbel|bold	Fret	96953117	2	1.645	0.880	0.745	0.347	fret.12
+fret:Corbel|bold	Fret	864de934	2	1.554	1.246	0.779	0.515	fret.13
+fret:Corbel|bold	Fret	92593480	2	1.724	1.201	0.573	0.516	fret.14
+fret:Corbel|bold	Fret	c900aa7a	2	1.619	1.224	0.764	0.669	fret.15
+fret:Corbel|bold	Fret	3d432f41	3	1.730	1.229	0.761	0.542	fret.16
+fret:Corbel|bold	Fret	b15ab8ea	2	1.598	1.201	0.402	0.370	fret.17
+fret:Corbel|bold	Fret	b8cfbe13	4	1.735	1.229	0.748	0.512	fret.18
+fret:Corbel|bold	Fret	23796bce	3	1.730	1.246	0.730	0.464	fret.19
+fret:Corbel|bold	Fret	cff02731	3	1.668	0.902	0.494	0.415	fret.20
+fret:Corbel|bold	Fret	2dd7436a	2	1.665	0.880	0.251	0.347	fret.21
+fret:Corbel|bold	Fret	0dc2e7b8	2	1.621	0.880	0.501	0.336	fret.22
+fret:Corbel|bold	Fret	a68d348b	2	1.567	1.246	0.593	0.415	fret.23
+fret:Corbel|bold	Fret	d7415610	2	1.736	1.223	0.272	0.276	fret.24
+fret:Corbel|italic	Fret	b1f1b6d3	2	0.783	0.886	0.501	0.500	fret.0
+fret:Corbel|italic	Fret	effaa3c1	1	0.685	0.841	0.483	0.572	fret.1
+fret:Corbel|italic	Fret	843cc66c	1	0.719	0.864	0.637	0.363	fret.2
+fret:Corbel|italic	Fret	481601dc	1	0.827	1.229	0.648	0.476	fret.3
+fret:Corbel|italic	Fret	0b03c8b2	1	0.778	1.184	0.554	0.584	fret.4
+fret:Corbel|italic	Fret	e15ea00c	1	0.884	1.207	0.491	0.705	fret.5
+fret:Corbel|italic	Fret	48bdb105	2	0.810	1.229	0.480	0.541	fret.6
+fret:Corbel|italic	Fret	a5cb1553	1	0.781	1.184	0.405	0.300	fret.7
+fret:Corbel|italic	Fret	47416da3	3	0.846	1.229	0.514	0.489	fret.8
+fret:Corbel|italic	Fret	2736f77c	2	0.834	1.229	0.544	0.466	fret.9
+fret:Corbel|italic	Fret	c8e50623	3	1.623	0.886	0.739	0.502	fret.10
+fret:Corbel|italic	Fret	f0407cdd	2	1.507	0.841	0.492	0.572	fret.11
+fret:Corbel|italic	Fret	b57686d5	2	1.545	0.864	0.796	0.376	fret.12
+fret:Corbel|italic	Fret	20d1880d	2	1.481	1.229	0.787	0.474	fret.13
+fret:Corbel|italic	Fret	ac5464bc	2	1.569	1.184	0.552	0.513	fret.14
+fret:Corbel|italic	Fret	4681c8c2	2	1.594	1.207	0.690	0.688	fret.15
+fret:Corbel|italic	Fret	9bd2ef83	3	1.685	1.229	0.736	0.545	fret.16
+fret:Corbel|italic	Fret	b15ab8ea	2	1.518	1.184	0.408	0.364	fret.17
+fret:Corbel|italic	Fret	ae774698	4	1.688	1.229	0.746	0.493	fret.18
+fret:Corbel|italic	Fret	2c0fe7e4	3	1.594	1.229	0.747	0.464	fret.19
+fret:Corbel|italic	Fret	4e05003f	3	1.680	0.886	0.580	0.445	fret.20
+fret:Corbel|italic	Fret	047792c0	2	1.600	0.864	0.315	0.376	fret.21
+fret:Corbel|italic	Fret	6fc102e4	2	1.566	0.864	0.563	0.363	fret.22
+fret:Corbel|italic	Fret	77f034b8	2	1.562	1.229	0.644	0.404	fret.23
+fret:Corbel|italic	Fret	bc1d46a0	2	1.662	1.206	0.319	0.288	fret.24
+fret:Consolas	Fret	186586af	3	0.842	1.190	0.501	0.500	fret.0
+fret:Consolas	Fret	effaa3c1	1	0.764	1.163	0.487	0.592	fret.1
+fret:Consolas	Fret	a2c9f7e0	1	0.763	1.174	0.599	0.284	fret.2
+fret:Consolas	Fret	492aa6f4	1	0.725	1.190	0.570	0.484	fret.3
+fret:Consolas	Fret	0307fb3b	2	0.912	1.158	0.618	0.591	fret.4
+fret:Consolas	Fret	3e838d63	1	0.706	1.174	0.531	0.760	fret.5
+fret:Consolas	Fret	642b525a	2	0.798	1.174	0.485	0.559	fret.6
+fret:Consolas	Fret	a5cb1553	1	0.783	1.158	0.542	0.312	fret.7
+fret:Consolas	Fret	fae7370e	3	0.788	1.190	0.508	0.531	fret.8
+fret:Consolas	Fret	19597bfa	2	0.798	1.174	0.498	0.426	fret.9
+fret:Consolas	Fret	5ddfb664	4	1.792	1.190	0.748	0.502	fret.10
+fret:Consolas	Fret	f0407cdd	2	1.755	1.163	0.495	0.592	fret.11
+fret:Consolas	Fret	af07f67f	2	1.765	1.174	0.793	0.301	fret.12
+fret:Consolas	Fret	ac193a62	2	1.743	1.190	0.803	0.487	fret.13
+fret:Consolas	Fret	03777c49	3	1.823	1.163	0.550	0.593	fret.14
+fret:Consolas	Fret	1bc1f7d8	2	1.736	1.179	0.777	0.751	fret.15
+fret:Consolas	Fret	31c3dc3f	3	1.779	1.179	0.753	0.561	fret.16
+fret:Consolas	Fret	b15ab8ea	2	1.759	1.163	0.445	0.481	fret.17
+fret:Consolas	Fret	4e9d3e59	4	1.765	1.190	0.768	0.532	fret.18
+fret:Consolas	Fret	6bd9d794	3	1.759	1.174	0.755	0.431	fret.19
+fret:Consolas	Fret	3ef5f357	4	1.781	1.190	0.580	0.420	fret.20
+fret:Consolas	Fret	d382a5dc	2	1.745	1.174	0.290	0.301	fret.21
+fret:Consolas	Fret	51b65e15	2	1.755	1.174	0.543	0.284	fret.22
+fret:Consolas	Fret	348aa9a8	2	1.732	1.190	0.625	0.413	fret.23
+fret:Consolas	Fret	6e47db00	3	1.812	1.174	0.292	0.307	fret.24
+fret:Consolas|bold	Fret	dc72008b	3	0.904	1.198	0.502	0.500	fret.0
+fret:Consolas|bold	Fret	effaa3c1	1	0.803	1.165	0.404	0.585	fret.1
+fret:Consolas|bold	Fret	d46ae339	1	0.791	1.177	0.593	0.294	fret.2
+fret:Consolas|bold	Fret	150254cf	1	0.780	1.195	0.538	0.509	fret.3
+fret:Consolas|bold	Fret	0307fb3b	2	0.925	1.158	0.606	0.594	fret.4
+fret:Consolas|bold	Fret	0606ab57	1	0.753	1.176	0.517	0.746	fret.5
+fret:Consolas|bold	Fret	5a406dd9	2	0.843	1.178	0.506	0.542	fret.6
+fret:Consolas|bold	Fret	a5cb1553	1	0.804	1.158	0.457	0.441	fret.7
+fret:Consolas|bold	Fret	9aa39e24	3	0.817	1.198	0.504	0.502	fret.8
+fret:Consolas|bold	Fret	a6de482c	2	0.842	1.177	0.513	0.451	fret.9
+fret:Consolas|bold	Fret	19d84007	4	1.841	1.198	0.735	0.503	fret.10
+fret:Consolas|bold	Fret	f0407cdd	2	1.795	1.165	0.457	0.585	fret.11
+fret:Consolas|bold	Fret	43bea5f9	2	1.790	1.177	0.785	0.310	fret.12
+fret:Consolas|bold	Fret	096e8c8e	2	1.793	1.195	0.781	0.511	fret.13
+fret:Consolas|bold	Fret	03777c49	3	1.849	1.165	0.534	0.592	fret.14
+fret:Consolas|bold	Fret	729c9c16	2	1.781	1.183	0.759	0.738	fret.15
+fret:Consolas|bold	Fret	91128fc3	3	1.819	1.185	0.753	0.546	fret.16
+fret:Consolas|bold	Fret	b15ab8ea	2	1.788	1.165	0.411	0.529	fret.17
+fret:Consolas|bold	Fret	2a49ddf3	4	1.797	1.198	0.763	0.504	fret.18
+fret:Consolas|bold	Fret	784e1eb4	3	1.795	1.177	0.754	0.455	fret.19
+fret:Consolas|bold	Fret	997ea05f	4	1.833	1.198	0.560	0.418	fret.20
+fret:Consolas|bold	Fret	a4ef8bec	2	1.788	1.177	0.288	0.310	fret.21
+fret:Consolas|bold	Fret	cc76008f	2	1.783	1.177	0.541	0.294	fret.22
+fret:Consolas|bold	Fret	a79d04b9	2	1.786	1.195	0.617	0.435	fret.23
+fret:Consolas|bold	Fret	2c4ce1bd	3	1.842	1.177	0.294	0.316	fret.24
+fret:Consolas|italic	Fret	99c7de85	3	0.886	1.190	0.499	0.500	fret.0
+fret:Consolas|italic	Fret	effaa3c1	1	0.756	1.163	0.569	0.593	fret.1
+fret:Consolas|italic	Fret	c554c28a	1	0.871	1.174	0.687	0.254	fret.2
+fret:Consolas|italic	Fret	895ee46b	1	0.851	1.190	0.647	0.500	fret.3
+fret:Consolas|italic	Fret	0307fb3b	2	0.940	1.158	0.647	0.591	fret.4
+fret:Consolas|italic	Fret	918f6b1e	1	0.876	1.174	0.462	0.761	fret.5
+fret:Consolas|italic	Fret	642b525a	2	0.857	1.174	0.448	0.548	fret.6
+fret:Consolas|italic	Fret	a5cb1553	1	0.894	1.158	0.517	0.312	fret.7
+fret:Consolas|italic	Fret	d30f5512	3	0.894	1.190	0.512	0.492	fret.8
+fret:Consolas|italic	Fret	0e980018	2	0.874	1.174	0.550	0.452	fret.9
+fret:Consolas|italic	Fret	f1b9c6e7	4	1.894	1.190	0.752	0.503	fret.10
+fret:Consolas|italic	Fret	f0407cdd	2	1.748	1.163	0.530	0.593	fret.11
+fret:Consolas|italic	Fret	bc0699be	2	1.837	1.174	0.818	0.273	fret.12
+fret:Consolas|italic	Fret	9186ea1a	2	1.832	1.190	0.820	0.502	fret.13
+fret:Consolas|italic	Fret	03777c49	3	1.864	1.163	0.569	0.593	fret.14
+fret:Consolas|italic	Fret	3a22baeb	2	1.870	1.179	0.722	0.753	fret.15
+fret:Consolas|italic	Fret	31c3dc3f	3	1.884	1.179	0.734	0.551	fret.16
+fret:Consolas|italic	Fret	b15ab8ea	2	1.955	1.163	0.444	0.482	fret.17
+fret:Consolas|italic	Fret	5036091d	4	1.887	1.190	0.757	0.494	fret.18
+fret:Consolas|italic	Fret	f9568307	3	1.870	1.174	0.774	0.456	fret.19
+fret:Consolas|italic	Fret	5643d436	4	1.919	1.190	0.623	0.421	fret.20
+fret:Consolas|italic	Fret	a7c9b5bf	2	1.774	1.174	0.363	0.273	fret.21
+fret:Consolas|italic	Fret	2af32819	2	1.863	1.174	0.587	0.254	fret.22
+fret:Consolas|italic	Fret	6b37c796	2	1.857	1.190	0.674	0.421	fret.23
+fret:Consolas|italic	Fret	acf131b2	3	1.890	1.174	0.353	0.279	fret.24
+fret:Verdana	Fret	9402258f	2	0.912	1.373	0.503	0.501	fret.0
+fret:Verdana	Fret	e9580a0c	1	0.714	1.323	0.317	0.216	fret.1
+fret:Verdana	Fret	98a609df	1	0.893	1.346	0.532	0.380	fret.2
+fret:Verdana	Fret	9500d228	1	0.869	1.374	0.623	0.488	fret.3
+fret:Verdana	Fret	0307fb3b	2	0.997	1.319	0.634	0.586	fret.4
+fret:Verdana	Fret	2c0e624c	1	0.859	1.347	0.565	0.665	fret.5
+fret:Verdana	Fret	4e61a6a0	2	0.934	1.371	0.494	0.509	fret.6
+fret:Verdana	Fret	a5cb1553	1	0.903	1.319	0.537	0.317	fret.7
+fret:Verdana	Fret	2283c9a6	3	0.937	1.379	0.503	0.481	fret.8
+fret:Verdana	Fret	a2c18299	2	0.934	1.371	0.510	0.491	fret.9
+fret:Verdana	Fret	50182020	3	1.937	1.373	0.653	0.453	fret.10
+fret:Verdana	Fret	01d45853	2	1.863	1.323	0.430	0.216	fret.11
+fret:Verdana	Fret	5eb942d1	2	1.938	1.346	0.641	0.347	fret.12
+fret:Verdana	Fret	a2fb1f01	2	1.920	1.374	0.743	0.456	fret.13
+fret:Verdana	Fret	3484f773	3	1.968	1.323	0.282	0.305	fret.14
+fret:Verdana	Fret	6f4d784c	2	1.928	1.351	0.689	0.588	fret.15
+fret:Verdana	Fret	bfd1e37f	3	1.958	1.371	0.680	0.474	fret.16
+fret:Verdana	Fret	11693f8d	2	1.942	1.323	0.207	0.230	fret.17
+fret:Verdana	Fret	a4e6e851	4	1.948	1.379	0.682	0.450	fret.18
+fret:Verdana	Fret	7f3890a2	3	1.936	1.371	0.684	0.459	fret.19
+fret:Verdana	Fret	ea09821e	3	2.040	1.374	0.540	0.445	fret.20
+fret:Verdana	Fret	113698dc	2	1.967	1.346	0.351	0.347	fret.21
+fret:Verdana	Fret	f3a4d5f0	2	2.042	1.346	0.514	0.380	fret.22
+fret:Verdana	Fret	db3e96dd	2	2.023	1.374	0.635	0.449	fret.23
+fret:Verdana	Fret	7af87603	3	2.072	1.346	0.276	0.397	fret.24
+fret:Verdana|bold	Fret	94f28bb0	2	1.091	1.374	0.503	0.500	fret.0
+fret:Verdana|bold	Fret	e9580a0c	1	0.880	1.322	0.280	0.211	fret.1
+fret:Verdana|bold	Fret	3e5e3d42	1	1.036	1.345	0.490	0.384	fret.2
+fret:Verdana|bold	Fret	0579fc37	1	1.041	1.374	0.586	0.488	fret.3
+fret:Verdana|bold	Fret	0307fb3b	2	1.144	1.323	0.620	0.598	fret.4
+fret:Verdana|bold	Fret	2a6d2027	1	1.026	1.347	0.540	0.649	fret.5
+fret:Verdana|bold	Fret	0e89dd95	2	1.079	1.371	0.531	0.539	fret.6
+fret:Verdana|bold	Fret	a5cb1553	1	1.034	1.319	0.517	0.348	fret.7
+fret:Verdana|bold	Fret	c84a8c70	3	1.114	1.379	0.487	0.506	fret.8
+fret:Verdana|bold	Fret	8d731755	2	1.079	1.372	0.490	0.493	fret.9
+fret:Verdana|bold	Fret	9615f260	3	2.249	1.374	0.646	0.451	fret.10
+fret:Verdana|bold	Fret	01d45853	2	2.175	1.322	0.411	0.211	fret.11
+fret:Verdana|bold	Fret	e2978221	2	2.258	1.345	0.612	0.347	fret.12
+fret:Verdana|bold	Fret	10dd29c0	2	2.223	1.374	0.726	0.457	fret.13
+fret:Verdana|bold	Fret	3484f773	3	2.277	1.326	0.276	0.304	fret.14
+fret:Verdana|bold	Fret	0a8f1054	2	2.230	1.350	0.673	0.575	fret.15
+fret:Verdana|bold	Fret	97762294	3	2.256	1.371	0.701	0.504	fret.16
+fret:Verdana|bold	Fret	11693f8d	2	2.231	1.322	0.201	0.230	fret.17
+fret:Verdana|bold	Fret	aab898c8	4	2.261	1.379	0.679	0.475	fret.18
+fret:Verdana|bold	Fret	68bb7c2e	3	2.230	1.372	0.681	0.462	fret.19
+fret:Verdana|bold	Fret	e4f5878c	3	2.321	1.374	0.543	0.450	fret.20
+fret:Verdana|bold	Fret	17f2baa3	2	2.246	1.345	0.341	0.347	fret.21
+fret:Verdana|bold	Fret	7ce137eb	2	2.330	1.345	0.495	0.384	fret.22
+fret:Verdana|bold	Fret	cf906db9	2	2.295	1.374	0.635	0.455	fret.23
+fret:Verdana|bold	Fret	2b5bb74c	3	2.348	1.348	0.268	0.402	fret.24
+fret:Verdana|italic	Fret	edb514a3	2	0.995	1.374	0.503	0.499	fret.0
+fret:Verdana|italic	Fret	eb219486	1	0.749	1.323	0.622	0.291	fret.1
+fret:Verdana|italic	Fret	3e5e3d42	1	1.045	1.346	0.590	0.359	fret.2
+fret:Verdana|italic	Fret	e7b1ed5a	1	1.061	1.374	0.617	0.504	fret.3
+fret:Verdana|italic	Fret	0307fb3b	2	1.029	1.319	0.653	0.586	fret.4
+fret:Verdana|italic	Fret	f0501c1f	1	1.119	1.347	0.477	0.662	fret.5
+fret:Verdana|italic	Fret	58057d19	2	0.966	1.371	0.521	0.495	fret.6
+fret:Verdana|italic	Fret	a5cb1553	1	1.093	1.319	0.529	0.316	fret.7
+fret:Verdana|italic	Fret	30d822ce	3	1.039	1.379	0.537	0.518	fret.8
+fret:Verdana|italic	Fret	476e042a	2	0.965	1.372	0.483	0.506	fret.9
+fret:Verdana|italic	Fret	c227c1cb	3	2.124	1.374	0.705	0.476	fret.10
+fret:Verdana|italic	Fret	c5574246	2	1.898	1.323	0.548	0.291	fret.11
+fret:Verdana|italic	Fret	ea37aae7	2	2.087	1.346	0.705	0.350	fret.12
+fret:Verdana|italic	Fret	bb930269	2	2.124	1.374	0.752	0.484	fret.13
+fret:Verdana|italic	Fret	f3eba366	3	2.084	1.323	0.429	0.392	fret.14
+fret:Verdana|italic	Fret	eed95c66	2	2.210	1.351	0.667	0.614	fret.15
+fret:Verdana|italic	Fret	834b7186	3	2.096	1.371	0.731	0.478	fret.16
+fret:Verdana|italic	Fret	e62e902d	2	2.238	1.323	0.323	0.296	fret.17
+fret:Verdana|italic	Fret	e65f6a53	4	2.131	1.379	0.735	0.502	fret.18
+fret:Verdana|italic	Fret	9519fd6a	3	2.117	1.372	0.717	0.488	fret.19
+fret:Verdana|italic	Fret	b3a57223	3	2.232	1.374	0.573	0.439	fret.20
+fret:Verdana|italic	Fret	106ea030	2	2.005	1.346	0.394	0.350	fret.21
+fret:Verdana|italic	Fret	7ce137eb	2	2.195	1.346	0.543	0.359	fret.22
+fret:Verdana|italic	Fret	41efd588	2	2.232	1.374	0.619	0.448	fret.23
+fret:Verdana|italic	Fret	2b5bb74c	3	2.191	1.346	0.330	0.379	fret.24

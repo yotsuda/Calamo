@@ -1,0 +1,24 @@
+// Lily# (2026-10-20, lysc Release): an arpeggio in a second voice is drawn at the wrong column. Below,
+// the lower voice's <d' f' a'>8@arpeggio is its third event (at 3/8); the wiggle is drawn before the
+// f'8 at 2/8 instead, the column of the upper voice's third event (r8). ArpeggioEngraver resolves the
+// item's X with GetItemXOffset(measures, MeasureIndex, ItemIndex), the voice's own item index looked
+// up in the staff's measure items, it seems. Found by the OMR's generated pieces (OmrGen --arpeggios):
+// piano004's right hand, voice { ... } { d4 fis8 <d fis>8@arpeggio <cis e>4. r8 }.
+title "arpeggio in a second voice"
+octave absolute
+time 4/4
+key c major
+
+part p1 { clef treble }
+
+section Piece {
+  p1 {
+    voice { r8 g'''8 r8 e'''8 c'''2 } { d''4 f''8 <d'' f'' a''>8@arpeggio <c'' e''>2 } |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff p1 "Staff"
+}
