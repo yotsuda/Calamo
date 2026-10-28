@@ -23,3 +23,21 @@ OMR が書く `.lys` の、オッターヴァとトリルの終わりを 1 音�
 Lily# の MusicXML 読み込みも同じ日に直した（オッターヴァの stop は、その前の音符に付く）。
 
 既にある生成譜の台の正解 `.lys` は、ottava のときと同じく描き直すときに作り直せばよい。
+
+## 追記（同じ夜）: `@ottava` / `@quindicesima` は廃止
+
+オッターヴァは**楽譜に出る文字だけ**で書く（オーナー決定・後方互換なし・専用の警告もなし）:
+
+| 今まで | これから |
+|---|---|
+| `@ottava` … `@!ottava` | `@8va` … `@!8va` |
+| `@ottava(bassa)` … `@!ottava` | `@8vb` … `@!8vb` |
+| `@quindicesima` … `@!quindicesima` | `@15ma` … `@!15ma` |
+| `@quindicesima(bassa)` … `@!quindicesima` | `@15mb` … `@!15mb` |
+
+古い名前は「知らない注釈」（LYS1008）として何も描かない。終わりは開いた名前で閉じる（`@8vb` なら `@!8vb`）。
+
+見つけた箇所:
+- `Omr/Program.cs` 1129 行: 始まり `@quindicesima` / `@ottava` ＋ `(bassa)` と、終わり（`e.OttavaEnd` で `@!quindicesima` / `@!ottava`）→ `@8va` `@8vb` `@15ma` `@15mb` と同じ名前の `@!`。終わりは開いた線の向き（上下）も要るので、`OttavaEnd` にオクターブ数だけでなく向きも持たせる必要があるかもしれない。
+- `OmrGen/Gen.cs` 505〜507 行: 同じ。
+- `Omr/SvgTruth.cs` 199・286 行: `.lys` の注釈名で ottava を見分けているところ（`"ottava" or "quindicesima"`）→ `8va` `8vb` `15ma` `15mb`。
