@@ -26,11 +26,11 @@ name: Release
 # measured it, 2026-08-23). A PAT lasts a year at most: THIS ONE EXPIRES 2027-10-16 (made
 # 2026-10-17; the same token is Lily#'s VSCE_PAT). When a release fails at verify-pat, that
 # is the first thing to renew: regenerate it in Azure DevOps and update the secret in BOTH
-# repositories (Settings -> Secrets and variables -> Actions).
+# repositories, Lily#'s and this one (Settings -> Secrets and variables -> Actions).
 #
-# The repository is private; the Marketplace does not mind (package.json has no repository
-# field, and pack-extension.ps1 packs with --allow-missing-repository). The readme's figure
-# is served from the Lily# site, so the site must be pushed before the tag.
+# The repository is public (Apache-2.0); package.json names it. Only a tag pushed by the owner
+# or a run by hand starts this workflow, so the secret never reaches a fork's pull request.
+# The readme's figure is served from the Lily# site, so the site must be pushed before the tag.
 
 on:
   push:
