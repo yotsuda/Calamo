@@ -2,6 +2,34 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## Lily# の 3 通: トリルの線の名前、`@!` は線の最後の音符、オッターヴァは印刷の文字で（2026-10-29 未明、前の節の次の一手 1）
+
+**現在地**: 検出器は detector36 のまま、学習し直しなし。セッションの頭の規則の check は OK。REQUESTS.md に新しい `fixed` はなし。Lily# は 3 通の変更をコミット済み（`ebc7fdf3f`・`bc1e6983d`・`1f523561f`）で、道具が使う `C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe` が古かった（10-28 16:17）ので、Lily# の作業ツリーがきれいなのを確かめて HEAD `2b33c15e0` で Release をビルドし直した（0:39）。
+
+**入れたもの**（後方互換なし）:
+- **オッターヴァ**: `.lys` は `@8va` `@8vb` `@15ma` `@15mb` … 同じ名前の `@!`（`Program.cs` の `OttavaName`）。`Ev.OttavaEnd` は `OttavaStart` と同じ符号つき（1 = 8va、−2 = 15mb）。終わりは**線の下の最後の事象**（`Ottavas.Apply` の `evs[last]`。線の下で終わる休符のこともある。全休符は印を書かないので含めない）。1 事象だけの線は `@8va@!8va`。
+- **トリルの線**: `@trillSpan` … `@!trillSpan`。`Articulations` は波の終わる手前の音符に内部の印 `Articulations.TrillEndsBefore` を付け、`Program.cs` の span の整理の前に、その声部の 1 つ前の音符（休符・全休符・斜線は飛ばす。小節・ページをまたぐ）へ `!trillSpan` を移す。続けてつなぐ線も前の線を 1 つ前の音符で閉じる（新しい始まりだけで閉じる書き方には頼らない）。
+- span の整理（`families`）: オッターヴァ・トリルで同じ事象が開いて閉じるなら、その事象だけの線とする。
+- `OmrGen`: `@8va` など、`@!` は線の最後の要素（休符もある）。トリルは `notes[i + len - 1]`。乱数の引き方は変えていない（同じ曲・同じ線）。
+- 正解・採点: `SvgTruth` の `MarkAt` が数字で始まる名前も取る（`Ottava()`）。`tools/score-marks.ps1` も新しい名前（`ottava:8va` など、`trillSpan` の `!` で `trillend`）。
+- **トリルの続き**（作り直した台で出た）: Lily# は次の段の続きの「tr」を、段の最初の事象が休符ならその休符の上に描く（basic002 の 6 小節目の `r8`）。「tr」に音符がないので続きと認めず、段の頭から探した波が「tr」の字の中で止まって、線を次の段の最初の音符で閉じていた。音符のない「tr」も下の五線で続きの候補にし、続きの「tr」が見つかればその波を段の頭からの探しより先に使う。
+
+**作り直した台**: `out/gen-ott`・`gen-ott-scan`・`gen-trill`・`gen-trill-scan`（同じ seed 7、新しい生成器と新しい lysc）。前の台はこのセッションの scratchpad に退避しただけ（次のセッションには残らない）。前の台の正解 `.lys` は 10-28 のオクターブの変更の前の書き方だった（今の台は LilyPond のオクターブ）。
+
+**見つけた Lily# の不具合 → REQUESTS #11**（`docs/repro/ottava-end-in-tuplet-2026-10-29.lys`）: オッターヴァの線が連符の中で終わると、`@!` の後の連符の音符も移調したまま描かれる（`tuplet 3/2 { d'''8@!15ma c''8 b'8 }` の c''・b' が 2 オクターブ下）。LilyPond 2.26.0 は五線の中。gen-ott の basic001 の 10 小節目。
+
+**数字**（受け入れた WORSE の理由）:
+- 規則の check: 10 better・7 WORSE を受け入れた。WORSE は全部作り直した gen-ott 系: basic001 の #11 の 2 音（gen-ott・gen-ott-scan）、gen-ott-scan の描き直したページの劣化（basic001 の 13 小節の 2 分音符、piano002 の ♮ の和音）。
+- 検出器の check: 9 WORSE を受け入れた（トリルは 188 本の始まり・終わりとも 100% のまま）。genO.basic 99.91 → 99.63 は #11 の連符の 3 音。genOS.basic 99.81 → 99.53 は同じ 3 音と、basic008 の 14 小節: 段をまたいで続く 8va の終わりのかぎが劣化で見えず、破線の終わり（666）が最後の音 `d'''2`（689）の手前で止まる（Lily# の新しい終わりは最後の列の中心の手前で、前より短い）。genOS.piano 99.97 → 99.79 は piano002: 段の最後の音から始まる 15ma（2 小節目の `g'''16`）を劣化版だけ見落とす、16 小節目の連符の音価。basic003 の 12 小節（8va を 1 音早く始める）は HEAD のビルドでも同じ読みで、前からの誤り。
+- 評価台・開発用の台は回していない（学習し直しなし。変えたのは線の終わりの書く場所と名前で、音の高さを上げる範囲は同じ）。
+
+**古い名前のまま残っているもの**: 検出器の学習の台（`out/train-ottava*`、`train-trill*` など）、`out/gen-ott-s11`・`gen-ott-s13`・`gen-trill-s11`、`out/pagecross` の正解 `.lys`。今の lysc は古い名前を描かない（LYS1008）ので、描き直すときは `OmrGen` で作り直す（`tools/train-model/redraw.ps1` は lysc が受け付けない台を作り直す）。
+
+**次の一手**:
+1. 前の節（README の図）の読み取りの不具合 1〜3（tchaikovsky39-5 のページ全体での余分な声、作曲者を `4`、運指の 4 を `g''4`）。評価台のページなので、開発用の台か生成譜で同じ型を再現してから。
+2. オッターヴァの終わりのかぎが見えないとき（劣化版）、破線の終わりで止めずに、破線 1 周期ほど先までの音符を線の下に入れるか（gen-ott-scan の basic008）。Lily# の新しい終わりの位置（最後の列の中心の手前）に合わせる。
+3. #11 が `fixed` になったら gen-ott・gen-ott-scan を描き直して check。
+
 ## 公開した repo と、README の図で見えた読み取りの不具合（2026-10-29）
 
 **現在地**: この repo（`C:\MyProj\LilySharp-Omr`）が公開の本体になった（GitHub `yotsuda/LilySharp-Omr`、public、Apache-2.0、履歴は `f9482c7` から）。前の repo は `C:\MyProj\LilySharp-Omr-dev`（GitHub `LilySharp-Omr-dev`、private）に保管、そちらでは作業しない。公開できないデータ（`data/scans`、`data/bohemian`、`data/ninetofive`、IMSLP の `rje-2010.pdf`・`hapebe-2011.pdf`）は手元にだけあり `.gitignore` で外してある。データを足すときは `data/LICENSES.md` に出所とライセンスを書く（著作権の残る楽譜は入れない）。
