@@ -3,6 +3,9 @@ obj/
 out/
 *.png
 *.log
+# the side files of a reading (x.omr.json; x.omr-pNN.png is a .png): try a reading under out/
+*.omr.json
+*.omr
 tools/train-model/.venv/
 # scanned pages are data, not output
 !data/print/**/*.png

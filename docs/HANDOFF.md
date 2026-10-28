@@ -2,6 +2,22 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 公開した repo と、README の図で見えた読み取りの不具合（2026-10-29）
+
+**現在地**: この repo（`C:\MyProj\LilySharp-Omr`）が公開の本体になった（GitHub `yotsuda/LilySharp-Omr`、public、Apache-2.0、履歴は `f9482c7` から）。前の repo は `C:\MyProj\LilySharp-Omr-dev`（GitHub `LilySharp-Omr-dev`、private）に保管、そちらでは作業しない。公開できないデータ（`data/scans`、`data/bohemian`、`data/ninetofive`、IMSLP の `rje-2010.pdf`・`hapebe-2011.pdf`）は手元にだけあり `.gitignore` で外してある。データを足すときは `data/LICENSES.md` に出所とライセンスを書く（著作権の残る楽譜は入れない）。
+
+- **README を書き直した**: 冒頭にスキャン・読み取り結果・Lily# の Bar fixes の図（`docs/figures/readme-*.png`）、成績は `docs/eval-sets.tsv` の版の種類ごとの集計（全体 94.0%）。仕様は `docs/protocol.md`（side file、`--progress json`、`omr verify --candidate`）、読み方の説明は `docs/reader.md` に移した。**`eval-sets.tsv` を更新したら README の「How well it reads」の表も更新する。**
+- **Marketplace の README**（`extension/README.md`）も同じ図に（`raw.githubusercontent.com` の絶対 URL）、Lily# 0.14.0 以降、Edit Bars Beside the Scan と Fix OMR Marks with AI、Privacy（AI 修正のときだけ選んだモデルに送る）。`package.json` の description から「Free while in beta」を外した。CHANGELOG に `## Unreleased`。
+- **次のリリースで**: `ReadCommand.Version`・`extension/package.json`・CHANGELOG の `## Unreleased` を同じ版（0.4.1）にしてタグ。`VSCE_PAT` は公開 repo の secret に入れ直した（期限 2027-10-16、Lily# と同じ）。
+- **試しに読むのは `out/` の下で**: 拡張は入力の画像の隣に書くので、`data` の画像を直接読むと出力が溜まる（99 個を消した）。`*.omr.json`・`*.omr` は `.gitignore` に入れた。
+
+**読み取りの不具合**（README の図を作るときに見えた。素材は `data/eval/tchaikovsky39-5/scan/p01.png` = **評価台のページ**なので、原則どおりこのページで調整はしない。同じ型を開発用の台か生成譜で再現してから直す）:
+
+1. **ページ全体を読むと 2 小節目の右手に余分な声**: `omr read p01.png`（ページ全体）で `voice { s4 s8 s32 d'8@todo(...)( } { b'8.~ ais'16 b'8 r16 cis''16 }`（上の声が付点 4 分足りない）。同じページの最初の 2 段だけを切り出した画像（y 90〜1150、上の柱と左下の CD Sheet Music のロゴを除く）を読むと `b'8.~ ais'16 b'8 r16 cis''16(` で、余分な声は無い（タイは 4 のとおり）。2026-10-17 の図（`docs/figures/scan-import.png`、0.3.0）でも正しかった。ページ全体のときだけの違い（柱か、ページの大きさで決まる何か）を調べる。
+2. **作曲者を `4` と読む**: ページ全体で `composer "4"`（右上の運指の数字を作曲者と取ったらしい）、柱の「Tchaikovsky — Album for the Young」は `subtitle`。切り出した画像では composer も subtitle も無い。
+3. **15 小節目の右手**: どちらの読みでも `voice { <a' cis''>8 s4 g''4 <gis' b'>8 } { <cis'' e''>8 r16 <b' d''>16 r16 s8 s16 }`。正しくは `<cis'' e''>8 r16 <b' d''>16 <a' cis''>8 r16 <gis' b'>16`。上の運指「4 2」の 4 を `g''4` と読んだらしい。印は付くが、memo は「a hairpin left open at the end」で理由が違う（`--verify` なしの全体の読みでは、この小節に印が無い）。
+4. 参考: 2・4・10・12 小節の `b'8.~ ais'16`（高さの違う音へのタイ）。スキャンはスラー。`--verify` は同じ小節に「on the scan, not in the text: a tie」と言う。
+
 ## 読み手の名前を `omr` に（2026-10-28 夜、repo の公開の準備）
 
 - **`src/OmrProto` → `src/Omr`、開発のビルドも `omr.exe`**（`Omr.csproj` の `AssemblyName`）: exe は `src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe`。tools のスクリプト、README、ROADMAP を合わせた。この節より下の古い節の `OmrProto.exe` は当時の名前（読み替える）。`pack-extension.ps1` の `-p:AssemblyName=omr` は要らなくなったので外した。
