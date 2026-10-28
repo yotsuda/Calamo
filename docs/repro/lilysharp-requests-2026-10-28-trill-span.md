@@ -15,8 +15,8 @@
 
 OMR が書く `.lys` を新しい書き方にしてほしい。見つけた箇所:
 
-1. `src/OmrProto/Articulations.cs` 211・268 行: `"startTrillSpan"` → `"trillSpan"`。266 行: `"stopTrillSpan"` → `"!trillSpan"`（`Program.cs` 1126 行が `"@" + a` で書くので、`!` を名前に含めれば `@!trillSpan` になる。`Contains` の判定も同じ文字列に）。
-2. `src/OmrProto/Program.cs` 613 行: `Named("trill line", "startTrillSpan", "stopTrillSpan")` → `Named("trill line", "trillSpan", "!trillSpan")`（rit などと同じ形）。617 行の注釈も。
+1. `src/Omr/Articulations.cs` 211・268 行: `"startTrillSpan"` → `"trillSpan"`。266 行: `"stopTrillSpan"` → `"!trillSpan"`（`Program.cs` 1126 行が `"@" + a` で書くので、`!` を名前に含めれば `@!trillSpan` になる。`Contains` の判定も同じ文字列に）。
+2. `src/Omr/Program.cs` 613 行: `Named("trill line", "startTrillSpan", "stopTrillSpan")` → `Named("trill line", "trillSpan", "!trillSpan")`（rit などと同じ形）。617 行の注釈も。
 3. `src/OmrGen/Gen.cs` 408・409 行: `"@startTrillSpan"` → `"@trillSpan"`、`"@stopTrillSpan"` → `"@!trillSpan"`。
 
 既にある生成譜の台の正解 `.lys` は、ottava のときと同じく描き直すときに作り直せばよい。
