@@ -113,6 +113,9 @@ sealed class Header
         // largest centred line of leadsheet-collide, over its title; a line that reads as a chord
         // name is no heading)
         lines = lines.Where(l => !ChordName(l.Text)).ToList();
+        // (a line of no letter is no heading: a fingering high over the first system's last chord, its
+        // "4" ending at the staff's right end, read as the composer of tchaikovsky39-5)
+        lines = lines.Where(l => l.Text.Any(char.IsLetter)).ToList();
         var centred = lines.Where(l => Centred(l.Box)).ToList();
         // (the largest print, as the size of its type: a Japanese or Chinese line's box is about the
         // em; a Latin one's runs from its tallest letter to its lowest, the capitals and ascenders
