@@ -204,6 +204,7 @@ static partial class Symbols
             }
             return map;
         }
+        ps.TieEndsAsSlur.Clear();
         var atLeft = Assign(lefts, -1);
         var atRight = Assign(rights, +1);
         Head At(Detection t, int side) => (side < 0 ? atLeft : atRight).TryGetValue(t, out var h) ? h : null;
@@ -224,7 +225,8 @@ static partial class Symbols
             if (a == null) { if (debug) Console.WriteLine($"detected tie_l at {t.X:F0},{t.Y:F0} ({t.Score:F2}): no head before it"); continue; }
             if (a.Tie) continue;
             var st = a.St;
-            var b = ps.Heads.Where(o => o != a && o.St == st && o.Pos == a.Pos && o.X - a.X > 0.5 * s && o.X - a.X < 12 * s).OrderBy(o => o.X).FirstOrDefault();
+            // (a bar spread by its words holds a tie over 12 spaces: the Zigeuner's b'4.~ b'8, 12.2)
+            var b = ps.Heads.Where(o => o != a && o.St == st && o.Pos == a.Pos && o.X - a.X > 0.5 * s && o.X - a.X < 20 * s).OrderBy(o => o.X).FirstOrDefault();
             bool tied;
             string why;
             if (b != null)
@@ -249,12 +251,28 @@ static partial class Symbols
                            for (int y = top; y <= bot; y++) if (d[x, y]) dark++;
                            return dark >= 0.9 * (bot - top + 1);
                        });
-                if (!tied && barBetween
-                    && !ps.Heads.Any(o => o.St == st && o.X > a.X + 1.5 * s && o.X < b.X - 1.5 * s)
+                bool nextNote = !ps.Heads.Any(o => o.St == st && o.X > a.X + 1.5 * s && o.X < b.X - 1.5 * s);
+                if (!tied && barBetween && nextNote
                     && !ps.Detections.Any(u => u.Class == "slur_r" && u.Score >= TrustScore && Math.Abs(u.X - b.X) < 1.5 * s && Math.Abs(u.Y - b.Y) < 4 * s))
                 {
                     tied = true;
                     why += ", but it is the next note and no slur ends there";
+                }
+                // (an arc from a note to the next one at its pitch, nothing between, is a tie whatever the
+                // detector called its end: a slur_r where a tie ends, on the start's side of the heads. An
+                // old print's tie sags, its end a space and a half off the head, the Zigeuner's b'4.~ b'8;
+                // Brandt's song: a'4.~ a'8)
+                else if (!tied && nextNote && !barBetween)
+                {
+                    var u = ps.Detections.Where(u => u.Class == "slur_r" && u.Score >= TrustScore && u.X > a.R && u.X < b.X + 0.3 * s
+                                                     && b.X - u.X < 2.0 * s && Math.Abs(u.Y - b.Y) <= 2.0 * s && Math.Sign(u.Y - b.Y) == Math.Sign(t.Y - a.Y))
+                                      .OrderByDescending(u => u.Score).FirstOrDefault();
+                    if (u != null)
+                    {
+                        tied = true;
+                        ps.TieEndsAsSlur.Add(u);
+                        why += $", but a slur_r at it ({u.Score:F2}) where a tie ends: the next note at its pitch";
+                    }
                 }
             }
             else
@@ -297,7 +315,8 @@ static partial class Symbols
     /// </summary>
     static void DetectedSlurs(PageSymbols ps, double s)
     {
-        var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= TrustScore).ToList();
+        // (a slur_r DetectedTies took for a tie's end ends no slur)
+        var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= TrustScore && !ps.TieEndsAsSlur.Contains(t)).ToList();
         // a tie's start that tied nothing (DetectedTies: no head at its place after it, or a slur's
         // end there) is a slur's start the detector took for a tie: the short arc from a chord's top
         // note down to the next note, tabi's 8th bar. It starts a slur only to an end found for it
@@ -368,7 +387,10 @@ static partial class Symbols
             {
                 var (a, above) = at[l];
                 double ax = a.Average(h => h.X);
-                var r = rights.Where(r => !used.Contains(r) && at[r].Chord != a && at[r].Chord.Average(h => h.X) > ax && at[r].Above == above)
+                // (a start the detector took for a tie's is a short arc, to a note or two on: it takes
+                // no end bars away, which is another slur's, kinkel19-2's 42nd bar, the Zigeuner's 18th)
+                var r = rights.Where(r => !used.Contains(r) && at[r].Chord != a && at[r].Chord.Average(h => h.X) > ax && at[r].Above == above
+                                          && (!fromTie.Contains(l) || at[r].Chord.Average(h => h.X) - ax < 12 * s))
                               .OrderBy(r => r.X).FirstOrDefault();
                 if (r != null)
                 {
