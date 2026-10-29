@@ -40,7 +40,19 @@ Not yet: lyrics, chord names, handwritten music.
 
 ## What it is built for
 
-The reader makes a text you will check and finish, not a guess you have to trust.
+The reader makes a text you will check and finish, not a guess you have to trust. Its learnt
+part is asked a different question from that of a reader that reads a staff end to end:
+
+| | This reader | A reader that reads a staff end to end |
+|---|---|---|
+| What the model is asked | What symbol is here? | What music is written on this staff? |
+| How | A small convolutional network (CenterNet-like) over the page: a heat map per kind of symbol, each peak one symbol | A staff is cut out, and a sequence model writes out its symbols (pitches, values…) one token after another |
+| What comes out | Symbols with their kind, place on the page and confidence, in no order | The music in order, with no places on the page |
+| What it looks at | The neighbourhood of each symbol | The whole staff, the context before and after |
+| Knowledge of music | None in the model: the rules put chords, voices and bars together and check them | In the model: it learns how music usually goes |
+| Size | About 5 MB; one page in a second or two on the CPU | Larger; usually run on a GPU |
+
+What follows from it:
 
 - **Every symbol has its place on the page.** A detector finds each head, rest, accidental
   and mark where it is printed, and the rules of notation put them together. So the reader
