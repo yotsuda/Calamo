@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmrGen;
 
-// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures]
+// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs]
 // ("all" is Gen.Suites; "band", the band scores' pieces, and "lied", songs whose voice's staff
 // is hidden where it rests, are asked for by name; --lyrics puts words under lied's voice)
 //
@@ -71,6 +71,8 @@ static class Program
         Writer.Beams3 = opt.ContainsKey("beams3");
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
         bool figures = opt.ContainsKey("figures");
+        // --leapslurs: two-note slurs over a wide leap from an eighth or sixteenth (an old print's hooked slur)
+        bool leapSlurs = opt.ContainsKey("leapslurs");
         var suites = opt.GetValueOrDefault("suite", "all") == "all"
             ? Gen.Suites
             : opt["suite"].Split(',');
@@ -117,6 +119,8 @@ static class Program
                     if (arpeggios) Gen.AddArpeggios(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 14));
                     // (--glissandi: likewise)
                     if (glissandi) Gen.AddGlissandi(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 15));
+                    // (--leapslurs: likewise; before the octave lines, which move the notes it leaps to)
+                    if (leapSlurs) Gen.AddLeapSlurs(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 18));
                     // (--ottava: octave lines, likewise; after the rests are put in, which move the bars)
                     // (--graces: grace notes, likewise; before the octave lines, which pass over no note with one)
                     if (graces) Gen.AddGraces(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 9));

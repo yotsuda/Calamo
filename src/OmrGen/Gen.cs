@@ -461,6 +461,46 @@ static class Gen
             }
     }
 
+    // OmrGen --leapslurs: two-note slurs over a wide leap (a fourth to an octave, up or down) from an
+    // eighth or sixteenth, in every part and voice, from a stream of their own after the music like
+    // --glissandi. Lily# draws such a slur as a short hook from the first head's tip down (or up) to
+    // the far head, the shape old prints give most two-note slurs and the detector missed on the
+    // scans (2026-10-30, HANDOFF). The second note is moved to the leap; within a bar, out of any slur
+    // or tie, never a voice that sings words (its syllables follow the slurs)
+    public static void AddLeapSlurs(GPiece p, Random rng)
+    {
+        foreach (var part in p.Parts)
+        {
+            if (part.Lyrics != null) continue;
+            int mid = MiddleLine(part.Clef);
+            for (int b = 0; b < part.Bars.Count; b++)
+            {
+                var keyAlt = KeyAlterations(p.At(b).Fifths);
+                foreach (var line in part.Bars[b])
+                {
+                    bool inSlur = false;
+                    for (int i = 0; i + 1 < line.Count; i++)
+                    {
+                        // (every value drawn whether used or not: the draws stay in step)
+                        double r = rng.NextDouble();
+                        int leap = rng.Next(3, 8) * (rng.Next(2) == 0 ? -1 : 1);
+                        GEv e = line[i], n = line[i + 1];
+                        if (e.SlurEnd) inSlur = false;
+                        if (e.SlurStart) inSlur = true;
+                        if (r >= 0.3 || inSlur || n.SlurStart || n.SlurEnd || e.IsRest || n.IsRest || e.Measure || n.Measure
+                            || e.Pitches.Count != 1 || n.Pitches.Count != 1 || e.Tie || n.Tie || (i > 0 && line[i - 1].Tie)
+                            || e.Ticks > 240 || n.Ticks > 480) continue;
+                        int d = e.Pitches[0].Dia + leap;
+                        if (Math.Abs(d - mid) > 9) d = e.Pitches[0].Dia - leap;
+                        n.Pitches = new() { new GPitch(d, keyAlt[((d % 7) + 7) % 7]) };
+                        e.SlurStart = n.SlurEnd = true;
+                        i++;
+                    }
+                }
+            }
+        }
+    }
+
     // OmrGen --ottava: octave lines (8va, 8vb, 15ma, 15mb) over stretches of a part's notes (S18: the
     // detector's training data for them), from a stream of their own after the music like --marks.
     // The notes under a line are written as they sound, an octave or two up or down, and Lily# draws
