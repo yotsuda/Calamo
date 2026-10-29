@@ -38,13 +38,40 @@ hairpins, pedal marks, articulations and ornaments, trills, arpeggios, glissandi
 endings, common words of expression, the tempo, the title, composer and poet, and rehearsal marks.
 Not yet: lyrics, chord names, handwritten music.
 
+## What it is built for
+
+The reader makes a text you will check and finish, not a guess you have to trust.
+
+- **Every symbol has its place on the page.** A detector finds each head, rest, accidental
+  and mark where it is printed, and the rules of notation put them together. So the reader
+  can box what it doubts, open a bar beside the scan, and draw its own reading again to
+  compare it with the page (`--verify`). A reader that turns a whole staff into a string of
+  symbols at once can tell only roughly where each one came from.
+- **It writes what it sees, and shows where that does not add up.** Bars are checked against
+  the time signature and voices against each other; a bar that does not fill is marked, not
+  filled with what the music would most likely do. A wrong reading tends to look wrong.
+- **The whole score, not only pitches and rhythms.** Dynamics, hairpins, articulations,
+  ornaments, pedal marks, words of expression, the tempo and the title are read where they
+  stand on the page. A new kind of symbol is taught by drawing pieces that have it, so the
+  reader grows one symbol at a time.
+- **Small and local.** A 5 MB detector and the rules, on the CPU: no GPU, nothing sent
+  anywhere. The code and the model are under the Apache License 2.0. The model learnt from
+  pages the project draws itself, from music it makes up, and from public-domain scans of
+  songs whose notes are CC0: no non-commercial or share-alike data went into it.
+- **Measured on music it never learnt from.** The evaluation pieces are kept out of
+  training: neither their pages nor their notes were seen.
+
+Where it is behind: old prints scanned small or worn, where a reader trained end to end on
+heavily degraded pages still reads more notes. That gap is the current work.
+
 ## How well it reads
 
 The evaluation sets are 66 readings of piano pieces and songs, some of them the same music in
 different editions, that the reader is never tuned on; all are public domain or under a free
 license (`data/eval`; the numbers are in [docs/eval-sets.tsv](docs/eval-sets.tsv); three editions
 are downloaded by hand, see [data/LICENSES.md](data/LICENSES.md)). A note or rest counts when its
-pitch and duration match the truth.
+pitch and duration match the truth. Other songs from some of the same old prints are in the
+development set (`data/dev`), whose scans the detector learns from.
 
 | Pages | Sets | Notes and rests | Read right |
 |---|---|---|---|
