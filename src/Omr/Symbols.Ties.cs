@@ -164,7 +164,7 @@ static partial class Symbols
     /// structure the rules' stroke-following asked of the ink (one stroke from head to head), read
     /// from the learnt shape instead: on a scan the stroke breaks, the ends still look like ends.
     /// </summary>
-    static void DetectedTies(PageSymbols ps, double s)
+    static void DetectedTies(PageSymbols ps, Img d, double s)
     {
         var lefts = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= TrustScore).ToList();
         var rights = ps.Detections.Where(t => t.Class == "tie_r" && t.Score >= TrustScore).ToList();
@@ -232,6 +232,30 @@ static partial class Symbols
                 var r = rights.Where(u => u.X > a.X && At(u, +1) == b).OrderByDescending(u => u.Score).FirstOrDefault();
                 tied = r != null;
                 why = r != null ? $"tie_r at {r.X:F0},{r.Y:F0} ({r.Score:F2}) at the next head at pos {a.Pos}" : $"no tie_r at the next head at pos {a.Pos} ({b.X:F0},{b.Y:F0})";
+                // (a long tie across a bar line to the next chord, on a photo: the detector sees its
+                // start and nothing of its end, which comes in just past the bar line, and the rules'
+                // stroke breaks in the grey. The next note at the same place, past a bar line, nothing
+                // between on the staff and no slur ending there, is the tie's end by the notation's
+                // own rule: a tie joins a note to the next one at its pitch. Within a bar the detector
+                // sees a tie's two ends; a lone start there is a glissando's line, chords001)
+                // (a second's head beside its chord's other heads is no note between)
+                // (the bar line: the detector's, or, where the ties over it dim it for the detector,
+                // tabi's 4th bar line at 0.41, a column dark through the staff clear of the two notes' stems)
+                double mid = (st.Lines[0].Top + st.Lines[^1].Bot) / 2.0;
+                bool barBetween = ps.Detections.Any(u => u.Class == "barline" && u.Score >= TrustScore && u.X > a.R && u.X < b.L && Math.Abs(u.Y - mid) < 3 * s)
+                    || Enumerable.Range((int)(a.R + 0.6 * s), Math.Max(0, (int)(b.L - 0.6 * s) - (int)(a.R + 0.6 * s))).Any(x =>
+                       {
+                           int top = st.Lines[0].Top, bot = st.Lines[^1].Bot, dark = 0;
+                           for (int y = top; y <= bot; y++) if (d[x, y]) dark++;
+                           return dark >= 0.9 * (bot - top + 1);
+                       });
+                if (!tied && barBetween
+                    && !ps.Heads.Any(o => o.St == st && o.X > a.X + 1.5 * s && o.X < b.X - 1.5 * s)
+                    && !ps.Detections.Any(u => u.Class == "slur_r" && u.Score >= TrustScore && Math.Abs(u.X - b.X) < 1.5 * s && Math.Abs(u.Y - b.Y) < 4 * s))
+                {
+                    tied = true;
+                    why += ", but it is the next note and no slur ends there";
+                }
             }
             else
             {
@@ -254,7 +278,7 @@ static partial class Symbols
             if (a == null || a.Tie) continue;
             if (DebugAt.HasValue && Math.Abs(u.X - DebugAt.Value.X) < 3 * s && Math.Abs(u.Y - DebugAt.Value.Y) < 3 * s)
                 Console.WriteLine($"detected tie_r at {u.X:F0},{u.Y:F0} ({u.Score:F2}) at head {b.X:F0},{b.Y:F0} pos {b.Pos}: no tie_l seen, tied from the head before at {a.X:F0},{a.Y:F0}");
-            a.Tie = true;
+            a.Tie = a.TieByEnd = true;
         }
     }
 
@@ -274,6 +298,12 @@ static partial class Symbols
     static void DetectedSlurs(PageSymbols ps, double s)
     {
         var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= TrustScore).ToList();
+        // a tie's start that tied nothing (DetectedTies: no head at its place after it, or a slur's
+        // end there) is a slur's start the detector took for a tie: the short arc from a chord's top
+        // note down to the next note, tabi's 8th bar. It starts a slur only to an end found for it
+        var fromTie = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= TrustScore
+            && !ps.Heads.Any(h => h.Tie && Math.Abs(h.Y - t.Y) <= 1.25 * s && t.X - h.X > -0.3 * s && t.X - h.X < 2.0 * s)).ToHashSet();
+        ends.AddRange(fromTie);
         if (ends.Count == 0) return;
         // chords: the heads on one stem, or stemless at one x
         var chords = new List<List<Head>>();
@@ -309,6 +339,14 @@ static partial class Symbols
             var near = Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
             if (t.Class == "slur_r" && near != null && near.Right - t.X < 0.6 * s) continue;
             var best = chords.Select(c => (c, f: Fit(c, t))).Where(p => p.f.Cost < double.MaxValue).OrderBy(p => p.f.Cost).FirstOrDefault();
+            // (a start among a tied chord's heads, not beyond them, is one of its ties' ends: a slur
+            // clears its outer note. Tabi's 4th bar, four ties out of a chord, one seen as a slur)
+            if (best.c != null && t.Class == "slur_l" && best.c.Any(h => h.Tie) && t.Y > best.c.Min(h => h.Y) && t.Y < best.c.Max(h => h.Y))
+            {
+                if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
+                    Console.WriteLine($"detected slur_l at {t.X:F0},{t.Y:F0} ({t.Score:F2}): among a tied chord's heads, a tie's end");
+                continue;
+            }
             if (best.c != null) at[t] = (best.c, best.f.Above);
             else if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                 Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): by no note");
@@ -319,7 +357,7 @@ static partial class Symbols
         foreach (var g in ends.GroupBy(StaffOf).Where(g => g.Key != null).OrderBy(g => g.Key.System).ThenBy(g => g.Key.Part))
         {
             var st = g.Key;
-            var lefts = g.Where(t => t.Class == "slur_l" && at.ContainsKey(t)).OrderBy(t => t.X).ToList();
+            var lefts = g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t)).OrderBy(t => t.X).ToList();
             var rights = g.Where(t => t.Class == "slur_r" && at.ContainsKey(t)).OrderBy(t => t.X).ToList();
             // the ends by no note: a broken slur's, at the staff's two edges
             bool hangsRight = g.Any(t => t.Class == "slur_r" && !at.ContainsKey(t) && st.Right - t.X < 3 * s);
@@ -339,7 +377,7 @@ static partial class Symbols
                     foreach (var h in at[r].Chord) h.SlurEnd = true;
                     if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0},{at[r].Chord[0].Y:F0} ({r.Score:F2}), {(above ? "over" : "under")}");
                 }
-                else open.Add(l);
+                else if (!fromTie.Contains(l)) open.Add(l);
             }
             // (only the last start left open can run on to the edge)
             bool ranOn = false;

@@ -386,6 +386,7 @@ GPL の「集積」として同梱も可能だが、OS ごとの大きさ・更�
 ## 7. セッションの進め方
 
 1. `docs/ROADMAP.md` と `docs/HANDOFF.md` を読む。`docs/repro/REQUESTS.md` に Lily# 側が `fixed` にした項目があれば、新しい lysc で確かめて `done` にする（絵が変わる直しなら生成譜の台を描き直す）。
+   **オーナーの種**（`C:\MyProj\omr-seeds`、Lily# の Report Misread to OMR。`docs/repro/lilysharp-reply-2026-10-29-seed-from-fixed-bars.md`）に `omr-triage.json` の無いフォルダーがあれば、まだ見ていない報告: 切り分けて（`rules` / `detector` / `new-symbol` / `false-report`）`omr-triage.json` を書く。フォルダーは消さない（評価の台）。読み手を直したら `pwsh tools/seeds.ps1` で全部の種が崩れていないかを見る。種の画像・`.lys` は学習に使わない、リリースに入れない。
 2. `pwsh tools/check.ps1` を実行し、基準値と一致することを確かめる（ずれていたら、まずその原因を調べる）。
    背景で走らせるなら `cmd /d /s /c "pwsh -File tools\check.ps1 < NUL > log 2>&1"`。**2 つ同時に走らせない**（同じ `out/` に書いて偽の WORSE が出る）。
 3. HANDOFF の「次の一手」から始める。対象の誤りを `out/gen/**/omr/sym-diffs.txt` で確認し、

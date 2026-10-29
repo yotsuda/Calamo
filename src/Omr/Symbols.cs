@@ -17,6 +17,7 @@ sealed class Head
     public int Dots;
     public int? Acc;             // accidental written before the head
     public bool Tie;             // a tie runs from this head to the next one at its pitch
+    public bool TieByEnd;        // ...on the detector's tie_r at the next head alone (a glissando's line ends the same way: Glissandi)
     public bool SlurStart, SlurEnd;   // a slur starts at this head (its chord) / ends at it
     public double Score;         // the learnt detector's confidence (0: the rules found it)
     public int Cluster;          // ink component id
@@ -719,7 +720,7 @@ static partial class Symbols
         }
         Signatures.Detect(ps, ink, inkHoles, systems, s, clefsRead == null ? null : () => clefsRead(ps));
         FindTies(ps, d, ink, s);
-        if (ps.Detections != null) DetectedTies(ps, s);
+        if (ps.Detections != null) DetectedTies(ps, d, s);
         Classify(ps, d, ink, systems, s);
         // a unison's sign is both voices' (it was given to one of the two heads)
         foreach (var h in ps.Heads.Where(h => h.Acc != null))

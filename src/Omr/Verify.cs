@@ -824,6 +824,14 @@ sealed class Verify
             int j = rb.FindIndex(t => t.Item1 == ra[i].Item1 && Math.Abs(t.Item2 - ra[i].Item2) <= 1);
             if (j >= 0) { ra.RemoveAt(i); rb.RemoveAt(j); }
         }
+        // a slur the reading drew where the scan shows a tie's start and no tie was read: the reader
+        // takes a tie's start that ties nothing for a slur's (Symbols.DetectedSlurs), and so does this
+        for (int i = ra.Count - 1; i >= 0; i--)
+        {
+            if (ra[i].Item1 != "slur_l") continue;
+            int j = rb.FindIndex(t => t.Item1 == "tie_l");
+            if (j >= 0) { ra.RemoveAt(i); rb.RemoveAt(j); }
+        }
         return (ra, rb);
     }
 

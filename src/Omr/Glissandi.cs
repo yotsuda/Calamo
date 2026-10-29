@@ -21,7 +21,11 @@ static class Glissandi
     static readonly double? DebugX = double.TryParse(Environment.GetEnvironmentVariable("OMR_GLISS_DEBUG"), out var v) ? v : null;
 
     /// <summary>A line found: from the head to the head, how long it ran in the ink, and the share of it thin across.</summary>
-    public sealed record Line(Head From, Head To, double Length, double Thin);
+    public sealed record Line(Head From, Head To, double Length, double Thin)
+    {
+        /// <summary>A tie read from the line's end alone (Head.TieByEnd) was taken off its chord: none is left on it.</summary>
+        public bool Untied;
+    }
 
     /// <summary>The glissando lines between the page's heads, in the page as binarized (the signs looked for in the ink without the staff lines).</summary>
     public static List<Line> Find(Img d, Img ink, List<Head> all, double s, List<Rest> rests = null)
@@ -36,6 +40,11 @@ static class Glissandi
                 // (on the same staff, a space and more over or under: a slant, not a tie's level; and
                 // room between the heads for the line and its two half-space gaps)
                 if (b.St != a.St || b.L - a.R < 2 * s || b.L - a.R > 16 * s || Math.Abs(b.Y - a.Y) < 0.8 * s) continue;
+                // (nor from a chord tied into b's: the line it follows is a tie that sags from one of its
+                // heads past another's, tabi's photo, a long tie across a bar line. A tie read from its
+                // end alone is no proof: a glissando's line ends as one does, chords001)
+                if (heads.Any(t => t.Tie && !t.TieByEnd && t.St == a.St && Math.Abs(t.X - a.X) < 1.5 * s
+                                   && heads.Any(u => u.St == b.St && u.Pos == t.Pos && Math.Abs(u.X - b.X) < 1.5 * s))) continue;
                 // (the line ends at the head's left, or at the left of the accidentals of its column, any of its
                 // chord's: a space to three back, an accidental's width and its gap and more, tried by halves)
                 // (and none at the head's left when its column has signs there: Lily# stops before them)
@@ -67,7 +76,13 @@ static class Glissandi
                     if (length >= 1.5 * s && thin >= 0.7 && reach && (best == null || length > best.Length)) best = new Line(a, b, length, thin);
                 }
             }
-            if (best != null) found.Add(best);
+            if (best == null) continue;
+            found.Add(best);
+            // (the line's end the detector took for a tie's: no tie from a's chord into b's)
+            var chord = heads.Where(t => t.St == a.St && Math.Abs(t.X - a.X) < 1.5 * s).ToList();
+            var untie = chord.Where(t => t.TieByEnd && heads.Any(u => u.St == best.To.St && u.Pos == t.Pos && Math.Abs(u.X - best.To.X) < 1.5 * s)).ToList();
+            foreach (var t in untie) t.Tie = t.TieByEnd = false;
+            best.Untied = untie.Count > 0 && !chord.Any(t => t.Tie);
         }
         return found;
     }
@@ -85,6 +100,7 @@ static class Glissandi
             {
                 e.Articulations ??= new List<string>();
                 if (!e.Articulations.Contains("glissando")) e.Articulations.Add("glissando");
+                if (g.Untied) e.Tie = false;
             }
         }
     }

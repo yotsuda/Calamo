@@ -25,6 +25,10 @@ $pkg = Get-Content "$stage\package.json" -Raw | ConvertFrom-Json
 if ($pkg.version -ne $info.version) { throw "extension/package.json is $($pkg.version), the reader $($info.version): make them one" }
 [IO.File]::WriteAllText("$bin\omr.json", (& "$bin\omr.exe" --version --json))
 
+# (the owner's seeds, their readings and tools/seeds.ps1 stay on the owner's machine: never in a release.
+# docs/repro/lilysharp-requests-2026-10-29-seed-from-fixed-bars.md)
+$seedFiles = Get-ChildItem $stage -Recurse -File | Where-Object { $_.FullName.Substring($stage.Length) -match 'seed' }
+if ($seedFiles) { throw "seed files in the package: $($seedFiles.FullName -join ', ')" }
 $size = (Get-ChildItem $bin -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
 "reader {0} (protocol {1}), bin {2:F1} MB" -f $info.version, $info.protocol, $size
 Push-Location $stage
