@@ -87,7 +87,12 @@ GROUPS = {0: [CLASSES.index(c) for c in ['head_black', 'head_half', 'head_whole'
                                          'stem_0', 'stem_1', 'stem_2', 'stem_3', 'barline']],
           1: [CLASSES.index(c) for c in ['head_black', 'head_half', 'head_whole', 'rest_long', 'rest_4', 'rest_8', 'rest_16',
                                          'sharp', 'flat', 'natural', 'dot', 'clef_g', 'clef_f', 'clef_c', 'timesig_c',
-                                         'digit_1', 'digit_2', 'digit_3', 'digit_4', 'digit_5', 'digit_6', 'digit_7', 'digit_8', 'digit_9']]}
+                                         'digit_1', 'digit_2', 'digit_3', 'digit_4', 'digit_5', 'digit_6', 'digit_7', 'digit_8', 'digit_9']],
+          # a bar read right whose slurs the truth gives (its MusicXML's): a slur's two ends, where they were found
+          3: [CLASSES.index(c) for c in ['slur_l', 'slur_r']]}
+# the ignore boxes, by kind: what each shuts (2: everything; 4: a slur's ends, where one was not found or one
+# hangs at a system's edge, its other end in the next system or the one before)
+SHUT = {2: list(range(len(CLASSES))), 4: GROUPS[3]}
 CLASS_OF = {
     'noteheads.s2': 'head_black', 'noteheads.s1': 'head_half', 'noteheads.s0': 'head_whole',
     'rests.0': 'rest_long', 'rests.1': 'rest_long', 'rests.2': 'rest_4', 'rests.3': 'rest_8', 'rests.4': 'rest_16',

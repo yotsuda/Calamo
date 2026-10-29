@@ -21,7 +21,7 @@ import sys, math, time
 import numpy as np
 import torch, torch.nn as nn, torch.nn.functional as F
 from PIL import Image
-from dataset import CLASSES, SPACE, HEIGHT, GROUPS
+from dataset import CLASSES, SPACE, HEIGHT, GROUPS, SHUT
 from degrade import degrade
 
 # the share of training windows dirtied by degrade.py (train ... --degrade 0.5); 0 trains as before
@@ -106,19 +106,20 @@ def focal_loss(pred, gt, mask=None):
 
 def mask_of(regions, x0, y0, dy):
     """The loss's mask over a window cut at x0, y0 and moved down dy: a page's regions (x0 y0 x1 y1 group,
-    in page pixels) open their group's classes (GROUPS), and an ignore box (group 2) shuts every class
+    in page pixels) open their group's classes (GROUPS), and an ignore box shuts its classes (SHUT: group 2
+    every class, group 4 a slur's ends)
     (the window's small turn is left out: a grid point at a region's edge either way)."""
     m = np.zeros((K, HEIGHT // STRIDE, CROP // STRIDE), dtype=np.float32)
     for shut in (False, True):
         for rx0, ry0, rx1, ry1, g in regions:
-            if (g == 2) != shut:
+            if (int(g) in SHUT) != shut:
                 continue
             gx0 = max(0, int(math.ceil((rx0 - x0) / STRIDE))); gx1 = min(m.shape[2], int(math.floor((rx1 - x0) / STRIDE)) + 1)
             gy0 = max(0, int(math.ceil((ry0 - y0 + dy) / STRIDE))); gy1 = min(m.shape[1], int(math.floor((ry1 - y0 + dy) / STRIDE)) + 1)
             if gx1 <= gx0 or gy1 <= gy0:
                 continue
             if shut:
-                m[:, gy0:gy1, gx0:gx1] = 0
+                m[SHUT[int(g)], gy0:gy1, gx0:gx1] = 0
             else:
                 m[GROUPS[int(g)], gy0:gy1, gx0:gx1] = 1
     return m

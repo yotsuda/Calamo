@@ -943,6 +943,37 @@ if (truth != null)
                 if (scored[pi] && scoredAs[j] > 0 && truth.Bars.ContainsKey((scoredAs[j], cfg.Parts[pi].Id)))
                     rows.Append(readBars[j]).Append('\t').Append(scoredAs[j]).Append('\t').Append(cfg.Parts[pi].Id).Append('\t').Append(sc.Wrong.Contains((scoredAs[j], cfg.Parts[pi].Id)) ? 0 : 1).Append('\n');
         File.WriteAllText(Path.Combine(exportDir, "read-bars.tsv"), rows.ToString());
+        // (and the truth's slurs and ties, a chord each: where the chord read for it stands, in a bar read right; the
+        // ends of a slur on a scan are looked for there, pseudo.py. In a bar read wrong only the mark, for pairing)
+        var marks = new StringBuilder("read\tpart\tright\tkind\tt\tx\tstemx\tstem\tlo\thi\n");
+        static string G(double v) => v.ToString("F1", CultureInfo.InvariantCulture);
+        for (int j = 0; j < readBars.Count; j++)
+            for (int pi = 0; pi < cfg.Parts.Count; pi++)
+            {
+                string id = cfg.Parts[pi].Id;
+                if (!scored[pi] || scoredAs[j] <= 0 || !truth.Voices.TryGetValue((scoredAs[j], id), out var tv)) continue;
+                bool right = !sc.Wrong.Contains((scoredAs[j], id));
+                static List<int> Midis(Ev e) => (e.Chord ?? new List<Pitch> { e.P }).Select(p => p.Midi()).Order().ToList();
+                var read = (allVoices.GetValueOrDefault((scoredAs[j], pi)) ?? new List<List<Ev>>()).SelectMany(v => v).Where(e => !e.IsRest && !e.Slash).OrderBy(e => e.X).ToList();
+                var tchords = tv.SelectMany(v => v).Where(e => !e.IsRest).OrderBy(e => e.X).ToList();
+                foreach (var e in tchords)
+                {
+                    if (!(e.Tie || e.SlurStart || e.SlurEnd)) continue;
+                    // the read chord with these notes, the k-th of them in x as this is the k-th in time
+                    Ev chord = null;
+                    if (right)
+                    {
+                        var same = tchords.Where(o => Midis(o).SequenceEqual(Midis(e))).ToList();
+                        var cands = read.Where(o => Midis(o).SequenceEqual(Midis(e))).ToList();
+                        if (same.Count == cands.Count) chord = cands[same.IndexOf(e)];
+                    }
+                    foreach (var (kind, has) in new[] { ("tie", e.Tie), ("slur_start", e.SlurStart), ("slur_end", e.SlurEnd) })
+                        if (has)
+                            marks.Append(readBars[j]).Append('\t').Append(id).Append('\t').Append(right ? 1 : 0).Append('\t').Append(kind).Append('\t').Append(e.X).Append('\t')
+                                 .Append(chord == null ? "-\t-\t-\t-\t-" : $"{G(chord.X)}\t{G(chord.StemX)}\t{chord.Stem}\t{G(chord.StemLo)}\t{G(chord.StemHi)}").Append('\n');
+                }
+            }
+        File.WriteAllText(Path.Combine(exportDir, "read-marks.tsv"), marks.ToString());
     }
     if (truth.Voices.Count > 0)
     {

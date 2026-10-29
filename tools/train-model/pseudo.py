@@ -7,7 +7,12 @@ with its rules and its checks across systems, reads many such bars right that th
 weakly: those bars teach the detector.
 
   omr ... --detector --align --by-order --export-read <dir>   (read-pNN.png/.tsv, read-bars.tsv)
-  python pseudo.py <out.npz> <model.pt>[,<model.pt>...] <export dir> [<export dir> ...]
+  python pseudo.py <out.npz> <model.pt>[,<model.pt>...] <export dir> [<export dir> ...] [--no-slurs]
+
+The truth's slurs (read-marks.tsv) teach a slur's two ends where the bar is read right (group 3): each
+end is the detectors' end of a slur or a tie nearest the chord read for it; an end none of them saw, and
+a slur hanging at a system's edge, is left out of the slur's loss (group 4). Old prints' short hooked
+slurs are not in the generated sets.
 
 A page here is taught only in regions (dataset.GROUPS): each staff's bars read right (their heads,
 rests, signs, dots, stems' tips, barlines, clefs) and its system's start where its first bar is right
@@ -34,6 +39,7 @@ SIGNS = ('sharp', 'flat', 'natural', 'dsharp', 'dflat')
 CLEF_CLASS = {'treble': 'clef_g', 'treble_8': 'clef_g', 'bass': 'clef_f', 'bass_8': 'clef_f', 'alto': 'clef_c', 'tenor': 'clef_c',
               'soprano': 'clef_c', 'mezzosoprano': 'clef_c', 'baritone': 'clef_c'}
 STATS = defaultdict(int)
+NO_SLURS = False
 
 
 def num(v):
@@ -77,6 +83,13 @@ def build_set(d, nets, dev):
     with open(os.path.join(d, 'read-bars.tsv'), newline='') as f:
         for r in csv.DictReader(f, delimiter='\t'):
             bars[(int(r['read']), r['part'])] = r['right'] == '1'
+    # the truth's slurs, a chord's mark each (read bar, part) -> (kind, its time, the chord read's x, stem's x, top, bottom)
+    marks = defaultdict(list)
+    if os.path.exists(os.path.join(d, 'read-marks.tsv')) and not NO_SLURS:
+        with open(os.path.join(d, 'read-marks.tsv'), newline='') as f:
+            for r in csv.DictReader(f, delimiter='\t'):
+                if r['kind'] != 'tie':
+                    marks[(int(r['read']), r['part'])].append((r['kind'], int(r['t']), num(r['x']), num(r['stemx']), num(r['lo']), num(r['hi'])))
     out = []
     pages = sorted(glob.glob(os.path.join(d, 'read-p*.tsv')))
     clef_offsets = defaultdict(list)     # per clef class: (dx, dy) of the found ones from the staff's left end and middle, in spaces
@@ -126,6 +139,42 @@ def build_set(d, nets, dev):
             top, bot = float(st['y']), float(st['b'])
             up = max([b for t, b in all_tops if b < top] or [-1e9]); down = min([t for t, b in all_tops if t > bot] or [1e9])
             return max(top - 5 * s, (up + top) / 2), min(bot + 5 * s, (bot + down) / 2)
+
+        def slurs(st, ms, head_end, b0, b1):
+            """A staff's slurs in a system, from the truth's marks (read-marks.tsv): in a bar read right each
+            end is looked for at the chord read for it, among the detectors' ends of a slur or a tie (a short
+            slur's end looks like a tie's), and the bar teaches a slur's ends (group 3). An end not found, and
+            a slur hanging at the system's edge (its other end in the system before or after), shut them (4)."""
+            p, left, right = st['part'], float(st['x']), float(st['a'])
+            starts = []
+            for k, (x0, x1, b) in enumerate(ms):
+                ok = bars.get((b, p))
+                if ok:
+                    open_(head_end if k == 0 else x0 - 0.3 * s, b0, x1 + 0.6 * s, b1, 3)
+                for kind, t, x, sx, lo, hi in sorted(marks.get((b, p), []), key=lambda m: m[1]):
+                    start = kind == 'slur_start'
+                    at = x if x is not None else (x0 if start else x1)
+                    if start:
+                        starts.append(at)
+                    elif starts:
+                        starts.pop()
+                    else:
+                        STATS['slur from before'] += 1; shut(left - 2 * s, b0, at + 1.5 * s, b1)
+                    if not ok or x is None:
+                        continue
+                    xs = [x] + ([sx] if sx else [])
+                    wx0, wx1, wy0, wy1 = min(xs) - 2 * s, max(xs) + 2 * s, lo - 3 * s, hi + 3 * s
+                    c = nearest(cands, {'slur_l', 'tie_l'} if start else {'slur_r', 'tie_r'}, wx0, wy0, wx1, wy1, x, (lo + hi) / 2)
+                    name = 'slur_l' if start else 'slur_r'
+                    if c:
+                        label(name, c[1], c[2], 'det' if c[0] == name else 'det as tie')
+                    else:
+                        STATS[name + ' lost'] += 1; shut(wx0, wy0, wx1, wy1)
+            for at in starts:
+                STATS['slur on after'] += 1; shut(at - 1.5 * s, b0, right + 2 * s, b1)
+
+        def shut(x0, y0, x1, y1):
+            regions.append((x0 * scale, y0 * scale, x1 * scale, y1 * scale, 4))
 
         def where(r):
             """(right?, bar) of a symbol's row: its staff's part, its x's measure."""
@@ -220,6 +269,8 @@ def build_set(d, nets, dev):
                 for k, (x0, x1, b) in enumerate(ms):
                     if bars.get((b, p)):
                         open_(head_end if k == 0 else x0 - 0.3 * s, b0, x1 + 0.6 * s, b1, 0)
+                if marks:
+                    slurs(st, ms, head_end, b0, b1)
                 # its barlines (one at each measure's end, at the staff's middle), where a bar either side is right
                 for k, (x0, x1, b) in enumerate(ms):
                     if not (bars.get((b, p)) or (k + 1 < len(ms) and bars.get((ms[k + 1][2], p)))): continue
@@ -297,6 +348,9 @@ def build_set(d, nets, dev):
 
 
 if __name__ == '__main__':
+    # (--no-slurs: the truth's slurs left out, as before they were taught: a control's set)
+    if '--no-slurs' in sys.argv:
+        sys.argv.remove('--no-slurs'); NO_SLURS = True
     out, models, dirs = sys.argv[1], sys.argv[2].split(','), sys.argv[3:]
     dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     nets = []
