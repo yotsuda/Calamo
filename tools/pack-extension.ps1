@@ -27,7 +27,7 @@ if ($pkg.version -ne $info.version) { throw "extension/package.json is $($pkg.ve
 
 # (the owner's seeds, their readings and tools/seeds.ps1 stay on the owner's machine: never in a release.
 # docs/repro/lilysharp-requests-2026-10-29-seed-from-fixed-bars.md)
-$seedFiles = Get-ChildItem $stage -Recurse -File | Where-Object { $_.FullName.Substring($stage.Length) -match 'seed' }
+$seedFiles = Get-ChildItem $stage -Recurse -File | Where-Object { [IO.Path]::GetRelativePath($stage, $_.FullName) -match 'seed' }
 if ($seedFiles) { throw "seed files in the package: $($seedFiles.FullName -join ', ')" }
 $size = (Get-ChildItem $bin -Recurse -File | Measure-Object Length -Sum).Sum / 1MB
 "reader {0} (protocol {1}), bin {2:F1} MB" -f $info.version, $info.protocol, $size
