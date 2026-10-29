@@ -953,9 +953,16 @@ if (truth != null)
                 var tv =truth.Voices.GetValueOrDefault((bar, cfg.Parts[pi].Id)) ?? new List<List<Ev>>();
                 var ov = (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).Select(Notes).Where(v => v.Count > 0).ToList();
                 sc.AddVoices(bar, cfg.Parts[pi].Id, tv, ov);
+                sc.AddTiesSlurs(bar, cfg.Parts[pi].Id, tv, ov);
             }
         Console.WriteLine(sc.VoiceSummary());
         File.WriteAllText(Path.Combine(outDir, "voice-diffs.txt"), string.Join("\n", sc.VDiffs));
+        // (a truth that marks no tie or slur, a .notes file's: nothing to say)
+        if (truth.Voices.Values.Any(vs => vs.Any(v => v.Any(e => e.Tie || e.SlurStart || e.SlurEnd))))
+        {
+            Console.WriteLine(sc.TieSlurSummary());
+            File.WriteAllText(Path.Combine(outDir, "tie-slur-diffs.txt"), string.Join("\n", sc.TieSlurDiffs));
+        }
     }
     // the note todos against the truth: of each reading offered, does the bar read the other way
     // match more of the truth's notes (pitch and length; "other"), fewer ("as read"), or as many

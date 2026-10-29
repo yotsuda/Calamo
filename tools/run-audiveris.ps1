@@ -82,7 +82,8 @@ if ($Dev) {
 }
 $total = @{ audiveris = @(0, 0); this = @(0, 0) }   # notes+rests found, of the truth's
 $rows = [System.Collections.Generic.List[object]]::new()   # this reader's count per set
-$pattern = 'exact events|notes\+rests|^align:'
+$pattern = 'exact events|notes\+rests|^align:|^ties:|^slur (starts|ends):'
+$marks = @(@('ties', 'tie'), @('slur starts', 'slurStart'), @('slur ends', 'slurEnd'))   # (the summary's name, the column's)
 foreach ($name in $benches.Keys) {
     if ($Sets.Count -gt 0 -and $Sets -notcontains $name) { continue }
     $b = $benches[$name]
@@ -138,7 +139,19 @@ foreach ($name in $benches.Keys) {
     foreach ($k in @(@('audiveris', $audText), @('this', $ownText))) {
         if ($k[1] -match 'truth (\d+), omr \d+; pitch\+duration found (\d+)') { $total[$k[0]][0] += [int]$Matches[2]; $total[$k[0]][1] += [int]$Matches[1] }
     }
-    if ($ownText -match 'truth (\d+), omr \d+; pitch\+duration found (\d+)') { $rows.Add([pscustomobject]@{ set = $name; truth = [int]$Matches[1]; found = [int]$Matches[2] }) }
+    if ($ownText -match 'truth (\d+), omr \d+; pitch\+duration found (\d+)') {
+        $row = [ordered]@{ set = $name; truth = [int]$Matches[1]; found = [int]$Matches[2] }
+        # (a MusicXML truth's ties and slurs, a chord each: found of the truth's, and read right of those read;
+        # every row has the columns, blank where the truth marks none: Export-Csv takes the first row's)
+        foreach ($m in $marks) {
+            foreach ($c in 'Truth', 'Found', 'Omr', 'Right') { $row["$($m[1])$c"] = '' }
+            if ($ownText -match "(?m)^$($m[0]): truth (\d+), omr (\d+), found (\d+), read right (\d+)") {
+                $row["$($m[1])Truth"] = [int]$Matches[1]; $row["$($m[1])Found"] = [int]$Matches[3]
+                $row["$($m[1])Omr"] = [int]$Matches[2]; $row["$($m[1])Right"] = [int]$Matches[4]
+            }
+        }
+        $rows.Add([pscustomobject]$row)
+    }
 }
 foreach ($k in 'audiveris', 'this') {
     if ($total[$k][1] -gt 0) { "total {0,-10} notes+rests found {1}/{2} ({3:F1}%)" -f $k, $total[$k][0], $total[$k][1], (100.0 * $total[$k][0] / $total[$k][1]) }
@@ -152,15 +165,29 @@ if ($Sets.Count -eq 0 -and $rows.Count -gt 0) {
     $rows | Export-Csv "$out\$kind-sets.tsv" -Delimiter "`t" -NoTypeInformation -UseQuotes Never
     $kept = "$root\docs\$kind-sets.tsv"
     if (Test-Path $kept) {
-        $was = @{}; foreach ($r in Import-Csv $kept -Delimiter "`t") { $was[$r.set] = [int]$r.found }
-        $up = 0; $down = 0
+        $was = @{}; foreach ($r in Import-Csv $kept -Delimiter "`t") { $was[$r.set] = $r }
+        $up = 0; $down = 0; $mUp = 0; $mDown = 0
         foreach ($r in $rows) {
             if (-not $was.ContainsKey($r.set)) { "  new     {0,-34} {1}/{2}" -f $r.set, $r.found, $r.truth; continue }
-            $d = $r.found - $was[$r.set]
-            if ($d -gt 0) { $up++; "  better  {0,-34} {1} -> {2} (+{3})" -f $r.set, $was[$r.set], $r.found, $d }
-            elseif ($d -lt 0) { $down++; "  WORSE   {0,-34} {1} -> {2} ({3})" -f $r.set, $was[$r.set], $r.found, $d }
+            $w = $was[$r.set]
+            $d = $r.found - [int]$w.found
+            if ($d -gt 0) { $up++; "  better  {0,-34} {1} -> {2} (+{3})" -f $r.set, $w.found, $r.found, $d }
+            elseif ($d -lt 0) { $down++; "  WORSE   {0,-34} {1} -> {2} ({3})" -f $r.set, $w.found, $r.found, $d }
+            # (ties and slurs: the truth's found, more is better, and those read wrong, fewer is better; a kept table
+            # without them says nothing)
+            foreach ($m in $marks) {
+                $f = "$($m[1])Found"; $o = "$($m[1])Omr"; $g = "$($m[1])Right"
+                if ("$($r.$f)" -eq '' -or "$($w.$f)" -eq '') { continue }
+                $was2 = @([int]$w.$f, ([int]$w.$o - [int]$w.$g)); $now2 = @([int]$r.$f, ([int]$r.$o - [int]$r.$g))
+                foreach ($i in 0, 1) {
+                    $d = ($now2[$i] - $was2[$i]) * $(if ($i -eq 0) { 1 } else { -1 })
+                    $what = "$($m[0]) $(if ($i -eq 0) { 'found' } else { 'read wrong' })"
+                    if ($d -gt 0) { $mUp++; "  better  {0,-34} {1} {2} -> {3}" -f $r.set, $what, $was2[$i], $now2[$i] }
+                    elseif ($d -lt 0) { $mDown++; "  WORSE   {0,-34} {1} {2} -> {3}" -f $r.set, $what, $was2[$i], $now2[$i] }
+                }
+            }
         }
-        "sets against docs\$kind-sets.tsv: $up better, $down worse, $($rows.Count - $up - $down) the same (copy out\audiveris\$kind-sets.tsv over it to keep these)"
+        "sets against docs\$kind-sets.tsv: $up better, $down worse, $($rows.Count - $up - $down) the same; ties and slurs $mUp better, $mDown worse (copy out\audiveris\$kind-sets.tsv over it to keep these)"
     }
     else { "no docs\$kind-sets.tsv yet: copy out\audiveris\$kind-sets.tsv there to compare the next run with this one" }
 }

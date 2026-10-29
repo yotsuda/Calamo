@@ -162,7 +162,8 @@ static class NotesTruth
 /// the config. Bars are the measures in order (not their printed numbers). Pitches keep their
 /// spelling. Grace and cue notes and invisible rests (a spacer's) are left out. The staff's
 /// voices go to Voices, chords as one event; with poly, Bars holds each note of a chord on its own
-/// (as the .notes truth does).
+/// (as the .notes truth does). A note's ties and slurs are kept (Tie, SlurStart, SlurEnd), a chord's
+/// in Voices as any of its notes'.
 /// </summary>
 static class MusicXmlTruth
 {
@@ -208,7 +209,13 @@ static class MusicXmlTruth
                                 int step = "CDEFGAB".IndexOf(p.Element("step").Value[0]);
                                 ev.P = new Pitch(int.Parse(p.Element("octave").Value) * 7 + step, (int)Math.Round(double.Parse(p.Element("alter")?.Value ?? "0", System.Globalization.CultureInfo.InvariantCulture)));
                                 // (an arpeggio, on each note of its chord: Scorer.AddArpeggios counts it once a chord)
-                                if (el.Elements("notations").Any(n => n.Element("arpeggiate") != null)) ev.Articulations = new List<string> { "arpeggio" };
+                                var notations = el.Elements("notations").ToList();
+                                if (notations.Any(n => n.Element("arpeggiate") != null)) ev.Articulations = new List<string> { "arpeggio" };
+                                // (a tie on the note it starts at; a slur on one note of its chord: Scorer.AddTiesSlurs counts them a chord)
+                                bool Has(string name, string type) => notations.Any(n => n.Elements(name).Any(x => (string)x.Attribute("type") == type));
+                                ev.Tie = Has("tied", "start");
+                                ev.SlurStart = Has("slur", "start");
+                                ev.SlurEnd = Has("slur", "stop");
                             }
                             list.Add(ev);
                             break;
@@ -235,8 +242,9 @@ static class MusicXmlTruth
                                 last.Chord.Sort((a, b) => a.Diatonic.CompareTo(b.Diatonic));
                                 last.P = last.Chord[^1];
                                 if (e.Articulations != null) last.Articulations ??= e.Articulations;
+                                last.Tie |= e.Tie; last.SlurStart |= e.SlurStart; last.SlurEnd |= e.SlurEnd;
                             }
-                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations });
+                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations, Tie = e.Tie, SlurStart = e.SlurStart, SlurEnd = e.SlurEnd });
                         }
                         if (!t.Voices.TryGetValue((bar, id), out var vs)) t.Voices[(bar, id)] = vs = new List<List<Ev>>();
                         vs.Add(line);
@@ -308,15 +316,52 @@ sealed class Scorer
         var o = Arpeggios(omr);
         // (with --poly the reader marks a chord's arpeggio on some of its heads' events: a note in common is the chord;
         // and a chord the reader splits into two voices has its wave on each: one truth chord found, both read right)
-        // (found: one to one, a bar's chords repeated over one wave read are found once)
+        var (found, right) = MatchChords(t, o);
+        ArpTruth += t.Count; ArpOmr += o.Count; ArpFound += found; ArpRight += right;
+        if (found < t.Count || right < o.Count) ArpDiffs.Add($"{bar,4} {part,-5} arpeggios: truth {t.Count}, read {o.Count}, found {found}, read right {right} ({ShowChords(t)} / {ShowChords(o)})");
+    }
+
+    /// <summary>A part-bar's marked chords, the truth's and those read, matched by a note in common: how many of
+    /// the truth's are found (one to one: a bar's chords repeated over one mark read are found once), and how
+    /// many of those read stand for one of the truth's.</summary>
+    static (int Found, int Right) MatchChords(List<HashSet<int>> t, List<HashSet<int>> o)
+    {
         var used = new bool[o.Count];
         int found = 0, right = o.Count(k => t.Any(c => c.Overlaps(k)));
         foreach (var c in t)
             for (int j = 0; j < o.Count; j++)
                 if (!used[j] && c.Overlaps(o[j])) { used[j] = true; found++; break; }
-        ArpTruth += t.Count; ArpOmr += o.Count; ArpFound += found; ArpRight += right;
-        string Show(List<HashSet<int>> a) => string.Join(" ", a.Select(h => string.Join(",", h.Order())));
-        if (found < t.Count || right < o.Count) ArpDiffs.Add($"{bar,4} {part,-5} arpeggios: truth {t.Count}, read {o.Count}, found {found}, read right {right} ({Show(t)} / {Show(o)})");
+        return (found, right);
+    }
+
+    static string ShowChords(List<HashSet<int>> a) => string.Join(" ", a.Select(h => string.Join(",", h.Order())));
+
+    // ties and slurs: a chord's (an event of a voice: the .lys writes "~", "(" and ")" a chord), matched within the
+    // part-bar by a note they share, as arpeggios are. The truth's MusicXML marks a tie on each note it holds and a
+    // slur on one note of its chord; the reading's tie holds every note of its chord the next one repeats.
+    static readonly (string Name, Func<Ev, bool> Has)[] TieSlurMarks = { ("ties", e => e.Tie), ("slur starts", e => e.SlurStart), ("slur ends", e => e.SlurEnd) };
+    public readonly int[,] TieSlur = new int[3, 4];   // per mark (ties, slur starts, slur ends): truth, omr, found, read right
+    public List<string> TieSlurDiffs = new();
+
+    public void AddTiesSlurs(int bar, string part, List<List<Ev>> truth, List<List<Ev>> omr)
+    {
+        for (int k = 0; k < TieSlurMarks.Length; k++)
+        {
+            var has = TieSlurMarks[k].Has;
+            List<HashSet<int>> Chords(List<List<Ev>> vs) => vs.SelectMany(v => v).Where(e => !e.IsRest && has(e)).Select(e => (e.Chord ?? new List<Pitch> { e.P }).Select(p => p.Midi()).ToHashSet()).ToList();
+            var t = Chords(truth);
+            var o = Chords(omr);
+            var (found, right) = MatchChords(t, o);
+            TieSlur[k, 0] += t.Count; TieSlur[k, 1] += o.Count; TieSlur[k, 2] += found; TieSlur[k, 3] += right;
+            if (found < t.Count || right < o.Count) TieSlurDiffs.Add($"{bar,4} {part,-5} {TieSlurMarks[k].Name}: truth {t.Count}, read {o.Count}, found {found}, read right {right} ({ShowChords(t)} / {ShowChords(o)})");
+        }
+    }
+
+    public string TieSlurSummary()
+    {
+        double P(int x, int of) => of == 0 ? 0 : 100.0 * x / of;
+        return string.Join("\n", TieSlurMarks.Select((m, k) =>
+            $"{m.Name}: truth {TieSlur[k, 0]}, omr {TieSlur[k, 1]}, found {TieSlur[k, 2]}, read right {TieSlur[k, 3]} (recall {P(TieSlur[k, 2], TieSlur[k, 0]):F1}%, precision {P(TieSlur[k, 3], TieSlur[k, 1]):F1}%)"));
     }
 
     public string ArpeggioSummary()

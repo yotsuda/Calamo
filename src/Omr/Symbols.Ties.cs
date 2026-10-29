@@ -392,7 +392,24 @@ static partial class Symbols
                 var r = rights.Where(r => !used.Contains(r) && at[r].Chord != a && at[r].Chord.Average(h => h.X) > ax && at[r].Above == above
                                           && (!fromTie.Contains(l) || at[r].Chord.Average(h => h.X) - ax < 12 * s))
                               .OrderBy(r => r.X).FirstOrDefault();
-                if (r != null)
+                // (an arc from a chord to the next one on the staff, the same notes and nothing between, is
+                // a tie whatever the detector called its two ends: a slur joins different notes. Brandt's
+                // song as MuseScore draws it, a''4.( a''8) four times for a''4.~ a''8. Not when the second
+                // has a sign: the same place, another note, Brandt's other song's a'8( ais'8). A second
+                // voice's heads between, stemmed the other way on the far side, are no note between.
+                // And only an arc that leaves the head from its side, as a tie does: Lily#'s slur from a
+                // stemmed note starts over it, the slurs suite's c4.( c8), 11 of 13 there 0.05-0.8 space
+                // inside the head's right edge, the real prints' ties 0.3-0.6 past it)
+                bool OtherVoice(Head o) => a[0].HasStem && o.HasStem && o.Up != a[0].Up && (a[0].Up ? o.Y > a.Max(h => h.Y) : o.Y < a.Min(h => h.Y));
+                if (r != null && !fromTie.Contains(l) && at[r].Chord is var b && b.Count == a.Count && l.X > a.Max(h => h.R)
+                    && a.Select(h => h.Pos).Order().SequenceEqual(b.Select(h => h.Pos).Order()) && b.All(h => h.Acc == null)
+                    && !ps.Heads.Any(o => o.St == st && !a.Contains(o) && !b.Contains(o) && !OtherVoice(o) && o.X > a.Max(h => h.X) + 0.5 * s && o.X < b.Min(h => h.X) - 0.5 * s))
+                {
+                    used.Add(r);
+                    foreach (var h in a) h.Tie = true;
+                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to the next chord, the same notes at {b[0].X:F0}: a tie");
+                }
+                else if (r != null)
                 {
                     used.Add(r);
                     foreach (var h in a) h.SlurStart = true;
