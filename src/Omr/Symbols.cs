@@ -728,7 +728,7 @@ static partial class Symbols
             foreach (var o in ps.Heads.Where(o => o != h && o.Acc == null && o.St == h.St && o.Pos == h.Pos && Math.Abs(o.X - h.X) < 0.3 * s && o.HasStem && h.HasStem && o.Up != h.Up))
                 o.Acc = h.Acc;
         // (after the dots are given: a slur leaving a dotted note starts past its dot)
-        if (ps.Detections != null) DetectedSlurs(ps, s);
+        if (ps.Detections != null) DetectedSlurs(ps, d, s);
         FindTuplets(ps, d, inkHoles, s);
         return ps;
     }

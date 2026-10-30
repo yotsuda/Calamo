@@ -313,7 +313,7 @@ static partial class Symbols
     /// such an end, and the next system's first end closes it (the second piece's start is a shape
     /// the detector mostly misses).
     /// </summary>
-    static void DetectedSlurs(PageSymbols ps, double s)
+    static void DetectedSlurs(PageSymbols ps, Img d, double s)
     {
         // (a slur_r DetectedTies took for a tie's end ends no slur)
         var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= TrustScore && !ps.TieEndsAsSlur.Contains(t)).ToList();
@@ -370,6 +370,24 @@ static partial class Symbols
             else if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                 Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): by no note");
         }
+        // an arc over three notes and more that each sing a syllable of their own is no slur: a sung
+        // slur holds one syllable over its notes. An old print's tuplet arc, its 3 at the top, over a
+        // voice's triplet of eighths (Chaminade's song, Enoch 1898: au pa-ys, dé-li-ci-eux)
+        var words = new Dictionary<Staff, List<(double L, double R)>>();
+        int? Sung(Staff st, List<Head> a, List<Head> b)
+        {
+            if (!words.TryGetValue(st, out var syl)) words[st] = syl = Syllables(ps, d, st, s);
+            if (syl.Count == 0) return null;
+            double ax = a.Average(h => h.X), bx = b.Average(h => h.X);
+            var on = chords.Where(c => c[0].St == st).Select(c => c.Average(h => h.X)).Order().ToList();
+            var span = on.Where(x => x > ax - 0.3 * s && x < bx + 0.3 * s).ToList();
+            // (a tuplet's three notes and more: a slur from one syllable's note to the next one's is
+            // printed in songs, "-gen Ziel!" in Lang's Op.36-3)
+            if (span.Count < 3) return null;
+            // (each syllable is its nearest note's, within a space and a half of it)
+            var owner = syl.Select(w => on.MinBy(x => Math.Abs(x - (w.L + w.R) / 2)) is var x && Math.Abs(x - (w.L + w.R) / 2) < 1.5 * s ? x : double.NaN).ToList();
+            return span.All(x => owner.Contains(x)) ? span.Count : null;
+        }
         Staff StaffOf(Detection t) => at.TryGetValue(t, out var a) ? a.Chord[0].St : Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
         bool Debug(Detection t) => DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s;
         var carried = new Dictionary<int, bool>();   // part -> a slur ran on from its staff in the system before
@@ -414,6 +432,11 @@ static partial class Symbols
                     foreach (var h in a) h.Tie = true;
                     if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to the next chord, the same notes at {b[0].X:F0}: a tie");
                 }
+                else if (r != null && Sung(st, a, at[r].Chord) is int n)
+                {
+                    used.Add(r);
+                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0}: each of its {n} notes has its own syllable, a tuplet's arc");
+                }
                 else if (r != null)
                 {
                     used.Add(r);
@@ -446,6 +469,41 @@ static partial class Symbols
             }
             carried[st.Part] = ranOn;
         }
+    }
+
+    /// <summary>
+    /// The syllables of a song's words under a staff (their x spans), or none: pieces of ink a letter's
+    /// height (half a space to two and a half) and up to three spaces wide, a space to eight under the
+    /// staff (short of the next staff below), with no head and nothing the detector marked in them; the
+    /// row is the letters level with the line most of them stand on, and a syllable the letters within
+    /// half a space of each other (a hyphen or an extender is too thin for a letter). None for a staff
+    /// with fewer than six syllables in its row, or with a second row of six letters and more (verses).
+    /// </summary>
+    static List<(double L, double R)> Syllables(PageSymbols ps, Img d, Staff st, double s)
+    {
+        var none = new List<(double L, double R)>();
+        double below = ps.Heads.Select(h => h.St).Distinct().Where(o => o != st && o.System == st.System && o.Top > st.Bottom).Select(o => o.Top - s).DefaultIfEmpty(st.Bottom + 8 * s).Min();
+        int x0 = Math.Max(0, st.Left), x1 = Math.Min(d.W - 1, st.Right), y0 = (int)(st.Bottom + s), y1 = (int)Math.Min(d.H - 1, Math.Min(below, st.Bottom + 8 * s));
+        int w = x1 - x0 + 1, h = y1 - y0 + 1;
+        if (w < 10 * s || h < 2 * s) return none;
+        var (_, comps) = Components.Label(w, h, i => d[x0 + i % w, y0 + i / w], eight: true);
+        var marked = ps.Heads.Select(q => (q.X, q.Y))
+            .Concat((ps.Detections ?? []).Where(t => t.Score > Detector.Threshold).Select(t => (t.X, t.Y))).ToList();
+        bool Holds(Comp c) => marked.Any(p => p.X >= x0 + c.MinX - 1 && p.X <= x0 + c.MaxX + 1 && p.Y >= y0 + c.MinY - 1 && p.Y <= y0 + c.MaxY + 1);
+        var letters = comps.Skip(1).Where(c => c.H >= 0.5 * s && c.H <= 2.5 * s && c.W <= 3 * s && c.MinY > 0 && c.MaxY < h - 1 && !Holds(c)).ToList();
+        if (letters.Count < 12) return none;
+        // (the line they stand on: the bottom most letters share, within a fifth of a space; a p's or a
+        // y's tail hangs below it, an accent or an apostrophe stands over it)
+        int foot = letters.Select(c => c.MaxY).MaxBy(y => letters.Count(o => Math.Abs(o.MaxY - y) <= 0.2 * s));
+        var row = letters.Where(c => c.MaxY >= foot - 0.2 * s && c.MaxY <= foot + 1.2 * s && c.MinY < foot - 0.3 * s && c.MinY > foot - 2.5 * s).OrderBy(c => c.MinX).ToList();
+        // (one verse only: under several, a slur may be one verse's, a dashed one -- Kinkel's Op.19-4)
+        var rest = letters.Except(row).ToList();
+        if (rest.Count >= 6 && rest.Max(c => rest.Count(o => Math.Abs(o.MaxY - c.MaxY) <= 0.2 * s)) >= 6) return none;
+        var syl = new List<(double L, double R)>();
+        foreach (var c in row)
+            if (syl.Count > 0 && x0 + c.MinX - syl[^1].R < 0.5 * s) syl[^1] = (syl[^1].L, Math.Max(syl[^1].R, x0 + c.MaxX + 1));
+            else syl.Add((x0 + c.MinX, x0 + c.MaxX + 1));
+        return syl.Count >= 6 ? syl : none;
     }
 
     /// <summary>

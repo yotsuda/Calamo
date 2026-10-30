@@ -27,6 +27,9 @@ static partial class Symbols
                                         && Math.Abs(h.Tip - t.Y) < (h.Beams > 0 ? 2.5 : 4.5) * s).OrderByDescending(h => h.StemX).FirstOrDefault();
             if (near == null) continue;
             var chord = heads.Where(h => h.St == near.St && h.Up == near.Up && h.Hollow == near.Hollow && Math.Abs(h.StemX - near.StemX) < 0.3 * s).ToList();
+            // (after a rhythm slash the next slash, one the detector is a little less sure of, is a
+            // rhythm slash too: detector39 sees the band suite's guitar slashes at 0.86-0.89)
+            if (chord.All(h => h.Slash)) continue;
             // the stem, from the tip towards where its head would be (stepping over a removed staff line)
             int dir = near.Up ? 1 : -1, bestX = 0, foot = 0, len = 0;
             for (int x = (int)Math.Round(t.X) - 2; x <= (int)Math.Round(t.X) + 2; x++)

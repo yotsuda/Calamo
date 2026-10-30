@@ -1,67 +1,67 @@
 set	truth	found	tieTruth	tieFound	tieOmr	tieRight	slurStartTruth	slurStartFound	slurStartOmr	slurStartRight	slurEndTruth	slurEndFound	slurEndOmr	slurEndRight
-dl-ms-01	478	442	52	49	49	49	48	24	24	24	48	22	23	22
-dl-ms-02	275	266	12	11	11	11	25	18	18	18	25	18	18	18
-dl-ms-03	498	497	6	5	5	5	17	14	15	14	17	15	15	15
-dl-ms-04	465	458	21	8	8	8	18	15	17	16	18	16	16	16
-dl-ms-05	592	585	4	2	2	2	9	6	7	7	13	8	8	8
-dl-ms-06	669	656	38	18	18	18	63	55	58	56	63	55	55	55
+dl-ms-01	478	441	52	50	50	50	48	21	21	21	48	21	21	21
+dl-ms-02	275	266	12	11	11	11	25	21	21	21	25	21	21	21
+dl-ms-03	498	497	6	6	6	6	17	12	12	12	17	12	12	12
+dl-ms-04	465	460	21	11	11	11	18	16	19	17	18	17	17	17
+dl-ms-05	592	585	4	2	2	2	9	8	8	8	13	8	8	8
+dl-ms-06	669	656	38	19	19	19	63	56	56	56	63	55	56	55
 dl-ms-07	1183	1180	11	5	5	5	1	0	0	0	1	0	0	0
-dl-ms-08	1263	1214	8	1	1	1	25	13	13	13	25	13	13	13
-dl-ms-09	1352	1324	3	2	2	2	16	16	16	16	16	16	16	16
-dl-ms-10	435	408	24	10	10	10	5	4	8	4	5	4	8	4
-dl-ms-11	588	588	3	3	3	3	24	23	23	23	24	22	22	22
-dl-ms-12	604	602	31	25	25	25	33	11	12	11	32	10	10	10
+dl-ms-08	1263	1212	8	1	1	1	25	18	18	18	25	18	21	18
+dl-ms-09	1352	1319	3	3	3	3	16	16	16	16	16	16	16	16
+dl-ms-10	435	408	24	14	14	14	5	4	8	4	5	4	8	4
+dl-ms-11	588	588	3	3	3	3	24	20	20	20	24	21	21	21
+dl-ms-12	604	600	31	26	26	26	33	10	11	10	32	8	8	8
 dl-ms-13	562	560	13	6	6	6	3	3	3	3	3	3	3	3
 dl-ms-14	589	588	22	22	22	22	8	8	8	8	8	8	8	8
-dl-ms-15	2061	2005	68	61	61	61	16	15	16	15	16	15	16	15
-dl-ms-16	1639	1612	41	29	29	29	87	84	86	84	87	85	85	85
+dl-ms-15	2061	2012	68	63	63	63	16	14	15	14	16	14	15	14
+dl-ms-16	1639	1627	41	33	33	33	87	84	85	85	87	83	85	83
 chopin28-4-mutopia	605	605												
-dl-scan	13253	12568	357	169	183	170	398	179	220	180	401	159	220	160
-chopin28-4-scan	605	514												
+dl-scan	13253	12604	357	184	201	186	398	172	219	174	401	160	217	162
+chopin28-4-scan	605	571												
 burgmuller100-01-dorico	259	242												
-burgmuller100-01-mutopia	256	248												
+burgmuller100-01-mutopia	256	247												
 burgmuller100-02-dorico	315	301												
 burgmuller100-02-mutopia	313	313												
 clementi36-1-bosse	389	387												
 clementi36-1-mutopia	389	389												
-clementi36-1-scan	389	383												
-schumann15-1-mutopia	273	134												
-schumann15-1-rje	274	150												
-schumann15-7-mutopia	413	387												
-schumann15-7-rje	406	403												
+clementi36-1-scan	389	382												
+schumann15-1-mutopia	273	135												
+schumann15-1-rje	274	142												
+schumann15-7-mutopia	413	395												
+schumann15-7-rje	406	402												
 tchaikovsky39-1-abc	256	254												
 tchaikovsky39-1-mutopia	260	257												
 tchaikovsky39-1-scan	259	245												
 tchaikovsky39-5-abc	475	475												
 tchaikovsky39-5-mutopia	450	450												
-tchaikovsky39-5-scan	475	467												
-lied-boulanger-clairieres02-ms	800	754	20	11	12	11	77	62	65	65	78	60	65	62
-lied-boulanger-clairieres02-scan	800	683	20	7	9	7	77	30	35	32	78	31	35	32
-lied-butterworth-shropshire1-ms	658	636	23	7	8	7	58	50	51	50	58	49	49	49
-lied-butterworth-shropshire1-scan	658	619	23	6	7	6	58	22	26	22	58	24	29	24
-lied-chaminade-paysbleu-ms	1163	1064	37	28	28	28	43	24	26	24	43	24	26	24
-lied-chaminade-paysbleu-scan	1163	907	37	4	4	4	43	14	44	14	43	16	45	17
-lied-elgar60-1-ms	754	737	16	12	12	12	28	25	25	25	28	25	25	25
-lied-elgar60-1-scan	754	632	16	6	6	6	28	14	15	14	28	16	16	16
-lied-faisst4-5-ms	836	829	9	5	5	5	48	46	48	46	48	47	48	47
-lied-faisst4-5-scan	836	803	9	7	13	8	48	26	30	26	48	28	31	28
+tchaikovsky39-5-scan	475	468												
+lied-boulanger-clairieres02-ms	800	753	20	12	12	12	77	66	70	69	78	63	70	66
+lied-boulanger-clairieres02-scan	800	728	20	9	10	9	77	37	40	39	78	39	43	40
+lied-butterworth-shropshire1-ms	658	636	23	8	9	8	58	48	48	48	58	47	47	47
+lied-butterworth-shropshire1-scan	658	624	23	9	9	9	58	23	26	23	58	22	25	22
+lied-chaminade-paysbleu-ms	1163	1065	37	29	30	29	43	29	31	29	43	29	31	29
+lied-chaminade-paysbleu-scan	1163	920	37	7	8	7	43	11	27	11	43	10	28	10
+lied-elgar60-1-ms	754	737	16	13	14	13	28	23	23	23	28	23	23	23
+lied-elgar60-1-scan	754	629	16	9	10	9	28	10	12	10	28	13	14	13
+lied-faisst4-5-ms	836	831	9	7	7	7	48	47	50	47	48	47	50	47
+lied-faisst4-5-scan	836	809	9	5	12	6	48	24	29	24	48	26	30	26
 lied-gonzaga-broma-ms	954	943	0	0	0	0	16	16	16	16	19	16	16	16
-lied-gonzaga-broma-scan	954	834	0	0	0	0	16	5	5	5	19	5	5	5
-lied-holmes-melodies16-ms	1461	1276	62	20	21	20	85	60	73	60	95	64	76	64
-lied-holmes-melodies16-scan	1461	1169	62	19	25	20	85	25	36	25	95	25	35	25
-lied-kinkel10-3-ms	479	459	3	1	1	1	7	5	5	5	7	5	5	5
-lied-kinkel10-3-scan	479	441	3	1	1	1	7	1	2	1	7	1	2	1
-lied-kinkel19-3-ms	684	681	0	0	1	0	19	18	18	18	19	18	18	18
-lied-kinkel19-3-scan	684	613	0	0	1	0	19	2	2	2	19	2	2	2
-lied-kinkel7-2-ms	972	927	0	0	0	0	46	46	46	46	46	46	46	46
-lied-kinkel7-2-scan	972	786	0	0	0	0	46	21	28	21	46	21	28	21
-lied-kinkel7-4-ms	642	639	0	0	0	0	2	2	2	2	2	2	2	2
-lied-kinkel7-4-scan	642	569	0	0	0	0	2	1	1	1	2	1	1	1
-lied-lang36-1-ms	1295	1255	6	5	5	5	36	35	35	35	36	34	34	34
-lied-lang36-1-scan	1295	1226	6	2	2	2	36	12	13	12	36	11	13	11
-lied-lang36-2-ms	565	546	1	0	0	0	39	34	34	34	39	33	33	33
-lied-lang36-2-scan	565	529	1	0	0	0	39	14	15	14	39	14	15	14
-lied-lehmann-flapper1-ms	499	469	6	4	4	4	9	2	4	2	12	3	4	3
-lied-lehmann-flapper1-scan	499	467	6	4	4	4	9	3	6	3	12	3	6	3
-lied-lehmann-flapper5-ms	590	548	31	8	9	8	39	22	26	22	42	22	23	22
-lied-lehmann-flapper5-scan	590	559	31	13	13	13	39	16	20	16	42	13	16	13
+lied-gonzaga-broma-scan	954	817	0	0	0	0	16	7	7	7	19	7	7	7
+lied-holmes-melodies16-ms	1461	1275	62	18	24	18	85	61	74	61	95	64	77	64
+lied-holmes-melodies16-scan	1461	1201	62	22	28	22	85	26	37	26	95	23	37	23
+lied-kinkel10-3-ms	479	459	3	1	1	1	7	6	6	6	7	6	6	6
+lied-kinkel10-3-scan	479	442	3	2	3	2	7	3	4	3	7	3	4	3
+lied-kinkel19-3-ms	684	681	0	0	2	0	19	15	15	15	19	14	14	14
+lied-kinkel19-3-scan	684	604	0	0	1	0	19	6	6	6	19	5	6	5
+lied-kinkel7-2-ms	972	927	0	0	1	0	46	46	46	46	46	46	46	46
+lied-kinkel7-2-scan	972	787	0	0	3	0	46	22	32	22	46	22	32	22
+lied-kinkel7-4-ms	642	636	0	0	0	0	2	2	2	2	2	2	2	2
+lied-kinkel7-4-scan	642	560	0	0	1	0	2	1	1	1	2	1	1	1
+lied-lang36-1-ms	1295	1275	6	5	5	5	36	35	35	35	36	34	34	34
+lied-lang36-1-scan	1295	1228	6	1	1	1	36	12	13	12	36	12	13	12
+lied-lang36-2-ms	565	563	1	0	0	0	39	36	36	36	39	36	36	36
+lied-lang36-2-scan	565	528	1	1	1	1	39	20	22	20	39	21	22	21
+lied-lehmann-flapper1-ms	499	468	6	4	5	4	9	4	5	4	12	4	5	4
+lied-lehmann-flapper1-scan	499	467	6	3	3	3	9	2	5	2	12	3	5	3
+lied-lehmann-flapper5-ms	590	552	31	13	15	13	39	26	29	26	42	23	25	23
+lied-lehmann-flapper5-scan	590	559	31	15	15	15	39	17	20	17	42	19	21	19
