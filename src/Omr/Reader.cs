@@ -876,8 +876,19 @@ static class Reader
         var wholes = sym.Rests.Where(r => r.St == st && r.X > x0 && r.X < x1 && r.Kind == RestKind.Whole).ToList();
         bool cue = barTicks > 0 && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0)
                    && inBar.Count + graceHeads.Count > 0 && 2 * (graceHeads.Count + inBar.Count(h => h.R - h.L + 1 < 1.1 * s)) >= inBar.Count + graceHeads.Count;
+        // (in a cue, a "rest" on a head's column, a space from it, is the small note's head and stem
+        // taken for a quarter rest -- the Eroica part's "Vln. 1" ais' in bar 187; and a grace head's
+        // dot, which no grace note has, is left among the unread pieces: the cue's gis''4. in bar 245)
+        if (cue)
+            foreach (var g in graceHeads.Where(g => g.Dots == 0))
+                if (sym.Others.Any(o => o.Class == "dot" && o.St == st && o.C.MinX + o.C.W / 2.0 - g.X > 0.5 * s && o.C.MinX + o.C.W / 2.0 - g.X < 2 * s
+                                        && Math.Abs(o.C.MinY + o.C.H / 2.0 - g.Y) < 0.7 * s))
+                    g.Dots = 1;
         foreach (var h in sym.Heads) if (h.St == st && h.X > x0 && h.X < x1) items.Add((h.X, h));
-        foreach (var r in sym.Rests) if (r.St == st && r.X > x0 && r.X < x1) items.Add((r.X, r));
+        foreach (var r in sym.Rests)
+            if (r.St == st && r.X > x0 && r.X < x1
+                && !(cue && r.Kind != RestKind.Whole && inBar.Concat(graceHeads).Any(h => Math.Abs(h.X - r.X) < 0.6 * s && Math.Abs(h.Y - r.Y) < 2 * s)))
+                items.Add((r.X, r));
         // (a grace note as a marker: its pitch kept for the next note's head, within four spaces of it)
         foreach (var g in graceHeads) items.Add((g.X, cue ? g : new GraceMark(g)));
         foreach (var b in sym.BeatRepeats) if (b.St == st && (b.L + b.R) / 2 > x0 && (b.L + b.R) / 2 < x1) items.Add(((b.L + b.R) / 2, b));

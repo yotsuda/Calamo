@@ -182,8 +182,10 @@ static partial class Symbols
     {
         // (on the page as drawn: removing the lines takes the sign's upper bar for a ledger line)
         // (as far as four spaces: a dotted note's sign stands past its dot -- tabi.jpg's "♩. = 60")
+        // (and up to a space over the head's middle: the sign stands on the text's middle, the note on
+        // its line -- the Nutcracker score's "♩ = 125" in a large type, the sign 0.8 spaces up)
         int x0 = (int)Math.Round(h.X + 0.8 * s), x1 = (int)Math.Round(h.X + 4.0 * s), most = (int)Math.Round(2.5 * s);
-        int y0 = (int)Math.Round(h.Y - 0.8 * s), y1 = (int)Math.Round(h.Y + 0.8 * s);
+        int y0 = (int)Math.Round(h.Y - 1.4 * s), y1 = (int)Math.Round(h.Y + 0.8 * s);
         if (x0 < 1 || x1 + most >= d.W || y0 < 0 || y1 >= d.H) return false;
         // the rows' runs that start in the window and are a bar's length, then the bars: rows in a
         // row with runs starting together
@@ -214,7 +216,8 @@ static partial class Symbols
                 double gap = (b.Top + b.Bottom - a.Top - a.Bottom) / 2.0;
                 if (gap < 0.25 * s || gap > 0.7 * s) continue;
                 if (Math.Abs(a.Start - b.Start) > 0.2 * s || Math.Abs(a.Len - b.Len) > 0.25 * s) continue;
-                if (Math.Abs((a.Top + b.Bottom) / 2.0 - h.Y) < 0.6 * s) return true;
+                double mid = (a.Top + b.Bottom) / 2.0 - h.Y;
+                if (mid > -1.0 * s && mid < 0.6 * s) return true;
             }
         return false;
     }
