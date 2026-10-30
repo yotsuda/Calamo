@@ -703,11 +703,14 @@ static partial class Symbols
             // parted between the voices)
             if (best == null)
             {
-                // (a neighbour at its height: the other voice's group stands an octave off, piano007. And close
-                // by, as a grace group's notes stand: a cue's notes, as far apart as the notes they copy, are of
-                // values of their own -- gen-cue's tuplets004, the dotted eighth taking the sixteenth's two beams)
-                var mate = ps.Graces.FirstOrDefault(o => o != g && Fellow(ink, g, o, s) && Math.Abs(o.Y - g.Y) < 2 * s && Math.Abs(o.X - g.X) < 2.5 * s && marked.ContainsKey(o) && o.Beams > 0);
-                if (mate != null) { g.HasStem = true; g.Up = mate.Up; g.StemX = g.Up ? g.R : g.L; g.Tip = mate.Tip; g.Beams = mate.Beams; }
+                // (a neighbour at its height: the other voice's group stands an octave off, piano007)
+                var mate = ps.Graces.FirstOrDefault(o => o != g && Fellow(ink, g, o, s) && Math.Abs(o.Y - g.Y) < 2 * s && marked.ContainsKey(o) && o.Beams > 0);
+                // (but where the rules' own stem goes the neighbour's way, the beams its ink shows at the small
+                // note's size: a cue's notes are of values of their own -- gen-cue's eighths and dotted eighths
+                // beamed to sixteenths, taking the sixteenths' two beams: basic001's g''8 f''16 ees''16; a dotted
+                // quarter, none, taking its neighbour's one: ledger004's bes'4.)
+                if (mate != null && g.HasStem && g.Up == mate.Up && ps.Labels != null) g.Beams = CountBeams(ink, ps.Labels, g, 0.63 * s);
+                else if (mate != null) { g.HasStem = true; g.Up = mate.Up; g.StemX = g.Up ? g.R : g.L; g.Tip = mate.Tip; g.Beams = mate.Beams; }
                 // (none either: the beams counted in the ink at the rules' tip, as a note's are, at the small
                 // note's size -- the detector sees no tip on gen-cue's beamed cue eighths, ledger003's d8 ees8)
                 else if (g.HasStem && ps.Labels != null) g.Beams = CountBeams(ink, ps.Labels, g, 0.63 * s);
