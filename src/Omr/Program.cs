@@ -382,8 +382,10 @@ for (int page = from; page <= to; page++)
                     tsv.Append("glyph\t").Append(g.Name).Append('\t').Append(F(g.L)).Append('\t').Append(F(g.T)).Append('\t').Append(F(g.R)).Append('\t').Append(F(g.B)).Append('\t').Append(g.Src).Append('\n');
                 // a grace note's head, small (grace.head: S21), and its accidental, small too but the same sign (its
                 // slash, where it has one, is among the marks as grace.slash); its stem's tip with its flags or beams
-                // is a stem's like any other (stem.N: the count tells the grace note's value)
-                foreach (var g in svg.Glyphs.Where(g => g.Small && (g.Name.StartsWith("noteheads.") || g.Name.StartsWith("accidentals."))))
+                // is a stem's like any other (stem.N: the count tells the grace note's value). A cue's notes
+                // (cue { }, OmrGen --cues) are as small: their heads grace.head too, their dots and rests
+                // the same signs (Lily# draws a cue's rests full size still: docs/repro/REQUESTS.md 12)
+                foreach (var g in svg.Glyphs.Where(g => g.Small && (g.Name.StartsWith("noteheads.") || g.Name.StartsWith("accidentals.") || g.Name.StartsWith("dots.") || g.Name.StartsWith("rests."))))
                     tsv.Append("glyph\t").Append(g.Name.StartsWith("noteheads.") ? "grace.head" : g.Name).Append('\t').Append(F(g.L)).Append('\t').Append(F(g.T)).Append('\t').Append(F(g.R)).Append('\t').Append(F(g.B)).Append('\t').Append(g.Src).Append('\n');
                 double hs = 0.5 * res.S;
                 foreach (var (x, y, n) in SymEval.StemTails(svg, res.S).Concat(SymEval.StemTails(svg, res.S, graces: true)))

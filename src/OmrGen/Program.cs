@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmrGen;
 
-// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs]
+// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues]
 // ("all" is Gen.Suites; "band", the band scores' pieces, and "lied", songs whose voice's staff
 // is hidden where it rests, are asked for by name; --lyrics puts words under lied's voice)
 //
@@ -73,6 +73,8 @@ static class Program
         bool figures = opt.ContainsKey("figures");
         // --leapslurs: two-note slurs over a wide leap from an eighth or sixteenth (an old print's hooked slur)
         bool leapSlurs = opt.ContainsKey("leapslurs");
+        // --cues: bars of a part's rest with another instrument's line printed small over it (voice { cue { ... } } { R })
+        bool cues = opt.ContainsKey("cues");
         var suites = opt.GetValueOrDefault("suite", "all") == "all"
             ? Gen.Suites
             : opt["suite"].Split(',');
@@ -124,6 +126,8 @@ static class Program
                     // (--ottava: octave lines, likewise; after the rests are put in, which move the bars)
                     // (--graces: grace notes, likewise; before the octave lines, which pass over no note with one)
                     if (graces) Gen.AddGraces(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 9));
+                    // (--cues: likewise; after the grace notes and before the octave lines, which pass over a bar of two voices)
+                    if (cues) Gen.AddCues(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 19));
                     if (ottava) Gen.AddOttavas(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 8));
                     // (--repeats: the form, likewise; last, since a tie or a slur across one of its cuts is undone)
                     if (repeats) Gen.AddRepeats(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 10));
@@ -169,9 +173,11 @@ sealed class GEv
     public bool SlurStart, SlurEnd;        // a slur starts at it / ends at it
     public string Marks = "";              // annotations as .lys writes them after the value (@p@cresc)
     public string Grace = "";              // grace notes before it, as .lys writes them (acciaccatura { d''8 }); no truth
+    public bool Cue;                       // a cue's (--cues): its voice written in cue { }, printed small
     public bool IsRest => Pitches.Count == 0;
     // (a septuplet's sixteenth is no whole number of ticks: the truth's times are fractions of a whole)
     public double Sounding => TupletN > 0 ? Ticks * (double)TupletD / TupletN : Ticks;
+    public GEv Copy() => (GEv)MemberwiseClone();
     /// <summary>A copy an octave lower (its grace text as it was: a band's guitar has none).</summary>
     public GEv OctaveDown()
     {
@@ -422,7 +428,7 @@ static class Writer
         return $"R{b}*{barTicks / (1920 / b) * n}";
     }
 
-    static string TryDur(int ticks)
+    internal static string TryDur(int ticks)
     {
         try { return DurText(ticks); } catch (InvalidOperationException) { return null; }
     }
@@ -458,7 +464,8 @@ static class Writer
             while (i < evs.Count && evs[i].TupletN == n && evs[i].TupletD == dd && sum < group) { run.Add(Ev(evs[i])); sum += evs[i].Ticks; i++; }
             parts.Add($"tuplet {n}/{dd} {{ " + string.Join(" ", run) + " }");
         }
-        return string.Join(" ", parts);
+        // (a cue's voice: the whole of it in cue { }, drawn small)
+        return evs.Count > 0 && evs.All(e => e.Cue) ? "cue { " + string.Join(" ", parts) + " }" : string.Join(" ", parts);
     }
 
     internal static string Ev(GEv e) => e.Grace +

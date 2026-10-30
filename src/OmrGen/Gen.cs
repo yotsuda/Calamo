@@ -501,6 +501,56 @@ static class Gen
         }
     }
 
+    // OmrGen --cues: cue notes (another instrument's line printed small in a part's rest, the
+    // detector's training data for small heads, rests and dots: the Eroica trumpet part, 2026-10-30
+    // HANDOFF), from a stream of their own after the music like --leapslurs. A bar of a part on a
+    // staff of its own becomes the cue's line over the part's full-measure rest, voice { cue { ... } }
+    // { R }, as a Sibelius part prints it; a cue runs on over the next bars now and then. The cue's
+    // line is the bar's own music a step or more away (its top note where it had a chord). Not a bar
+    // a tie or a slur crosses into or out of, nor one with marks or grace notes (they would hang on
+    // the cue). The truth's first voice is the cue's line, its second the rest, as the reader writes it
+    public static void AddCues(GPiece p, Random rng)
+    {
+        foreach (var part in p.Parts)
+        {
+            if (p.Grand || part.InGrand || part.Lyrics != null) continue;
+            bool slur = false, last = false;
+            for (int b = 0; b < part.Bars.Count; b++)
+            {
+                // (every value drawn whether used or not: the draws stay in step)
+                double r = rng.NextDouble();
+                int shift = rng.Next(1, 5) * (rng.Next(2) == 0 ? -1 : 1);
+                var voices = part.Bars[b];
+                bool tiedIn = b > 0 && part.Bars[b - 1].Any(v => v.Count > 0 && v[^1].Tie);
+                bool open = slur;
+                foreach (var e in voices[0]) { if (e.SlurEnd) slur = false; if (e.SlurStart) slur = true; }
+                // (and a bar whose rest is one written value: R1, R2., not 5/4's or 9/8's)
+                last = r < (last ? 0.6 : 0.15) && voices.Count == 1 && !open && !slur && !tiedIn && Writer.TryDur(p.At(b).BarTicks) != null
+                    && voices[0].All(e => !e.Measure && !e.Tie && !e.SlurStart && !e.SlurEnd && e.Marks == "" && e.Grace == "");
+                if (!last) continue;
+                var keyAlt = KeyAlterations(p.At(b).Fifths);
+                int mid = MiddleLine(part.Clef);
+                var cue = voices[0].Select(e =>
+                {
+                    var c = e.Copy();
+                    c.Cue = true;
+                    if (!e.IsRest)
+                    {
+                        var top = e.Pitches[^1];
+                        // (from the staff's second line up to four ledger lines over it: lower, the line
+                        // would run over the part's rest, which hangs under the staff, and Lily# draws them on each other)
+                        int d = top.Dia + shift;
+                        while (d < mid - 2) d += 7;
+                        while (d > mid + 12) d -= 7;
+                        c.Pitches = new() { new GPitch(d, keyAlt[((d % 7) + 7) % 7]) };
+                    }
+                    return c;
+                }).ToList();
+                part.Bars[b] = new() { cue, new() { new GEv { Ticks = p.At(b).BarTicks, Measure = true } } };
+            }
+        }
+    }
+
     // OmrGen --ottava: octave lines (8va, 8vb, 15ma, 15mb) over stretches of a part's notes (S18: the
     // detector's training data for them), from a stream of their own after the music like --marks.
     // The notes under a line are written as they sound, an octave or two up or down, and Lily# draws

@@ -1,0 +1,28 @@
+// Rests inside a cue { } are drawn full size; the cue's heads, flags, accidentals and dots at
+// font-size -4 (0.63). LilyPond's CueVoice scales everything the region prints, rests included
+// (fontSize = #-4 is a context property). A Sibelius part's cue rests are small too (the Eroica
+// trumpet part of the Scoring Notes 2024 test, bar 187), and the OMR's detector, taught from
+// lysc's pictures, does not see them there.
+// Bar 2: the cue's r8 is full size. Bar 3: the cue's r4 is as large as bar 5's own r4.
+title "Cue Rests"
+octave absolute
+time 3/4
+key c major
+
+part pt { clef treble }
+
+section Piece {
+  pt {
+    c''4 d''4 e''4 |
+    voice { cue { r8 fis''8 gis''4. a''8 } } { R2. } |
+    voice { cue { bes'4 r4 c''4 } } { R2. } |
+    voice { cue { c''2. } } { R2. } |
+    e''4 r4 g''4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff pt "Trumpet"
+}
