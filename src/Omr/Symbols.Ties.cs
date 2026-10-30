@@ -376,8 +376,13 @@ static partial class Symbols
         foreach (var g in ends.GroupBy(StaffOf).Where(g => g.Key != null).OrderBy(g => g.Key.System).ThenBy(g => g.Key.Part))
         {
             var st = g.Key;
-            var lefts = g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t)).OrderBy(t => t.X).ToList();
-            var rights = g.Where(t => t.Class == "slur_r" && at.ContainsKey(t)).OrderBy(t => t.X).ToList();
+            // (one start and one end a chord on a side: the detector seen twice on one end, 0.51 and
+            // 0.77 a space apart, gave the second start the next slur's end, and every slur after it
+            // the end of the one after, kinkel19-4's left hand)
+            List<Detection> OnePerChord(IEnumerable<Detection> ts) => ts.GroupBy(t => (at[t].Chord, at[t].Above))
+                .Select(c => c.MaxBy(t => (fromTie.Contains(t) ? 0 : 1, t.Score))).OrderBy(t => t.X).ToList();
+            var lefts = OnePerChord(g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t)));
+            var rights = OnePerChord(g.Where(t => t.Class == "slur_r" && at.ContainsKey(t)));
             // the ends by no note: a broken slur's, at the staff's two edges
             bool hangsRight = g.Any(t => t.Class == "slur_r" && !at.ContainsKey(t) && st.Right - t.X < 3 * s);
             bool hangsLeft = g.Any(t => t.Class == "slur_l" && !at.ContainsKey(t) && t.X - st.Left < 12 * s);
