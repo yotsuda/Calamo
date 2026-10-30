@@ -191,10 +191,12 @@ static partial class Symbols
             }
             else
             {
-                // the beam group whose stem tips are nearest the number
+                // the beam group whose stem tips are nearest the number (a cue's small notes' too: their
+                // number is full-sized over their beam, gen-cue's tuplets)
+                var stemmed = ps.Heads.Concat(ps.Graces.Where(g => g.HasStem && g.Beams > 0)).ToList();
                 Head near = null;
                 double bd = double.MaxValue;
-                foreach (var hd in ps.Heads)
+                foreach (var hd in stemmed)
                 {
                     // (the staff above's too: a group beamed below its staff sets its number under the
                     // beam, between the staves, nearer the staff below -- a grand staff's right hand;
@@ -224,26 +226,36 @@ static partial class Symbols
                     // between the stems. The beam is still a line through the stem tips: follow the
                     // beamed stems of the same direction on either side while their tips keep to it,
                     // then keep what stands as far on either side of the number (it is centred on its group)
-                    var stems = ps.Heads.Where(hd => hd.St == o.St && hd.HasStem && hd.Up == near.Up && hd.Beams > 0)
+                    var stems = stemmed.Where(hd => hd.St == o.St && hd.HasStem && hd.Up == near.Up && hd.Beams > 0)
                                         .GroupBy(hd => Math.Round(hd.StemX / (0.3 * s))).Select(g => g.OrderBy(hd => Math.Abs(hd.Tip - hd.Y)).Last())
                                         .OrderBy(hd => hd.StemX).ToList();
                     int k = stems.FindIndex(hd => Math.Abs(hd.StemX - near.StemX) < 0.3 * s);
                     if (k >= 0)
                     {
                         int a = k, b = k;
-                        bool Joins(Head p, Head q) => q.StemX - p.StemX < 4 * s && Math.Abs(q.Tip - p.Tip) < 1.5 * s;
+                        // A cue's small notes stand as far apart as the full-sized notes they copy, a group's
+                        // and its neighbours' alike, their tips at one height: a small beam's ink between their
+                        // stems joins them, and the group it joins is the number's (the number stands half a
+                        // space off its middle, too far for the half-way measure below)
+                        // (gen-cue's tuplets002, the triplets' notes read one by one, or with a neighbour's)
+                        bool cueBeam = ps.Graces.Contains(near);
+                        bool Joins(Head p, Head q) => cueBeam ? ps.Graces.Contains(p) && ps.Graces.Contains(q) && q.StemX - p.StemX < 8 * s && CueBeam(d, p, q, s)
+                                                              : q.StemX - p.StemX < 4 * s && Math.Abs(q.Tip - p.Tip) < 1.5 * s;
+                        if (TupletVerbose && cueBeam) Console.WriteLine("      cue stems " + string.Join(" ", stems.Where(hd => Math.Abs(hd.StemX - near.StemX) < 8 * s).Select(hd => $"{hd.X:F0},{hd.Y:F0}:{hd.StemX:F0}/{hd.Tip:F0}{(ps.Graces.Contains(hd) ? "g" : "")}")));
                         while (a > 0 && Joins(stems[a - 1], stems[a])) a--;
                         while (b < stems.Count - 1 && Joins(stems[b], stems[b + 1])) b++;
-                        double half = Math.Min(c.Cx - stems[a].StemX, stems[b].StemX - c.Cx) + 0.5 * s;
+                        double half = cueBeam ? double.MaxValue : Math.Min(c.Cx - stems[a].StemX, stems[b].StemX - c.Cx) + 0.5 * s;
                         var xs = stems.GetRange(a, b - a + 1).Where(hd => Math.Abs(hd.StemX - c.Cx) <= half).Select(hd => hd.StemX).ToList();
                         if (xs.Count >= 2)
                         {
                             double lo = xs.Min() - 0.3 * s, hi = xs.Max() + 0.3 * s;
-                            group = ps.Heads.Where(hd => hd.St == o.St && hd.HasStem && hd.StemX > lo && hd.StemX < hi).ToList();
+                            group = stemmed.Where(hd => hd.St == o.St && hd.HasStem && hd.StemX > lo && hd.StemX < hi).ToList();
                             if (TupletVerbose) Console.WriteLine($"      -> one stem in its piece: {xs.Count} stems along the beam line");
                         }
                     }
                 }
+                // (a small note's group has no cluster: alone where the beam line found no fellows)
+                if (group.Count == 0) group.Add(near);
                 x0 = group.Min(hd => hd.L) - 0.1 * s; x1 = group.Max(hd => hd.R) + 0.1 * s;
                 up = near.Up;
             }
@@ -251,7 +263,7 @@ static partial class Symbols
             // lyric's kana, a chord name's letter or a flag (揺れる想い, a tuplet 3/2 { a8 } in half the vocal's bars)
             if (!det)
             {
-                int Columns(double lo, double hi) => ps.Heads.Where(hd => hd.St == o.St && hd.X > lo && hd.X < hi).Select(hd => Math.Round((hd.HasStem ? hd.StemX : hd.X) / (0.6 * s))).Distinct().Count()
+                int Columns(double lo, double hi) => ps.Heads.Concat(ps.Graces).Where(hd => hd.St == o.St && hd.X > lo && hd.X < hi).Select(hd => Math.Round((hd.HasStem ? hd.StemX : hd.X) / (0.6 * s))).Distinct().Count()
                                                      + ps.Rests.Count(r => r.St == o.St && r.X > lo && r.X < hi);
                 if (Columns(x0, x1) < 2)
                 {
@@ -292,7 +304,8 @@ static partial class Symbols
             var (num, den) = value switch { 4 => (3, 4), 2 => (3, 2), 5 => (4, 5), 6 => (4, 6), 7 => (4, 7), _ => (2, 3) };
             tupletId++;
             ps.Tuplets.Add(o);
-            foreach (var hd in ps.Heads)
+            // (a grace note's scale is no matter -- it takes no time -- but a cue's small notes play theirs)
+            foreach (var hd in ps.Heads.Concat(ps.Graces))
                 if (hd.St == o.St && hd.X > x0 && hd.X < x1 && (up == null || !hd.HasStem || hd.Up == up)) { hd.Scale = (num, den); hd.Tuplet = tupletId; }
             // (and a rest of its voice: where the other voice's stems stand in the span too, the rests
             // on that voice's side of the staff are its -- the upper voice's 16th rest over a lower
@@ -300,8 +313,35 @@ static partial class Symbols
             bool twoVoices = up != null && ps.Heads.Any(hd => hd.St == o.St && hd.HasStem && hd.Up != up && hd.X > x0 && hd.X < x1);
             double mid = (o.St.Top + o.St.Bottom) / 2;
             foreach (var r in ps.Rests)
-                if (r.St == o.St && r.X > x0 && r.X < x1 && !(twoVoices && (up == true ? r.Y > mid + 0.5 * s : r.Y < mid - 0.5 * s))) { r.Scale = (num, den); r.Tuplet = tupletId; }
+                // (not the whole rest under a cue: the part's own bar of rest, its notes' span about it)
+                if (r.St == o.St && r.X > x0 && r.X < x1 && r.Kind != RestKind.Whole && !(twoVoices && (up == true ? r.Y > mid + 0.5 * s : r.Y < mid - 0.5 * s))) { r.Scale = (num, den); r.Tuplet = tupletId; }
         }
+    }
+
+    /// <summary>
+    /// Whether a beam joins two small notes' stems: in nine columns in ten between them, a run of ink
+    /// as thick as a small beam (a fifth of a space, more than a staff line's) between the two tips'
+    /// heights, half a space beyond either towards the heads and a space and a half away from them.
+    /// Their tips are often off, the rules' and the detector's on one beam, a fifth of a space apart, or
+    /// short of a steep one (tuplets004's b'8 a'8 g'8, and a'8 d''8 g''8 with the g'' tipped half a
+    /// space over its head): the line from tip to tip misses the beam.
+    /// </summary>
+    static bool CueBeam(Img d, Head p, Head q, double s)
+    {
+        double lo = Math.Min(p.Tip, q.Tip), hi = Math.Max(p.Tip, q.Tip);
+        int y0 = (int)(lo - (p.Up ? 1.5 : 0.5) * s), y1 = (int)(hi + (p.Up ? 0.5 : 1.5) * s);
+        int need = Math.Max(2, (int)Math.Round(0.18 * s)), n = 20, hit = 0;
+        for (int k = 1; k < n; k++)
+        {
+            int x = (int)Math.Round(p.StemX + (q.StemX - p.StemX) * k / n), run = 0;
+            if (x <= 0 || x >= d.W) continue;
+            for (int y = Math.Max(0, y0); y <= Math.Min(d.H - 1, y1); y++)
+            {
+                run = d[x, y] ? run + 1 : 0;
+                if (run >= need) { hit++; break; }
+            }
+        }
+        return hit >= 0.9 * (n - 1);
     }
 
     /// <summary>The two halves of a tuplet bracket either side of a number (null where there is none).</summary>
