@@ -55,7 +55,8 @@ static class Fixes
         int music = 0;
         foreach (var ((b, p), evs) in res.Bars)
         {
-            if (evs.Count == 0 || evs.Any(e => e.FullBar || e.Blank || e.Slash)) continue;
+            // (a full-bar rest under another voice's notes is no rest bar: a part's cue over its own rest)
+            if (evs.Count == 0 || evs.All(e => e.FullBar) || evs.Any(e => e.Blank || e.Slash)) continue;
             if (!res.Voices.TryGetValue((b, p), out var vs) || !state.BarTime.TryGetValue(b, out var tm)) continue;
             music++;
             if (!filled.TryGetValue(tm, out var counts)) filled[tm] = counts = new int[17];
@@ -80,7 +81,7 @@ static class Fixes
             var offParts = new List<int>();
             foreach (var ((bar, p), vs) in res.Voices.Where(kv => kv.Key.Bar == b))
             {
-                if (!state.Played.TryGetValue((b, p), out var played) || played.Evs.Count == 0 || played.Evs.Any(e => e.FullBar || e.Blank || e.Slash)) continue;
+                if (!state.Played.TryGetValue((b, p), out var played) || played.Evs.Count == 0 || played.Evs.All(e => e.FullBar) || played.Evs.Any(e => e.Blank || e.Slash)) continue;
                 var ds = vs.Select(v => v.Sum(e => e.Ticks) - barTicks).ToList();
                 deltas.AddRange(ds);
                 if (ds.Any(d => d != 0)) offParts.Add(p);

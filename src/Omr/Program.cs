@@ -1134,7 +1134,8 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
     for (int i = 0; i < evs.Count;)
     {
         // a voice that enters late (or comes back from another staff) waits with spacer rests
-        if (pad && anchors != null && anchors.Count > 0)
+        // (not a full-bar rest: it rests the bar from its start, wherever it stands)
+        if (pad && anchors != null && anchors.Count > 0 && !evs[i].FullBar)
         {
             var before = anchors.Where(a => a.X <= evs[i].X + 8).ToList();
             int at = before.Count > 0 ? before[^1].At : 0;

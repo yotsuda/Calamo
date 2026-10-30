@@ -1102,11 +1102,22 @@ static class Reader
         // a lone whole rest fills the bar
         if (barTicks > 0)
             foreach (var list in new[] { evs, single })
+            {
                 if (list.Count == 1 && list[0].IsRest && list[0].Ticks == Dur.Whole)
                 {
                     list[0].FullBar = true;
                     list[0].Ticks = barTicks;
                 }
+                // and so does a whole rest in the bar's middle under another voice's bar, the bar's only whole
+                // rest: a part's cue notes over its own rest (a trumpet part's "Vln. 1" bars in 3/4, read as r1;
+                // the cue's own rests beside it)
+                else if (list.Count(e => e.IsRest && e.Ticks == Dur.Whole) == 1 && list.Single(e => e.IsRest && e.Ticks == Dur.Whole) is { Stem: 0 } r
+                         && Math.Abs(r.X - (x0 + x1) / 2) < 0.25 * (x1 - x0) && list.Where(e => e != r).Sum(e => e.Ticks) <= barTicks)
+                {
+                    r.FullBar = true;
+                    r.Ticks = barTicks;
+                }
+            }
         return (evs, single);
     }
 

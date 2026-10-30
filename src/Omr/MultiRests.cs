@@ -8,7 +8,8 @@ namespace Omr;
 /// one -- or, from ten bars on, a thick bar along the middle line between two uprights. The count is
 /// read twice, from the digits and from the rests (principle 2: a structure, not a threshold). Under
 /// ten the rests tell it, and the digits must be there: a breve rest alone is a 4/2 measure's rest.
-/// From ten the digits alone tell it.
+/// From ten the digits alone tell it, and so they do over a bar of any count (Sibelius draws the bar
+/// from two bars on).
 /// </summary>
 static class MultiRests
 {
@@ -58,6 +59,9 @@ static class MultiRests
             double w = c.W / s, h = c.H / s;
             if (Verbose) Console.WriteLine($"    rests? s{st.System + 1} part {st.Part} x {x0:F0}: piece at {c.MinX},{c.MinY} {w:F2}x{h:F2} fill {c.Fill:F2}, middle {(c.Cy - mid) / s:F2} spaces under the middle line, top {(c.MinY - line4) / s:F2} under the fourth");
             if (w >= 3 && h <= 2.6 && Math.Abs(c.Cy - mid) < 0.6 * s && bar == null) { bar = c; continue; }
+            // (a repeat's thick line and dots, its bracket, by the measure's ends: the barline's, not the
+            // measure's -- Sibelius's 22 bars' rest after a start repeat, a trumpet part of the Eroica)
+            if (c.MaxX < x0 + 1.5 * s || c.MinX > x1 - 1.5 * s) continue;
             if (c.Fill < 0.8) return 0;
             if (w >= 0.8 && w <= 1.8 && h >= 0.3 && h <= 0.75 && Math.Abs(c.MinY - line4) < 0.3 * s) church += 1;
             else if (w >= 0.3 && w <= 0.9 && h >= 0.75 && h <= 1.3 && Math.Abs(c.Cy - (mid - 0.5 * s)) < 0.35 * s) church += 2;
@@ -96,18 +100,26 @@ static class MultiRests
             return 0;
         }
         int? number = 0;
+        // (over a bar the shapes may be far from Lily#'s and still read right: Sibelius's 7, 11, 22 and 25 at
+        // 3.8 to 7.8, every one right -- the bar under them says they are a count)
+        double far = bar != null ? 8.0 : 3.0;
         foreach (var c in digits)
         {
             var f = GlyphKnn.BoxFeatures(page, c, s);
             sym.TimeSamples.Add(("d", c, f));
             // (the classifier's 0s are from the counts over multi-bar rests: no time signature has one)
             var (label, dist) = GlyphKnn.Enabled ? GlyphKnn.Classify(f, family: "d:") : ("d:none", double.MaxValue);
-            number = dist <= 3.0 && int.TryParse(label[2..], out int v) ? number * 10 + v : null;
-            if (Verbose) Console.WriteLine($"    rests? s{st.System + 1} part {st.Part} x {x0:F0}: digit at {c.MinX},{c.MinY} {c.W / s:F2}x{c.H / s:F2}: {label} {dist:F2}");
+            // (a digit unlike Lily#'s, another engraver's: the learnt detector's digit at its middle, when it saw one -- 1 to 9, no 0)
+            var seenDigit = dist <= 3.0 ? null : sym.Detections?.Where(t => t.Class.StartsWith("digit_") && t.Score >= Detector.Threshold
+                                                                            && t.X >= c.MinX && t.X <= c.MaxX && t.Y >= c.MinY && t.Y <= c.MaxY).MaxBy(t => t.Score);
+            if (seenDigit != null) label = "d:" + seenDigit.Class[6..];
+            number = (dist <= far || seenDigit != null) && int.TryParse(label[2..], out int v) ? number * 10 + v : null;
+            if (Verbose) Console.WriteLine($"    rests? s{st.System + 1} part {st.Part} x {x0:F0}: digit at {c.MinX},{c.MinY} {c.W / s:F2}x{c.H / s:F2}: {label} {dist:F2}{(seenDigit != null ? $" (the detector's, {seenDigit.Score:F2})" : "")}");
         }
         string rule = bar != null ? "a bar" : $"church rests of {church}";
         how = $"{rule}, digits {(number is int nv ? nv.ToString() : "unread")}";
-        if (bar != null) return number is int n && n >= 10 ? n : 0;
+        // (Lily# draws the bar from ten bars on; Sibelius from two, its count over it: "2" for bars 3-4)
+        if (bar != null) return number is int n && n >= 2 ? n : 0;
         if (number is int d && d != church) how += $": the rests' {church} taken";
         return church;
     }

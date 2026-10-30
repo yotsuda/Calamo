@@ -218,8 +218,13 @@ static partial class Layout
         List<double> Inner(List<double> xs) => xs.Where(x => x > xs[0] + 1.0 * s && x < xs[^1] - 1.0 * s).ToList();
         var ia = Inner(xa); var ib = Inner(xb);
         int shared = ia.Count(x => ib.Any(y => Math.Abs(x - y) <= 0.3 * s));
-        bool one = shared >= 2 && shared >= 0.5 * Math.Min(ia.Count, ib.Count);
-        if (TraceJoins) Console.WriteLine($"  barlines {a.Kind}@{a.Top:F0} {ia.Count} inner of {xa.Count}, {b.Kind}@{b.Top:F0} {ib.Count} of {xb.Count}: {shared} at the same columns -> {(one ? "one system" : "not one system")}");
+        // (and fewer left over on the two than shared: one system's staves have the same barlines but
+        // for those the detector misses, two systems' bars fall at a few columns alike by chance -- a
+        // trumpet part's two systems on the Eroica's second page, 3 of 7 and 6 alike, 7 apart, read
+        // the four pages as a score of two staves in 1/4)
+        int left = ia.Count - shared + ib.Count(y => !ia.Any(x => Math.Abs(x - y) <= 0.3 * s));
+        bool one = shared >= 2 && shared >= 0.5 * Math.Min(ia.Count, ib.Count) && left < shared;
+        if (TraceJoins) Console.WriteLine($"  barlines {a.Kind}@{a.Top:F0} {ia.Count} inner of {xa.Count}, {b.Kind}@{b.Top:F0} {ib.Count} of {xb.Count}: {shared} at the same columns, {left} not ->{(one ? "one system" : "not one system")}");
         return one;
     }
 
