@@ -46,11 +46,20 @@ part is asked a different question from that of a reader that reads a staff end 
 | | This reader | A reader that reads a staff end to end |
 |---|---|---|
 | What the model is asked | What symbol is here? | What music is written on this staff? |
-| How | A small convolutional network (CenterNet-like) over the page: a heat map per kind of symbol, each peak one symbol | A staff is cut out, and a sequence model writes out its symbols (pitches, values…) one token after another |
-| What comes out | Symbols with their kind, place on the page and confidence, in no order | The music in order, with no places on the page |
-| What it looks at | The neighbourhood of each symbol | The whole staff, the context before and after |
-| Knowledge of music | None in the model: the rules put chords, voices and bars together and check them | In the model: it learns how music usually goes |
-| Size | About 5 MB; one page in a second or two on the CPU | Larger; usually run on a GPU |
+| How | A small convolutional network (CenterNet-like, with no box sizes): the page is scaled to 16 pixels a staff space and read in bands 14 spaces tall, with a heat map per kind of symbol (95 kinds), each peak one symbol | A staff is cut out, and a sequence model writes out its symbols (pitches, values…) one token after another |
+| Where the staves are | Found by the rules; the detector does not know where they are | Found first, so that each staff can be cut out for the model |
+| What comes out | Symbols with their kind, place on the page and confidence, in no order | The music in order, with the staff's place on the page but not each symbol's |
+| What it looks at | About 8 staff spaces around each symbol | The whole staff, the context before and after |
+| Knowledge of music | No melody or harmony in the model, only what shows within a few spaces; the rules put chords, voices and bars together and check them | In the model: it learns how music usually goes |
+| Bars | Each bar has its place on the page, and the bars read are counted against the printed bar numbers | A bar missed shifts every bar after it |
+| When it is wrong | A bar that does not fill is marked: a wrong reading tends to look wrong | The model writes what music usually does, so a wrong reading can look right |
+| Putting a kind of mistake right | Traced to the detector or to a rule; a rule put right mends every bar it touches | It lies in the weights: more data, and the model learnt again |
+| A new kind of symbol | Easy to add: pieces that have it are drawn, and the detector is learnt again in under an hour, the rest of its data as it was. But what it means in the music is a rule written by hand | New tokens, and the whole model learnt again on transcriptions that spell the symbol, a long run. But no rule to write: the model learns what it means |
+| The model | About 1.2 million weights, a 5 MB file | Tens of times larger |
+| Speed | A page in about ten seconds on the CPU; no GPU | Runs on the CPU too, a GPU optional; several times as long a page |
+| Learning again | Under an hour on one desktop GPU, so a change can be tried and measured the same day | Days on a GPU, on larger data |
+| What to install | The VS Code extension alone: no Python, nothing more to download | Usually Python with its packages, and the models |
+| Where it runs | Windows x64 only | Usually Linux, macOS and Windows |
 
 What follows from it:
 
@@ -74,7 +83,54 @@ What follows from it:
   training: neither their pages nor their notes were seen.
 
 Where it is behind: old prints scanned small or worn, where a reader trained end to end on
-heavily degraded pages still reads more notes. That gap is the current work.
+heavily degraded pages still reads more notes. That gap is the current work. And it runs only on
+Windows x64.
+
+## How sure it is, symbol by symbol
+
+Every symbol the detector finds comes with a score, the height of its peak, and stands at its place
+on the page. The rules weigh those scores as they put the music together, and add what they find
+themselves: a head the detector barely sees, a dot the rules found and the detector does not, a bar
+whose voices do not fill its time, a bar that draws differently from the page (`--verify`). Each
+such place becomes a todo with a confidence from 0 to 1 and a box on the page
+([docs/protocol.md](docs/protocol.md) says how each is set). The less sure ones are written into the
+`.lys`; Lily# boxes them on the scan, opens the bar beside the page, and *Fix OMR Marks with AI…*
+sends only those bars to an AI. So the work of checking goes where the reading is weak, not over
+every bar.
+
+A reader that writes a staff out as tokens has a probability for each token too, but not the place
+on the page it came from, and its sense of how music usually goes can make a wrong reading look as
+sure as a right one. The marks here are not a proof either: they catch most of the bars read wrong,
+not all of them.
+
+The same design keeps the reader from leaning towards a kind of music. The detector learns what
+symbols look like, not how music goes: it sees a few staff spaces around each symbol, and the pieces
+it learnt from are mostly music the project makes up. What it reads depends on the symbols it has
+been taught (TAB and drums, not yet lyrics or chord names), not on the style of the music; a reader
+that learns how music goes reads best the kind of music it learnt from.
+
+## What it writes
+
+Most readers write MusicXML, the format notation programs exchange, made for programs rather than
+for people, or a MIDI file, which keeps the notes to play and loses most of the notation. This one writes Lily# text, a bar to a line:
+
+```
+  p1 {
+    b8. b'16@text("espressivo") |
+    b'2. c''4 |
+    …
+    gis4@todo(b10-up "⅙ halves short of 2/2: a note or rest missed, or a duration misread?") tuplet 3/2 { a8@cresc b8@!cresc } d'8@decresc c'8 e8@!decresc <a e'>8 |
+```
+
+- **Short enough to read and correct by hand**, and to compare in version control.
+- **The doubt travels with the music.** A place to check is marked on its note in the text
+  (`@todo`), with what does not add up, so Lily#, a person and an AI model all see it where it is.
+  MusicXML has no place for how sure a reading is: a reader can only colour a note, which says
+  neither how sure nor why, or keep its doubts in a file of its own that no notation program draws.
+- **Beside it, `x.omr.json`** holds where each bar is on the page and every todo with its
+  confidence, for a program that calls the reader ([docs/protocol.md](docs/protocol.md)).
+- **MusicXML when you need it.** Lily# turns the `.lys` into MusicXML (`lysc xml`), MIDI, LilyPond
+  source or PDF; the marks stay in the `.lys`.
 
 ## How well it reads
 
@@ -87,13 +143,13 @@ development set (`data/dev`), whose scans the detector learns from.
 
 | Pages | Sets | Notes and rests | Read right |
 |---|---|---|---|
-| Engraved with MuseScore (OpenScore Lieder) | 31 | 25,605 | 96.6% |
+| Engraved with MuseScore (OpenScore Lieder) | 31 | 25,605 | 96.7% |
 | Engraved with LilyPond (Mutopia) | 8 | 2,959 | 94.1% |
 | Other modern engravings (Dorico, abcm2ps and others, from IMSLP) | 7 | 2,374 | 93.2% |
 | Scans of 19th- and early 20th-century prints (IMSLP) | 20 | 27,333 | 91.5% |
 | All | 66 | 58,271 | 94.0% |
 
-A one-page LilyPond PDF reads in a few seconds; an old print scanned small, or a long PDF, takes
+A page reads in about ten seconds on the CPU; an old print scanned small, or a long PDF, takes
 longer. The marks are not a proof: a bar with no mark can still be wrong.
 
 ## Build and run
