@@ -49,8 +49,11 @@ static partial class Symbols
             // (the hole looked for about the detection's centre, a tenth of a space off it, and in a small
             // square: a cue's half head on a line, Leland's narrow slanting hole a few pixels from the
             // centre, measured 0.30 at the centre -- gen-cue's ledger003, a2 read as a4)
+            // (and on a ledger line, the line through the hole fills every such square: the paper about
+            // the middle, the line's rows left out -- gen-cue's tuplets004, a cue's a''2 read as a''4)
             bool black = t.Class == "head_black" || cross || t.Class == "slash_black"
-                         || grace && new[] { -1, 0, 1 }.SelectMany(i => new[] { -1, 0, 1 }, (i, j) => InkCore(ink, t.X + i * 0.1 * s, t.Y + j * 0.1 * s, 0.09 * s)).Min() >= 0.3;
+                         || grace && new[] { -1, 0, 1 }.SelectMany(i => new[] { -1, 0, 1 }, (i, j) => InkCore(ink, t.X + i * 0.1 * s, t.Y + j * 0.1 * s, 0.09 * s)).Min() >= 0.3
+                                  && !(SmallHole(ink, t.X, t.Y, s) is var hole && hole.Line && hole.White >= 0.3);
             if (!black && !whole && !grace && t.Class != "head_half" && t.Class != "slash_hollow") continue;
             if (det.Any(u => Rivals(u, t) && Beats(u, t))) continue;
             // (a note on seven ledger lines and more stands past Nearest's reach: piano-collide's
@@ -107,6 +110,25 @@ static partial class Symbols
                 L = xl, R = xr, OuterW = xr - xl + 1, Pos = (int)Math.Round(st.Pos(t.Y)), Far = far,
             });
         }
+    }
+
+    // the share of a small head's middle (a quarter of a space either side, a fifth over and under) that
+    // is paper, the rows a line runs through left out (inked from nearly half a space left to as far right),
+    // and whether there were any
+    static (double White, bool Line) SmallHole(Img ink, double x, double y, double s)
+    {
+        int x0 = (int)Math.Round(x), y0 = (int)Math.Round(y), rx = (int)Math.Round(0.25 * s), ry = (int)Math.Round(0.2 * s), line = (int)Math.Round(0.45 * s);
+        int white = 0, all = 0;
+        bool any = false;
+        for (int yy = y0 - ry; yy <= y0 + ry; yy++)
+        {
+            if (yy < 0 || yy >= ink.H || x0 - line < 0 || x0 + line >= ink.W) continue;
+            bool through = true;
+            for (int xx = x0 - line; xx <= x0 + line && through; xx++) through = ink[xx, yy];
+            if (through) { any = true; continue; }
+            for (int xx = x0 - rx; xx <= x0 + rx; xx++) { all++; if (!ink[xx, yy]) white++; }
+        }
+        return (all == 0 ? 0 : (double)white / all, any);
     }
 
     // the share of a square r out from (x, y) that is ink

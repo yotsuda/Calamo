@@ -38,7 +38,7 @@ static partial class Symbols
         // (a slash's stem leaves its corner, about a space above or below its centre)
         // (a small head's stem is short: a cue's beamed eighths, 0.63 of a note's size, stand 1.45 spaces
         // from their beam -- gen-cue's ledger003, read as quarters)
-        double least = h.Grace ? 1.2 * s : 2.2 * s;
+        double least = h.Grace ? 1.2 * s : 2.2 * s, size = h.Grace ? 0.63 : 1;
         Search(h.Slash ? (int)(1.4 * s) : 0, 0);
         if (bestLen < least && h.Score > 0)
         {
@@ -83,8 +83,8 @@ static partial class Symbols
                 if (!ink[x, y]) { if (dbg) Console.WriteLine($"  stem? up x {x}: no ink"); continue; }
                 y = Follow(x, y, -1);
                 int len = cy - y;
-                if (dbg) Console.WriteLine($"  stem? up x {x}: len {len / s:F2} thin {ThinSomewhere(ink, x, cy, -1, len, s)}");
-                if (len > bestLen && ThinSomewhere(ink, x, cy, -1, len, s)) { bestLen = len; bestX = x; bestTip = y; bestUp = true; }
+                if (dbg) Console.WriteLine($"  stem? up x {x}: len {len / s:F2} thin {ThinSomewhere(ink, x, cy, -1, len, s, size)}");
+                if (len > bestLen && ThinSomewhere(ink, x, cy, -1, len, s, size)) { bestLen = len; bestX = x; bestTip = y; bestUp = true; }
             }
             // down: at the left edge, going down
             for (int x = (int)(h.L - past * s); x <= (int)(h.Cross ? h.X + 0.2 * s : h.L + 0.35 * s); x++)
@@ -94,8 +94,8 @@ static partial class Symbols
                 if (!ink[x, y]) { if (dbg) Console.WriteLine($"  stem? down x {x}: no ink"); continue; }
                 y = Follow(x, y, 1);
                 int len = y - cy;
-                if (dbg) Console.WriteLine($"  stem? down x {x}: len {len / s:F2} thin {ThinSomewhere(ink, x, cy, 1, len, s)}");
-                if (len > bestLen && ThinSomewhere(ink, x, cy, 1, len, s)) { bestLen = len; bestX = x; bestTip = y; bestUp = false; }
+                if (dbg) Console.WriteLine($"  stem? down x {x}: len {len / s:F2} thin {ThinSomewhere(ink, x, cy, 1, len, s, size)}");
+                if (len > bestLen && ThinSomewhere(ink, x, cy, 1, len, s, size)) { bestLen = len; bestX = x; bestTip = y; bestUp = false; }
             }
         }
     }
@@ -229,13 +229,26 @@ static partial class Symbols
 
     /// <summary>
     /// A stem is thin somewhere along it: just past its head, or further on (in a chord the next
-    /// head up the stem is right there, and a beam may sit at the tip).
+    /// head up the stem is right there, and a beam may sit at the tip). A small head's places are as much
+    /// nearer as it is smaller (<paramref name="size"/>): a cue's stem, 1.7 spaces to its beam, was looked
+    /// at only where a staff line crosses it (gen-cue's tuplets002, its a16 read as a quarter). And its
+    /// short beam, steep to the next note, runs beside it all the way down on one side: thin on the other
+    /// side is thin enough (chords001's des'16 after a dotted eighth in Petaluma, read as a quarter).
     /// </summary>
-    static bool ThinSomewhere(Img ink, int x, int cy, int dir, int len, double s)
+    static bool ThinSomewhere(Img ink, int x, int cy, int dir, int len, double s, double size = 1)
     {
         foreach (double at in new[] { 0.9, 1.5, 2.1 })
-            if (at * s < len - 0.3 * s && Thin(ink, x, (int)(cy + dir * at * s), s)) return true;
+            if (at * size * s < len - 0.3 * s && (size < 1 ? ThinOnOneSide(ink, x, (int)(cy + dir * at * size * s), s)
+                                                            : Thin(ink, x, (int)(cy + dir * at * size * s), s))) return true;
         return false;
+    }
+
+    /// <summary>At row y the ink from column x out half a space, on the left or on the right, is no wider than a stem.</summary>
+    static bool ThinOnOneSide(Img ink, int x, int y, double s)
+    {
+        int left = 0, right = 0, r = (int)(0.5 * s);
+        for (int dx = 0; dx <= r; dx++) { if (ink[x - dx, y]) left++; if (ink[x + dx, y]) right++; }
+        return Math.Min(left, right) <= 0.2 * s;
     }
 
     /// <summary>
@@ -690,8 +703,10 @@ static partial class Symbols
             // parted between the voices)
             if (best == null)
             {
-                // (a neighbour at its height: the other voice's group stands an octave off, piano007)
-                var mate = ps.Graces.FirstOrDefault(o => o != g && Fellow(ink, g, o, s) && Math.Abs(o.Y - g.Y) < 2 * s && marked.ContainsKey(o) && o.Beams > 0);
+                // (a neighbour at its height: the other voice's group stands an octave off, piano007. And close
+                // by, as a grace group's notes stand: a cue's notes, as far apart as the notes they copy, are of
+                // values of their own -- gen-cue's tuplets004, the dotted eighth taking the sixteenth's two beams)
+                var mate = ps.Graces.FirstOrDefault(o => o != g && Fellow(ink, g, o, s) && Math.Abs(o.Y - g.Y) < 2 * s && Math.Abs(o.X - g.X) < 2.5 * s && marked.ContainsKey(o) && o.Beams > 0);
                 if (mate != null) { g.HasStem = true; g.Up = mate.Up; g.StemX = g.Up ? g.R : g.L; g.Tip = mate.Tip; g.Beams = mate.Beams; }
                 // (none either: the beams counted in the ink at the rules' tip, as a note's are, at the small
                 // note's size -- the detector sees no tip on gen-cue's beamed cue eighths, ledger003's d8 ees8)

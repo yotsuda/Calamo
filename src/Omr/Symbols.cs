@@ -777,7 +777,10 @@ static partial class Symbols
             // (on the head's own row, the head's own width: a head in a space rounded onto the line
             // beside it -- the bowed page's gap stretched -- has no line through it, only its ink)
             bool own = k == Math.Abs(p);
-            int x0 = own ? (int)(h.R > h.L ? h.L : h.X - 0.55 * s) : (int)(h.X - 0.7 * s), x1 = own ? (int)(h.R > h.L ? h.R : h.X + 0.55 * s) : (int)(h.X + 0.7 * s);
+            // (a small head's ledger lines are as short as it is small: a cue's on three ledgers over the
+            // staff, its lines 1.1 spaces long, gen-cue's tuplets004 -- dropped as a grace head off the staff)
+            double reach = h.Grace ? 0.45 : 0.7;
+            int x0 = own ? (int)(h.R > h.L ? h.L : h.X - 0.55 * s) : (int)(h.X - reach * s), x1 = own ? (int)(h.R > h.L ? h.R : h.X + 0.55 * s) : (int)(h.X + reach * s);
             for (int yy = (int)y - win; yy <= (int)y + win && !found; yy++)
                 found = Inked(x0, x1, yy)
                         && (!wider || Inked((int)(h.L - 0.3 * s), (int)(h.L - 0.1 * s), yy) && Inked((int)(h.R + 0.1 * s), (int)(h.R + 0.3 * s), yy))

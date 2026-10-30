@@ -859,7 +859,8 @@ static class Reader
     /// </summary>
     /// <param name="clefs">the clefs inside the measure, left to right (Sig.Mid): each item past one is read by it, and the first such item carries it (Ev.ClefBefore)</param>
     /// <param name="octaveClef">the measure opens under an octave clef (treble_8, bass_8): its notes are Ev.OctaveClef, until a clef inside it (only treble_8 is one there: the .lys writes a bass_8 inside the music as bass)</param>
-    static (List<Ev> Evs, List<Ev> Single) StaffEvents(PageSymbols sym, Staff st, double x0, double x1, double s, int mid, int[] keyAlt, int barTicks, List<Sig> clefs = null, bool octaveClef = false)
+    /// <param name="measuring">the measure read to tell its length (barTicks 0): a cue's small notes are its notes</param>
+    static (List<Ev> Evs, List<Ev> Single) StaffEvents(PageSymbols sym, Staff st, double x0, double x1, double s, int mid, int[] keyAlt, int barTicks, List<Sig> clefs = null, bool octaveClef = false, bool measuring = false)
     {
         var evs = new List<Ev>();
         var single = new List<Ev>();
@@ -874,7 +875,7 @@ static class Reader
         var inBar = sym.Heads.Where(h => h.St == st && h.X > x0 && h.X < x1 && !h.Slash && !h.Cross).ToList();
         var graceHeads = sym.Graces.Where(g => g.St == st && g.X > x0 && g.X < x1).ToList();
         var wholes = sym.Rests.Where(r => r.St == st && r.X > x0 && r.X < x1 && r.Kind == RestKind.Whole).ToList();
-        bool cue = barTicks > 0 && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0) && inBar.Count + graceHeads.Count > 0;
+        bool cue = (barTicks > 0 || measuring) && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0) && inBar.Count + graceHeads.Count > 0;
         if (cue)
         {
             // (small beside the page's black heads where they are wider: a photo's 12-pixel space measures
@@ -1179,7 +1180,7 @@ static class Reader
             for (int m = 0; m < sys.Measures; m++)
                 foreach (var st in sys.Staves)
                 {
-                    var (evs, _) = StaffEvents(sym, st, sys.Bars[m], sys.Bars[m + 1], s, Clefs.MiddleLine("treble"), new int[7], 0);
+                    var evs = Measured(StaffEvents(sym, st, sys.Bars[m], sys.Bars[m + 1], s, Clefs.MiddleLine("treble"), new int[7], 0, measuring: true).Evs);
                     if (evs.Count == 0 || (evs.Count == 1 && evs[0].IsRest && evs[0].Ticks == Dur.Whole)) continue;
                     filling.Add(evs);
                 }
@@ -1225,7 +1226,7 @@ static class Reader
             for (int m = m0; m < m1; m++)
                 foreach (var st in sys.Staves)
                 {
-                    var (evs, _) = StaffEvents(sym, st, sys.Bars[m], sys.Bars[m + 1], s, Clefs.MiddleLine("treble"), new int[7], 0);
+                    var evs = Measured(StaffEvents(sym, st, sys.Bars[m], sys.Bars[m + 1], s, Clefs.MiddleLine("treble"), new int[7], 0, measuring: true).Evs);
                     if (evs.Count == 0 || (evs.Count == 1 && evs[0].IsRest && evs[0].Ticks == Dur.Whole)) continue;
                     contents.Add(evs);
                 }
@@ -1564,6 +1565,18 @@ static class Reader
         var totals = m.Evs.Where(evs => evs.Count > 0 && !(evs.Count == 1 && evs[0].Blank)).Select(evs => evs.Sum(e => e.Ticks)).ToList();
         if (totals.Count == 0 || m.BarTicks <= 0) return 0;
         return Math.Max(0, totals.Min() - m.BarTicks) / (double)m.BarTicks;
+    }
+
+    /// <summary>
+    /// A measure's events as its length is measured before the time is known: a bar's only whole rest
+    /// among notes is the other voice's bar of rest, any length (a part's rest under a cue, read with its
+    /// small notes as events (StaffEvents' measuring): its four quarters added to the cue's 4/4, or the
+    /// cue's notes no time at all, made gen-cue's chords001 5/4 with three cue bars).
+    /// </summary>
+    static List<Ev> Measured(List<Ev> evs)
+    {
+        var wholes = evs.Where(e => e.IsRest && e.Ticks == Dur.Whole && e.Stem == 0).ToList();
+        return wholes.Count == 1 && evs.Any(e => !e.IsRest) ? evs.Where(e => e != wholes[0]).ToList() : evs;
     }
 
     /// <summary>Whether the events make a measure of exactly the given length, voice by voice.</summary>
