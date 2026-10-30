@@ -1,0 +1,32 @@
+// A cue { } region's heads are drawn at font-size -4 (0.63 of a normal head), LilyPond's
+// CueVoice default. Sibelius, Dorico and MuseScore print cues larger: the Scoring Notes 2024
+// Eroica trumpet part (Sibelius, bars 358-362, "Ob. 1") has cue heads 0.95 x 0.80 staff
+// spaces against its normal heads' 1.29 x 1.12 (about 0.73), where lysc's are 0.76 x 0.62 in all
+// four music fonts. The OMR's detector, taught from lysc's pictures, takes those larger cue
+// heads for normal ones or misses them (the c''' over two ledger lines in bar 359 of a phone
+// photo of that part). Bars 1-5 are the cue bars of that part; bars 6-7 are normal notes to
+// compare with.
+title "Cue Size"
+octave absolute
+time 3/4
+key f major
+
+part pt { clef treble }
+
+section Piece {
+  pt {
+    voice { cue { g''4 bes''4 c'''4 } } { R2. } |
+    voice { cue { c'''4 r4 r4 } } { R2. } |
+    voice { cue { g''2 bes''4 } } { R2. } |
+    voice { cue { g''2 c''4 } } { R2. } |
+    voice { cue { f''2 aes''4 } } { R2. } |
+    g''2 bes''4 |
+    c''4 a''4 c'''4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff pt "Trumpet"
+}
