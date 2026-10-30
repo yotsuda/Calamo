@@ -248,6 +248,8 @@ Fantasy 434 → 483、TAT 205 → 291。線の通った「0」と加線の上の
   **2026-10-26 承認（ライセンスに問題がなければ、の条件つき。確認済み）:** 学習データの汚しに augraphy（sparkfish/augraphy、**MIT**、README で確認。
   依存の numpy・scipy・scikit-image・scikit-learn・numba・opencv-python・Pillow・matplotlib・requests も BSD・Apache-2.0・MIT 系）。
   `tools/train-model/.venv` に入れ、学習の道具として使うだけで出荷物には含めない。入れるときに版と依存の版を記録する。
+  **2026-10-30 オーナー決定: 入れない**（「差が少ないなら速い方」）。同じ種類の汚しは自前の `degrade.py` にあり、augraphy にしかない種類の多くは形を動かすもので、
+  位置を学ぶ検出器には使えない。足りない種類（インクの中のむら、鉛筆の書き込み）は `degrade.py` に足す（HANDOFF）。
 - **実譜データの入手。** 楽譜の PDF、MuseScore の元ファイルなど。
 - **Lab 側の成果物への修正。** Bohemian の `.lys` の転記ミスの修正は提案済みで、未承認。
 - ~~**Lily# の連符の不具合。**~~ 2026-09-28 に Lily# 側で修正済み（`docs/repro/tuplet-in-voice2.lys`）。
