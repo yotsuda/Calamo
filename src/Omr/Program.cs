@@ -743,9 +743,15 @@ for (int si = 0; si < sections.Count; si++)
                 foreach (var v in voices)
                 {
                     var vm = new List<(Ev Ev, int At)>();
+                    // (a cue's voice, its notes small over the part's rest: cue { }. A tie out of it is
+                    // dropped: two cue blocks side by side are two voices, and Lily# refuses a tie from
+                    // one into the next -- the Eroica part's tied "Vln. 1" cues over 10 bars)
+                    bool cue = v.Count > 0 && v.All(e => e.Cue) && v.Any(e => !e.IsRest);
+                    if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tie = false;
                     string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm);
-                    marks.AddRange(vm.Select(m => (m.Ev, music.Length + 3 + m.At)));
-                    music += " { " + line + " }";
+                    string open = cue ? " { cue { " : " { ";
+                    marks.AddRange(vm.Select(m => (m.Ev, music.Length + open.Length + m.At)));
+                    music += open + line + (open.Length > 3 ? " } }" : " }");
                 }
             }
             int start = lys.Length;

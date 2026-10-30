@@ -865,10 +865,21 @@ static class Reader
         var single = new List<Ev>();
         var accs = new Dictionary<int, int>();
         var items = new List<(double X, object O)>();
+        // A cue: another instrument's notes printed small over the part's own full-bar rest, a whole
+        // rest in the bar's middle (a trumpet part's "Vln. 1" and "Ob. 1" bars). Half its heads and
+        // more are small, under 1.1 spaces wide where a head is 1.25 and more (a hollow head is often
+        // given the usual width, its ink not measured: the Eroica's flat b2. in bar 394), or grace heads -- which are then
+        // the cue's notes: all of them are small (the Eroica part's c8 in bar 244, dropped as a grace
+        // note with no note after it)
+        var inBar = sym.Heads.Where(h => h.St == st && h.X > x0 && h.X < x1 && !h.Slash && !h.Cross).ToList();
+        var graceHeads = sym.Graces.Where(g => g.St == st && g.X > x0 && g.X < x1).ToList();
+        var wholes = sym.Rests.Where(r => r.St == st && r.X > x0 && r.X < x1 && r.Kind == RestKind.Whole).ToList();
+        bool cue = barTicks > 0 && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0)
+                   && inBar.Count + graceHeads.Count > 0 && 2 * (graceHeads.Count + inBar.Count(h => h.R - h.L + 1 < 1.1 * s)) >= inBar.Count + graceHeads.Count;
         foreach (var h in sym.Heads) if (h.St == st && h.X > x0 && h.X < x1) items.Add((h.X, h));
         foreach (var r in sym.Rests) if (r.St == st && r.X > x0 && r.X < x1) items.Add((r.X, r));
         // (a grace note as a marker: its pitch kept for the next note's head, within four spaces of it)
-        foreach (var g in sym.Graces) if (g.St == st && g.X > x0 && g.X < x1) items.Add((g.X, new GraceMark(g)));
+        foreach (var g in graceHeads) items.Add((g.X, cue ? g : new GraceMark(g)));
         foreach (var b in sym.BeatRepeats) if (b.St == st && (b.L + b.R) / 2 > x0 && (b.L + b.R) / 2 < x1) items.Add(((b.L + b.R) / 2, b));
         items.Sort((a, c) => a.X.CompareTo(c.X));
         // the beat repeats' copies, mark by mark, and the group the marks in a row play again
@@ -1118,6 +1129,9 @@ static class Reader
                     r.Ticks = barTicks;
                 }
             }
+        // (a cue's: every event but the part's own rest)
+        if (cue && evs.Any(e => e.FullBar))
+            foreach (var e in evs.Concat(single).Where(e => !e.FullBar)) e.Cue = true;
         return (evs, single);
     }
 
