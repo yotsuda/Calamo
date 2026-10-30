@@ -16,7 +16,10 @@ param(
 Add-Type -AssemblyName System.Drawing
 $Sets = @($Sets | ForEach-Object { $_ -split ',' })   # (pwsh -File passes a list as one string)
 $root = Resolve-Path "$PSScriptRoot\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+# a folder's pages, p01.png on (not the page images Lily# leaves beside a page it read, p01.omr-p01.png:
+# one in tchaikovsky39-5's scan made it a page of two from 2026-10-28, and its row fell out of the table)
+function PageCount($dir) { @(Get-ChildItem "$dir\p*.png" | Where-Object Name -match '^p\d+\.png$').Count }
+$omr ="$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
 $out = "$root\out\audiveris"
 $lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
 if ($Verify) { $OmrArgs += '--verify', $lysc }
@@ -34,7 +37,7 @@ if ($Eval) {
     # (never debug the reader on these: see prep-eval.ps1)
     $benches = [ordered]@{}
     foreach ($d in Get-ChildItem "$root\data\eval\dichterliebe\ms" -Directory | Sort-Object Name) {
-        $benches["dl-ms-$($d.Name)"] = @{ Pages = $d.FullName; To = @(Get-ChildItem "$($d.FullName)\p*.png").Count
+        $benches["dl-ms-$($d.Name)"] = @{ Pages = $d.FullName; To = (PageCount $d.FullName)
                                           Args = @('--config', "$($d.FullName)\$($d.Name).score", '--truth', "$($d.FullName)\truth.musicxml", '--poly') }
     }
     $c = "$root\data\eval\chopin28-4"
@@ -42,7 +45,7 @@ if ($Eval) {
     # the old prints: Breitkopf's Dichterliebe (the sixteen songs on through, one truth numbered on), Peters' prelude
     $dl = "$root\data\eval\dichterliebe"
     $xmls = (Get-ChildItem "$dl\ms" -Directory | Sort-Object Name | ForEach-Object { "$($_.FullName)\truth.musicxml" }) -join '+'
-    $benches['dl-scan'] = @{ Pages = "$dl\scan"; To = @(Get-ChildItem "$dl\scan\p*.png").Count; Args = @('--config', "$dl\scan\dichterliebe.score", '--truth', $xmls, '--poly') }
+    $benches['dl-scan'] = @{ Pages = "$dl\scan"; To = (PageCount "$dl\scan"); Args = @('--config', "$dl\scan\dichterliebe.score", '--truth', $xmls, '--poly') }
     $benches['chopin28-4-scan'] = @{ Pages = "$c\scan"; To = 1; Args = @('--config', "$c\scan\chopin28-4.score", '--truth', "$c\truth\page-{part}.notes", '--pickup', '1/4', '--poly') }
     # short piano pieces from Mutopia (2026-10-14, data/eval/CANDIDATES-2026-10-14.md): the truth is the Mutopia
     # source's, mutopia/ its own PDF, scan/ an IMSLP print of the edition it was typed from, the truth put right
@@ -55,7 +58,7 @@ if ($Eval) {
         foreach ($kind in Get-ChildItem $d -Directory | Where-Object { Test-Path "$($_.FullName)\$n.score" } | ForEach-Object Name) {
             $truth = if (Test-Path "$d\truth-$kind") { "$d\truth-$kind" } else { "$d\truth" }
             # (Clementi's Mutopia PDF and Schirmer scan: their first page; Bosse's pages hold the first movement only)
-            $to = if ($n -eq 'clementi36-1' -and $kind -in 'mutopia', 'scan') { 1 } else { @(Get-ChildItem "$d\$kind\p*.png").Count }
+            $to = if ($n -eq 'clementi36-1' -and $kind -in 'mutopia', 'scan') { 1 } else { (PageCount "$d\$kind") }
             $benches["$n-$kind"] = @{ Pages = "$d\$kind"; To = $to; Args = @('--config', "$d\$kind\$n.score", '--truth', "$truth\page-{part}.notes") + $pickup + @('--poly') }
         }
     }
@@ -64,7 +67,7 @@ if ($Eval) {
     foreach ($d in Get-ChildItem "$root\data\eval\lieder" -Directory | Sort-Object Name) {
         foreach ($kind in 'ms', 'scan') {
             if (-not (Test-Path "$($d.FullName)\$kind\p01.png")) { continue }
-            $benches["lied-$($d.Name)-$kind"] = @{ Pages = "$($d.FullName)\$kind"; To = @(Get-ChildItem "$($d.FullName)\$kind\p*.png").Count
+            $benches["lied-$($d.Name)-$kind"] = @{ Pages = "$($d.FullName)\$kind"; To = (PageCount "$($d.FullName)\$kind")
                                                   Args = @('--config', "$($d.FullName)\$kind\$($d.Name).score", '--truth', "$($d.FullName)\ms\truth.musicxml", '--poly') }
         }
     }
@@ -75,7 +78,7 @@ if ($Dev) {
     foreach ($d in Get-ChildItem "$root\data\dev\lieder" -Directory | Sort-Object Name) {
         foreach ($kind in 'ms', 'scan') {
             if (-not (Test-Path "$($d.FullName)\$kind\p01.png")) { continue }
-            $benches["dev-$($d.Name)-$kind"] = @{ Pages = "$($d.FullName)\$kind"; To = @(Get-ChildItem "$($d.FullName)\$kind\p*.png").Count
+            $benches["dev-$($d.Name)-$kind"] = @{ Pages = "$($d.FullName)\$kind"; To = (PageCount "$($d.FullName)\$kind")
                                                  Args = @('--config', "$($d.FullName)\$kind\$($d.Name).score", '--truth', "$($d.FullName)\ms\truth.musicxml", '--poly') }
         }
     }
