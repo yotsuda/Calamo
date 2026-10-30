@@ -6,14 +6,16 @@ Three kinds of page, as the old prints of the development set show them (data/de
   - a print scanned to black and white, mostly an old one: ink that bled or wore thin, thin strokes (staff
     lines, stems, ledger lines) broken where the ink faded, the page cut at one grey level, dust and blots;
   - a grey scan: a show-through of the other side, a shadow or uneven light, paper grain, streaks, JPEG;
-  - a small page blown up (about 96 dpi).
+  - a small page blown up (about 96 dpi);
+  - a phone's photo (about 12 px a space: soft, grey, unevenly lit, sharpened, JPEG).
+Before any of them, now and then, ink uneven within its strokes and a player's pencil marks.
 Only numpy and PIL: nothing to install, nothing that ships.
 
   degrade(g, rng, other)  g: float32 HxW, 1 = paper, 0 = ink; other: another window (for show-through)
 """
 import io
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 
 def field(h, w, rng, period):
@@ -98,6 +100,70 @@ def low_resolution(g, rng):
     return resize(small, w, h, Image.Resampling.BICUBIC if rng.random() < 0.5 else Image.Resampling.BILINEAR)
 
 
+def mottle(g, rng, s=1.0):
+    """Ink uneven within a stroke: a fine grain a few pixels across (worn type, a dry pen, toner), so a
+    head or a beam is not one grey but spotted lighter; the coarse field of a faded print is old_print's."""
+    h, w = g.shape
+    f = field(h, w, rng, rng.uniform(2, 6) * s)
+    return 1.0 - (1.0 - g) * (1.0 - rng.uniform(0.3, 0.7) * f)
+
+
+def pencil(g, rng):
+    """A player's pencil: a few faint, thin, wavering strokes anywhere (a fingering, a breath mark, a
+    circle round a note, a line through a bar), the paper's grey not the ink's black."""
+    h, w = g.shape
+    im = Image.new('L', (w, h), 255)
+    d = ImageDraw.Draw(im)
+    for _ in range(rng.integers(1, 5)):
+        x, y = rng.uniform(0, w), rng.uniform(0, h)
+        if rng.random() < 0.3:
+            # (a circle or an oval round something)
+            rx, ry = rng.uniform(6, 30), rng.uniform(6, 30)
+            d.ellipse([x - rx, y - ry, x + rx, y + ry], outline=0, width=int(rng.integers(1, 3)))
+            continue
+        pts, ang, n = [(x, y)], rng.uniform(0, 2 * np.pi), int(rng.integers(2, 8))
+        for _ in range(n):
+            ang += rng.normal(0, 0.6)
+            step = rng.uniform(5, 20)
+            x, y = x + step * np.cos(ang), y + step * np.sin(ang)
+            pts.append((x, y))
+        d.line(pts, fill=0, width=int(rng.integers(1, 3)))
+    lead = 1.0 - blur(np.asarray(im, dtype=np.float32) / 255.0, rng.uniform(0.3, 0.8))
+    # (graphite is grey and grainy)
+    tone = rng.uniform(0.35, 0.75) * (0.7 + 0.3 * rng.random(g.shape).astype(np.float32))
+    return np.minimum(g, 1.0 - lead * tone)
+
+
+def photo(g, rng):
+    """A phone's photo of a page (the Eroica trumpet part, 2026-10-30: 12.4 px a space): a small page,
+    a little out of focus, grey ink on grey paper under uneven light, the camera's noise, its sharpening
+    and its JPEG, blown up to the detector's scale."""
+    h, w = g.shape
+    # (a bold print, as the Eroica part's: its staff lines a quarter of a space thick, its small heads' ledger
+    # lines as thick, where Lily#'s are a tenth; the ink spread a pixel or two all round)
+    if rng.random() < 0.6:
+        im = Image.fromarray(np.clip(g * 255, 0, 255).astype(np.uint8))
+        g = np.asarray(im.filter(ImageFilter.MinFilter(int(rng.choice([3, 3, 5])))), dtype=np.float32) / 255.0
+    s = rng.uniform(0.6, 0.9)
+    sw, sh = max(1, int(round(w * s))), max(1, int(round(h * s)))
+    small = resize(g, sw, sh, Image.Resampling.BOX)
+    small = blur(small, rng.uniform(0.3, 1.0))
+    ink, paper = rng.uniform(0.05, 0.35), rng.uniform(0.55, 0.9)
+    small = ink + (paper - ink) * small
+    # light from one side and a shadow of the hand or the phone
+    yy, xx = np.mgrid[0:sh, 0:sw].astype(np.float32)
+    ramp = rng.uniform(-1, 1) * xx / sw + rng.uniform(-1, 1) * yy / sh
+    ramp = (ramp - ramp.min()) / max(1e-6, ramp.max() - ramp.min())
+    small = small * (1.0 - rng.uniform(0, 0.3) * ramp) * (1.0 - rng.uniform(0, 0.2) * field(sh, sw, rng, rng.uniform(40, 200)))
+    small = small + rng.normal(0, rng.uniform(0.01, 0.035), small.shape).astype(np.float32)
+    im = Image.fromarray(np.clip(small * 255, 0, 255).astype(np.uint8))
+    if rng.random() < 0.6:
+        im = im.filter(ImageFilter.UnsharpMask(radius=rng.uniform(0.8, 2.0), percent=int(rng.integers(50, 200)), threshold=0))
+    buf = io.BytesIO(); im.save(buf, 'JPEG', quality=int(rng.integers(40, 92)))
+    small = np.asarray(Image.open(buf), dtype=np.float32) / 255.0
+    return resize(small, w, h, Image.Resampling.BICUBIC)
+
+
 def grey_scan(g, rng, other):
     """A grey scan of a worn page."""
     h, w = g.shape
@@ -141,6 +207,12 @@ def grey_scan(g, rng, other):
 
 def degrade(g, rng, other=None):
     g = g.astype(np.float32)
+    # (the ink's grain and a pencil come before the scan or the camera, which see them as they see the print)
+    if rng.random() < 0.3:
+        g = mottle(g, rng)
+    if rng.random() < 0.15:
+        g = pencil(g, rng)
     r = rng.random()
-    g = old_print(g, rng) if r < 0.45 else grey_scan(g, rng, other) if r < 0.8 else low_resolution(g, rng)
+    g = (old_print(g, rng) if r < 0.4 else grey_scan(g, rng, other) if r < 0.7
+         else low_resolution(g, rng) if r < 0.85 else photo(g, rng))
     return np.clip(g, 0, 1)

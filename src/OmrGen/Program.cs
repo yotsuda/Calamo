@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmrGen;
 
-// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues]
+// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
 // ("all" is Gen.Suites; "band", the band scores' pieces, and "lied", songs whose voice's staff
 // is hidden where it rests, are asked for by name; --lyrics puts words under lied's voice)
 //
@@ -75,6 +75,9 @@ static class Program
         bool leapSlurs = opt.ContainsKey("leapslurs");
         // --cues: bars of a part's rest with another instrument's line printed small over it (voice { cue { ... } } { R })
         bool cues = opt.ContainsKey("cues");
+        // --cue-whole <share>: the share of the cue bars held on one note (0 if not given: the suites
+        // have few whole notes, and a small whole note read at 0.13; the training sets raise it)
+        if (opt.TryGetValue("cue-whole", out var cw)) Gen.CueWhole = double.Parse(cw, CultureInfo.InvariantCulture);
         var suites = opt.GetValueOrDefault("suite", "all") == "all"
             ? Gen.Suites
             : opt["suite"].Split(',');

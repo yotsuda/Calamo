@@ -509,6 +509,10 @@ static class Gen
     // line is the bar's own music a step or more away (its top note where it had a chord). Not a bar
     // a tie or a slur crosses into or out of, nor one with marks or grace notes (they would hang on
     // the cue). The truth's first voice is the cue's line, its second the rest, as the reader writes it
+    // (--cue-whole: the share of the cue bars held on one note the bar long, a whole or a dotted half;
+    // drawn only when asked for, so the pages without it stay as they were)
+    public static double CueWhole = 0;
+
     public static void AddCues(GPiece p, Random rng)
     {
         foreach (var part in p.Parts)
@@ -520,6 +524,7 @@ static class Gen
                 // (every value drawn whether used or not: the draws stay in step)
                 double r = rng.NextDouble();
                 int shift = rng.Next(1, 5) * (rng.Next(2) == 0 ? -1 : 1);
+                bool held = CueWhole > 0 && rng.NextDouble() < CueWhole;
                 var voices = part.Bars[b];
                 bool tiedIn = b > 0 && part.Bars[b - 1].Any(v => v.Count > 0 && v[^1].Tie);
                 bool open = slur;
@@ -546,6 +551,9 @@ static class Gen
                     }
                     return c;
                 }).ToList();
+                // (held: the bar's first note, the bar long)
+                if (held && cue.FirstOrDefault(e => !e.IsRest) is { } first)
+                    cue = new() { new GEv { Ticks = p.At(b).BarTicks, Pitches = first.Pitches, Cue = true } };
                 part.Bars[b] = new() { cue, new() { new GEv { Ticks = p.At(b).BarTicks, Measure = true } } };
             }
         }
