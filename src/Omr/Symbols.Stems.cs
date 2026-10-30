@@ -36,22 +36,25 @@ static partial class Symbols
         // column it picks is the stem's solid middle, which the beam count relies on); the loose
         // one only when it found nothing.
         // (a slash's stem leaves its corner, about a space above or below its centre)
+        // (a small head's stem is short: a cue's beamed eighths, 0.63 of a note's size, stand 1.45 spaces
+        // from their beam -- gen-cue's ledger003, read as quarters)
+        double least = h.Grace ? 1.2 * s : 2.2 * s;
         Search(h.Slash ? (int)(1.4 * s) : 0, 0);
-        if (bestLen < 2.2 * s && h.Score > 0)
+        if (bestLen < least && h.Score > 0)
         {
             bestLen = 0;
             Search((int)((h.Slash ? 1.4 : 0.55) * s), Math.Max(1, (int)(0.2 * s)));
         }
         // (a scan's head the detector boxed narrower than its ink: the stem a third of a space past the
         // box's edge, broken a quarter of a space over its ledger -- kinkel10-4's b, left stemless and read a quarter)
-        if (bestLen < 2.2 * s && h.Score > 0 && !h.Slash && !h.Cross)
+        if (bestLen < least && h.Score > 0 && !h.Slash && !h.Cross)
         {
             bestLen = 0;
             // (and broken up to half a space short of its beam, the tip the beam's edge: kinkel10-4's scan, the left
             // hand's d, white a third of a space under the beam and once more over the staff, read a quarter)
             Search((int)(0.55 * s), Math.Max(1, (int)(0.3 * s)), 0.3, (int)(0.5 * s));
         }
-        if (bestLen >= 2.2 * s)
+        if (bestLen >= least)
         {
             h.HasStem = true; h.Up = bestUp; h.StemX = bestX; h.Tip = bestTip;
         }
@@ -645,8 +648,8 @@ static partial class Symbols
 
     /// <summary>
     /// A grace note's stem, its flags or beams, and its slash, from the detector (S21): the stem's
-    /// tip (stem_N) in the column of the head's edge, a space and a half to four and a half away (a
-    /// grace note's stem is shorter than a note's), its N the flags or beams at it (one an eighth,
+    /// tip (stem_N) in the column of the head's edge, a space and a fifth to four and a half away (a
+    /// grace note's stem is shorter than a note's, a cue's beamed one shorter still), its N the flags or beams at it (one an eighth,
     /// two a sixteenth); an acciaccatura's slash (grace_slash) within a space and a quarter of the
     /// stem's column, from a space short of the head to a space past the tip (through the beam of two).
     /// </summary>
@@ -666,7 +669,7 @@ static partial class Symbols
                 bool up = t.Y < g.Y;
                 if (Math.Abs(t.X - (up ? g.R : g.L)) > 0.5 * s) continue;
                 double along = Math.Abs(t.Y - g.Y);
-                if (along < 1.5 * s || along > 4.5 * s) continue;
+                if (along < 1.2 * s || along > 4.5 * s) continue;
                 // (a stem in ink from the head to the tip: the other staff's grace group under it, its
                 // up stem's tip a space and a half below, is not this one's down stem -- piano006's
                 // grace { f16 e16 }, the e taking the left hand's tip and the two parted)
@@ -690,6 +693,9 @@ static partial class Symbols
                 // (a neighbour at its height: the other voice's group stands an octave off, piano007)
                 var mate = ps.Graces.FirstOrDefault(o => o != g && Fellow(ink, g, o, s) && Math.Abs(o.Y - g.Y) < 2 * s && marked.ContainsKey(o) && o.Beams > 0);
                 if (mate != null) { g.HasStem = true; g.Up = mate.Up; g.StemX = g.Up ? g.R : g.L; g.Tip = mate.Tip; g.Beams = mate.Beams; }
+                // (none either: the beams counted in the ink at the rules' tip, as a note's are, at the small
+                // note's size -- the detector sees no tip on gen-cue's beamed cue eighths, ledger003's d8 ees8)
+                else if (g.HasStem && ps.Labels != null) g.Beams = CountBeams(ink, ps.Labels, g, 0.63 * s);
             }
             // a lone grace note (no other within two spaces and a half on its staff: a group's are beamed,
             // a space or so apart) wears a flag, not a beam

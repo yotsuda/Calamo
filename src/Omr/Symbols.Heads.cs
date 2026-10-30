@@ -46,7 +46,11 @@ static partial class Symbols
             // (a small head is a grace note's, black, or a cue's, which may be hollow: one class for both,
             // its middle's ink tells -- the Eroica part's photographed cue half notes, bars 156 and 158)
             bool cross = t.Class == "head_x", whole = t.Class == "head_whole";
-            bool black = t.Class == "head_black" || cross || t.Class == "slash_black" || grace && InkCore(ink, t.X, t.Y, 0.12 * s) >= 0.3;
+            // (the hole looked for about the detection's centre, a tenth of a space off it, and in a small
+            // square: a cue's half head on a line, Leland's narrow slanting hole a few pixels from the
+            // centre, measured 0.30 at the centre -- gen-cue's ledger003, a2 read as a4)
+            bool black = t.Class == "head_black" || cross || t.Class == "slash_black"
+                         || grace && new[] { -1, 0, 1 }.SelectMany(i => new[] { -1, 0, 1 }, (i, j) => InkCore(ink, t.X + i * 0.1 * s, t.Y + j * 0.1 * s, 0.09 * s)).Min() >= 0.3;
             if (!black && !whole && !grace && t.Class != "head_half" && t.Class != "slash_hollow") continue;
             if (det.Any(u => Rivals(u, t) && Beats(u, t))) continue;
             // (a note on seven ledger lines and more stands past Nearest's reach: piano-collide's
