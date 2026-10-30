@@ -874,8 +874,15 @@ static class Reader
         var inBar = sym.Heads.Where(h => h.St == st && h.X > x0 && h.X < x1 && !h.Slash && !h.Cross).ToList();
         var graceHeads = sym.Graces.Where(g => g.St == st && g.X > x0 && g.X < x1).ToList();
         var wholes = sym.Rests.Where(r => r.St == st && r.X > x0 && r.X < x1 && r.Kind == RestKind.Whole).ToList();
-        bool cue = barTicks > 0 && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0)
-                   && inBar.Count + graceHeads.Count > 0 && 2 * (graceHeads.Count + inBar.Count(h => h.R - h.L + 1 < 1.1 * s)) >= inBar.Count + graceHeads.Count;
+        bool cue = barTicks > 0 && wholes.Count == 1 && Math.Abs(wholes[0].X - (x0 + x1) / 2) < 0.25 * (x1 - x0) && inBar.Count + graceHeads.Count > 0;
+        if (cue)
+        {
+            // (small beside the page's black heads where they are wider: a photo's 12-pixel space measures
+            // its heads 1.37 wide and the cue's 1.05-1.13 -- the Eroica part's photographed page 2)
+            var widths = sym.Heads.Where(h => !h.Hollow && !h.Slash && !h.Cross).Select(h => h.R - h.L + 1).OrderBy(w => w).ToList();
+            double under = widths.Count >= 8 ? Math.Max(1.1 * s, 0.85 * widths[widths.Count / 2]) : 1.1 * s;
+            cue = 2 * (graceHeads.Count + inBar.Count(h => h.R - h.L + 1 < under)) >= inBar.Count + graceHeads.Count;
+        }
         // (in a cue, a "rest" on a head's column, a space from it, is the small note's head and stem
         // taken for a quarter rest -- the Eroica part's "Vln. 1" ais' in bar 187; and a grace head's
         // dot, which no grace note has, is left among the unread pieces: the cue's gis''4. in bar 245)
