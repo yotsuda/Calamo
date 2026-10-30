@@ -43,8 +43,11 @@ static partial class Symbols
             var t = seen;
             if (t.Class == "head_black" && rivals?.FirstOrDefault(u => Rivals(u, t) && Beats(u, t)) is Detection hollow) t = hollow;
             bool slash = t.Class.StartsWith("slash_"), grace = t.Class == "grace_head";
-            bool cross = t.Class == "head_x", black = t.Class == "head_black" || cross || t.Class == "slash_black" || grace, whole = t.Class == "head_whole";
-            if (!black && !whole && t.Class != "head_half" && t.Class != "slash_hollow") continue;
+            // (a small head is a grace note's, black, or a cue's, which may be hollow: one class for both,
+            // its middle's ink tells -- the Eroica part's photographed cue half notes, bars 156 and 158)
+            bool cross = t.Class == "head_x", whole = t.Class == "head_whole";
+            bool black = t.Class == "head_black" || cross || t.Class == "slash_black" || grace && InkCore(ink, t.X, t.Y, 0.12 * s) >= 0.3;
+            if (!black && !whole && !grace && t.Class != "head_half" && t.Class != "slash_hollow") continue;
             if (det.Any(u => Rivals(u, t) && Beats(u, t))) continue;
             // (a note on seven ledger lines and more stands past Nearest's reach: piano-collide's
             // fis''' and dis'''' under an 8va, on 7 and 9. Taken only on ledger lines all the way out)
