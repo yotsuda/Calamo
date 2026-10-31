@@ -119,6 +119,9 @@ static partial class Symbols
     //   rules' among them). Above 1 = the rules decide, as before.
     public static double SureScore = 0.9;
     public static double TrustScore = 0.5;
+    // A slur's weak end (Detector.WeakSlur up) pairs with a sure one this far away, in spaces, on the
+    // detector's word alone; farther, only along the arc's ink (DetectedSlurs' Joined)
+    public static double FarSlur = 25;
 
     static bool IsWeakSign(Detection t) => (t.Class == "sharp" || t.Class == "flat") && t.Score <= Detector.Threshold;
 

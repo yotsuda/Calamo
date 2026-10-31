@@ -372,8 +372,9 @@ static partial class Symbols
                 continue;
             }
             if (best.c != null) at[t] = (best.c, best.f.Above);
-            else if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
-                Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): by no note");
+            if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
+                Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): " + (best.c == null ? "by no note"
+                    : $"{(best.f.Above ? "over" : "under")} the chord at {best.c.Average(h => h.X):F0} ({string.Join(" ", best.c.Select(h => h.Pos))})"));
         }
         // an arc over three notes and more that each sing a syllable of their own is no slur: a sung
         // slur holds one syllable over its notes. An old print's tuplet arc, its 3 at the top, over a
@@ -394,7 +395,8 @@ static partial class Symbols
             return span.All(x => owner.Contains(x)) ? span.Count : null;
         }
         Staff StaffOf(Detection t) => at.TryGetValue(t, out var a) ? a.Chord[0].St : Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
-        bool Debug(Detection t) => DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s;
+        // (--at 0,0: every slur's working on the page)
+        bool Debug(Detection t) => DebugAt.HasValue && (DebugAt.Value == (0, 0) || Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s);
         var carried = new Dictionary<int, bool>();   // part -> a slur ran on from its staff in the system before
         foreach (var g in ends.GroupBy(StaffOf).Where(g => g.Key != null).OrderBy(g => g.Key.System).ThenBy(g => g.Key.Part))
         {
@@ -441,6 +443,171 @@ static partial class Symbols
                 }
                 return n > 0 && on >= 0.7 * n && beyond < 0.5 * n;
             }
+            // a start and an end on the two notes a tie joins (the same notes, the tie read, nothing between)
+            // are the tie's own arc seen again by the detector as a slur's two ends -- an old print's tie
+            // under a sixteenth, tie_l 0.86 and slur_l 0.51 at it, kinkel7-6's scan -- unless two arcs run
+            // between the notes, the tie and a slur over it (the slurs suite's c4~( c8), as written; and a
+            // slur from a tied note on past its partner, c4~( c8 d4), ends beyond it): the ink in the middle
+            // column between the chords, on the arc's side, holds two thin strokes then, one for the tie alone
+            bool TiePartner(Detection l, Detection r)
+            {
+                var (a, b) = (at[l].Chord, at[r].Chord);
+                if (!a.All(h => h.Tie) || b.Count != a.Count || !a.Select(h => h.Pos).Order().SequenceEqual(b.Select(h => h.Pos).Order())) return false;
+                bool OtherVoice(Head o) => a[0].HasStem && o.HasStem && o.Up != a[0].Up && (a[0].Up ? o.Y > a.Max(h => h.Y) : o.Y < a.Min(h => h.Y));
+                if (ps.Heads.Any(o => o.St == st && !a.Contains(o) && !b.Contains(o) && !OtherVoice(o) && o.X > a.Max(h => h.X) + 0.5 * s && o.X < b.Min(h => h.X) - 0.5 * s)) return false;
+                var lineRows = new HashSet<int>();
+                foreach (var ln in st.Lines) for (int yy = ln.Top - 1; yy <= ln.Bot + 1; yy++) lineRows.Add(yy);
+                int mid = (int)((a.Max(h => h.R) + b.Min(h => h.L)) / 2), sign = at[l].Above ? -1 : 1;
+                double edge = at[l].Above ? Math.Min(a.Min(h => h.Y), b.Min(h => h.Y)) - 0.5 * s : Math.Max(a.Max(h => h.Y), b.Max(h => h.Y)) + 0.5 * s;
+                int arcs = 0;
+                for (int x = mid - 2; x <= mid + 2; x++)
+                {
+                    if (x < 0 || x >= d.W) continue;
+                    int n = 0;
+                    for (int k = 0; k <= 4 * s; k++)
+                    {
+                        int y = (int)edge + sign * k;
+                        if (y < 0 || y >= d.H || !d[x, y] || lineRows.Contains(y)) continue;
+                        int t = k;
+                        while (k + 1 <= 4 * s && (int)edge + sign * (k + 1) is var y2 && y2 >= 0 && y2 < d.H && d[x, y2] && !lineRows.Contains(y2)) k++;
+                        if (k - t + 1 <= 0.4 * s) n++;
+                    }
+                    arcs = Math.Max(arcs, n);
+                }
+                if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {a.Average(h => h.X):F0} to {b.Average(h => h.X):F0}, the notes a tie joins: {arcs} thin stroke(s) between them at x {mid} -> {(arcs >= 2 ? "a slur over the tie" : "the tie's own arc")}");
+                return arcs < 2;
+            }
+            // a fermata's arc over one note, its two edges seen as a slur's start and end (0.69 and 0.57,
+            // three spaces apart, over the last note of kinkel10-4's scan's 34th bar)
+            // (or one the detector does not see, an old print's, its 10th bar's: the arc's two edges two to five
+            // spaces apart at one height, and its dot, a loose piece of ink a third of a space round, in the
+            // middle under the arc, on the notes' side)
+            bool Fermata(Detection l, Detection r)
+            {
+                bool seen = ps.Detections.Any(u => u.Class == "fermata" && u.Score >= TrustScore
+                    && Math.Abs(u.X - l.X) < 2.2 * s && Math.Abs(u.X - r.X) < 2.2 * s && Math.Abs(u.Y - l.Y) < 1.2 * s && Math.Abs(u.Y - r.Y) < 1.2 * s);
+                if (seen && (Debug(l) || Debug(r))) Console.WriteLine($"fermata detected between the ends {l.X:F0},{l.Y:F0} and {r.X:F0},{r.Y:F0}: no slur");
+                if (seen) return true;
+                if (r.X - l.X < 2 * s || r.X - l.X > 5 * s || Math.Abs(l.Y - r.Y) > 0.6 * s) return false;
+                double mx = (l.X + r.X) / 2, my = (l.Y + r.Y) / 2;
+                int sign = at[l].Above ? 1 : -1;
+                // (round: a dash of ink half a space wide and a quarter high under a two-note slur is none, kinkel19-2's
+                // scan; centred under the arc's middle within a third of a space, as a fermata's is: a round piece
+                // half a space off the middle between two slurred notes is none, the slurs suite's slurs006; and
+                // clear of the notes, a space off every head of the two chords: a dotted note's dot is none)
+                var heads = at[l].Chord.Concat(at[r].Chord).ToList();
+                bool Dot(Other o) => o.C.W >= 0.25 * s && o.C.W <= 0.7 * s && o.C.H >= 0.25 * s && o.C.H <= 0.7 * s && Math.Min(o.C.W, o.C.H) >= 0.65 * Math.Max(o.C.W, o.C.H)
+                    && Math.Abs(o.C.Cx - mx) < 0.3 * s && (o.C.Cy - my) * sign > -0.8 * s && (o.C.Cy - my) * sign < 1.2 * s
+                    && heads.All(h => (h.Y - o.C.Cy) * sign >= 0.9 * s);
+                if (Debug(l) || Debug(r))
+                    Console.WriteLine($"fermata? ends {l.X:F0},{l.Y:F0} {r.X:F0},{r.Y:F0}: ink pieces near {mx:F0},{my:F0}: "
+                        + string.Join(" ", ps.Others.Where(o => Math.Abs(o.C.Cx - mx) < 2 * s && Math.Abs(o.C.Cy - my) < 2 * s).Select(o => $"{o.Class}@{o.C.Cx:F0},{o.C.Cy:F0} {o.C.W}x{o.C.H}{(Dot(o) ? " dot" : "")}")));
+                return ps.Others.Any(Dot);
+            }
+            // A weak end far from its sure one joins it only along the arc's own ink: from the sure end one
+            // thin stroke runs, column by column, to the weak end, passing a stem or a beam it crosses and a
+            // break in an old print's ink (the staves' line rows left out, as FindTies does). Not joined: a
+            // tie's start seen as slur_l 0.20 with a slur's end seventy spaces on, the tie's own end unseen
+            // (kinkel7-1's scan, 8th bar). A near one (FarSlur spaces and less, most slurs) is taken without:
+            // the stroke of an old print's short slur is lost too often (a staff line's rows take a shallow
+            // arc, its ink breaks, its tip merges with a stem) for the few far pairs it would spare
+            bool Joined(Detection sure, Detection weak)
+            {
+                int dir = Math.Sign(weak.X - sure.X);
+                if (dir == 0) return false;
+                // (every staff's line rows on the page: a slur under one staff runs close over the next one's top line)
+                var lineRows = new HashSet<int>();
+                foreach (var o in ps.Heads.Select(h => h.St).Distinct())
+                    foreach (var ln in o.Lines) for (int yy = ln.Top - 1; yy <= ln.Bot + 1; yy++) lineRows.Add(yy);
+                bool InLines(double y) => lineRows.Contains((int)Math.Floor(y)) || lineRows.Contains((int)Math.Ceiling(y));
+                int thinMax = (int)(0.4 * s);
+                int y0 = (int)Math.Max(0, Math.Min(sure.Y, weak.Y) - 6 * s), y1 = (int)Math.Min(d.H - 1, Math.Max(sure.Y, weak.Y) + 6 * s);
+                List<(int T, int B)> Runs(int x)
+                {
+                    var r = new List<(int, int)>();
+                    for (int y = y0; y <= y1; y++)
+                    {
+                        if (!d[x, y] || lineRows.Contains(y)) continue;
+                        int t = y;
+                        while (y + 1 <= y1 && d[x, y + 1] && !lineRows.Contains(y + 1)) y++;
+                        r.Add((t, y));
+                    }
+                    return r;
+                }
+                double Mid((int T, int B) r) => (r.T + r.B) / 2.0;
+                int goal = (int)weak.X;
+                string Columns(int from) => string.Join(" | ", Enumerable.Range(0, 12).Select(k => from + dir * 3 * k).Where(xx => xx >= 0 && xx < d.W)
+                    .Select(xx => string.Join(",", Runs(xx).Select(r => $"{r.T - (int)sure.Y}..{r.B - (int)sure.Y}"))));
+                bool debug = Debug(sure) || Debug(weak);
+                // the stroke at the sure end: a thin run within a space of its height over the first columns
+                // from it towards the other end, nearest first; the first that leads to the other end wins (the
+                // end's own column may hold none of the arc yet, only the head under it, the tip coming a column
+                // or two on; or a line's one-row remnant lies nearer the end's height than the tip does)
+                var starts = new List<(int X, (int T, int B) Run)>();
+                for (int k = 0; k <= s; k++)
+                {
+                    int xx = (int)sure.X + dir * k;
+                    if (xx < 0 || xx >= d.W) break;
+                    foreach (var r in Runs(xx).Where(r => r.B - r.T + 1 <= thinMax && Math.Abs(Mid(r) - sure.Y) <= s)) starts.Add((xx, r));
+                }
+                if (starts.Count == 0)
+                {
+                    if (debug) Console.WriteLine($"arc from {sure.X:F0},{sure.Y:F0} ({sure.Score:F2}) towards {weak.X:F0},{weak.Y:F0} ({weak.Score:F2}): no thin stroke at the sure end -> not joined\n    columns from the sure end (rows rel. to it): {Columns((int)sure.X)}");
+                    return false;
+                }
+                (int Reach, double Y) far = (int.MinValue, 0);
+                foreach (var (sx, run) in starts.OrderBy(p => Math.Abs(Mid(p.Run) - sure.Y)).Take(6))
+                {
+                    var end = Trace(sx, run);
+                    // (the stroke is not asked to bow away from the notes: a slur between notes of different
+                    // heights climbs from one end to the other, its highest point the end itself)
+                    if (Math.Abs(end.Reach - goal) <= 1.5 * s && Math.Abs(end.Y - weak.Y) <= 1.5 * s)
+                    {
+                        if (debug) Console.WriteLine($"arc from {sure.X:F0},{sure.Y:F0} ({sure.Score:F2}) towards {weak.X:F0},{weak.Y:F0} ({weak.Score:F2}): from {sx},{Mid(run):F0} reach {end.Reach} of {goal} at y {end.Y:F0} -> joined");
+                        return true;
+                    }
+                    if (far.Reach == int.MinValue || Math.Abs(end.Reach - goal) < Math.Abs(far.Reach - goal)) far = end;
+                }
+                if (debug)
+                {
+                    Console.WriteLine($"arc from {sure.X:F0},{sure.Y:F0} ({sure.Score:F2}) towards {weak.X:F0},{weak.Y:F0} ({weak.Score:F2}): {starts.Count} strokes to start from, the farthest reach {far.Reach} of {goal} at y {far.Y:F0} -> not joined");
+                    Console.WriteLine($"    columns about that reach (rows rel. to the sure end): {Columns(far.Reach - dir * 6)}");
+                }
+                return false;
+
+                (int Reach, double Y) Trace(int x, (int T, int B) cur)
+                {
+                    int reach = x, gap = 0, thick = 0, hidden = 0;
+                    // (the arc's slope where it was last seen, over the five columns before: where a break or a
+                    // crossing hides it, it is looked for where that slope leads -- a thin arc drawn at a slope
+                    // steps a row or two a column)
+                    var path = new List<(int X, double Y)> { (x, Mid(cur)) };
+                    double Slope() => path.Count < 2 ? 0 : (path[^1].Y - path[Math.Max(0, path.Count - 6)].Y) / (path[^1].X - path[Math.Max(0, path.Count - 6)].X);
+                    for (x += dir; dir > 0 ? x < goal : x > goal; x += dir)
+                    {
+                        if (x < 0 || x >= d.W) break;
+                        // the run that carries on from the last one: overlapping where the arc should be, with play
+                        // for the columns skipped over a break or a crossing; the nearest, and of two as near the
+                        // one as thick as the arc (a line's one-row remnant beside it does not draw it off)
+                        double at0 = Mid(cur) + Slope() * (x - reach);
+                        double half = (cur.B - cur.T) / 2.0 + 3 + (gap + thick + hidden) / 4.0;
+                        var next = Runs(x).Where(r => r.B >= at0 - half && r.T <= at0 + half)
+                                          .OrderBy(r => Math.Abs(Mid(r) - at0) + Math.Abs((r.B - r.T) - (cur.B - cur.T))).Cast<(int T, int B)?>().FirstOrDefault();
+                        if (next == null)
+                        {
+                            // (a shallow arc crosses a staff line's rows, left out, over many columns: hidden there, not broken)
+                            if (InLines(at0)) { if (++hidden > 6 * s) break; continue; }
+                            if (++gap > 1.5 * s) break;
+                            continue;
+                        }
+                        // (a crossing: a stem's few columns, a beam's edge the arc runs along for a space or two)
+                        if (next.Value.B - next.Value.T + 1 > thinMax) { if (++thick > 2.5 * s) break; continue; }
+                        cur = next.Value; gap = thick = hidden = 0; reach = x;
+                        path.Add((x, Mid(cur)));
+                    }
+                    return (reach, Mid(cur));
+                }
+            }
             foreach (var l in lefts.Where(Sure))
             {
                 var a = at[l].Chord;
@@ -448,7 +615,7 @@ static partial class Symbols
                 // (a start the detector took for a tie's is a short arc, to a note or two on: it takes
                 // no end bars away, which is another slur's, kinkel19-2's 42nd bar, the Zigeuner's 18th)
                 var r = rights.Where(r => Sure(r) && !used.Contains(r) && at[r].Chord != a && X(r) > ax && at[r].Above == at[l].Above
-                                          && (!fromTie.Contains(l) || X(r) - ax < 12 * s))
+                                          && (!fromTie.Contains(l) || X(r) - ax < 12 * s) && !TiePartner(l, r) && !Fermata(l, r))
                               .OrderBy(r => r.X).FirstOrDefault();
                 if (r != null) Pair(l, r);
                 else if (!fromTie.Contains(l)) open.Add(l);
@@ -462,7 +629,8 @@ static partial class Symbols
                 if (hangsRight && l == open[^1]) continue;
                 double ax = X(l);
                 double next = lefts.Where(o => Sure(o) && o != l && at[o].Above == at[l].Above && X(o) > ax).Select(X).DefaultIfEmpty(double.MaxValue).Min();
-                var r = rights.Where(r => !Sure(r) && !used.Contains(r) && at[r].Chord != at[l].Chord && X(r) > ax && X(r) < next && at[r].Above == at[l].Above && !Bracket(l, r))
+                var r = rights.Where(r => !Sure(r) && !used.Contains(r) && at[r].Chord != at[l].Chord && X(r) > ax && X(r) < next && at[r].Above == at[l].Above
+                                          && !TiePartner(l, r) && !Bracket(l, r) && !Fermata(l, r) && (r.X - l.X <= FarSlur * s || Joined(l, r)))
                               .OrderBy(r => r.X).FirstOrDefault();
                 if (r == null) continue;
                 Pair(l, r);
@@ -498,7 +666,7 @@ static partial class Symbols
                 double bx = X(r);
                 double last = rights.Where(o => Sure(o) && o != r && at[o].Above == at[r].Above && X(o) < bx).Select(X).DefaultIfEmpty(double.MinValue).Max();
                 var l = lefts.Where(l => !Sure(l) && !used.Contains(l) && at[l].Chord != at[r].Chord && X(l) < bx && X(l) > last && at[l].Above == at[r].Above
-                                         && !lefts.Any(o => Sure(o) && at[o].Above == at[r].Above && X(o) > X(l) && X(o) < bx) && !Bracket(l, r))
+                                         && !lefts.Any(o => Sure(o) && at[o].Above == at[r].Above && X(o) > X(l) && X(o) < bx) && !TiePartner(l, r) && !Bracket(l, r) && !Fermata(l, r) && (r.X - l.X <= FarSlur * s || Joined(r, l)))
                              .OrderBy(l => l.X).LastOrDefault();
                 if (l != null) { used.Add(l); Pair(l, r); }
             }
