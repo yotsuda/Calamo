@@ -303,9 +303,10 @@ sealed class Verify
             }
         // (and a weak dot in the column of a sure one: the other voice's, lined up with a chord's)
         foreach (var t in Symbols.ColumnDots(res.Sym, s)) list.Add(("dot", t.X, t.Y));
-        // (and a weak slur's start, "slur_l?": the reader takes one where a sure end closes it
-        // (Symbols.DetectedSlurs), so it bears out a slur drawn there, and asks for none -- Unmatched)
-        foreach (var t in res.Sym.Detections.Where(t => t.Class == "slur_l" && t.Score >= Detector.WeakSlur && t.Score < Detector.Threshold))
+        // (and a weak slur's start, "slur_l?", or a weak tie's that the reader takes for one: it takes
+        // either where a sure end closes it (Symbols.DetectedSlurs), so it bears out a slur drawn
+        // there, and asks for none -- Unmatched)
+        foreach (var t in res.Sym.Detections.Where(t => t.Class is "slur_l" or "tie_l" && t.Score >= Detector.WeakSlur && t.Score < Detector.Threshold))
         {
             if (!NoteBy(headPts, t.X, t.Y, s)) continue;
             var h = headPts.Where(h => Math.Abs(h.Y - t.Y) < 6 * s).OrderBy(h => Math.Abs(h.X - (t.X - 0.2 * s))).FirstOrDefault();

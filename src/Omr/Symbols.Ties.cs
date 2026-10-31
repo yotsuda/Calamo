@@ -319,15 +319,20 @@ static partial class Symbols
         // a sure one)
         var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= Detector.WeakSlur && !ps.TieEndsAsSlur.Contains(t)).ToList();
         bool Sure(Detection t) => t.Score >= TrustScore;
-        // (nor a weak start by a grace note: Lily#'s slur from an acciaccatura to its note, which
-        // the start would give to the note before it, gen-grace's basic002)
-        ends.RemoveAll(t => !Sure(t) && t.Class == "slur_l" && ps.Graces.Any(g => Math.Abs(g.X - t.X) < 1.5 * s && Math.Abs(g.Y - t.Y) < 2.5 * s));
         // a tie's start that tied nothing (DetectedTies: no head at its place after it, or a slur's
         // end there) is a slur's start the detector took for a tie: the short arc from a chord's top
         // note down to the next note, tabi's 8th bar. It starts a slur only to an end found for it
-        var fromTie = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= TrustScore
-            && !ps.Heads.Any(h => h.Tie && Math.Abs(h.Y - t.Y) <= 1.25 * s && t.X - h.X > -0.3 * s && t.X - h.X < 2.0 * s)).ToHashSet();
+        // (and a weak one, 0.2 up, only a sure end with no start of its own takes, as a weak slur_l:
+        // the arc over a second voice's b'8( g'8) that leaves beside the first voice's dotted note
+        // over it, tie_l 0.31-0.32 and nothing else, kinkel7-6's 21st bar in print and scan)
+        // (one with no head before it, as a tie's start has, is nothing: the accidentals before a
+        // chord seen as tie_l 0.25, kinkel10-5's scan, paired with a sure end over the next chord)
+        bool HeadBefore(Detection t, bool tied) => ps.Heads.Any(h => (h.Tie || !tied) && Math.Abs(h.Y - t.Y) <= 1.25 * s && t.X - h.X > -0.3 * s && t.X - h.X < 2.0 * s);
+        var fromTie = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= Detector.WeakSlur && HeadBefore(t, false) && !HeadBefore(t, true)).ToHashSet();
         ends.AddRange(fromTie);
+        // (nor a weak start by a grace note, slur_l or tie_l: Lily#'s slur from an acciaccatura to
+        // its note, which the start would give to the note before it, gen-grace's basic002)
+        ends.RemoveAll(t => !Sure(t) && t.Class is "slur_l" or "tie_l" && ps.Graces.Any(g => Math.Abs(g.X - t.X) < 1.5 * s && Math.Abs(g.Y - t.Y) < 2.5 * s));
         if (ends.Count == 0) return;
         // chords: the heads on one stem, or stemless at one x
         var chords = new List<List<Head>>();
@@ -362,6 +367,11 @@ static partial class Symbols
             // (a broken slur's first piece ends at the staff's very end, past the last note's reach)
             var near = Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
             if (t.Class == "slur_r" && near != null && near.Right - t.X < 0.6 * s) continue;
+            // (not moved to the other voice's chord at the same x when level with this one's outer head:
+            // tried for kinkel7-6's 21st bar as MuseScore draws it, where the arc over the second voice's
+            // b'8( g'8) begins beside the first voice's dis''4., and dropped -- the detector sees that
+            // start under 0.2 there, and the move took a glissando's line seen as slur_l 0.55 from the
+            // first voice to the second, gen-gliss's voices2001, for one slur more on the development set)
             var best = chords.Select(c => (c, f: Fit(c, t))).Where(p => p.f.Cost < double.MaxValue).OrderBy(p => p.f.Cost).FirstOrDefault();
             // (a start among a tied chord's heads, not beyond them, is one of its ties' ends: a slur
             // clears its outer note. Tabi's 4th bar, four ties out of a chord, one seen as a slur)
@@ -660,12 +670,13 @@ static partial class Symbols
             }
             carried[st.Part] = ranOn;
             // a sure end no start took takes a weak start: the last before it on its side, after the
-            // last sure end there
+            // last sure end there (one seen as a tie's start, a short arc, from no farther than a sure one)
             foreach (var r in rights.Where(r => Sure(r) && !used.Contains(r)))
             {
                 double bx = X(r);
                 double last = rights.Where(o => Sure(o) && o != r && at[o].Above == at[r].Above && X(o) < bx).Select(X).DefaultIfEmpty(double.MinValue).Max();
                 var l = lefts.Where(l => !Sure(l) && !used.Contains(l) && at[l].Chord != at[r].Chord && X(l) < bx && X(l) > last && at[l].Above == at[r].Above
+                                         && (!fromTie.Contains(l) || bx - X(l) < 12 * s)
                                          && !lefts.Any(o => Sure(o) && at[o].Above == at[r].Above && X(o) > X(l) && X(o) < bx) && !TiePartner(l, r) && !Bracket(l, r) && !Fermata(l, r) && (r.X - l.X <= FarSlur * s || Joined(r, l)))
                              .OrderBy(l => l.X).LastOrDefault();
                 if (l != null) { used.Add(l); Pair(l, r); }

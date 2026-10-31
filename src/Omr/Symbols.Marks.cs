@@ -679,7 +679,10 @@ static partial class Symbols
         // toner hollowed; piano006's, pushed out by the other voice's second, it sees weakly: ColumnDots). The false ones have a tie's end or a head on them, or are flat,
         // thin or small (a tie's stub, a scrap of a head the toner thinned: 0.2-0.3 space).
         bool Round(Comp c) => c.W >= 0.35 * s && c.H >= 0.35 * s && Math.Abs(c.W - c.H) <= 0.12 * s && c.Fill >= 0.5;
-        bool Unseen(DotAt d) => !ps.Detections.Any(t => Math.Abs(t.X - d.X) < 0.7 * s && Math.Abs(t.Y - d.Y) < 0.7 * s);
+        // (an arc's end seen under the threshold is not seeing anything: a tie's start sits just where a
+        // dot does, right of the head, and the detector marks one at 0.2-0.5 by many a dotted note)
+        bool Unseen(DotAt d) => !ps.Detections.Any(t => Math.Abs(t.X - d.X) < 0.7 * s && Math.Abs(t.Y - d.Y) < 0.7 * s
+                                                         && !(t.Class is "tie_l" or "slur_l" or "slur_r" && t.Score < Detector.Threshold));
         // (or a clean round one the detector sees weakly as a dot, at 0.45 and more, and nothing else there more
         // surely: lang36-3's scan, the dot tucked under the right end of a head on a ledger, ees,,4., at 0.497
         // beside the stem's tip. Not a speck: kinkel7-1's scan, its specks beside the heads seen as dots, five
