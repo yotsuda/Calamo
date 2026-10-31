@@ -6,8 +6,9 @@ param(
 # The training sets for cue notes (detector39, detector40, detector41): the basic, ledger, chords, tuplets
 # and slurs suites with OmrGen --cues (a bar of the part's rest with another instrument's line printed small
 # over it, as a Sibelius part prints one: the Eroica trumpet part, 2026-10-30), each piece drawn in one of
-# the four music fonts with its own engraving (--vary) and its own cue size (layout { cueSize -4, -3 or -2 }:
-# 0.63, 0.71 or 0.79 of full size, Lily#'s REQUESTS.md 13, 2026-10-31), clean at the usual resolution, at
+# the four music fonts with its own engraving (--vary) and its own cue size (layout { cueSize -4 or -3 }:
+# 0.63 or 0.71 of full size, Lily#'s REQUESTS.md 13, 2026-10-31; not -2, 0.79, which taught detector41 to
+# take an old print's small heads for grace notes), clean at the usual resolution, at
 # scale 3 (about 30 px a space), at scale 1.25 (about 12 px a space, a phone's photo of a part: the Eroica
 # photo's small heads, 2026-10-31), and printed-and-scanned (random degradation); and the evaluation sets
 # (seed 7). The cue's heads are grace_head, its accidentals, dots, rests and stems' tips the usual classes

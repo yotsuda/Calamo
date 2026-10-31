@@ -64,6 +64,9 @@ static class Detector
         // the rarer scripts (OmrGen --scripts2): the portato (a tenuto's line and a staccato's dot, one
         // class above or below), the stopped note's + and the pralltriller
         "art_portato", "art_stopped", "orn_prallprall",
+        // a cue's hollow head (cue { }, OmrGen --cues): a small half or whole note, the stem telling
+        // which, as slash_hollow's does; a cue's black head is grace_head like a grace note's
+        "grace_hollow",
     };
     public static double Threshold = 0.5;
     // A cross head is found down to this score, and kept under Threshold only when a stem is found

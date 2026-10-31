@@ -49,7 +49,7 @@ static class ReadExport
             if (h.HasStem) Row("stem", $"stem_{Math.Min(3, h.Beams)}", h.StemX, h.Tip, h.St, h.Up ? 1 : 0);
             if (h.Tremolo > 0) Row("tremolo", "-", h.X, h.Y, h.St);
         }
-        foreach (var g in res.Sym.Graces) Row("grace", "grace_head", g.X, g.Y, g.St);
+        foreach (var g in res.Sym.Graces) Row("grace", g.Hollow ? "grace_hollow" : "grace_head", g.X, g.Y, g.St);
         foreach (var r in res.Sym.Rests)
         {
             Row("rest", r.Kind switch { RestKind.Whole or RestKind.Half => "rest_long", RestKind.Quarter => "rest_4", RestKind.Eighth => "rest_8", _ => "rest_16" }, r.X, r.Y, r.St, r.L, r.R);

@@ -197,7 +197,7 @@ static class Memo
             "percent_1" => "a one-bar repeat sign", "percent_2" => "a two-bar repeat sign",
             "sharp" => "a ♯", "flat" => "a ♭", "natural" => "a ♮", "dsharp" => "a 𝄪", "dflat" => "a 𝄫",
             "dot" => "a dot", "tie_l" => "a tie", "slur_l" => "a slur",
-            "grace_head" => "a grace note", "grace_slash" => "a grace note's slash",
+            "grace_head" => "a grace note", "grace_slash" => "a grace note's slash", "grace_hollow" => "a cue's hollow note",
             "rep_open" => "a repeat's opening dots", "rep_close" => "a repeat's closing dots", "volta_l" => "an ending's bracket", "volta_r" => "an ending's end",
             "segno" => "a segno", "coda" => "a coda sign",
             "orn_trill" => "a trill", "orn_mordent" => "a mordent", "orn_prall" => "a prall", "orn_turn" => "a turn", "orn_reverseturn" => "a reverse turn",

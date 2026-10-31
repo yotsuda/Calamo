@@ -250,7 +250,7 @@ sealed class Verify
         // (a grace note the reader took is written as one, and its drawing's small head and stem are no
         // note's: the detector's head there, and a stem by it, are left out)
         // (but a stem the reader's note there has, its tip where the detector sees one, is that note's)
-        bool Grace(Detection t) => res.Sym.Graces.Any(g => t.Class.StartsWith("head_") || t.Class == "grace_head" ? Math.Abs(g.X - t.X) < 0.6 * s && Math.Abs(g.Y - t.Y) < 0.6 * s
+        bool Grace(Detection t) => res.Sym.Graces.Any(g => t.Class.StartsWith("head_") || t.Class is "grace_head" or "grace_hollow" ? Math.Abs(g.X - t.X) < 0.6 * s && Math.Abs(g.Y - t.Y) < 0.6 * s
             : t.Class == "grace_slash" ? Math.Abs(g.X - t.X) < 2.5 * s && Math.Abs(g.Y - t.Y) < 4.5 * s
             : t.Class.StartsWith("stem_") && Math.Abs(g.X - t.X) < 1.2 * s && Math.Abs(g.Y - t.Y) < 4 * s
               && !res.Sym.Heads.Any(h => h.HasStem && Math.Abs(h.StemX - t.X) < 0.5 * s && Math.Abs(h.Tip - t.Y) < 1.5 * s));

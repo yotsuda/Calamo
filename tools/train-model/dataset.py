@@ -77,7 +77,12 @@ CLASSES = ['none', 'head_black', 'head_half', 'head_whole', 'rest_long', 'rest_4
            # the rarer scripts (OmrGen --scripts2): the portato (a tenuto's line and a staccato's dot;
            # the one above and the one below one class), the stopped note's + and the pralltriller.
            # No set made before has any
-           'art_portato', 'art_stopped', 'orn_prallprall']
+           'art_portato', 'art_stopped', 'orn_prallprall',
+           # a cue's hollow head (OmrGen --cues, Lily#'s cue { } at layout { cueSize N }): a small half or
+           # whole note, the stem telling which, as slash_hollow's does. Its black head is grace_head. The
+           # ink of a small head's middle told them apart before, and a printer's uneven toner hollows a
+           # black one (gen-cue-scan's ledger005 and tuplets002 with detector41, cue eighths read as halves)
+           'grace_hollow']
 # the classes a page the reader read teaches (pseudo.py), by the kind of region: a bar read right (0)
 # teaches its notes, rests, signs, dots, stems' tips, barlines and clefs; a system's start before its
 # first note (1) its clef, key and time. A region of kind 2 teaches nothing (a mark the reader did not
@@ -111,7 +116,7 @@ CLASS_OF = {
     'scripts.ustaccatissimo': 'art_staccatissimo', 'scripts.dstaccatissimo': 'art_staccatissimo',
     'scripts.ufermata': 'fermata', 'scripts.dfermata': 'fermata',
     'ott.8va': 'ott_8va', 'ott.8vb': 'ott_8vb', 'ott.15ma': 'ott_15ma', 'ott.15mb': 'ott_15mb', 'ott.end': 'ott_end',
-    'grace.head': 'grace_head', 'grace.slash': 'grace_slash',
+    'grace.head': 'grace_head', 'grace.slash': 'grace_slash', 'grace.hollow': 'grace_hollow',
     'rep.open': 'rep_open', 'rep.close': 'rep_close', 'volta.l': 'volta_l', 'volta.r': 'volta_r',
     'scripts.segno': 'segno', 'scripts.coda': 'coda', 'scripts.varcoda': 'coda',
     'scripts.trill': 'orn_trill', 'scripts.mordent': 'orn_mordent', 'scripts.prall': 'orn_prall',

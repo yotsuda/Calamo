@@ -94,9 +94,11 @@ static class Program
                 Writer.MusicFont = fonts?[new Random(seed * 7919 + n * 104729 + suiteKey + 1).Next(fonts.Length)];
                 // (the engraving's settings likewise: --vary)
                 Writer.Style = vary ? Writer.DrawStyle(new Random(seed * 7919 + n * 104729 + suiteKey + 2)) : null;
-                // (--cues: the piece's cue size, -4, -3 or -2 (0.63, 0.71, 0.79: a Sibelius part's cues are
-                // about 0.73; -1, 0.89, is too near full size), from a stream of its own likewise)
-                Writer.CueSize = cues ? new Random(seed * 7919 + n * 104729 + suiteKey + 20).Next(-4, -1) : null;
+                // (--cues: the piece's cue size, -4 or -3 (0.63 or 0.71, up to 0.82 under --vary's NoteHead.scale:
+                // a Sibelius part's cues are about 0.73), from a stream of its own likewise. Not -2 (0.79, up to
+                // 0.91): detector41, taught it, took an old print's small full-size heads for grace notes --
+                // kinkel19-6's and 19-2's scans, 11 grace groups read as 19 and 16, 35 and 34 notes lost)
+                Writer.CueSize = cues ? new Random(seed * 7919 + n * 104729 + suiteKey + 20).Next(-4, -2) : null;
                 // (--headers: a title, subtitle, composer, poet and tempo, from a stream of their own likewise)
                 Writer.HeaderRng = opt.ContainsKey("headers") ? new Random(seed * 7919 + n * 104729 + suiteKey + 3) : null;
                 // (--tuplets: which kind a tuplet group is, from a stream of its own likewise: the
@@ -250,8 +252,8 @@ static class Writer
     public static (List<string> Paper, List<string> Layout)? Style;
 
     /// <summary>The size of the piece's cues (OmrGen --cues): LilyPond's font-size step, written
-    /// as layout { cueSize N } (-4, Lily#'s default, is 0.63 of full size; -3 0.71, -2 0.79), or
-    /// null: not written. The detector learns a cue's glyphs over the sizes a part's cues come in.</summary>
+    /// as layout { cueSize N } (-4, Lily#'s default, is 0.63 of full size; -3 0.71), or null: not
+    /// written. The detector learns a cue's glyphs over the sizes a part's cues come in.</summary>
     public static int? CueSize;
 
     /// <summary>A piece's engraving settings, drawn: a quarter of the pieces keep the defaults, the
