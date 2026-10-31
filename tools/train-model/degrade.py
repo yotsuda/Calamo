@@ -8,14 +8,18 @@ Three kinds of page, as the old prints of the development set show them (data/de
   - a grey scan: a show-through of the other side, a shadow or uneven light, paper grain, streaks, JPEG;
   - a small page blown up (about 96 dpi);
   - a phone's photo (about 12 px a space: soft, grey, unevenly lit, sharpened, JPEG).
-Before any of them, now and then, ink uneven within its strokes and a player's pencil marks.
+Before any of them, now and then, ink uneven within its strokes.
+(No player's pencil marks: faint thin strokes taught as nothing, of any shape, weaken the detector's slur
+and tie ends on the scans -- wavering curves and circles, detector40-42 and the mean end score 0.474 on the
+development set's slurs, or straight strokes, crosses and digits alone, detector46, 0.478, against 0.505-0.517
+without them, detector39, 44 and 45; slurcount.py and slurtab.py, 2026-11-01.)
 Only numpy and PIL: nothing to install, nothing that ships.
 
   degrade(g, rng, other)  g: float32 HxW, 1 = paper, 0 = ink; other: another window (for show-through)
 """
 import io
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageFilter
 
 
 def field(h, w, rng, period):
@@ -108,32 +112,6 @@ def mottle(g, rng, s=1.0):
     return 1.0 - (1.0 - g) * (1.0 - rng.uniform(0.3, 0.7) * f)
 
 
-def pencil(g, rng):
-    """A player's pencil: a few faint, thin, wavering strokes anywhere (a fingering, a breath mark, a
-    circle round a note, a line through a bar), the paper's grey not the ink's black."""
-    h, w = g.shape
-    im = Image.new('L', (w, h), 255)
-    d = ImageDraw.Draw(im)
-    for _ in range(rng.integers(1, 5)):
-        x, y = rng.uniform(0, w), rng.uniform(0, h)
-        if rng.random() < 0.3:
-            # (a circle or an oval round something)
-            rx, ry = rng.uniform(6, 30), rng.uniform(6, 30)
-            d.ellipse([x - rx, y - ry, x + rx, y + ry], outline=0, width=int(rng.integers(1, 3)))
-            continue
-        pts, ang, n = [(x, y)], rng.uniform(0, 2 * np.pi), int(rng.integers(2, 8))
-        for _ in range(n):
-            ang += rng.normal(0, 0.6)
-            step = rng.uniform(5, 20)
-            x, y = x + step * np.cos(ang), y + step * np.sin(ang)
-            pts.append((x, y))
-        d.line(pts, fill=0, width=int(rng.integers(1, 3)))
-    lead = 1.0 - blur(np.asarray(im, dtype=np.float32) / 255.0, rng.uniform(0.3, 0.8))
-    # (graphite is grey and grainy)
-    tone = rng.uniform(0.35, 0.75) * (0.7 + 0.3 * rng.random(g.shape).astype(np.float32))
-    return np.minimum(g, 1.0 - lead * tone)
-
-
 def photo(g, rng):
     """A phone's photo of a page (the Eroica trumpet part, 2026-10-30: 12.4 px a space): a small page,
     a little out of focus, grey ink on grey paper under uneven light, the camera's noise, its sharpening
@@ -207,11 +185,9 @@ def grey_scan(g, rng, other):
 
 def degrade(g, rng, other=None):
     g = g.astype(np.float32)
-    # (the ink's grain and a pencil come before the scan or the camera, which see them as they see the print)
+    # (the ink's grain comes before the scan or the camera, which see it as they see the print)
     if rng.random() < 0.3:
         g = mottle(g, rng)
-    if rng.random() < 0.15:
-        g = pencil(g, rng)
     r = rng.random()
     g = (old_print(g, rng) if r < 0.4 else grey_scan(g, rng, other) if r < 0.7
          else low_resolution(g, rng) if r < 0.85 else photo(g, rng))
