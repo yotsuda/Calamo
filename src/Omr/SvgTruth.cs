@@ -11,12 +11,16 @@ sealed class TGlyph
     public double L, T, R, B;    // its box
     public double Size;          // font size in staff spaces x 4
     public int Src = -1;         // data-pos: where in the .lys source it comes from (-1: none)
+    // a cue's (cue { } in the .lys, OmrGen --cues): told by where it comes from, not by its size,
+    // which is whatever layout { cueSize N } makes it (0.63 at the default -4, 0.89 at -1) times
+    // NoteHead.scale (OmrGen --vary): small whatever that comes to
+    public bool Cue;
     // full-sized music, not a grace note's (0.71), a tuplet number's (0.79) or a tempo mark's
     // note (0.89); a head scaled by NoteHead.scale 0.92 (OmrGen --vary's least) still is
-    public bool Full => Size > 0.905;
-    // a grace note's: its head and flag at seven tenths (0.71), its accidental at 0.63 (S21). A tuplet
-    // number is text, not a glyph; a tempo mark's note (0.89) is neither full nor small
-    public bool Small => Size > 0.55 && Size < 0.8;
+    public bool Full => !Cue && Size > 0.905;
+    // a grace note's: its head and flag at seven tenths (0.71), its accidental at 0.63 (S21), or a
+    // cue's. A tuplet number is text, not a glyph; a tempo mark's note (0.89) is neither full nor small
+    public bool Small => Cue || (Size > 0.55 && Size < 0.8);
     public double Cx => (L + R) / 2;
     public double Cy => (T + B) / 2;
 }
@@ -119,6 +123,9 @@ sealed class SvgPage
         var page = new SvgPage { MusicFont = pageFont };
         string lysPath = Regex.Replace(Path.ChangeExtension(path, ".lys"), @"-page\d+\.lys$", ".lys");
         string lys = File.Exists(lysPath) ? File.ReadAllText(lysPath) : null;
+        // (the cues' stretches of the source: a glyph from inside one is a cue's, TGlyph.Cue)
+        var cueSpans = lys != null ? CueSpans(lys) : new();
+        bool InCue(int src) => src >= 0 && cueSpans.Any(c => src > c.Open && src < c.Close);
         var stack = new Stack<(double Tx, double Ty, double Sx, double Sy, bool Skip)>();
         var tr = (Tx: 0.0, Ty: 0.0, Sx: 1.0, Sy: 1.0);
         bool skip = false;   // inside another page's group
@@ -366,7 +373,7 @@ sealed class SvgPage
                         double k = size * tr.Sx * page.Ppu;
                         page.Glyphs.Add(new TGlyph
                         {
-                            Name = b.Name, X = o.X, Y = o.Y, Size = size, Src = Src(),
+                            Name = b.Name, X = o.X, Y = o.Y, Size = size, Src = Src(), Cue = InCue(Src()),
                             L = o.X + b.X0 * k, R = o.X + b.X1 * k, T = o.Y - b.Y1 * k, B = o.Y - b.Y0 * k,
                         });
                         x += b.X1 - b.X0;   // (glyph runs are single glyphs in practice)
@@ -528,6 +535,24 @@ sealed class SvgPage
             if (page.Marks.Any(m => m.Kind == "ped.notch" && Math.Abs(m.X - top.X) < 0.2 * u && Math.Abs(m.Y - top.Y) < 0.2 * u)) continue;
             page.Marks.Add((top.X, top.Y, "ped.notch", l.Src));
         }
+    }
+
+    /// <summary>Every cue { } of the source: the '{' that opens it and the '}' that closes it (the
+    /// source positions of what is written between them lie between). Comments are skipped.</summary>
+    static List<(int Open, int Close)> CueSpans(string lys)
+    {
+        var spans = new List<(int, int)>();
+        foreach (Match m in Regex.Matches(lys, @"\bcue\s*\{"))
+        {
+            int open = m.Index + m.Length - 1, depth = 0;
+            for (int i = open; i < lys.Length; i++)
+            {
+                if (lys[i] == '/' && i + 1 < lys.Length && lys[i + 1] == '/') { i = lys.IndexOf('\n', i); if (i < 0) break; continue; }
+                if (lys[i] == '{') depth++;
+                else if (lys[i] == '}' && --depth == 0) { spans.Add((open, i)); break; }
+            }
+        }
+        return spans;
     }
 
     /// <summary>The ')' that closes the slur opened at <paramref name="open"/> (slurs nest), or -1.</summary>

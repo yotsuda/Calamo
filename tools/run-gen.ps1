@@ -15,14 +15,15 @@ param(
     [switch]$Verify,    # the redraw check (omr --verify): the .lys engraved again and compared with the page, bar by bar
     [string[]]$OmrArgs = @(),   # more arguments for omr (e.g. '--detector')
     [string[]]$GenArgs = @(),   # more arguments for OmrGen (e.g. '--lyrics')
-    [string]$Fonts = ''         # music fonts drawn among, piece by piece (e.g. 'Emmentaler,Bravura,Petaluma,Leland'); '' = Lily#'s default
+    [string]$Fonts = '',        # music fonts drawn among, piece by piece (e.g. 'Emmentaler,Bravura,Petaluma,Leland'); '' = Lily#'s default
+    [string]$Lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'   # the lysc that engraves (another build of Lily#'s to try)
 )
 # Generate test scores, engrave them with Lily#, read them back with the OMR, and tabulate.
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\.."
 $gen = "$root\src\OmrGen\bin\Release\net10.0\OmrGen.exe"
 $omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
-$lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
+$lysc = $Lysc
 
 if ($Redraw) {
     # (the old drawing gone first: a piece may now take fewer pages)

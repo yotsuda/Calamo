@@ -94,6 +94,9 @@ static class Program
                 Writer.MusicFont = fonts?[new Random(seed * 7919 + n * 104729 + suiteKey + 1).Next(fonts.Length)];
                 // (the engraving's settings likewise: --vary)
                 Writer.Style = vary ? Writer.DrawStyle(new Random(seed * 7919 + n * 104729 + suiteKey + 2)) : null;
+                // (--cues: the piece's cue size, -4, -3 or -2 (0.63, 0.71, 0.79: a Sibelius part's cues are
+                // about 0.73; -1, 0.89, is too near full size), from a stream of its own likewise)
+                Writer.CueSize = cues ? new Random(seed * 7919 + n * 104729 + suiteKey + 20).Next(-4, -1) : null;
                 // (--headers: a title, subtitle, composer, poet and tempo, from a stream of their own likewise)
                 Writer.HeaderRng = opt.ContainsKey("headers") ? new Random(seed * 7919 + n * 104729 + suiteKey + 3) : null;
                 // (--tuplets: which kind a tuplet group is, from a stream of its own likewise: the
@@ -234,19 +237,29 @@ static class Writer
     public static void Fonts(StringBuilder lys)
     {
         if (MusicFont != null) lys.AppendLine($"fonts {{ music \"{MusicFont}\" }}");
-        if (Style != null) lys.Append(Style);
+        var paper = Style?.Paper ?? new();
+        var layout = new List<string>(Style?.Layout ?? new());
+        // (in the one layout block: of several, Lily# keeps the last only, LYS4005)
+        if (CueSize != null) layout.Add($"cueSize {CueSize}");
+        if (paper.Count > 0) lys.AppendLine("paper { " + string.Join("  ", paper) + " }");
+        if (layout.Count > 0) lys.AppendLine("layout { " + string.Join("  ", layout) + " }");
     }
 
-    /// <summary>The engraving settings of the piece being written (OmrGen --vary): paper and
-    /// layout blocks, or null: Lily#'s defaults.</summary>
-    public static string Style;
+    /// <summary>The engraving settings of the piece being written (OmrGen --vary): the paper
+    /// block's entries and the layout block's, or null: Lily#'s defaults.</summary>
+    public static (List<string> Paper, List<string> Layout)? Style;
+
+    /// <summary>The size of the piece's cues (OmrGen --cues): LilyPond's font-size step, written
+    /// as layout { cueSize N } (-4, Lily#'s default, is 0.63 of full size; -3 0.71, -2 0.79), or
+    /// null: not written. The detector learns a cue's glyphs over the sizes a part's cues come in.</summary>
+    public static int? CueSize;
 
     /// <summary>A piece's engraving settings, drawn: a quarter of the pieces keep the defaults, the
     /// others each setting with odds of two in three. The ranges are the proposal's (Lily# P2-P4,
     /// docs/repro/lilysharp-proposal-2026-10-02.md), in Lily#'s units: thicknesses in staff line
     /// thicknesses (lineThickness 0.1 space), so a stem of 0.08-0.2 spaces is 0.8-2.0 over the
     /// staff line's own factor.</summary>
-    public static string DrawStyle(Random rng)
+    public static (List<string> Paper, List<string> Layout)? DrawStyle(Random rng)
     {
         if (rng.NextDouble() < 0.25) return null;
         var inv = CultureInfo.InvariantCulture;
@@ -277,10 +290,7 @@ static class Writer
         if (Pick()) layout.Add(string.Format(inv, "NoteHead.scale {0:F3}", head));
         if (Pick()) layout.Add(string.Format(inv, "Dots.padding {0:F3}", dots));
         if (Pick()) layout.Add(string.Format(inv, "Accidental.rightPadding {0:F3}", acc));
-        var sb = new StringBuilder();
-        if (paper.Count > 0) sb.AppendLine("paper { " + string.Join("  ", paper) + " }");
-        if (layout.Count > 0) sb.AppendLine("layout { " + string.Join("  ", layout) + " }");
-        return sb.Length > 0 ? sb.ToString() : null;
+        return paper.Count > 0 || layout.Count > 0 ? (paper, layout) : null;
     }
 
     /// <summary>The piece's words over the music (OmrGen --headers), drawn from this; null: the title is the piece's name.</summary>
