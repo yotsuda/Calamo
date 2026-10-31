@@ -2,9 +2,9 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
-## 42 のスラーの減りの原因は新しい degrade.py: detector43（ls を 4 倍）は戻らず、detector44（古い degrade.py）は戻る（2026-11-01 未明、前の節の次の一手 1）
+## 42 のスラーの減りの原因は degrade.py の pencil: detector43（ls を 4 倍）は戻らず、44（古い degrade.py）と 45（pencil なし）は戻る。どちらも採らず（2026-11-01 未明〜朝、前の節の次の一手 1）
 
-**現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし（4/4 とも triage 済み）、REQUESTS.md に新しい `fixed` はなし。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 3 は未解決）。**読み手は変えていない**。学習の道具だけ: `slurcount.py` がクラスの少ない古い模型（39 までの 80 クラス）も読めるように head の重みを詰める、`train.py train … --degrader <file.py>`（別の `degrade.py` で学習する、対照用）。
+**現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`。43・44・45 は候補として読んだだけ）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし（4/4 とも triage 済み）、REQUESTS.md に新しい `fixed` はなし。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 3 は未解決）。**読み手は変えていない**。学習の道具だけ: `slurcount.py` がクラスの少ない古い模型（39 までの 80 クラス）も読めるように head の重みを詰める、`train.py train … --degrader <file.py>`（別の `degrade.py` で学習する、対照用）。
 
 **見たもの（次の一手 1）**: 開発用の台のスキャン 15 曲の正解のスラー 182 本のうち両端の和音の位置が分かる 122 本（`slurcount.py`、10-29 の export `out/pseudo2/dev-*-scan` の窓。`out/slur-37c-42.tsv`・`slur-39-44.tsv`）で、検出器ごとの端の点数:
 
@@ -30,7 +30,10 @@
 - 検出器単体: `eval-cue` grace_head 100・grace_hollow 100、`eval-cue-scan` 94.2 / 66.7（42: 94.9 / 77.8）。
 - → **44 は採らない**。新しい `degrade.py` はスキャンの符頭を助けていて（下がる台は 40〜42 で 39 より上がった台の裏返し）、スラーの端だけを傷めている。
 
-**detector45**（学習中）: 42 の作りで `degrade.py` の **pencil だけを外す**（乱数は同じ列: 引いた数を捨てる）。鉛筆の細いゆれる線と丸（15% の窓）を「何もない」と教えるのが、弧の端を弱めている第一の疑い。
+**detector45** = 42 の作りで `degrade.py` の **pencil だけを外した**（確率 0.15 → 0。乱数は同じ列: 引いた数を捨てる。mottle・photo・種類の割合はそのまま）。鉛筆の細いゆれる線と丸（15% の窓）を「何もない」と教えるのが弧の端を弱めている、の疑いは**当たり**:
+- スラーの端（上の表の続き）: 両端 0.5 以上 **31**、両端 0.25 以上 86、片方 0.5・片方 0.2 以上 80、平均 **0.511**、0.5 以上の端 126 = 39 の水準（44 は 0.517）。生成譜は変わらず（`eval-ls-scan` slur_l/r 98.3 / 99.7、`eval-cue` grace_head 100・grace_hollow 88.9、`eval-cue-scan` 93.2 / 55.6）。
+- 実譜（42 + 規則と比べて。`out/pseudo2/d45-*`、`out/eroica/d45`）: 評価台 音 スキャン 25204 → **25172**（−32: kinkel7-2-scan −20、chopin28-4-scan −18、boulanger02-scan −10、kinkel7-4-scan −10、flapper5-scan −10、dl-scan −9 / chaminade-scan +26、gonzaga-scan +14。44 で −80 だった holmes16 は +3）、ms 11790 → 11789、その他 17971 → 17989。スラーの始まり found スキャン 534 → **559**、ms 467 → 474、その他 311 → 321（39 + 規則の 553 / 479 / 329 に戻る）、**ただし誤りも スキャン 138 → 164、ms 26 → 34、その他 14 → 22、タイの誤り 28 → 42**（見つけた分と同じだけ誤りが増える: 弱い端を使う規則が 42 の点数に合わせてある）。開発用の台 スキャン 11116 → **11088**（19-6 −16、19-1 −7、10-2 −6、lang36-3 −6 / 10-4 +6）、**スラーの始まり found 82 → 76**、誤り 10 → 14、浄書 11693 → 11691。英雄 写真 251（todo 11）→ **250（todo 14）**、PDF 291 → 288。
+- → **45 は採らない**（42 を採った目安「開発用の台のスキャンが 39 に戻り、英雄の写真が 251 以上」に届かない。音は学習の揺れの中、スラーは found と誤りが同じだけ増え、開発用の台では減る）。**分かったのは原因**: 検出器がスキャンのスラーの端に付ける点数は、`degrade.py` の pencil で 0.03〜0.04 下がる。mottle・photo は端を傷めず（45 ≒ 44）、スキャンの符頭を助ける（44 の −176 が 45 では −32）。
 
 **分かったこと**:
 1. 学習の台本は scratchpad に置くと消える。ここに: `cd tools\train-model`、`set TORCHINDUCTOR_CACHE_DIR=%TEMP%\torchinductor`、`set USERNAME=ytsud`、`.venv\Scripts\python.exe train.py train rs-band4-scan.npz,v4-train12-l.npz*3,ms-band4-scan.npz,v4-band-scan-l.npz*3,m4-l.npz*4,m5-l.npz*2,grace-l.npz,ott-l.npz,rep-l.npz*2,orn-l.npz*2,s2.npz,tup-l.npz*2,rs-band4.npz,ms-band4.npz,v4-band-l.npz*3,rs.npz,pseudo-dev2n.npz*30,ls.npz*2,cues2.npz*2 detectorNN.pt 45 --degrade 0.5 --seed 3`（= 42 の作り。43 は `ls.npz*4`、44 は `--degrader <古い degrade.py>`、45 は `--degrader <pencil を 0 にした degrade.py>`）。49 秒/エポック、37 分。空きの記憶 42 GB で足りた（check は終わってから）。
@@ -38,8 +41,10 @@
 3. 評価台の検出器どうしの比べ方: `out/pseudo2/<tag>-eval-sets.tsv` を種類（scan / ms / その他）で足す小さな python（scratchpad の `setsum.py`、空欄は 0）。`run-audiveris` の末尾の better/worse の数は台ごとの印なので、合計はこれで見る。
 
 **次の一手**:
-1. **45 の結果**: `train.py onnx` → `slurcount.py`（39・42・44・45 を同じ窓で）→ `evalmodel.ps1 -Tag d45` → `readeroica.ps1 -Tag d45`。スラーの端が 44 並み（平均 0.51 以上）で音が 42 並み（評価台 スキャン 25200 前後、holmes16・chaminade を落とさない）なら候補: `check -Detector`、種、採る手順は前の節。戻らなければ次は mottle を外した 46、その次が photo。pencil が原因なら、鉛筆を外すのではなく**弧に似ない形に描き直す**（直線と数字だけ、または弧は符頭から離す）のが本筋。
-2. 前の節の 2・3（英雄の写真の書体、弱い `tie_l` の続き、弱い端の閾値 0.25、7-1 の 20 小節: 符頭は 42 で読めていてタイ a''~ だけが残る（`tie-slur-diffs` 20 rh ties truth 1 read 0）。Lily# 側へ Release の lysc のビルドし直し）。
+1. **`degrade.py` の pencil を弧に似ない形にする**（鉛筆を外すのではなく: 短い直線・数字・×印だけにして、ゆれる曲線と丸をやめる。または弧の形は符頭から 3 間以上離す）。次の学習し直し（キューの大きさ、`--leapslurs` の台、写真の書体など別の理由で学習し直すとき）に入れ、`slurcount.py`（39・42・45 と同じ窓 `out/pseudo2/dev-*-scan`、表の列）で端の点数が 0.51 前後に戻ることを確かめる。そのとき 45 で増えた**スラーの誤り**（評価台 +42、開発用の台 +4）も見る: 弱い端の規則（`Detector.WeakSlur` 0.2、確かな端 0.5）は 42 の点数に合わせてあるので、点数が上がった模型では誤りが増える。開発用の台のスキャンで 45 の誤り 14 本の中身（`cropbar.py`）を見て、規則で除けるか、閾値を 0.25 にするか（前からの次の一手 3）を決める。
+2. 45 で開発用の台のスラーの found が 82 → 76 に減る理由（端の点数は上がっているのに）。`tie-slur-diffs.txt` で減った曲（`out/pseudo2/d45-dev-sets.tsv` と `docs/dev-sets.tsv` の差）を見る。
+3. 前の節の 2・3（英雄の写真の書体、弱い `tie_l` の続き、7-1 の 20 小節: 符頭は 42 で読めていてタイ a''~ だけが残る（`tie-slur-diffs` 20 rh ties truth 1 read 0）。Lily# 側へ Release の lysc のビルドし直し）。
+4. 模型は `tools/train-model/detector43/44/45.pt`・`.onnx`（git は無視）に残した。44（古い degrade.py）は英雄の写真 256（todo 7）で 42 より上、PDF 288。
 
 ## detector42 を採った: 装飾音の幅の物差し、2 つの大きさで見た符頭を 1 つに、キューの白い符頭、点の列の小節線、旗の付け根（2026-10-31 深夜、前の節の次の一手 1・2）
 
