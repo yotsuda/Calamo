@@ -2,6 +2,45 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 42 のスラーの減りの原因は新しい degrade.py: detector43（ls を 4 倍）は戻らず、detector44（古い degrade.py）は戻る（2026-11-01 未明、前の節の次の一手 1）
+
+**現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし（4/4 とも triage 済み）、REQUESTS.md に新しい `fixed` はなし。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 3 は未解決）。**読み手は変えていない**。学習の道具だけ: `slurcount.py` がクラスの少ない古い模型（39 までの 80 クラス）も読めるように head の重みを詰める、`train.py train … --degrader <file.py>`（別の `degrade.py` で学習する、対照用）。
+
+**見たもの（次の一手 1）**: 開発用の台のスキャン 15 曲の正解のスラー 182 本のうち両端の和音の位置が分かる 122 本（`slurcount.py`、10-29 の export `out/pseudo2/dev-*-scan` の窓。`out/slur-37c-42.tsv`・`slur-39-44.tsv`）で、検出器ごとの端の点数:
+
+| 検出器 | 両端 0.5 以上 | 両端 0.25 以上 | 片方 0.5・片方 0.2 以上 | 端の点数の平均 | 0.5 以上の端 |
+|---|---|---|---|---|---|
+| 37c | 30 | 81 | 70 | 0.462 | 118 |
+| 38（ls*2 を足した） | 39 | 84 | 79 | 0.500 | 135 |
+| 39 | 34 | 94 | 82 | 0.505 | 127 |
+| 40 | 26 | 80 | 76 | 0.482 | 120 |
+| 41 | 30 | 78 | 72 | 0.471 | 117 |
+| 42 | 28 | 83 | 75 | 0.474 | 117 |
+| **43** = 42 の作り + ls*4 | 29 | 76 | 65 | 0.476 | 116 |
+| **44** = 42 の作り + 2929341 の前の degrade.py | **37** | 93 | **88** | **0.517** | **136** |
+
+- 42 の減りは**学習の揺れではない**: `cues2.npz*2` + 新しい `degrade.py`（mottle・pencil・photo、`2929341`）で学習した 40・41・42 に共通（全部 0.47〜0.48、38・39 は 0.50）。端ごとの差は 42 − 39 で −0.1 が 53 端、−0.2 が 36、+0.1 が 44 と全体がずれていて、スラーの種類（2 音 / 3〜4 音 / 5 音以上）にもよらない。0.3 以上落ちた端 7 のうち 4 はタイの端（`tie_r` 0.77 → 0.30 など）。
+- 生成譜のスラーの端は 42 も 43 も 44 も 99%（`eval-ls-scan` の slur_l/r 98.9〜99.4、`eval-cue-scan` 96.1）。足りないのは生成譜のスラーの量ではなく**実スキャンへの一般化** → 43（`ls.npz` を 2 倍 → 4 倍）は戻らない（両端 0.25 以上はむしろ 83 → 76）。
+- 44（42 の台のまま `degrade.py` だけ古いもの）は 39 より上に戻る → **原因は新しい `degrade.py`**。
+
+**44 の実譜**（42 + 規則 = `docs/*-sets.tsv` と比べて。読み手は同じ。`out/pseudo2/d44-*`、`out/eroica/d44`）:
+- 評価台: 音 スキャン 25204 → **25028**（−176: holmes16-scan −80、chaminade-scan −25、kinkel7-2-scan −16、kinkel7-4-scan −16、lang36-2-scan −15、chopin28-4-scan −12）、ms 11790 → 11783、その他 17971 → 17980。**スラーの始まり found スキャン 534 → 563、ms 467 → 472、その他 311 → 327**（39 + 規則は 553 / 479 / 329）。ただし誤り スキャン 138 → 155、タイの誤り 28 → 40、ms のタイの誤り 6 → 13。
+- 開発用の台: スキャン 11116 → **11065**（19-6 −32、装飾音の組は 0 のまま。中身は見ていない）、浄書 11693 → 11692。
+- 英雄: 写真 251（todo 11）→ **256（todo 7）**、PDF 291 → 288。
+- 検出器単体: `eval-cue` grace_head 100・grace_hollow 100、`eval-cue-scan` 94.2 / 66.7（42: 94.9 / 77.8）。
+- → **44 は採らない**。新しい `degrade.py` はスキャンの符頭を助けていて（下がる台は 40〜42 で 39 より上がった台の裏返し）、スラーの端だけを傷めている。
+
+**detector45**（学習中）: 42 の作りで `degrade.py` の **pencil だけを外す**（乱数は同じ列: 引いた数を捨てる）。鉛筆の細いゆれる線と丸（15% の窓）を「何もない」と教えるのが、弧の端を弱めている第一の疑い。
+
+**分かったこと**:
+1. 学習の台本は scratchpad に置くと消える。ここに: `cd tools\train-model`、`set TORCHINDUCTOR_CACHE_DIR=%TEMP%\torchinductor`、`set USERNAME=ytsud`、`.venv\Scripts\python.exe train.py train rs-band4-scan.npz,v4-train12-l.npz*3,ms-band4-scan.npz,v4-band-scan-l.npz*3,m4-l.npz*4,m5-l.npz*2,grace-l.npz,ott-l.npz,rep-l.npz*2,orn-l.npz*2,s2.npz,tup-l.npz*2,rs-band4.npz,ms-band4.npz,v4-band-l.npz*3,rs.npz,pseudo-dev2n.npz*30,ls.npz*2,cues2.npz*2 detectorNN.pt 45 --degrade 0.5 --seed 3`（= 42 の作り。43 は `ls.npz*4`、44 は `--degrader <古い degrade.py>`、45 は `--degrader <pencil を 0 にした degrade.py>`）。49 秒/エポック、37 分。空きの記憶 42 GB で足りた（check は終わってから）。
+2. cmd の中の `^` は escape 文字: `git show 2929341^:…` は `^^` と書く（1 回目は新しい方の `degrade.py` が出ていた）。
+3. 評価台の検出器どうしの比べ方: `out/pseudo2/<tag>-eval-sets.tsv` を種類（scan / ms / その他）で足す小さな python（scratchpad の `setsum.py`、空欄は 0）。`run-audiveris` の末尾の better/worse の数は台ごとの印なので、合計はこれで見る。
+
+**次の一手**:
+1. **45 の結果**: `train.py onnx` → `slurcount.py`（39・42・44・45 を同じ窓で）→ `evalmodel.ps1 -Tag d45` → `readeroica.ps1 -Tag d45`。スラーの端が 44 並み（平均 0.51 以上）で音が 42 並み（評価台 スキャン 25200 前後、holmes16・chaminade を落とさない）なら候補: `check -Detector`、種、採る手順は前の節。戻らなければ次は mottle を外した 46、その次が photo。pencil が原因なら、鉛筆を外すのではなく**弧に似ない形に描き直す**（直線と数字だけ、または弧は符頭から離す）のが本筋。
+2. 前の節の 2・3（英雄の写真の書体、弱い `tie_l` の続き、弱い端の閾値 0.25、7-1 の 20 小節: 符頭は 42 で読めていてタイ a''~ だけが残る（`tie-slur-diffs` 20 rh ties truth 1 read 0）。Lily# 側へ Release の lysc のビルドし直し）。
+
 ## detector42 を採った: 装飾音の幅の物差し、2 つの大きさで見た符頭を 1 つに、キューの白い符頭、点の列の小節線、旗の付け根（2026-10-31 深夜、前の節の次の一手 1・2）
 
 **現在地**: 検出器は **detector42**（`data/detector.onnx`、`tools/train-model/detector42.onnx` と同じ。80 クラス + `grace_hollow`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし、REQUESTS.md に新しい `fixed` はなし。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 4 は未解決）。終わりの check: 規則 OK（0 better・0 WORSE）、`check -Detector`（42）は better 45・**WORSE 79**（下。`-Accept` で基準値に）、種 **4/4**。`docs/eval-sets.tsv`・`dev-sets.tsv` は 42 + 今の規則の数字に写した。

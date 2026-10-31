@@ -15,13 +15,19 @@ import numpy as np
 from PIL import Image
 import torch
 from train import Detector
+from dataset import CLASSES
 from pseudo import candidates, nearest, read_page, num
 
 out_tsv, models, dirs = sys.argv[1], sys.argv[2].split(','), sys.argv[3:]
 dev = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 nets = []
 for m in models:
-    net = Detector().to(dev); net.load_state_dict(torch.load(m, map_location=dev)); net.eval(); nets.append(net)
+    sd = torch.load(m, map_location=dev)
+    k = sd['head.weight'].shape[0]
+    if k < len(CLASSES):   # a model from before the last classes were added: those classes never fire
+        sd['head.weight'] = torch.cat([sd['head.weight'], torch.zeros(len(CLASSES) - k, *sd['head.weight'].shape[1:], device=dev)])
+        sd['head.bias'] = torch.cat([sd['head.bias'], torch.full((len(CLASSES) - k,), -20.0, device=dev)])
+    net = Detector().to(dev); net.load_state_dict(sd); net.eval(); nets.append(net)
 
 rows_out = []
 for d in dirs:

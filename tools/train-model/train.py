@@ -2,8 +2,11 @@
 the centre of every symbol with a heat map per class (the CenterNet idea, without box sizes: a
 symbol's size follows from its class and the staff space).
 
-  python train.py train <train.npz> <model.pt> [epochs] [--degrade p] [--seed n]   train (GPU if there is one);
-                                                                 p of the windows dirtied by degrade.py;
+  python train.py train <train.npz> <model.pt> [epochs] [--degrade p] [--seed n] [--degrader <file.py>]
+                                                                 train (GPU if there is one);
+                                                                 p of the windows dirtied by degrade.py
+                                                                 (or by the file's degrade(): an older
+                                                                 one, as a control);
                                                                  n seeds the windows (1 if not given) and
                                                                  the weights (unseeded if not given)
   python train.py eval  <model.pt> <eval.npz>                    precision/recall per class
@@ -323,6 +326,11 @@ if __name__ == '__main__':
         k = sys.argv.index('--degrade'); DEGRADE = float(sys.argv[k + 1]); del sys.argv[k:k + 2]
     if '--seed' in sys.argv:
         k = sys.argv.index('--seed'); SEED = int(sys.argv[k + 1]); del sys.argv[k:k + 2]
+    if '--degrader' in sys.argv:
+        # (another degrade.py, by path: a control trained with an older one, to tell its effect from the sets')
+        import importlib.util
+        k = sys.argv.index('--degrader'); spec = importlib.util.spec_from_file_location('degrader', sys.argv[k + 1]); del sys.argv[k:k + 2]
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); degrade = mod.degrade
     if cmd == 'train': train(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 10)
     elif cmd == 'eval': evaluate(sys.argv[2], sys.argv[3])
     elif cmd == 'onnx': export(sys.argv[2], sys.argv[3])
