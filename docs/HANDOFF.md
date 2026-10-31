@@ -2,6 +2,31 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## REQUESTS 11・12・13 を新しい lysc で確かめて done に、gen-ott とキューの台を描き直した（2026-10-31 夕、前の節の次の一手 0）
+
+**現在地**: 検出器は **detector39 のまま**。セッションの頭の規則の check は OK（0 better・0 WORSE）。新しい種はなし（4/4 とも triage 済み）。REQUESTS.md は 11・12 が `fixed`、**セッション中に 13 も `fixed`**（Lily# 第1035、`e20c7c610`、オーナー決定「提案通り」: `layout { cueSize N }`、N は −8〜0、既定 −4 のまま。`lysc --set cueSize=-2` でも効く）。3 件とも **done** にした。
+
+**確かめ方**: Lily# の作業ツリーは別セッションが使っている（未コミットの変更あり）ので触らず、`git worktree add <scratch> <commit>` で `ccdeeb676`（11・12）と `112813183`（13）を取り、`dotnet build LilySharp.Cli -c Release -o <scratch>` で lysc を作って再現譜を描いた（確かめたら worktree は消した）。**普段使う `C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe` は 14:26 のビルドで、3 件の直しの前のまま**（`run-gen.ps1`・`run-audiveris.ps1 -Verify` が使う）。Lily# 側が Release をビルドし直すまで、台を描き直すときは scratch のビルドを `$lysc` に差し替えた写しの `run-gen.ps1` で（このセッションはそうした）。
+- 11（連符の中で終わるオッターヴァ）: c''・b' が 3 小節とも五線の中、破線とかぎは d''' の上で終わる。
+- 12（キューの休符）: 2 小節目の r8・3 小節目の r4 が小さく、5 小節目は通常。
+- 13（キューの大きさ）: 既定（−4）は前と同じ。`--set cueSize=-2` と `layout { cueSize -1 }` で符頭・符幹・休符・加線がそろって大きくなり、通常の音符は変わらない。SVG の font-size は −4 で 2.52（0.63）、−2 で 3.17（0.79）。
+
+**描き直したもの**（`run-gen.ps1 -Redraw`: 同じ曲、OmrGen は走らせない。劣化版は同じ乱数で同じ汚し）: `out/gen-ott`・`gen-ott-scan`（11）、`gen-cue`・`gen-cue-scan`・`train-cue`・`train-cue-s3`・`train-cue-s125`・`train-cue-scan`（12）。`cues2.npz` は作り直していない（学習し直しのときに）。
+
+**数字**:
+- 規則の check: **6 better・WORSE なし**（`symO.basic.head` 2 → 0、`symOS.basic.head` 3 → 0、genO/genOS basic 83.07/82.97 → 83.26。規則だけの読み手はオッターヴァの字を読めないので genO が 83〜91 なのは前からの基準値どおり）。`-Accept` で基準値に。
+- `check -Detector`: **6 better・WORSE なし**（genO/genOS basic 99.63 → 99.91）。`-Accept` で基準値に。
+- `gen-cue`（detector39、`--detector`）: 小さい休符を 39 は学んでいないので basic 99.8 → **98.7**、chords 99.8 → 99.4、ledger 99.8 → 99.2、tuplets 99.8 → 99.0、slurs 99.5。`gen-cue-scan` basic 99.1 → 97.8、chords 92.9 → 93.8、ledger 95.1 → 94.4、tuplets 93.3 → 92.6、slurs 99.1。誤りの型: 小さい休符の付点を落とす（`r8.` → `r8`）、`r16 r16` を落として隣を 8 分に、それで小節の長さが合わず `R`。正解の箱（`boxes-pNN.tsv`）には小さい休符が `rests.3`/`rests.4` で入っている（幅は通常の 0.63）ので、学習し直せばそのまま学べる。
+- 評価台は回していない（lysc の絵が変わっただけで読み手は同じ）。種は読み手が変わっていないので回していない。
+
+**次の学習し直しのために見つけたこと**（`SvgTruth.TGlyph`）: 正解は符頭の大小を SVG の font-size だけで決める（`Small` = 0.55〜0.8、`Full` > 0.905、間は「テンポ記号の音符（0.89）」として**どちらにも入れない**）。`--export-boxes` は `Small` の符頭を `grace.head` に書く。**`--vary` の `NoteHead.scale`（0.92〜1.15）はキューの符頭にも掛かる**（train-cue の basic015: 2.52 × 1.1 = 2.77）。cueSize −3（0.71）× 1.15 = 0.81、−2（0.79）× 1.1 = 0.87 は `Small` の外に落ちて正解から消える。キューの大きさを揺らすなら、先に正解側を直す: (a) `Small` の上限を 0.905 まで上げる（テンポ記号の音符 0.89 が `grace.head` になる。テンポ記号は `--headers` の台にある）か、(b) 符頭が `cue { }` の中か（`data-pos` の位置が `.lys` の `cue {` … `}` の中）で決める（タイ・スラーを `.lys` の文字で分けるのと同じ作り。こちらが筋）。
+
+**次の一手**:
+1. **キューの大きさを揺らして学習し直す（新しいセッションで）**: (1) 正解側: 上の (b)（`cue { }` の中の符頭・臨時記号・付点・休符を大きさによらず小さいクラスに）。(2) 生成器: `--cues` に大きさの流れ（`seed … + 20`）を足し、曲ごとに `layout { cueSize N }`（N は −4・−3・−2 = 0.63・0.71・0.79。−1 = 0.89 は通常に近すぎるので入れない）を `Writer.Style` の横に書く。(3) `gen-cues.ps1` で 6 台を作り直し（OmrGen から。`--cue-whole 0.25` のまま）、`cues2.npz` を作り直す。(4) detector41 = 39 の作り + `cues2.npz*2`（台本は scratchpad の `train40.cmd` の型。48 秒/エポック、36 分）。対照は 39。採る前に ROADMAP §7 の 4（`run-audiveris.ps1 -Eval -Reuse`、英雄の写真 `readeroica.ps1`、`check -Detector`）。
+2. 英雄の写真の書体（10-31 の detector40 の節の次の一手 1）は、1 の後にまだ見えなければ。
+3. 前の節の 1〜3（弱い `tie_l` の続き、弱い端の閾値 0.25、7-1 の 20 小節の a''、dl-scan の型）。
+4. Lily# 側へ: Release の lysc をビルドし直してほしい（REQUESTS 12 の行に書いた）。
+
 ## 弱い `tie_l` をスラーの始まりに、二声の入れ替えは採らず（2026-10-31 午後、前の節の次の一手 1）
 
 **現在地**: 検出器は **detector39 のまま**。セッションの頭の規則の check は OK（0 better・0 WORSE）。新しい種はなし。REQUESTS.md はセッションの頭には新しい `fixed` がなかったが、**セッション中（15:47）に Lily# 側が書き換えた**: **11（連符の中で終わるオッターヴァ）が `fixed e64dad771`、12（キューの休符の大きさ）が `fixed 0ae99e2e6`**、どちらも未 push（次の Lily# の版から）。**13（キューの大きさ）は `question`**: 機構は入れられる、文法と既定は**オーナーの判断待ち**（Lily# の案は `layout { cueSize -2 }`、既定 −4 のまま）。返事は `LilySharp-Lab/sessions/p1034/omr/lilysharp-reply-2026-10-31.md`。この節の作業には関係しないので、確かめは次の一手 0 に。
