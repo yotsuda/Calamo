@@ -942,8 +942,13 @@ static partial class Symbols
             gap++;
             if (c == '=') lined = true;
         }
+        // (a flag joins the stem at its tip and swings away from there: a run that begins half a space
+        // and more below the tip, nothing joined above it, is no flag -- a slur's start on the stem's
+        // right at the head's height, the Eroica part's photographed cue c'''4( read as an eighth)
+        int first = text.IndexOf('#');
+        if (first >= 0.5 * s) runs = 0;
         if (DebugAt.HasValue && Math.Abs(g.X - DebugAt.Value.X) < 2 * s && Math.Abs(g.Y - DebugAt.Value.Y) < 3 * s)
-            Console.WriteLine($"  flag rows from the tip at column {x0} (# ink joined to the stem, = a line's or a beam's row): {rows} -> {runs} runs");
+            Console.WriteLine($"  flag rows from the tip at column {x0} (# ink joined to the stem, = a line's or a beam's row): {rows} -> {runs} runs{(first >= 0.5 * s ? " (the first begins too far below the tip)" : "")}");
         return runs;
     }
 

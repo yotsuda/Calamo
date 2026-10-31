@@ -106,6 +106,10 @@ static class Detector
     // hole, seen as black 0.53 and half 0.50 (kinkel19-5's scan, the bass's c,2)
     public static double WeakHalf = 0.25;
     public static bool IsWeakHalf(Detection t) => t.Class == "head_half" && t.Score <= Threshold;
+    // A cue's hollow head likewise, found down to WeakHalf, but only to join a half head seen at the same
+    // spot (JoinSizes: the Eroica part's photographed cue c'''2, grace_hollow 0.50 and head_half 0.37);
+    // alone under the threshold it is dropped (Reader)
+    public static bool IsWeakHollowGrace(Detection t) => t.Class == "grace_hollow" && t.Score <= Threshold;
     public static bool IsWeakTab(Detection t) => t.Digits != null && t.Score <= Threshold;
     // A hairpin's end likewise, kept apart (PageSymbols.WeakHairpins) and taken only where its two lines
     // are found in the ink (Expressions.Trace): a scan cut dark to black and white thickens and speckles
@@ -176,6 +180,28 @@ static class Detector
     }
 
     /// <summary>Every symbol on the page (grey, 0 = ink, w x h), with the staff space s in page pixels.</summary>
+    /// <summary>
+    /// A head seen as a black head and as a grace note's at one spot, each under the threshold, is one
+    /// head seen at two sizes: a cue's head, between a grace note's size and a head's (the Eroica part's
+    /// photographed cues at 0.73 of a head: head_black 0.33 and grace_head 0.41, 0.44 and 0.44 from
+    /// detector42, taught cues at 0.63-0.82, where detector39 saw a black head at 0.80). The two readings
+    /// count as one, its kind the larger's; a half head and a cue's hollow head likewise.
+    /// </summary>
+    public static void JoinSizes(List<Detection> det, double s)
+    {
+        var pairs = new[] { ("head_black", "grace_head"), ("head_half", "grace_hollow") };
+        foreach (var (full, small) in pairs)
+            foreach (var t in det.Where(t => t.Class == full && t.Score <= Threshold).ToList())
+            {
+                var u = det.Where(u => u.Class == small && u.Score <= Threshold && Math.Abs(u.X - t.X) < 0.3 * s && Math.Abs(u.Y - t.Y) < 0.3 * s)
+                           .OrderByDescending(u => u.Score).FirstOrDefault();
+                if (u == null || t.Score + u.Score <= Threshold) continue;
+                var (keep, drop) = u.Score > t.Score ? (u, t) : (t, u);
+                keep.Score += drop.Score;
+                det.Remove(drop);
+            }
+    }
+
     public static List<Detection> Detect(byte[] gray, int w, int h, double s)
     {
         var found = new List<Detection>();
@@ -239,7 +265,7 @@ static class Detector
         int kk = heat.Dimensions[1], ph = heat.Dimensions[2], pw = heat.Dimensions[3];
         int crossClass = Array.IndexOf(Classes, "head_x"), percentClass = Array.IndexOf(Classes, "percent_1"), percent2Class = Array.IndexOf(Classes, "percent_2");
         int sharpClass = Array.IndexOf(Classes, "sharp"), flatClass = Array.IndexOf(Classes, "flat"), naturalClass = Array.IndexOf(Classes, "natural"), wholeClass = Array.IndexOf(Classes, "head_whole");
-        int dotClass = Array.IndexOf(Classes, "dot"), blackClass = Array.IndexOf(Classes, "head_black"), graceClass = Array.IndexOf(Classes, "grace_head"), halfClass = Array.IndexOf(Classes, "head_half");
+        int dotClass = Array.IndexOf(Classes, "dot"), blackClass = Array.IndexOf(Classes, "head_black"), graceClass = Array.IndexOf(Classes, "grace_head"), halfClass = Array.IndexOf(Classes, "head_half"), graceHollowClass = Array.IndexOf(Classes, "grace_hollow");
         int tipClass = Array.IndexOf(Classes, "hairpin_tip"), openClass = Array.IndexOf(Classes, "hairpin_open");
         int pedEndClass = Array.IndexOf(Classes, "ped_r"), pedUpClass = Array.IndexOf(Classes, "ped_up"), notchClass = Array.IndexOf(Classes, "ped_notch");
         int slurL = Array.IndexOf(Classes, "slur_l"), slurR = Array.IndexOf(Classes, "slur_r"), tieL = Array.IndexOf(Classes, "tie_l");
@@ -261,7 +287,7 @@ static class Detector
                         : c == wholeClass ? Math.Min(Threshold, WeakWhole)
                         : c == dotClass ? Math.Min(Threshold, WeakDot)
                         : c == blackClass || c == graceClass ? Math.Min(Threshold, WeakGrace)
-                        : c == halfClass ? Math.Min(Threshold, WeakHalf)
+                        : c == halfClass || c == graceHollowClass ? Math.Min(Threshold, WeakHalf)
                         : c == tipClass || c == openClass ? Math.Min(Threshold, WeakHairpin)
                         : c == pedEndClass || c == pedUpClass || c == notchClass ? Math.Min(Threshold, WeakPedal)
                         : c == slurL || c == slurR || c == tieL ? Math.Min(Threshold, WeakSlur)

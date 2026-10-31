@@ -107,6 +107,8 @@ static class Reader
         // the learnt detector (--detector) reads the whole page once: the barlines it found tell
         // of the staves too faint for the row test (a scan's), then go to FindBars; the rest to Symbols.Find
         var det = Detector.Enabled && d.Gray != null ? Detector.Detect(d.Gray, d.W, d.H, s) : null;
+        // (a head seen at two sizes, as a black head and as a grace note's, each under the threshold: one head)
+        if (det != null) { Detector.JoinSizes(det, s); det.RemoveAll(Detector.IsWeakHollowGrace); }
         // (TAB digits under the threshold are only the TAB's: rivals to a fret's other reading, Tab.Apply)
         var weakTabs = det?.Where(Detector.IsWeakTab).ToList() ?? new List<Detection>();
         det?.RemoveAll(Detector.IsWeakTab);

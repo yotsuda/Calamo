@@ -79,6 +79,7 @@ sealed class PageSymbols
     public List<Other> Tuplets = new();  // the tuplet numbers taken, with their staff (a detected one may be no piece of Others)
     public Dictionary<(int Bar, int Part), (Staff St, List<Ev> Evs)> Unprinted = new();   // the triplets read from a bar's length, no number printed: their events (Reader.UnprintedTriplets)
     public List<Detection> Detections;   // what the learnt detector found (--detector), or null
+    public List<SystemInfo> Systems;     // the page's systems with their bar lines as the layout found them (Layout.FindBars; Reader checks them further)
     public HashSet<Detection> TieEndsAsSlur = new();   // its slur_rs that end a tie, an arc to the next note at the pitch (Symbols.DetectedTies): no slur's ends
     public List<Tempo.Frame> Frames;     // the rehearsal marks' boxes over the systems (found with the detector; else Tempo finds them)
     public List<Detection> WeakSigns = new();   // its sharps and flats under Detector.Threshold: a key's, only where the system's other staves read that key
@@ -160,6 +161,7 @@ static partial class Symbols
     public static PageSymbols Find(Img d, Img ink, List<Staff> staves, List<SystemInfo> systems, double s, List<Detection> det, Action<PageSymbols> clefsRead = null, List<Detection> weakDots = null, List<Detection> weakHeads = null, List<Detection> weakSlashes = null, List<Detection> weakOttavas = null, List<Detection> weakClefs = null, List<Detection> weakHalves = null, List<Detection> weakNaturals = null)
     {
         var ps = new PageSymbols();
+        ps.Systems = systems;
         ps.Scan = d.Raw != null || d.Bowed != null;   // (as Reader has it: the accidentals' reading weighs it too)
         if (weakDots != null) ps.WeakDots = weakDots;
         if (weakClefs != null) ps.WeakClefs = weakClefs;
@@ -278,7 +280,22 @@ static partial class Symbols
                 h.Grace = false;
                 if (h.OuterW < 0.9 * s) { h.L = Math.Round(h.X - 0.65 * s); h.R = Math.Round(h.X + 0.65 * s); h.OuterW = h.R - h.L + 1; }
             }
-        var graces =ps.Heads.Where(h => h.Grace && (h.Score > Detector.Threshold
+        // nor is a "grace head" as wide as the page's heads a grace note's: a grace note's head is drawn at
+        // about seven tenths of a head, a cue's at 0.63-0.8 (the ruler a cue's bar is told by, StaffEvents).
+        // An old print's heads, small and a little uneven, the detector takes for grace heads here and
+        // there (kinkel19-6's scan at 96 dpi, read 2.67 times up: eleven grace groups where the music has
+        // none; nineteen and more from a detector taught cues at 0.8-0.9, detector41 and 42)
+        if (ps.Detections != null && HeadWidth(ink, ps, s) is var headW && headW > 0)
+            foreach (var h in ps.Heads.Where(h => h.Grace && !h.Hollow && h.Score > Detector.Threshold).ToList())
+            {
+                double w = MiddleWidth(ink, h, s);
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 2 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
+                    Console.WriteLine($"grace head at {h.X:F0},{h.Y:F0} ({h.Score:F2}): {w / s:F2} wide on its middle rows, the page's heads {headW / s:F2}{(w < 0.85 * headW ? "" : ": a note")}");
+                if (w < 0.85 * headW) continue;
+                h.Grace = false;
+                if (h.OuterW < 0.9 * s) { h.L = Math.Round(h.X - 0.65 * s); h.R = Math.Round(h.X + 0.65 * s); h.OuterW = h.R - h.L + 1; }
+            }
+        var graces = ps.Heads.Where(h => h.Grace && (h.Score > Detector.Threshold
             || GraceHead(ink, h, s, narrowOnly: true) && ps.Detections?.Any(t => t.Class.StartsWith("stem_") && Math.Abs(t.X - h.X) < 1.2 * s && Math.Abs(t.Y - h.Y) < 4 * s) == true)).ToList();
         ps.Heads.RemoveAll(h => h.Grace);
         if (rulesRead) graces.AddRange(ps.Heads.Where(h => GraceHead(ink, h, s) && !graces.Any(g => Math.Abs(g.X - h.X) < 0.8 * s && Math.Abs(g.Y - h.Y) < 0.8 * s)).ToList());

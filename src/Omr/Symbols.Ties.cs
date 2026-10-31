@@ -241,10 +241,14 @@ static partial class Symbols
                 // own rule: a tie joins a note to the next one at its pitch. Within a bar the detector
                 // sees a tie's two ends; a lone start there is a glissando's line, chords001)
                 // (a second's head beside its chord's other heads is no note between)
-                // (the bar line: the detector's, or, where the ties over it dim it for the detector,
-                // tabi's 4th bar line at 0.41, a column dark through the staff clear of the two notes' stems)
+                // (the bar line: the layout's (Layout.FindBars: the rules' column test, or the detector's seen
+                // on every staff of the system -- tabi's 2nd bar line, which the ties over it dim to 0.50 for
+                // detector42 on the piano's staff, 0.64 for detector39), the detector's on this staff, or, where
+                // the ties over it dim it for the detector, tabi's 4th bar line at 0.41, a column dark through
+                // the staff clear of the two notes' stems)
                 double mid = (st.Lines[0].Top + st.Lines[^1].Bot) / 2.0;
-                bool barBetween = ps.Detections.Any(u => u.Class == "barline" && u.Score >= TrustScore && u.X > a.R && u.X < b.L && Math.Abs(u.Y - mid) < 3 * s)
+                bool barBetween = ps.Systems?.Any(sys => sys.Staves.Contains(st) && sys.Bars.Any(x => x > a.R && x < b.L)) == true
+                    || ps.Detections.Any(u => u.Class == "barline" && u.Score >= TrustScore && u.X > a.R && u.X < b.L && Math.Abs(u.Y - mid) < 3 * s)
                     || Enumerable.Range((int)(a.R + 0.6 * s), Math.Max(0, (int)(b.L - 0.6 * s) - (int)(a.R + 0.6 * s))).Any(x =>
                        {
                            int top = st.Lines[0].Top, bot = st.Lines[^1].Bot, dark = 0;

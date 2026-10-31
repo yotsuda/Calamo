@@ -14,7 +14,7 @@ static partial class Symbols
         // (a drum's cross head, plain or circled, times as a black head: its stem, beams and flags tell)
         // (a guitar's rhythm slash likewise: its stem, beams, flags and dots tell its duration, B3)
         // (a grace note's small head likewise, marked Grace: Find sets it apart, S21)
-        static bool IsHead(Detection t) => t.Class is "head_black" or "head_half" or "head_whole" or "head_x" or "slash_black" or "slash_hollow" or "grace_head";
+        static bool IsHead(Detection t) => t.Class is "head_black" or "head_half" or "head_whole" or "head_x" or "slash_black" or "slash_hollow" or "grace_head" or "grace_hollow";
         // one head seen as two kinds (the toner hollows a black head, and a half head's rim
         // looks filled): the likelier kind. Both taken, the black one's stem dropped the other
         // as a hollow head on a black chord's stem (tuplets009 on fill: head_half 0.75 against
@@ -42,18 +42,13 @@ static partial class Symbols
         {
             var t = seen;
             if (t.Class == "head_black" && rivals?.FirstOrDefault(u => Rivals(u, t) && Beats(u, t)) is Detection hollow) t = hollow;
-            bool slash = t.Class.StartsWith("slash_"), grace = t.Class == "grace_head";
-            // (a small head is a grace note's, black, or a cue's, which may be hollow: one class for both,
-            // its middle's ink tells -- the Eroica part's photographed cue half notes, bars 156 and 158)
+            bool slash = t.Class.StartsWith("slash_"), grace = t.Class is "grace_head" or "grace_hollow";
+            // (a small head is a grace note's or a cue's black head, grace_head, or a cue's half or whole
+            // note's, grace_hollow, a class of its own since detector42: the ink of its middle told them
+            // apart before, and a printer's uneven toner hollows a black one -- gen-cue-scan's ledger005
+            // and tuplets002 with detector41, cue eighths read as halves)
             bool cross = t.Class == "head_x", whole = t.Class == "head_whole";
-            // (the hole looked for about the detection's centre, a tenth of a space off it, and in a small
-            // square: a cue's half head on a line, Leland's narrow slanting hole a few pixels from the
-            // centre, measured 0.30 at the centre -- gen-cue's ledger003, a2 read as a4)
-            // (and on a ledger line, the line through the hole fills every such square: the paper about
-            // the middle, the line's rows left out -- gen-cue's tuplets004, a cue's a''2 read as a''4)
-            bool black = t.Class == "head_black" || cross || t.Class == "slash_black"
-                         || grace && new[] { -1, 0, 1 }.SelectMany(i => new[] { -1, 0, 1 }, (i, j) => InkCore(ink, t.X + i * 0.1 * s, t.Y + j * 0.1 * s, 0.09 * s)).Min() >= 0.3
-                                  && !(SmallHole(ink, t.X, t.Y, s) is var hole && hole.Line && hole.White >= 0.3);
+            bool black = t.Class is "head_black" or "slash_black" or "grace_head" || cross;
             if (!black && !whole && !grace && t.Class != "head_half" && t.Class != "slash_hollow") continue;
             if (det.Any(u => Rivals(u, t) && Beats(u, t))) continue;
             // (a note on seven ledger lines and more stands past Nearest's reach: piano-collide's
@@ -112,25 +107,6 @@ static partial class Symbols
         }
     }
 
-    // the share of a small head's middle (a quarter of a space either side, a fifth over and under) that
-    // is paper, the rows a line runs through left out (inked from nearly half a space left to as far right),
-    // and whether there were any
-    static (double White, bool Line) SmallHole(Img ink, double x, double y, double s)
-    {
-        int x0 = (int)Math.Round(x), y0 = (int)Math.Round(y), rx = (int)Math.Round(0.25 * s), ry = (int)Math.Round(0.2 * s), line = (int)Math.Round(0.45 * s);
-        int white = 0, all = 0;
-        bool any = false;
-        for (int yy = y0 - ry; yy <= y0 + ry; yy++)
-        {
-            if (yy < 0 || yy >= ink.H || x0 - line < 0 || x0 + line >= ink.W) continue;
-            bool through = true;
-            for (int xx = x0 - line; xx <= x0 + line && through; xx++) through = ink[xx, yy];
-            if (through) { any = true; continue; }
-            for (int xx = x0 - rx; xx <= x0 + rx; xx++) { all++; if (!ink[xx, yy]) white++; }
-        }
-        return (all == 0 ? 0 : (double)white / all, any);
-    }
-
     // the share of a square r out from (x, y) that is ink
     static double InkCore(Img ink, double x, double y, double r)
     {
@@ -170,7 +146,7 @@ static partial class Symbols
         // not widen again (an oval narrows to its top and bottom: a ledger line or a neighbour
         // touching it widens the run; two rows running wider, past a quarter space out: a scan's
         // ragged edge widens one row)
-        int Run(int x, int y) { int l = x, r = x; while (ink[l - 1, y] && x - l < 1.5 * s) l--; while (ink[r + 1, y] && r - x < 1.5 * s) r++; return r - l + 1; }
+        int Run(int x, int y) => InkRun(ink, x, y, s);
         int Edge(int x, int dy)
         {
             int y = y0, least = Run(x, y0);
@@ -191,14 +167,51 @@ static partial class Symbols
         }
         // (the middle rows' median: a slur through the head widens a few of them -- lied004's grace
         // notes under their slur)
-        var runs = new List<int>();
-        for (int y = y0 - c; y <= y0 + c; y++) if (ink[xm, y]) runs.Add(Run(xm, y));
-        if (runs.Count > 0) { runs.Sort(); w = runs[runs.Count / 2]; }
+        w = (int)MiddleWidth(ink, h, s);
         if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
             Console.WriteLine($"grace? head at {h.X:F0},{h.Y:F0}: {(yb - ya + 1) / s:F2} tall ({ya}-{yb}), {w / s:F2} wide at x {xm}");
         // (narrow only, its height left unread: a weak detection by a stem, its grace slur under it and
         // its slash over it joining it -- the ballade's acciaccatura, 1.35 tall, 0.85 wide)
         return (narrowOnly || yb - ya + 1 < 0.85 * s) && w < (narrowOnly ? 1.0 : 1.05) * s;
+    }
+
+    // the ink's run along row y through column x, up to a space and a half either way
+    static int InkRun(Img ink, int x, int y, double s)
+    {
+        int l = x, r = x;
+        while (l > 0 && ink[l - 1, y] && x - l < 1.5 * s) l--;
+        while (r + 1 < ink.W && ink[r + 1, y] && r - x < 1.5 * s) r++;
+        return r - l + 1;
+    }
+
+    /// <summary>
+    /// A head's width as the median run of ink along its middle rows (a fifth of a space over and
+    /// under its middle, through the middle of its edges): one row a slur or a neighbour widens, or
+    /// a taken-out staff line empties, does not tell. 0 where no row is inked.
+    /// </summary>
+    static double MiddleWidth(Img ink, Head h, double s)
+    {
+        int y0 = (int)Math.Round(h.Y), c = (int)Math.Round(0.2 * s);
+        int xm = (int)Math.Round(h.R - h.L > 0.6 * s ? (h.L + h.R) / 2 : h.X);
+        if (xm < 1 || xm + 1 >= ink.W || y0 - c < 0 || y0 + c >= ink.H) return 0;
+        var runs = new List<int>();
+        for (int y = y0 - c; y <= y0 + c; y++) if (ink[xm, y]) runs.Add(InkRun(ink, xm, y, s));
+        if (runs.Count == 0) return 0;
+        runs.Sort();
+        return runs[runs.Count / 2];
+    }
+
+    /// <summary>
+    /// The width of the page's black heads, the median of the full-size ones' MiddleWidth: the ruler
+    /// a small head is small by, measured as the small head is. (Not their edges L-R: a head whose
+    /// middle row runs under nine tenths of a space is given a head's usual width there, 1.3 spaces,
+    /// and an old print's slanting ovals all run 0.9 on any one row, kinkel19-6's scan -- against that
+    /// ruler every one of them looks small.) 0 under eight heads.
+    /// </summary>
+    static double HeadWidth(Img ink, PageSymbols ps, double s)
+    {
+        var widths = ps.Heads.Where(h => !h.Grace && !h.Hollow && !h.Slash && !h.Cross).Select(h => MiddleWidth(ink, h, s)).Where(w => w > 0).OrderBy(w => w).ToList();
+        return widths.Count >= 8 ? widths[widths.Count / 2] : 0;
     }
 
     /// <summary>

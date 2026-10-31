@@ -2,6 +2,35 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## detector42 を採った: 装飾音の幅の物差し、2 つの大きさで見た符頭を 1 つに、キューの白い符頭、点の列の小節線、旗の付け根（2026-10-31 深夜、前の節の次の一手 1・2）
+
+**現在地**: 検出器は **detector42**（`data/detector.onnx`、`tools/train-model/detector42.onnx` と同じ。80 クラス + `grace_hollow`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし、REQUESTS.md に新しい `fixed` はなし。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 4 は未解決）。終わりの check: 規則 OK（0 better・0 WORSE）、`check -Detector`（42）は better 45・**WORSE 79**（下。`-Accept` で基準値に）、種 **4/4**。`docs/eval-sets.tsv`・`dev-sets.tsv` は 42 + 今の規則の数字に写した。
+
+**読み手に入れた規則**（学習し直しなし。42 を採る前に 39 で確かめ、42 でも同じ規則）:
+1. **装飾音の幅の物差し**（`Symbols.cs`、`HeadWidth`/`MiddleWidth` in `Symbols.Heads.cs`）: 検出器の `grace_head`（閾値の上、黒）でも、中央の行のインクの幅の中央値が、その頁の黒い符頭の同じ測り方の中央値の 0.85 倍以上なら通常の符頭。**物差しは同じ測り方で**: 符頭の `L`-`R` は「中央の行が 0.9 間未満なら既定の 1.3 間」に置き換わるが、古い刷り（kinkel19-6 のスキャン、96 dpi を 2.67 倍）の斜めの楕円は 1 行あたり 0.9 間しかなく、既定の幅の物差しでは全部が小さく見えた（最初の版はこれで 19-6 の偽の装飾音 11 → 8 止まり）。行ごとの幅どうしなら 0.87 / 0.94 で通常の符頭。19-6 の偽の装飾音の組 11 → **0**（正解 0）、19-2 11 → 0（正解 2、見ていない）。
+2. **2 つの大きさで見た符頭を 1 つに**（`Detector.JoinSizes`、`Reader` が検出の直後に呼ぶ）: 同じ場所（0.3 間）の `head_black` と `grace_head` がどちらも閾値の下で、足すと閾値を超えるなら 1 つの符頭（高い方の種類、点数は和）。`head_half` と `grace_hollow` も同じ（`grace_hollow` は `WeakHalf` 0.25 まで拾い、合わさらなければ捨てる `IsWeakHollowGrace`）。42 は英雄の写真のキューの符頭（通常の 0.73）を `head_black` 0.33〜0.54 と `grace_head` 0.24〜0.56 に割って見ていて、どちらも落ちていた（39 は `head_black` 0.53〜0.95）。5 小節の c'''2 は `grace_hollow` 0.50 + `head_half` 0.37。
+3. **キューの白い符頭** `grace_hollow`（`Symbols.DetectedHeads`、前の節に書いた切り替え）: `grace_head` は黒、`grace_hollow` は白。真ん中のインクの検査と `SmallHole` は外した（削除）。
+4. **点の列は小節線ではない**（`Layout.FindBars`）: 検出器の小節線が確信 0.9 未満で、その列に検出器の付点があり、列が五線の上から下まで暗くなければ捨てる。gen-cue-scan の chords005 で 42 が付点つき和音の縦に並んだ 2 つの点を `barline` 0.50 と見て（単独の五線の段では何も問われずに採られていた）1 小節目が割れ、found 160 → 33 になっていた（前の節は「規則の小節線」と書いたが検出器の弱い小節線だった）。chords005 は 42 で 33 → 168（96.6%、39 は 160）。
+5. **旗の付け根**（`Symbols.Stems.FlagRuns`）: 符幹の右に付くインクの走りの最初が先端から 0.5 間より下から始まるなら旗ではない。英雄の写真のキューの c'''4( の右に始まるスラーを、孤立した装飾音の旗の数え方（検出器の `stem_0` が 0.9 未満なら インクで数える）が 1 本の旗と取って 8 分にしていた。
+6. **タイの小節線はレイアウトのもの**（`Symbols.Ties.DetectedTies`、`PageSymbols.Systems`）: 「左端があり、間に小節線があり、次の音が同じ高さ」のタイの規則の小節線に、`Layout.FindBars` が見つけた段の小節線（規則の列の検査、または検出器が段の全部の五線で見たもの）を足した。種 tabi-18 の 2 小節の `<cis fis>2.~` は、タイが上にかぶる小節線を 42 がピアノの五線で 0.50（39 は 0.64）としか見ず、`TrustScore` の下で規則が効かなくなっていた（種 4/4 → 3/4 → 4/4）。
+
+**42 を採った根拠**（HANDOFF の目安「開発用の台のスキャンが 39 に戻り、英雄の写真が 251 以上」）。比べる相手は 39 + 同じ規則（`out/pseudo2/d39b-*`、規則 1・4 の後。規則 2・3・5・6 は 39 の読みを変えない: 英雄 251/288 のまま）:
+- 開発用の台: 39 + 規則 スキャン 11065 → **11108**（+43: 19-6 +24、19-2 +13、19-4 +3、19-5 +3。0 worse）、浄書 11700。42 + 規則 スキャン **11116**、浄書 11693（19-6 −10、10-1-ms −6、10-2-scan +9）。
+- 評価台（42 + 規則 vs 39 + 規則）: スキャン 25179 → **25204**（+25）、ms 11803 → 11790（−13）、その他 17993 → 17971（−22）。**スラーの始まり found はスキャン 553 → 534、ms 479 → 467、その他 329 → 311**（42 の学習の揺れ。前の節の d42 でも同じ）。タイの誤り 37 → 28、15 → 6。台ごとの大きな揺れは前の節の「分かったこと 2」の型（lang36-1-ms −20、lang36-2-ms −17、holmes16-scan −18、chaminade-scan −16 / kinkel10-3-ms +20、kinkel7-2-scan +19、kinkel7-4-scan +17、dl-scan +16）。
+- 英雄（`readeroica.ps1`）: 写真 39 = 251（todo 13）、42 は 243 → 247（規則 2）→ 249（`grace_hollow` の弱い拾い）→ **251（todo 11）**（規則 5）。PDF 39 = 288、42 = **291**（todo 0）。
+- gen-cue（42）: basic 99.8、chords 99.8、ledger 99.6、slurs 99.2、tuplets 99.0（39: 98.7 / 99.4 / 99.2 / 99.5 / 99.0）。gen-cue-scan: basic 99.8、chords **96.8**（39: 93.8）、ledger 98.2（94.4）、slurs 99.1、tuplets 95.1（92.6）。
+- `check -Detector`: 39 + 規則 1〜5 は 0 better・0 WORSE（規則は生成譜を変えない）。42 は better 45・**WORSE 79**。better は fill の chords 99.88 → 100、meters、ties（genRS 99.69 → 100）、genLo7 basic 99.44 → 99.72、textA など。**WORSE の大半はスラー**: `sym*.slurs.slur`（取りこぼし）gen 13 → 17、genS 6 → 15、genR 12 → 17、genRS 11 → 24、genF 10 → 16、symA.lied 4 → 6、`gen*.slurs.recall` 99.95 → 99.78 など（スラーの端を見落として音符の長さが崩れる）。ほかは fill の head.beams/head.stem が 1〜3 件ずつ、`ver.ties.spare` 0 → 4、trillWS 100 → 99.5、bohemian 99.9 → 99.8。**42 はスラーの端を 39 より見ない**（評価台のスラーの始まり found −49 と同じ性質。学習の揺れではなく 42 の癖）。これを受け入れて採った（次の一手 1）。**戻すなら** `git checkout <前のコミット> -- data/detector.onnx docs/baseline-detector.json docs/eval-sets.tsv docs/dev-sets.tsv` → ビルド（規則 1〜6 は 39 でもそのまま使える: 39 の読みは英雄 251/288、開発用の台 11108、評価台 25179 で変わらない）。
+
+**分かったこと**:
+1. `check -Detector` と `run-gen -OmrArgs --detector`、`seeds.ps1` は **exe の横の `detector.onnx`** を使う（`--detector` に path を渡さないと `AppContext.BaseDirectory`）。csproj が `data/detector.onnx` をビルド時に写す（`PreserveNewest`）ので、**模型を入れ替えたらビルドし直す**（または bin に写す）。今回は最初の `check -Detector` が 39 のまま走った。`evalmodel.ps1`・`readeroica.ps1` は path を渡すので関係ない。
+2. 検出器は符頭の大きさの境目で確信を 2 つのクラスに割る（規則 2）。学習の台の大きさの範囲の外（写真のキュー 0.73、42 は 0.63〜0.82 で学習）で起きる。
+3. 古い刷りの斜めの楕円の符頭は行ごとの幅が 0.9 間で、既定の幅に置き換わる（規則 1）。`StaffEvents` のキューの小節の判定（`L`-`R` の中央値の 0.85 倍）も同じ物差しの偏りを持つが、キューは通常より小さい側なので今のところ害はない。
+
+**次の一手**:
+1. **42 のスラーの減り**（評価台のスラーの始まり found −49、浄書でも）: 42 の `slur_l`/`slur_r` の点数を 39 と比べる（`--detections`、`tools/train-model/slurcount.py` の窓）。学習の揺れなら次の学習し直し（キューの台 + `--leapslurs` の台を増やす）で戻す。
+2. 前の節の 3（英雄の写真の書体、弱い `tie_l` の続き、弱い端の閾値 0.25、7-1 の 20 小節の a''）。
+3. Lily# 側へ: Release の lysc をビルドし直してほしい（REQUESTS 12 の行に書いたまま）。それまで `gen-cues.ps1 -Lysc` に scratch のビルドを渡す。
+
 ## キューの大きさを揺らして学習し直す: detector41・42 は採らず、正解はソースの位置で、`grace_hollow` クラス（2026-10-31 夜、前の節の次の一手 1）
 
 **現在地**: 検出器は **detector39 のまま**（`data/detector.onnx`）。規則の check は頭と正解側を直した後の 2 回とも OK（0 better・0 WORSE）、終わりの `check -Detector`（39 のまま、読み手の変更の後）も OK（0 better・0 WORSE）、種 4/4。新しい種はなし（4/4 triage 済み）、REQUESTS.md に新しい `fixed` はなし。**Lily# の Release の lysc は 14:26 のまま**（REQUESTS 12・13 の前）。このセッションは Lily# `112813183` を `git worktree add` で scratch に取って lysc をビルドし（確かめたら worktree は消した）、**`run-gen.ps1 -Lysc <exe>`・`gen-cues.ps1 -Lysc <exe>`** で台を描いた（今回足した引数。既定は Release）。

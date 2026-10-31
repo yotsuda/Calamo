@@ -84,6 +84,17 @@ static partial class Layout
                 i = j + 1;
                 double x = group.Average(t => t.X);
                 var onStaves = group.Select(t => sys.Staves.OrderBy(st => Math.Abs(t.Y - st.Mid)).First()).Distinct().ToList();
+                bool Dark(Staff st) => Enumerable.Range((int)(x - 0.3 * s), (int)(0.6 * s) + 1).Any(cx => ColFrac(d, cx, st, 2) >= 0.9);
+                // (a dotted chord's dots, one over the other in a column, are no barline: seen as one at 0.50
+                // on a single staff, where nothing else is asked of it -- gen-cue-scan's chords005 with
+                // detector42, its first bar cut after <d'' e''>8. A barline is a line: its column is dark
+                // from the top line to the bottom line, and the dots' is not)
+                if (group.Max(t => t.Score) < Symbols.SureScore
+                    && onStaves.Any(st => !Dark(st) && det.Any(t => t.Class == "dot" && Math.Abs(t.X - x) < 0.3 * s && Math.Abs(t.Y - st.Mid) < 2.5 * s)))
+                {
+                    if (Signatures.Verbose) Console.WriteLine($"    barline at x {x:F0} (system {sys.Index + 1}): seen at {group.Max(t => t.Score):F2} on a dot's column, not dark: dropped");
+                    continue;
+                }
                 if (onStaves.Count < sys.Staves.Count && group.Max(t => t.Score) < Symbols.SureScore)
                 {
                     // seen on some staves only, and not surely: it fills in what the rules read nothing
@@ -95,7 +106,6 @@ static partial class Layout
                     // at 0.77 on the voice's and the right hand's staves, the left hand's beamed group
                     // starting right beside it, its stem's tip five pixels off at the bottom line --
                     // a stem from a head inside the staff covers only part of it)
-                    bool Dark(Staff st) => Enumerable.Range((int)(x - 0.3 * s), (int)(0.6 * s) + 1).Any(cx => ColFrac(d, cx, st, 2) >= 0.9);
                     bool Spanned(Staff st) => onStaves.Count >= 2 && Dark(st);
                     bool stemInstead = sys.Staves.Where(st => !onStaves.Contains(st)).Any(st => tips.Any(p => p.St == st && Math.Abs(p.T.X - x) < 0.5 * s) && !Spanned(st));
                     if (group.Max(t => t.Score) < Symbols.TrustScore || stemInstead) continue;
