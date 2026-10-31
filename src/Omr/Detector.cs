@@ -116,6 +116,9 @@ static class Detector
     // with --vary), a notch at a system's start at 0.47, and the * of piano006's page cut dark to black
     // and white at 0.29-0.48
     public static double WeakPedal = 0.1, WeakStar = 0.2;
+    // A slur's end likewise, taken only as the other end of a slur whose one end is sure
+    // (Symbols.DetectedSlurs): an old print's slur ends are seen at 0.2-0.5 as often as above
+    public static double WeakSlur = 0.2;
     public static bool IsWeakPedal(Detection t) => t.Class is "ped_r" or "ped_up" or "ped_notch" && t.Score <= Threshold;
     // A rhythm slash likewise, kept apart (Symbols.Find's weakSlashes) and taken only on a one-line
     // rhythm staff, standing alone, where the ink leans as a slash does: leadsheet-collide's last
@@ -235,6 +238,7 @@ static class Detector
         int dotClass = Array.IndexOf(Classes, "dot"), blackClass = Array.IndexOf(Classes, "head_black"), graceClass = Array.IndexOf(Classes, "grace_head"), halfClass = Array.IndexOf(Classes, "head_half");
         int tipClass = Array.IndexOf(Classes, "hairpin_tip"), openClass = Array.IndexOf(Classes, "hairpin_open");
         int pedEndClass = Array.IndexOf(Classes, "ped_r"), pedUpClass = Array.IndexOf(Classes, "ped_up"), notchClass = Array.IndexOf(Classes, "ped_notch");
+        int slurL = Array.IndexOf(Classes, "slur_l"), slurR = Array.IndexOf(Classes, "slur_r");
         int slashClass = Array.IndexOf(Classes, "slash_black"), slashHollowClass = Array.IndexOf(Classes, "slash_hollow");
         int ottFirst = Array.IndexOf(Classes, "ott_8va");   // (the four signs' classes follow one another)
         int segnoClass = Array.IndexOf(Classes, "segno"), trillClass = Array.IndexOf(Classes, "orn_trill");
@@ -256,6 +260,7 @@ static class Detector
                         : c == halfClass ? Math.Min(Threshold, WeakHalf)
                         : c == tipClass || c == openClass ? Math.Min(Threshold, WeakHairpin)
                         : c == pedEndClass || c == pedUpClass || c == notchClass ? Math.Min(Threshold, WeakPedal)
+                        : c == slurL || c == slurR ? Math.Min(Threshold, WeakSlur)
                         : c == slashClass || c == slashHollowClass ? Math.Min(Threshold, WeakSlash)
                         : c >= ottFirst && c < ottFirst + 4 ? Math.Min(Threshold, WeakOttavaSeen)
                         : c == segnoClass ? Math.Min(Threshold, WeakSegno)

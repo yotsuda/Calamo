@@ -303,6 +303,14 @@ sealed class Verify
             }
         // (and a weak dot in the column of a sure one: the other voice's, lined up with a chord's)
         foreach (var t in Symbols.ColumnDots(res.Sym, s)) list.Add(("dot", t.X, t.Y));
+        // (and a weak slur's start, "slur_l?": the reader takes one where a sure end closes it
+        // (Symbols.DetectedSlurs), so it bears out a slur drawn there, and asks for none -- Unmatched)
+        foreach (var t in res.Sym.Detections.Where(t => t.Class == "slur_l" && t.Score >= Detector.WeakSlur && t.Score < Detector.Threshold))
+        {
+            if (!NoteBy(headPts, t.X, t.Y, s)) continue;
+            var h = headPts.Where(h => Math.Abs(h.Y - t.Y) < 6 * s).OrderBy(h => Math.Abs(h.X - (t.X - 0.2 * s))).FirstOrDefault();
+            list.Add(("slur_l?", h == default ? t.X : h.X, t.Y));
+        }
         // (a beat repeat the reader wrote out shows its group again: the group's heads, stems and dots
         // moved onto the mark -- not its accidentals, which hold through the bar and are not drawn again)
         var shown = list.ToList();
@@ -832,6 +840,14 @@ sealed class Verify
             int j = rb.FindIndex(t => t.Item1 == "tie_l");
             if (j >= 0) { ra.RemoveAt(i); rb.RemoveAt(j); }
         }
+        // a slur the reading drew where the input shows its start only weakly; a weak start alone is no difference
+        for (int i = ra.Count - 1; i >= 0; i--)
+        {
+            if (ra[i].Item1 != "slur_l") continue;
+            int j = rb.IndexOf(("slur_l?", ra[i].Item2));
+            if (j >= 0) { ra.RemoveAt(i); rb.RemoveAt(j); }
+        }
+        rb.RemoveAll(t => t.Item1 == "slur_l?");
         return (ra, rb);
     }
 

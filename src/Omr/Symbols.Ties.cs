@@ -315,8 +315,13 @@ static partial class Symbols
     /// </summary>
     static void DetectedSlurs(PageSymbols ps, Img d, double s)
     {
-        // (a slur_r DetectedTies took for a tie's end ends no slur)
-        var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= TrustScore && !ps.TieEndsAsSlur.Contains(t)).ToList();
+        // (a slur_r DetectedTies took for a tie's end ends no slur; a weak end, 0.2 up, only pairs with
+        // a sure one)
+        var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= Detector.WeakSlur && !ps.TieEndsAsSlur.Contains(t)).ToList();
+        bool Sure(Detection t) => t.Score >= TrustScore;
+        // (nor a weak start by a grace note: Lily#'s slur from an acciaccatura to its note, which
+        // the start would give to the note before it, gen-grace's basic002)
+        ends.RemoveAll(t => !Sure(t) && t.Class == "slur_l" && ps.Graces.Any(g => Math.Abs(g.X - t.X) < 1.5 * s && Math.Abs(g.Y - t.Y) < 2.5 * s));
         // a tie's start that tied nothing (DetectedTies: no head at its place after it, or a slur's
         // end there) is a slur's start the detector took for a tie: the short arc from a chord's top
         // note down to the next note, tabi's 8th bar. It starts a slur only to an end found for it
@@ -402,49 +407,66 @@ static partial class Symbols
             var lefts = OnePerChord(g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t)));
             var rights = OnePerChord(g.Where(t => t.Class == "slur_r" && at.ContainsKey(t)));
             // the ends by no note: a broken slur's, at the staff's two edges
-            bool hangsRight = g.Any(t => t.Class == "slur_r" && !at.ContainsKey(t) && st.Right - t.X < 3 * s);
-            bool hangsLeft = g.Any(t => t.Class == "slur_l" && !at.ContainsKey(t) && t.X - st.Left < 12 * s);
+            bool hangsRight = g.Any(t => t.Class == "slur_r" && Sure(t) && !at.ContainsKey(t) && st.Right - t.X < 3 * s);
+            bool hangsLeft = g.Any(t => t.Class == "slur_l" && Sure(t) && !at.ContainsKey(t) && t.X - st.Left < 12 * s);
             var used = new HashSet<Detection>();
             var open = new List<Detection>();
-            foreach (var l in lefts)
+            double X(Detection t) => at[t].Chord.Average(h => h.X);
+            // (a weak end and a sure one with a tuplet's number between them at their height, or by
+            // the weak end, are a bracket's two ends: MuseScore's triplet brackets under kinkel19-6's
+            // right hand, the right hook seen as a slur's end at 0.62-0.71, the left end or the number
+            // itself at 0.27-0.42)
+            // And a bracket with no number, MuseScore's after the first two: a straight thin line from
+            // one end to the other through the middle of the span, where a slur bulges away from its
+            // notes (the middle fifth of it, ink within 0.15 space of the line between the two ends
+            // in seven of ten columns, and none 0.3-2 spaces beyond it in half of them)
+            bool Bracket(Detection l, Detection r)
             {
-                var (a, above) = at[l];
-                double ax = a.Average(h => h.X);
+                if (ps.Detections.Any(u => u.Class.StartsWith("tuplet_") && u.Score >= TrustScore
+                    && u.X > l.X - s && u.X < r.X + s && Math.Abs(u.Y - (l.Y + r.Y) / 2) < 1.5 * s)) return true;
+                int x0 = (int)(l.X + 0.4 * (r.X - l.X)), x1 = (int)(l.X + 0.6 * (r.X - l.X));
+                int sign = at[l].Above ? -1 : 1, on = 0, beyond = 0, n = 0;
+                for (int x = Math.Max(0, x0); x <= Math.Min(d.W - 1, x1); x++)
+                {
+                    double y = l.Y + (r.Y - l.Y) * (x - l.X) / (r.X - l.X);
+                    bool Ink(double a, double b)
+                    {
+                        for (int yy = (int)Math.Min(a, b); yy <= (int)Math.Max(a, b); yy++)
+                            if (yy >= 0 && yy < d.H && d[x, yy]) return true;
+                        return false;
+                    }
+                    n++;
+                    if (Ink(y - 0.15 * s, y + 0.15 * s)) on++;
+                    if (Ink(y + sign * 0.3 * s, y + sign * 2 * s)) beyond++;
+                }
+                return n > 0 && on >= 0.7 * n && beyond < 0.5 * n;
+            }
+            foreach (var l in lefts.Where(Sure))
+            {
+                var a = at[l].Chord;
+                double ax = X(l);
                 // (a start the detector took for a tie's is a short arc, to a note or two on: it takes
                 // no end bars away, which is another slur's, kinkel19-2's 42nd bar, the Zigeuner's 18th)
-                var r = rights.Where(r => !used.Contains(r) && at[r].Chord != a && at[r].Chord.Average(h => h.X) > ax && at[r].Above == above
-                                          && (!fromTie.Contains(l) || at[r].Chord.Average(h => h.X) - ax < 12 * s))
+                var r = rights.Where(r => Sure(r) && !used.Contains(r) && at[r].Chord != a && X(r) > ax && at[r].Above == at[l].Above
+                                          && (!fromTie.Contains(l) || X(r) - ax < 12 * s))
                               .OrderBy(r => r.X).FirstOrDefault();
-                // (an arc from a chord to the next one on the staff, the same notes and nothing between, is
-                // a tie whatever the detector called its two ends: a slur joins different notes. Brandt's
-                // song as MuseScore draws it, a''4.( a''8) four times for a''4.~ a''8. Not when the second
-                // has a sign: the same place, another note, Brandt's other song's a'8( ais'8). A second
-                // voice's heads between, stemmed the other way on the far side, are no note between.
-                // And only an arc that leaves the head from its side, as a tie does: Lily#'s slur from a
-                // stemmed note starts over it, the slurs suite's c4.( c8), 11 of 13 there 0.05-0.8 space
-                // inside the head's right edge, the real prints' ties 0.3-0.6 past it)
-                bool OtherVoice(Head o) => a[0].HasStem && o.HasStem && o.Up != a[0].Up && (a[0].Up ? o.Y > a.Max(h => h.Y) : o.Y < a.Min(h => h.Y));
-                if (r != null && !fromTie.Contains(l) && at[r].Chord is var b && b.Count == a.Count && l.X > a.Max(h => h.R)
-                    && a.Select(h => h.Pos).Order().SequenceEqual(b.Select(h => h.Pos).Order()) && b.All(h => h.Acc == null)
-                    && !ps.Heads.Any(o => o.St == st && !a.Contains(o) && !b.Contains(o) && !OtherVoice(o) && o.X > a.Max(h => h.X) + 0.5 * s && o.X < b.Min(h => h.X) - 0.5 * s))
-                {
-                    used.Add(r);
-                    foreach (var h in a) h.Tie = true;
-                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to the next chord, the same notes at {b[0].X:F0}: a tie");
-                }
-                else if (r != null && Sung(st, a, at[r].Chord) is int n)
-                {
-                    used.Add(r);
-                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0}: each of its {n} notes has its own syllable, a tuplet's arc");
-                }
-                else if (r != null)
-                {
-                    used.Add(r);
-                    foreach (var h in a) h.SlurStart = true;
-                    foreach (var h in at[r].Chord) h.SlurEnd = true;
-                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0},{at[r].Chord[0].Y:F0} ({r.Score:F2}), {(above ? "over" : "under")}");
-                }
+                if (r != null) Pair(l, r);
                 else if (!fromTie.Contains(l)) open.Add(l);
+            }
+            // a sure start with no sure end takes a weak one: the detector sees an old print's slur ends
+            // at 0.2-0.5 as often as above (the development set's scans, 122 slurs placed: both ends
+            // sure 34, one sure and the other weak 48 more). The first after it on its side, before the
+            // next sure start there; not the staff's last start when a slur runs on from it to the edge
+            foreach (var l in open.ToList())
+            {
+                if (hangsRight && l == open[^1]) continue;
+                double ax = X(l);
+                double next = lefts.Where(o => Sure(o) && o != l && at[o].Above == at[l].Above && X(o) > ax).Select(X).DefaultIfEmpty(double.MaxValue).Min();
+                var r = rights.Where(r => !Sure(r) && !used.Contains(r) && at[r].Chord != at[l].Chord && X(r) > ax && X(r) < next && at[r].Above == at[l].Above && !Bracket(l, r))
+                              .OrderBy(r => r.X).FirstOrDefault();
+                if (r == null) continue;
+                Pair(l, r);
+                open.Remove(l);
             }
             // (only the last start left open can run on to the edge)
             bool ranOn = false;
@@ -460,14 +482,60 @@ static partial class Symbols
             // Only the staff's first end can close it, one no start before it on its side has taken
             if (hangsLeft || carried.GetValueOrDefault(st.Part))
             {
-                var r = rights.FirstOrDefault();
-                if (r != null && !used.Contains(r) && !lefts.Any(l => l.X < r.X && at[l].Above == at[r].Above))
+                var r = rights.FirstOrDefault(Sure);
+                if (r != null && !used.Contains(r) && !lefts.Any(l => Sure(l) && l.X < r.X && at[l].Above == at[r].Above))
                 {
+                    used.Add(r);
                     foreach (var h in at[r].Chord) h.SlurEnd = true;
                     if (Debug(r)) Console.WriteLine($"slur_r at {r.X:F0},{r.Y:F0} ({r.Score:F2}): ends a slur from the system before");
                 }
             }
             carried[st.Part] = ranOn;
+            // a sure end no start took takes a weak start: the last before it on its side, after the
+            // last sure end there
+            foreach (var r in rights.Where(r => Sure(r) && !used.Contains(r)))
+            {
+                double bx = X(r);
+                double last = rights.Where(o => Sure(o) && o != r && at[o].Above == at[r].Above && X(o) < bx).Select(X).DefaultIfEmpty(double.MinValue).Max();
+                var l = lefts.Where(l => !Sure(l) && !used.Contains(l) && at[l].Chord != at[r].Chord && X(l) < bx && X(l) > last && at[l].Above == at[r].Above
+                                         && !lefts.Any(o => Sure(o) && at[o].Above == at[r].Above && X(o) > X(l) && X(o) < bx) && !Bracket(l, r))
+                             .OrderBy(l => l.X).LastOrDefault();
+                if (l != null) { used.Add(l); Pair(l, r); }
+            }
+            void Pair(Detection l, Detection r)
+            {
+                var (a, above) = at[l];
+                double ax = a.Average(h => h.X);
+                // (an arc from a chord to the next one on the staff, the same notes and nothing between, is
+                // a tie whatever the detector called its two ends: a slur joins different notes. Brandt's
+                // song as MuseScore draws it, a''4.( a''8) four times for a''4.~ a''8. Not when the second
+                // has a sign: the same place, another note, Brandt's other song's a'8( ais'8). A second
+                // voice's heads between, stemmed the other way on the far side, are no note between.
+                // And only an arc that leaves the head from its side, as a tie does: Lily#'s slur from a
+                // stemmed note starts over it, the slurs suite's c4.( c8), 11 of 13 there 0.05-0.8 space
+                // inside the head's right edge, the real prints' ties 0.3-0.6 past it)
+                bool OtherVoice(Head o) => a[0].HasStem && o.HasStem && o.Up != a[0].Up && (a[0].Up ? o.Y > a.Max(h => h.Y) : o.Y < a.Min(h => h.Y));
+                if (!fromTie.Contains(l) && at[r].Chord is var b && b.Count == a.Count && l.X > a.Max(h => h.R)
+                    && a.Select(h => h.Pos).Order().SequenceEqual(b.Select(h => h.Pos).Order()) && b.All(h => h.Acc == null)
+                    && !ps.Heads.Any(o => o.St == st && !a.Contains(o) && !b.Contains(o) && !OtherVoice(o) && o.X > a.Max(h => h.X) + 0.5 * s && o.X < b.Min(h => h.X) - 0.5 * s))
+                {
+                    used.Add(r);
+                    foreach (var h in a) h.Tie = true;
+                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to the next chord, the same notes at {b[0].X:F0}: a tie");
+                }
+                else if (Sung(st, a, at[r].Chord) is int n)
+                {
+                    used.Add(r);
+                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0}: each of its {n} notes has its own syllable, a tuplet's arc");
+                }
+                else
+                {
+                    used.Add(r);
+                    foreach (var h in a) h.SlurStart = true;
+                    foreach (var h in at[r].Chord) h.SlurEnd = true;
+                    if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0},{at[r].Chord[0].Y:F0} ({r.Score:F2}), {(above ? "over" : "under")}");
+                }
+            }
         }
     }
 
