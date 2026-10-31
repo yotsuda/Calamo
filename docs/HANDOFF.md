@@ -2,6 +2,40 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## キューの大きさを揺らして学習し直す: detector41・42 は採らず、正解はソースの位置で、`grace_hollow` クラス（2026-10-31 夜、前の節の次の一手 1）
+
+**現在地**: 検出器は **detector39 のまま**（`data/detector.onnx`）。規則の check は頭と正解側を直した後の 2 回とも OK（0 better・0 WORSE）、終わりの `check -Detector`（39 のまま、読み手の変更の後）も OK（0 better・0 WORSE）、種 4/4。新しい種はなし（4/4 triage 済み）、REQUESTS.md に新しい `fixed` はなし。**Lily# の Release の lysc は 14:26 のまま**（REQUESTS 12・13 の前）。このセッションは Lily# `112813183` を `git worktree add` で scratch に取って lysc をビルドし（確かめたら worktree は消した）、**`run-gen.ps1 -Lysc <exe>`・`gen-cues.ps1 -Lysc <exe>`** で台を描いた（今回足した引数。既定は Release）。
+
+**作ったもの**（`1f66f70` と次のコミット）:
+- **正解はソースの位置で** (`SvgTruth.TGlyph.Cue`): `.lys` の `cue { … }` の中に `data-pos` があるグリフはキューのもので、大きさによらず `Small`（`Full` ではない）。`CueSpans` が `cue {` から対応する `}` までを拾う（`//` コメントは飛ばす。スラーの `SlurEnd` と同じ作り）。`--export-boxes` はキューの黒い符頭を `grace.head`、**2 分・全音符の符頭を `grace.hollow`**、臨時記号・付点・休符は通常の名前で書く。`cueSize -2` × `NoteHead.scale 1.15` = 0.91 の符頭（前は `Full`）が 24/24 `grace.head` になるのを手で確かめた。
+- **生成器**: `--cues` で曲ごとに `cueSize` を別の乱数（種 + 20）で引き、`--vary` の **同じ `layout { }` に混ぜて**書く（`layout` を 2 つ書くと後の方だけが効く: LYS4005。`Writer.Style` は文字列ではなく paper・layout の項目の組に）。**−4 か −3 だけ**（0.63・0.71、`NoteHead.scale` を掛けて 0.82 まで。−2 = 0.79〜0.91 は detector41 で古い刷りの通常の符頭と見分けがつかなくなった、下）。
+- **検出器のクラス `grace_hollow`**（`dataset.py`・`Detector.Classes` の末尾、小さい 2 分・全音符の符頭。符幹が全音符か 2 分かを決める、`slash_hollow` と同じ）。読み手の切り替え（`grace_head` は黒、`grace_hollow` は白、真ん中のインクの検査と `SmallHole` を外す）は**試して戻した**: 39 にはこのクラスがなく、キューの 2 分音符（gen-cue の ledger003、英雄の 156・158 小節）を 4 分に読んでしまう。採る模型ができたときに `Symbols.DetectedHeads` で入れる（数行）。
+- `tools/train-model/evalmodel.ps1`（評価台・開発用の台を候補の模型で読む、`out/pseudo2/<tag>-*`）と `readeroica.ps1`（英雄のパート譜を候補の模型で読む、`out/eroica/<tag>`）: これまで scratchpad に置いていた台本を tools に移した。切り出しは `cropbar.py`（評価台）のほか、生成譜用の `cropgen.py` は scratchpad のみ。
+
+**detector41** = 39 の作り + `cues2.npz*2`（キュー −4・−3・−2、999 頁、`grace_head` 8199。台本は scratchpad の `train41.cmd`、1 回目は npz の読み込みで **MemoryError**: 空きが 35 GB ほど要る。check を同時に走らせない、`dotnet build-server shutdown`）:
+- 検出器単体（39 → 41、−2 入りの `eval-cue*`）: `grace_head` きれい 84.6 → **98.4**、劣化版 70.5 → **87.8**、写真 73.1 → **98.1**。`eval-scan`・`eval-fill`・`eval-ls-scan` は同じ。
+- 読み手（gen-cue、39 → 41）: basic 98.9 → 99.8、chords 99.7 → 100、ledger 98.6 → 99.4、tuplets 98.5 → 100、slurs 99.5。劣化版 basic 98.7 → 99.8、chords 93.7 → 95.9、**ledger 97.9 → 96.3、tuplets 97.3 → 94.3**（ledger005・tuplets002、どちらも `cueSize -2`: 印刷の汚し `--fill` でキューの黒い符頭に白い穴が開き、`grace_head` の真ん中のインクの検査が「白い符頭」と取って e''8 → e''2。39 はこれらを `head_black` と見ていたので検査を通らなかった。→ `grace_hollow` クラスの理由）。
+- 実譜（`out/pseudo2/d41-*`）: 評価台 音 スキャン 25174 → **25080**（−94）、浄書 +2、その他 −7。開発用の台 スキャン 11065 → **10969**（−96: kinkel19-6 −35、19-2 −34）。**原因は装飾音の読み過ぎ**: 19-6 の `grace`/`appoggiatura` の組が 39 の 11 → 41 の 19、19-2 が 11 → 16（正解はそれぞれ 0 と 2。96 dpi の古い刷りで、1 間 10.5 px を 2.67 倍に拡大して読む台）。0.79〜0.91 のキューの符頭を `grace_head` と教えると、古い刷りの小さめの通常の符頭と形で見分けられない。英雄: 写真 251 → **246**（todo 13 → 18）、PDF 288 → 287。
+- **採らない**。
+
+**detector42** = 41 の作り + `grace_hollow`、キューは −4・−3（`cues2.npz`: `grace_head` 7424、`grace_hollow` 775。台本 `train42.cmd`、48〜61 秒/エポック):
+- 検出器単体（`eval-cue*` は作り直したので 39・41 とは比べられない: `train.py eval` は古い模型を新しいクラスの npz に掛けられない、size mismatch）: `eval-cue` `grace_head` **100**、`grace_hollow` 88.9（16/18）、全体 99.7。劣化版 94.9 / 77.8（余分 19）、全体 99.3。写真 90.5 / **44.4**、全体 98.2。`eval-scan`・`eval-ls-scan` は 39・41 と同じ。
+- 読み手（新しい gen-cue、39 → 42）: basic 98.9 → 99.8、chords 99.4 → 99.8、ledger 98.6 → 99.6、tuplets 98.3 → 99.8、slurs 99.5 → 99.2。劣化版 basic 98.7 → 99.8、**chords 94.6 → 76.7**（chords005 だけ: 極端に汚れた頁で余分な小節線 1 本（`sym-diffs` の `barline extra at 1104,342`、検出器の小節線ではなく規則の）が 1 小節目に入り、12 小節が全部ずれて found 160 → 33）、ledger 97.7 → 97.9、tuplets 95.6、slurs 99.1。
+- 実譜（`out/pseudo2/d42-*`）: 評価台 音 スキャン 25174 → **25181**（+7）、浄書 24802 → **24773**（−29）、その他 −6。スラーの始まり found スキャン 553 → 534、浄書 808 → 778。タイ スキャン 279 → 272。開発用の台 スキャン 11065 → **10995**（−70: **19-6 −37（装飾音の組 11 → 23）**、19-1 −21、19-2 −14、19-5 −13）、浄書 −7。英雄: 写真 251 → **243**（todo 19）、**PDF 288 → 291**。
+- **採らない**（効いたのはキューの生成譜と英雄の PDF だけで、写真と古い刷りが下がる）。`tools/train-model/detector41.onnx`・`detector42.onnx`（`.pt` も）は残した（git は無視）。
+
+**分かったこと**:
+1. キューの台で学習し直すと、古い刷り（kinkel19-x のスキャン）の通常の符頭を装飾音と見る。39 でも 19-6 に偽の装飾音の組が 11 ある（正解 0）ので、**読み手の規則の候補**: 検出器の `grace_head` でも、幅がその頁の黒い符頭の幅の中央値に近ければ（キューの小節の判定と同じ物差し、0.85 倍以上）通常の符頭。開発用の台で直してよい。
+2. 検出器の点数に合わせた規則の分だけ、学習し直すと実譜が下がる（10-27 の −293 と同じ型。40・41・42 とも holmes16 −18〜45、kinkel10-3-ms +20、kinkel7-4-scan +17〜20 が共通）。
+3. `train.py` の `load` は npz を全部メモリに広げる（35 GB ほど）。
+4. 英雄の写真の残りは 42 でも良くならない（243）。書体の件（10-31 の detector40 の節の次の一手 1）はそのまま。
+
+**次の一手**:
+1. **装飾音の幅の規則**（分かったこと 1）を読み手に入れ、開発用の台（`run-audiveris.ps1 -Dev -Reuse`）で 39 の偽の装飾音が減るのを確かめる。それから **42 を規則つきで読み直す**（`tools/train-model/evalmodel.ps1 -Model tools/train-model/detector42.onnx -Tag d42b`、`readeroica.ps1 -Model … -Tag d42b`）: 開発用の台のスキャンが 39 に戻り、英雄の写真が 251 以上なら 42 を採る（`Symbols.DetectedHeads` の切り替え: `grace_head` は黒、`grace_hollow` は白、インクの検査と `SmallHole` を外す → `data/detector.onnx` → `check -Detector`（学習の揺れの WORSE を見る）→ `docs/*-sets.tsv` を写す → `tools/seeds.ps1`）。
+2. 42 の chords005（gen-cue-scan）の余分な小節線（規則の小節線。42 固有か、39 でも出る型かは見ていない）。
+3. 前の節の 2・3（英雄の写真の書体、弱い `tie_l` の続き、弱い端の閾値 0.25、7-1 の 20 小節の a''）。
+4. **Lily# 側へ**: Release の lysc をビルドし直してほしい（REQUESTS 12 の行に書いたまま）。それまで `gen-cues.ps1 -Lysc` に scratch のビルドを渡す。
+
 ## REQUESTS 11・12・13 を新しい lysc で確かめて done に、gen-ott とキューの台を描き直した（2026-10-31 夕、前の節の次の一手 0）
 
 **現在地**: 検出器は **detector39 のまま**。セッションの頭の規則の check は OK（0 better・0 WORSE）。新しい種はなし（4/4 とも triage 済み）。REQUESTS.md は 11・12 が `fixed`、**セッション中に 13 も `fixed`**（Lily# 第1035、`e20c7c610`、オーナー決定「提案通り」: `layout { cueSize N }`、N は −8〜0、既定 −4 のまま。`lysc --set cueSize=-2` でも効く）。3 件とも **done** にした。
