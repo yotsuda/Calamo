@@ -88,6 +88,8 @@ sealed class PageSymbols
     public List<Detection> WeakHairpins = new();   // its hairpins' ends under Detector.Threshold: only where the ink holds the two lines (Expressions)
     public List<Detection> WeakPedals = new();     // its pedal brackets' end hooks and notches and its *s under Detector.Threshold: only where the pedal is down (Expressions)
     public List<Detection> WeakOttavas = new();    // its octave lines' signs under Detector.Threshold: only where the dashes run on from them in the ink (Ottavas)
+    public List<Detection> OctaveSigns = new();    // the octave lines' signs whose letters hold no heads: the sure ones, and the unsure whose line runs on
+    public List<(double X0, double X1, double Top, double Bottom)> OctaveWaves = new();   // an old print's wavy octave lines on from those signs (Ottavas.WaveEnd): their columns and rows
     public List<Detection> WeakSegnos = new();     // its segnos under Detector.Threshold: only where a jump back to the sign was read in words and no sure segno seen (Form)
     public bool Scan;                              // the page is a scan, grainy or bowed (Img.Raw, Img.Bowed): Fixes weighs the detector's weak dots only there
     public List<Detection> WeakRests = new();      // its rests under Detector.Threshold: only as a bar's one reading that fills every voice (Fixes)
@@ -636,7 +638,11 @@ static partial class Symbols
             // the detector is unsure of counts where its dashes run on from it, as Ottavas takes it)
             var ends = ps.Detections.Where(t => t.Class == "ott_end" && t.Score > Detector.Threshold).ToList();
             var marks = ps.Detections.Where(t => t.Score > Detector.Threshold && (t.Class.StartsWith("dyn_") || t.Class is "ped" or "ped_up" || Ottavas.IsSign(t)))
-                .Concat((weakOttavas == null ? null : Ottavas.Pooled(weakOttavas, s))?.Where(t => t.Score > Detector.WeakOttava && Ottavas.DashesOn(d, s, t, ends)) ?? Enumerable.Empty<Detection>()).ToList();
+                .Concat((weakOttavas == null ? null : Ottavas.Pooled(weakOttavas, s))?.Where(t => t.Score > Detector.WeakOttava && Ottavas.LineOn(d, s, t, ends)) ?? Enumerable.Empty<Detection>()).ToList();
+            ps.OctaveSigns = marks.Where(Ottavas.IsSign).ToList();
+            foreach (var t in ps.OctaveSigns)
+                if (Ottavas.WaveEnd(d, s, t.X + Ottavas.HalfWidth(t) * s, t.Y, out double top, out double bottom) is var end && !double.IsNaN(end))
+                    ps.OctaveWaves.Add((t.X + Ottavas.HalfWidth(t) * s, end, top, bottom));
             Drop("a dynamic or the pedal", h => marks.Any(t => Math.Abs(t.X - h.X) < (Ottavas.IsSign(t) ? Ottavas.HalfWidth(t) + 0.2 : t.Class == "ped" ? 1.6 : 0.8) * s && Math.Abs(t.Y - h.Y) < (Ottavas.IsSign(t) ? 0.9 : 0.8) * s));
             // nor an articulation (S15: a marcato's or a fermata's ink, a staccato's dot) or an ornament
             // (S23: a turn's or a mordent's bowls of ink over the staff)
@@ -703,7 +709,12 @@ static partial class Symbols
         // (a head beyond its staff on a page levelled by strips: its position from the ledger lines as
         // printed, LedgerPos. Not elsewhere: a degraded page's blurred ledgers moved chords on ledger
         // lines a position, gen-scan's chords 99.9 -> 98.8). A head inside it: from its lines beside it, LinePos
-        if (d.Bowed != null) foreach (var h in ps.Heads) h.Pos = Math.Abs(h.Pos) >= 6 ? LedgerPos(d, h, s) : LinePos(d, h, s);
+        if (d.Bowed != null)
+            foreach (var h in ps.Heads)
+                h.Pos = Math.Abs(h.Pos) >= 6
+                    // (a mate by its height, whatever staff it went to: bar 13's f' over the left hand, taken for the right's)
+                    ? LedgerPos(d, h, s, mateOut: ps.Heads.Any(o => o != h && Math.Abs(o.X - h.X) < 0.6 * s && Math.Sign(h.Pos) * (h.Y - o.Y) > 0.5 * s && Math.Abs(h.Y - o.Y) < 6 * s))
+                    : LinePos(d, h, s);
         // (elsewhere a detected head one or two steps past the first ledger with no ledgers running to it: it may
         // sit on that ledger, printed low -- LedgerPos's own test, and only that: where it finds a ledger, a
         // degraded page's head filled over its own second ledger hangs under the first by it, gen-scan-fill's
@@ -876,7 +887,8 @@ static partial class Symbols
     /// </summary>
     /// <param name="onFirstOnly">only the head on the first ledger, none found at its place: where a ledger is
     /// found the position stands</param>
-    static int LedgerPos(Img d, Head h, double s, bool onFirstOnly = false)
+    /// <param name="mateOut">a head of its chord stands further out from the staff (its ledgers go on past this head's)</param>
+    static int LedgerPos(Img d, Head h, double s, bool onFirstOnly = false, bool mateOut = true)
     {
         int p = h.Pos;
         if (Math.Abs(p) < 6 || h.St == null || h.St.OneLine) return p;
@@ -913,6 +925,11 @@ static partial class Symbols
             }
             if (bestRow < 0) break;
             lastY = bestRow; lastK = k;
+            // (a head on the ledger just found, through its middle, with no chord-mate further out, has none past
+            // it: a line there is something else's -- kinkel7-1's scan, bar 14's e''' on its third ledger, an
+            // accent's lower stroke 1.4 spaces over it taken for the fourth, read d'''. A mate's ledgers go on:
+            // bar 13's b hung 0.16 space under the c' ledger of its <g b f'>, as far off a line as the e''')
+            if (!mateOut && k >= Math.Abs(p) && Math.Abs(bestRow - h.Y) <= 0.25 * s) break;
         }
         if (lastK == 4)
         {

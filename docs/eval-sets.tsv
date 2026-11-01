@@ -16,15 +16,15 @@ dl-ms-14	589	587	40	36	36	36	8	8	8	8	8	8	8	8
 dl-ms-15	2061	2013	124	113	113	113	16	15	16	15	16	15	16	15
 dl-ms-16	1639	1626	54	47	47	47	87	83	84	83	87	83	84	83
 chopin28-4-mutopia	605	605												
-dl-scan	13253	12621	505	276	297	280	398	228	283	230	401	217	286	219
-chopin28-4-scan	605	572												
+dl-scan	13253	12622	505	276	297	280	398	228	283	230	401	217	286	219
+chopin28-4-scan	605	573												
 burgmuller100-01-dorico	259	242												
 burgmuller100-01-mutopia	256	248												
 burgmuller100-02-dorico	315	301												
 burgmuller100-02-mutopia	313	313												
 clementi36-1-bosse	389	387												
 clementi36-1-mutopia	389	389												
-clementi36-1-scan	389	383												
+clementi36-1-scan	389	384												
 schumann15-1-mutopia	273	133												
 schumann15-1-rje	274	144												
 schumann15-7-mutopia	413	388												
@@ -42,21 +42,21 @@ lied-butterworth-shropshire1-scan	658	625	36	13	13	13	58	35	42	35	58	35	43	35
 lied-chaminade-paysbleu-ms	1163	1069	46	39	39	39	43	34	38	34	43	33	38	33
 lied-chaminade-paysbleu-scan	1163	905	46	24	24	24	43	25	52	25	43	27	56	27
 lied-elgar60-1-ms	754	737	20	16	17	16	28	23	23	23	28	23	23	23
-lied-elgar60-1-scan	754	634	20	10	10	10	28	18	21	18	28	19	20	19
+lied-elgar60-1-scan	754	635	20	10	10	10	28	18	21	18	28	19	20	19
 lied-faisst4-5-ms	836	830	13	7	7	7	48	46	49	46	48	47	49	47
 lied-faisst4-5-scan	836	807	13	9	15	9	48	25	29	25	48	27	31	27
 lied-gonzaga-broma-ms	954	945	0	0	0	0	16	16	16	16	19	16	16	16
-lied-gonzaga-broma-scan	954	828	0	0	0	0	16	10	10	10	19	10	10	10
+lied-gonzaga-broma-scan	954	829	0	0	0	0	16	10	10	10	19	10	10	10
 lied-holmes-melodies16-ms	1461	1274	87	39	40	39	85	62	75	62	95	65	80	65
-lied-holmes-melodies16-scan	1461	1183	87	41	53	42	85	36	50	36	95	34	51	34
+lied-holmes-melodies16-scan	1461	1185	87	41	53	42	85	36	50	36	95	34	51	34
 lied-kinkel10-3-ms	479	479	5	2	2	2	7	5	5	5	7	5	5	5
 lied-kinkel10-3-scan	479	438	5	4	4	4	7	2	3	2	7	2	3	2
 lied-kinkel19-3-ms	684	682	0	0	1	0	19	18	18	18	19	18	18	18
-lied-kinkel19-3-scan	684	605	0	0	3	0	19	6	6	6	19	6	6	6
+lied-kinkel19-3-scan	684	607	0	0	3	0	19	6	6	6	19	6	6	6
 lied-kinkel7-2-ms	972	927	0	0	0	0	46	46	46	46	46	46	46	46
 lied-kinkel7-2-scan	972	808	0	0	0	0	46	28	39	28	46	28	39	28
 lied-kinkel7-4-ms	642	639	0	0	0	0	2	2	2	2	2	2	2	2
-lied-kinkel7-4-scan	642	577	0	0	1	0	2	2	2	2	2	2	2	2
+lied-kinkel7-4-scan	642	578	0	0	1	0	2	2	2	2	2	2	2	2
 lied-lang36-1-ms	1295	1255	6	5	6	5	36	35	35	35	36	34	34	34
 lied-lang36-1-scan	1295	1228	6	1	2	1	36	18	19	18	36	18	19	18
 lied-lang36-2-ms	565	546	1	0	0	0	39	38	38	38	39	37	37	37
@@ -64,4 +64,4 @@ lied-lang36-2-scan	565	532	1	1	1	1	39	27	28	27	39	28	28	28
 lied-lehmann-flapper1-ms	499	470	11	9	9	9	9	4	5	4	12	4	5	4
 lied-lehmann-flapper1-scan	499	467	11	8	8	8	9	2	5	2	12	2	5	2
 lied-lehmann-flapper5-ms	590	553	45	15	17	15	39	24	26	24	42	25	26	25
-lied-lehmann-flapper5-scan	590	562	45	16	16	16	39	21	25	21	42	21	23	21
+lied-lehmann-flapper5-scan	590	563	45	16	16	16	39	21	25	21	42	21	23	21

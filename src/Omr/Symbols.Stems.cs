@@ -392,7 +392,8 @@ static partial class Symbols
     }
 
     /// <summary>Beams (or flags) crossing a column just beside the stem, near its tip.</summary>
-    static int CountBeams(Img ink, int[] labels, Head h, double s)
+    /// <param name="only">the one side to count on (-1 left, 1 right), or 0 for the more of the two</param>
+    static int CountBeams(Img ink, int[] labels, Head h, double s, int only = 0)
     {
         int dir = h.Up ? 1 : -1;                  // from the tip towards the head
         int tip = (int)h.Tip;
@@ -405,7 +406,7 @@ static partial class Symbols
             foreach (int dx in new[] { 0, -1, 1 })
                 if (tipLabel == 0) tipLabel = labels[(tip + dir * k) * ink.W + (int)h.StemX + dx];
         int best = 0;
-        foreach (int side in new[] { -1, 1 })
+        foreach (int side in only != 0 ? new[] { only } : new[] { -1, 1 })
         {
             // (the column further out within a beamlet's length: meters002's, about three quarters of a space)
             int count = Count((int)Math.Round(h.StemX + side * 0.5 * s), (int)Math.Round(h.StemX + side * 0.7 * s));
@@ -1064,6 +1065,26 @@ static partial class Symbols
                         Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: no tip marked, a stroke crosses the rules' tip to the left on a stem of its own, no flag's: 0");
                     h.Beams = 0;
                 }
+                // (and the rules' one on an up stem whose tip stands in an octave line's sign's letters: theirs --
+                // kinkel7-1's scan, bar 21's f''4. under an old print's "8va", its stem reaching up into the a)
+                else if (h.Beams == 1 && h.Up && ps.OctaveSigns.Any(t => Math.Abs(t.X - h.StemX) < (Ottavas.HalfWidth(t) + 0.2) * s && Math.Abs(t.Y - h.Tip) < 0.9 * s))
+                {
+                    if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                        Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: no tip marked, the rules' tip in an octave sign's letters: 0");
+                    h.Beams = 0;
+                }
+                // (and the rules' one on an up stem counted on its left only, where a flag never runs, its tip's ink
+                // holding no other stem (no beam's): another mark's the stem runs into -- kinkel7-1's scan, bar 14's
+                // e'''4. under an accent, its stem on into the "u" of the words over the staff. Not a head there, a space
+                // and a half about the tip: an eighth's stem run up into another's head, kinkel7-3's ees,8 and kinkel7-6's
+                // e,8 and e'8, counts one on its left)
+                else if (h.Beams == 1 && h.Up && ink != null && ps.Labels != null && !SharedPiece(h) && CountBeams(ink, ps.Labels, h, s, only: 1) == 0
+                         && !ps.Heads.Any(o => o != h && o.X < h.StemX && h.StemX - o.X < 1.5 * s && Math.Abs(o.Y - h.Tip) < 1.5 * s))
+                {
+                    if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                        Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: no tip marked, the rules' one left of an up stem on a piece of its own: 0");
+                    h.Beams = 0;
+                }
                 continue;
             }
             int n = best.Class[5] - '0';
@@ -1091,6 +1112,15 @@ static partial class Symbols
             // stem one run shorter than two flags run together, the one stands -- kinkel10-4's voice,
             // its eighths read as sixteenths, the flag's run 0.64 of a space. Up stems only: kinkel10-2's
             // down-stemmed sixteenths in pairs half a space apart passed for flags, their short beam a wedge)
+            // (a two the detector is less than sure of, marked in an old print's wavy octave line that runs along the
+            // beam's top: the wave's, the rules' one stands -- kinkel7-1's scan, bar 21's f''8 and e''8 at stem_2 0.66, 0.71)
+            if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureScore
+                && ps.OctaveWaves.Any(w => h.StemX > w.X0 && h.StemX < w.X1 && best.Y > w.Top - 0.2 * s && best.Y < w.Bottom + 0.2 * s))
+            {
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                    Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: the two marked in an octave line's wave, the rules' 1 stands");
+                continue;
+            }
             if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureScore && ink != null && ps.Labels != null && LoneFlag(h))
             {
                 if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)

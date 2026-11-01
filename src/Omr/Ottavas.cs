@@ -167,6 +167,73 @@ static class Ottavas
     }
 
     /// <summary>
+    /// An old print's line: a wavy line in place of the dashes, "8va~~~~" ended by "loco." (kinkel7-1's scan,
+    /// bar 21: the wave 0.3 to 0.55 of a space thick a column, its middle turning up and down by 0.3 of a space
+    /// every third of a space). From the letters' right edge (a space and a half on at most), a thin band of ink
+    /// (0.1 to 0.65 of a space a column) within a space of the sign's height, followed column by column (its
+    /// middle moving a fifth of a space at most; gaps of a quarter of a space, and ink across it -- a stem
+    /// touching it -- passed over) for three spaces and more, that waves: its middle turns (by 0.08 of a space)
+    /// once every space and a half at least. A slur, a beam or the dashes run on without turning. The end of
+    /// its last column, or NaN for none; top and bottom: the rows the band covers
+    /// </summary>
+    public static double WaveEnd(Img ink, double s, double x, double y, out double top, out double bottom)
+    {
+        top = bottom = double.NaN;
+        int lo = (int)Math.Max(0, y - s), hi = (int)Math.Min(ink.H - 1, y + s);
+        // the run of ink in the column nearest c, within 0.6 of a space of it: its rows
+        (int Top, int Bottom) Run(int xx, double c)
+        {
+            int a = (int)Math.Max(lo, c - 0.6 * s), b = (int)Math.Min(hi, c + 0.6 * s);
+            (int, int) best = (-1, -1); double near = double.MaxValue;
+            for (int yy = a; yy <= b; yy++)
+            {
+                if (!ink[xx, yy]) continue;
+                int t = yy; while (t > 0 && ink[xx, t - 1]) t--;
+                int e = yy; while (e < ink.H - 1 && ink[xx, e + 1]) e++;
+                if (Math.Abs((t + e) / 2.0 - c) < near) { near = Math.Abs((t + e) / 2.0 - c); best = (t, e); }
+                yy = e;
+            }
+            return best;
+        }
+        for (int x0 = (int)Math.Max(0, x - 0.3 * s); x0 < Math.Min(ink.W, x + 1.5 * s); x0++)
+        {
+            var (t0, b0) = Run(x0, y);
+            if (t0 < 0 || b0 - t0 + 1 < 0.1 * s || b0 - t0 + 1 > 0.65 * s) continue;
+            var mids = new List<double>();
+            double c = (t0 + b0) / 2.0, up = t0, down = b0;
+            // (ink over the band's middle, thicker than the wave, is passed over without a gap and without moving
+            // the end: a beam the wave touches along nine spaces, bar 21's)
+            int last = x0, seen = x0;
+            for (int xx = x0; xx < ink.W && xx - seen <= 0.25 * s; xx++)
+            {
+                var (t, b) = Run(xx, c);
+                if (t >= 0 && t <= c + 0.3 * s && b >= c - 0.3 * s) seen = xx;
+                if (t < 0 || b - t + 1 < 0.1 * s || b - t + 1 > 0.65 * s || Math.Abs((t + b) / 2.0 - c) > 0.2 * s) continue;
+                c = (t + b) / 2.0; mids.Add(c); last = xx;
+                up = Math.Min(up, t); down = Math.Max(down, b);
+            }
+            double length = last - x0;
+            if (length < 3 * s) continue;
+            // (the turns, each a move back of 0.08 of a space from the furthest the middle went the other way)
+            int turns = 0, dir = 0; double ext = mids[0], least = mids[0], most = mids[0], h = 0.08 * s;
+            foreach (var m in mids)
+            {
+                if (dir == 0)
+                {
+                    least = Math.Min(least, m); most = Math.Max(most, m);
+                    if (m - least >= h) { dir = 1; ext = m; } else if (most - m >= h) { dir = -1; ext = m; }
+                }
+                else if (dir * (m - ext) > 0) ext = m;
+                else if (dir * (ext - m) >= h) { turns++; dir = -dir; ext = m; }
+            }
+            if (turns < length / (1.5 * s)) continue;
+            top = up; bottom = down;
+            return last;
+        }
+        return double.NaN;
+    }
+
+    /// <summary>
     /// Which way the hook at (x, y) points: the rows with ink in the column a fifth of a space either side
     /// of x, from a quarter of a space off y to a space off, below and above (the hook is 0.8 of a space).
     /// 1 down (a line over its staff), -1 up (under), 0 unclear (a stem through it, or none)
@@ -206,6 +273,10 @@ static class Ottavas
             || ends.Any(e => Math.Abs(e.Y - t.Y) < 1.5 * s && e.X > right && e.X < t.X + 60 * s);
     }
 
+    /// <summary>An unsure sign's line runs on from it: its dashes (<see cref="DashesOn"/>) or an old print's wave (<see cref="WaveEnd"/>)</summary>
+    public static bool LineOn(Img ink, double s, Detection t, IEnumerable<Detection> ends)
+        => DashesOn(ink, s, t, ends) || !double.IsNaN(WaveEnd(ink, s, t.X + HalfWidth(t) * s, t.Y, out _, out _));
+
     /// <summary>
     /// The detector's unsure signs, those at one place (within a space and a half across, 0.6 of a space
     /// up and down) taken as one: the letters it split between the two of one octave count (a "15mb" seen
@@ -241,16 +312,27 @@ static class Ottavas
         var ends = det.Where(t => t.Class == "ott_end").ToList();
         double DashesEnd(double x, double y) => Ottavas.DashesEnd(ink, s, x, y);
         int HookDir(double x, double y) => Ottavas.HookDir(ink, s, x, y);
+        // an old print's wavy line on from a sign (WaveEnd): its end (NaN for none) and the rows it covers
+        var waves = new Dictionary<Detection, (double End, double Top, double Bottom)>();
+        (double End, double Top, double Bottom) Wave(Detection t)
+        {
+            if (!waves.TryGetValue(t, out var w))
+                waves[t] = w = (WaveEnd(ink, s, t.X + HalfWidth(t) * s, t.Y, out double top, out double bottom), top, bottom);
+            return w;
+        }
+        bool Wavy(Detection t) => !double.IsNaN(Wave(t).End);
         // the nearest ink to the line on one side (dir 1 below it, -1 above), in spaces: over the columns
-        // past the letters and short of the hook, from past the dashes to fourteen spaces off; 99 for none
+        // past the letters and short of the hook, from past the dashes (a wave's band) to fourteen spaces off; 99 for none
         double InkDistance(Detection t, double endX, int dir)
         {
-            int x0 = (int)(t.X + HalfWidth(t) * s + 0.3 * s), x1 = (int)Math.Min(ink.W - 1, endX - 1.0 * s);
+            // (an old print's letters run wider, an accent over the "va" reaching 2.6 spaces past the sign's middle: kinkel7-1's)
+            int x0 = (int)(t.X + HalfWidth(t) * s + (Wavy(t) ? 1.5 : 0.3) * s), x1 = (int)Math.Min(ink.W - 1, endX - 1.0 * s);
+            double from = Wavy(t) ? (dir > 0 ? Wave(t).Bottom : Wave(t).Top) : t.Y;
             double best = 99;
             for (int xx = x0; xx <= x1; xx++)
                 for (double d = 0.35 * s; d < best * s && d < 14 * s; d++)
                 {
-                    int yy = (int)Math.Round(t.Y + dir * d);
+                    int yy = (int)Math.Round(from + dir * d);
                     if (yy < 0 || yy >= ink.H) break;
                     if (ink[xx, yy]) { best = d / s; break; }
                 }
@@ -291,10 +373,11 @@ static class Ottavas
         }
         var weak = Pooled(res.Sym.WeakOttavas, s);
         if (Verbose) foreach (var t in weak) Console.WriteLine($"  weak octave sign {t.Class} {t.Score:F2} at {t.X:F0},{t.Y:F0}");
-        var signs = det.Where(IsSign).Concat(weak.Where(t => t.Score > Detector.WeakOttava && DashesOn(t)))
+        // (or a wave runs on from them, which is no word's letters: kinkel7-1's scan, an "8va~~~" read as an 8vb at 0.36)
+        var signs = det.Where(IsSign).Concat(weak.Where(t => t.Score > Detector.WeakOttava && (DashesOn(t) || Wavy(t))))
             .OrderByDescending(t => t.Score).ToList();
         signs = signs.Where((t, i) => !signs.Take(i).Any(o => Math.Abs(o.X - t.X) < 1.5 * s && Math.Abs(o.Y - t.Y) < 1.0 * s))
-            .Where(t => !InWords(t))
+            .Where(t => Wavy(t) || !InWords(t))
             .OrderBy(t => t.Y).ThenBy(t => t.X).ToList();
         if (signs.Count == 0) return marks;
         var found = new List<Line>();
@@ -325,7 +408,7 @@ static class Ottavas
             // the side the letters say; with no staff there, the other side when the hook (the detector's,
             // or the one in the ink where the dashes end) points that way
             bool up = SaysUp(t), sure = true, hooked = false, hookSide = false;
-            double dashes = end == null ? Ottavas.DashesEnd(ink, s, t.X + half, t.Y, out hooked, out _) : 0;
+            double dashes = end != null ? 0 : Wavy(t) ? Wave(t).End : Ottavas.DashesEnd(ink, s, t.X + half, t.Y, out hooked, out _);
             // (the hook's direction: the detector's hook, or the one the dashes run into in the ink; a
             // dash's bare end tells nothing, whatever ink stands near it)
             int hook = end != null ? HookDir(end.X, end.Y) : hooked ? HookDir(dashes + 0.1 * s, t.Y) : 0;
@@ -489,11 +572,11 @@ static class Ottavas
             double half = HalfWidth(t) * s;
             var (sys, st) = line.Up ? line.Over : line.Under;
             int BarAt(double x) { int k = 0; while (k + 1 < sys.Measures && x >= sys.Bars[k + 1] - 0.5 * s) k++; return sys.BarOf(k); }
-            double dashes = end != null ? end.X : DashesEnd(t.X + half, t.Y);
+            double dashes = end != null ? end.X : Wavy(t) ? Wave(t).End : DashesEnd(t.X + half, t.Y);
             // (the scan stops at the next sign at the height, and a line with no dash before it is its letters
             // only: seed 11's piano006, a "(8vb)" over one rest at a system's start, its hook in its letters,
             // ran through the next 8vb's letters, narrow pieces of them taken for its tail, to that one's hook)
-            if (end == null && signs.Where(o => o != t && Math.Abs(o.Y - t.Y) < 1.0 * s && o.X > t.X + half)
+            if (end == null && !Wavy(t) && signs.Where(o => o != t && Math.Abs(o.Y - t.Y) < 1.0 * s && o.X > t.X + half)
                     .Select(o => o.X - HalfWidth(o) * s).Where(l => l < dashes).DefaultIfEmpty(double.NaN).Min() is var next && !double.IsNaN(next))
             {
                 dashes = Ottavas.DashesEnd(ink, s, t.X + half, t.Y, out _, out bool dashed, next);
