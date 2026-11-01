@@ -80,7 +80,7 @@ sealed class PageSymbols
     public Dictionary<(int Bar, int Part), (Staff St, List<Ev> Evs)> Unprinted = new();   // the triplets read from a bar's length, no number printed: their events (Reader.UnprintedTriplets)
     public List<Detection> Detections;   // what the learnt detector found (--detector), or null
     public List<SystemInfo> Systems;     // the page's systems with their bar lines as the layout found them (Layout.FindBars; Reader checks them further)
-    public HashSet<Detection> TieEndsAsSlur = new();   // its slur_rs that end a tie, an arc to the next note at the pitch (Symbols.DetectedTies): no slur's ends
+    public HashSet<Detection> TieEndsAsSlur = new();   // its slur_rs that end a tie, an arc to the next note at the pitch, and slur_ls that start one (Symbols.DetectedTies): no slur's ends
     public List<Tempo.Frame> Frames;     // the rehearsal marks' boxes over the systems (found with the detector; else Tempo finds them)
     public List<Detection> WeakSigns = new();   // its sharps and flats under Detector.Threshold: a key's, only where the system's other staves read that key
     public List<Detection> WeakDots = new();    // its dots under Detector.Threshold: only in the column of a surer dot (Symbols.ColumnDots)
