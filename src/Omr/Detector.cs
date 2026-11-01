@@ -238,6 +238,11 @@ static class Detector
     static readonly int Tab0 = Array.IndexOf(Classes, "tab_0");
     // (tab_0 ... tab_9 only: the classes after them, S14's, are no digits)
     static bool IsTab(int c) => c >= Tab0 && c < Tab0 + 10;
+    // A tuplet's number under the threshold likewise, kept apart (PageSymbols.WeakTuplets, from
+    // Symbols.WeakTupletNumber up) and taken only to tell a tuplet's arc from a slur (DetectedSlurs'
+    // Bracket): an old print's 3 under its arc, seen at 0.42 and 0.49
+    static readonly bool[] TupletClass = Classes.Select(c => c.StartsWith("tuplet_")).ToArray();
+    public static bool IsWeakTuplet(Detection t) => t.Class.StartsWith("tuplet_") && t.Score <= Threshold;
 
     /// <summary>Each TAB digit's score around a grid point (the best over its 3x3).</summary>
     static float[] DigitScores(Tensor<float> heat, int gx, int gy)
@@ -297,6 +302,7 @@ static class Detector
                         : c == rest4 || c == rest8 || c == rest16 ? Math.Min(Threshold, WeakRest)
                         : c == trillClass ? Math.Min(Threshold, Articulations.WeakTrill)
                         : c == clefG || c == clefF || c == clefC ? Math.Min(Threshold, WeakClef)
+                        : TupletClass[c] ? Math.Min(Threshold, Symbols.WeakTupletNumber)
                         : IsTab(c) ? Math.Min(Threshold, WeakTab) : Threshold;
             // (a little under the threshold's logit, then the threshold itself on the sigmoid, as before)
             double zth = Math.Log(th / (1 - th)) - 1e-3;

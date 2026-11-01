@@ -337,6 +337,15 @@ static partial class Symbols
         // (nor a weak start by a grace note, slur_l or tie_l: Lily#'s slur from an acciaccatura to
         // its note, which the start would give to the note before it, gen-grace's basic002)
         ends.RemoveAll(t => !Sure(t) && t.Class is "slur_l" or "tie_l" && ps.Graces.Any(g => Math.Abs(g.X - t.X) < 1.5 * s && Math.Abs(g.Y - t.Y) < 2.5 * s));
+        // (nor a weak end at a hairpin's end the detector is sure of: the two lines' ends at a hairpin's open
+        // end, a space above and below it (1.04 spaces off its centre), seen as slur_l 0.35 and 0.25 under
+        // kinkel19-2's right hand, bar 26, the open end itself at 0.71; the upper one, under the chord,
+        // started a slur to the next bar's end. Within 1.2 spaces of the hairpin's end only: a slur's true
+        // end 1.3 spaces under a hairpin's, slur_r 0.30 ending the arc over kinkel19-2's left hand, bar 50)
+        var pinEnds = ps.Detections.Where(t => t.Class is "hairpin_tip" or "hairpin_open" && t.Score >= TrustScore).ToList();
+        ends.RemoveAll(t => !Sure(t) && pinEnds.FirstOrDefault(h => Math.Abs(h.X - t.X) < 0.7 * s && Math.Abs(h.Y - t.Y) < 1.2 * s) is Detection pin
+                            && (!Debug(t) || Log($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): a line's end of the {pin.Class} at {pin.X:F0},{pin.Y:F0} ({pin.Score:F2}), dropped")));
+        static bool Log(string line) { Console.WriteLine(line); return true; }
         if (ends.Count == 0) return;
         // chords: the heads on one stem, or stemless at one x
         var chords = new List<List<Head>>();
@@ -431,15 +440,23 @@ static partial class Symbols
             // (a weak end and a sure one with a tuplet's number between them at their height, or by
             // the weak end, are a bracket's two ends: MuseScore's triplet brackets under kinkel19-6's
             // right hand, the right hook seen as a slur's end at 0.62-0.71, the left end or the number
-            // itself at 0.27-0.42)
+            // itself at 0.27-0.42. The number is taken from WeakTupletNumber: an old print's 3 under
+            // its arc, kinkel19-6's scan, bar 2, seen at 0.42)
             // And a bracket with no number, MuseScore's after the first two: a straight thin line from
             // one end to the other through the middle of the span, where a slur bulges away from its
             // notes (the middle fifth of it, ink within 0.15 space of the line between the two ends
             // in seven of ten columns, and none 0.3-2 spaces beyond it in half of them)
+            // (Two sure ends with the number in the middle of the span at their height, over as many
+            // chords as it says, are not told from a slur: an old print's tuplet arc round its 3
+            // (lang36-3's scan, bar 32, slur_l 0.93 and slur_r 0.82, the 3 at 0.49) is the shape of
+            // Lily#'s slur over a triplet whose 3 stands on the slur's side (gen-mmrests-scan's
+            // slurs004) and of MuseScore's over a triplet sung on one syllable (kinkel19-1's ms, bar
+            // 8, "Her - -"): tried 2026-11-01 and dropped)
             bool Bracket(Detection l, Detection r)
             {
-                if (ps.Detections.Any(u => u.Class.StartsWith("tuplet_") && u.Score >= TrustScore
-                    && u.X > l.X - s && u.X < r.X + s && Math.Abs(u.Y - (l.Y + r.Y) / 2) < 1.5 * s)) return true;
+                double midY = (l.Y + r.Y) / 2;
+                if (ps.Detections.Concat(ps.WeakTuplets).Any(u => u.Class.StartsWith("tuplet_") && u.Score >= WeakTupletNumber
+                                                                  && u.X > l.X - s && u.X < r.X + s && Math.Abs(u.Y - midY) < 1.5 * s)) return true;
                 int x0 = (int)(l.X + 0.4 * (r.X - l.X)), x1 = (int)(l.X + 0.6 * (r.X - l.X));
                 int sign = at[l].Above ? -1 : 1, on = 0, beyond = 0, n = 0;
                 for (int x = Math.Max(0, x0); x <= Math.Min(d.W - 1, x1); x++)
@@ -696,7 +713,13 @@ static partial class Symbols
                 // voice's heads between, stemmed the other way on the far side, are no note between.
                 // And only an arc that leaves the head from its side, as a tie does: Lily#'s slur from a
                 // stemmed note starts over it, the slurs suite's c4.( c8), 11 of 13 there 0.05-0.8 space
-                // inside the head's right edge, the real prints' ties 0.3-0.6 past it)
+                // inside the head's right edge, the real prints' ties 0.3-0.6 past it. Not by the arc's
+                // height over the heads: an engraver's arc from a whole note to the next at the same pitch,
+                // bowed high over the bar line between them, 1.5 spaces over its heads where it leaves them
+                // (kinkel19-6's scan, bar 13, "Meer" sung on through the two, a slur in the truth), is the
+                // shape of MuseScore's ties over a bar, 1.5-1.7 spaces over the heads a space before the
+                // second (kinkel7-1's ms, bar 20, ties in the truth): tried both by the detector's ends and
+                // by the ink, 2026-11-01, and dropped)
                 bool OtherVoice(Head o) => a[0].HasStem && o.HasStem && o.Up != a[0].Up && (a[0].Up ? o.Y > a.Max(h => h.Y) : o.Y < a.Min(h => h.Y));
                 if (!fromTie.Contains(l) && at[r].Chord is var b && b.Count == a.Count && l.X > a.Max(h => h.R)
                     && a.Select(h => h.Pos).Order().SequenceEqual(b.Select(h => h.Pos).Order()) && b.All(h => h.Acc == null)

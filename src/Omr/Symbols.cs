@@ -91,6 +91,7 @@ sealed class PageSymbols
     public bool Scan;                              // the page is a scan, grainy or bowed (Img.Raw, Img.Bowed): Fixes weighs the detector's weak dots only there
     public List<Detection> WeakRests = new();      // its rests under Detector.Threshold: only as a bar's one reading that fills every voice (Fixes)
     public List<Detection> WeakTrills = new();     // its trills' "tr"s under Detector.Threshold: only where a trill line's wave follows (Articulations)
+    public List<Detection> WeakTuplets = new();    // its tuplet numbers under Detector.Threshold (WeakTupletNumber up): only to tell a tuplet's arc from a slur (DetectedSlurs)
     public List<Detection> WeakClefs = new();      // its clefs under Detector.Threshold: only inside a staff, on a clef's shape in the ink (Signatures.MidClefs)
     public List<Detection> WeakNaturals = new();   // its naturals under Detector.Threshold: only on a scan, by a head with no sign, on ink no rule named (Symbols.WeakNaturals)
     public List<Arpeggios.Arp> Arpeggios = new();   // the arpeggios' wavy lines left of chords: @arpeggio on them, and no rests in them
@@ -123,6 +124,9 @@ static partial class Symbols
     // A slur's weak end (Detector.WeakSlur up) pairs with a sure one this far away, in spaces, on the
     // detector's word alone; farther, only along the arc's ink (DetectedSlurs' Joined)
     public static double FarSlur = 25;
+    // A tuplet's number this sure, under the threshold, makes a bracket's or a tuplet arc's two ends
+    // of two slur ends (DetectedSlurs' Bracket): an old print's 3 under its arc, seen at 0.42-0.49
+    public static double WeakTupletNumber = 0.3;
 
     static bool IsWeakSign(Detection t) => (t.Class == "sharp" || t.Class == "flat") && t.Score <= Detector.Threshold;
 
@@ -174,8 +178,9 @@ static partial class Symbols
         if (det != null)
         {
             // the learnt detector's heads (S10); the rules below check them as they check their own
-            ps.Detections = det.Where(t => !IsWeakSign(t)).ToList();
+            ps.Detections = det.Where(t => !IsWeakSign(t) && !Detector.IsWeakTuplet(t)).ToList();
             ps.WeakSigns = det.Where(IsWeakSign).ToList();
+            ps.WeakTuplets = det.Where(Detector.IsWeakTuplet).ToList();
             DetectedHeads(d, ink, ps.Detections, staves, s, ps.Heads, weakHalves);
             // a head the detector is torn over, black and half each under its threshold (0.47 and 0.47), is
             // the half where its middle is white: an old print's half note, a thin rim round a wide hole
