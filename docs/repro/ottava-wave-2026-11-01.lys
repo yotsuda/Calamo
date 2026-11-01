@@ -1,0 +1,28 @@
+// A shape to draw for training (REQUESTS 17): an old print's octave line is "8va" and a WAVY
+// line, not dashes, and it ends with the word "loco." instead of a hook. kinkel7-1's scan (Kinkel,
+// Op. 7 No. 1; the OMR's development set data/dev/lieder/kinkel7-1, page 2, bar 21, right hand):
+// "8va" over the staff, the wave running on 46 spaces past it, 0.3 to 0.55 of a space thick, turning
+// up and down every third of a space by 0.3, touching the beam under it for nine spaces, then
+// "loco." over the next bar's first note. The OMR's detector, taught only Lily#'s dashes and hooks,
+// sees those letters weakly and the wrong way round (an 8vb at 0.36). Bar 2 here is that bar (one
+// voice); bar 3 is the "loco." bar. Today lysc draws the line dashed with a hook.
+title "Ottava Wave"
+octave absolute
+time 9/8
+key f major
+
+part rh { clef treble }
+
+section Piece {
+  rh {
+    a'8 c''8 f''8 a''8 g''8 f''8 e''8 d''8 c''8 |
+    f'''4.@8va f'''8 e'''8 d'''8 cis'''8 d'''8 bes''8@!8va |
+    a''8 a''8 a''8 g''8 g''8 g''8 f''4. |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff rh "Piano"
+}
