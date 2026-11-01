@@ -42,8 +42,14 @@ $rows = foreach ($dir in $seeds) {
         $side = Get-ChildItem $out -Filter *.omr.json | Select-Object -First 1
         if ($side) {
             $j = Get-Content $side.FullName -Raw | ConvertFrom-Json
-            # (the bar the seed names: its measure and part in this reading; the page and its box when the numbers moved)
+            # (the bar the seed names: its measure and part in this reading; or, the page read alone numbering its
+            # bars from 1 where the piece's reading counted on from the pages before, the part's bar whose box
+            # holds the seed's box's centre -- Bohemian Rhapsody's bar 124, bar 6 of its page 11)
             $m = $j.measures | Where-Object { $_.measure -eq $s.measure -and $_.part -eq $s.part } | Select-Object -First 1
+            if (-not $m -and $s.scan.box) {
+                $cx = ($s.scan.box[0] + $s.scan.box[2]) / 2; $cy = ($s.scan.box[1] + $s.scan.box[3]) / 2
+                $m = $j.measures | Where-Object { $_.part -eq $s.part -and $_.box[0] -le $cx -and $cx -le $_.box[2] -and $_.box[1] -le $cy -and $cy -le $_.box[3] } | Select-Object -First 1
+            }
             if ($m) {
                 $lines = Get-Content "$out\$($j.lys)"
                 $now = $lines[$m.line - 1]

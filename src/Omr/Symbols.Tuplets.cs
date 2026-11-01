@@ -180,7 +180,11 @@ static partial class Symbols
             bool? up = null;    // a number by a beam group: its voice's stems (another voice under it keeps its time)
             if (left != null && right != null)
             {
-                x0 = left.C.MinX - 0.3 * s; x1 = right.C.MaxX + 0.3 * s;
+                // (a hook stands at a note's edge -- the first's left or its stem, the last's right, or, as
+                // MuseScore sets it, the last head's left edge, Bohemian Rhapsody's bar 124 with its g''8's
+                // centre 0.3 space past the hook: a head whose centre is within four fifths of a space of a
+                // hook, a head's width, is under the bracket)
+                x0 = left.C.MinX - 0.8 * s; x1 = right.C.MaxX + 0.8 * s;
                 // a bracket over nothing near it (a metronome mark's tuplet) spans no notes here
                 double lo = x0, hi = x1;
                 // (a bracket may sit on the heads' side or the stems', or just off the staff)
@@ -349,12 +353,20 @@ static partial class Symbols
     {
         var c = o.C;
         Other left = null, right = null;
+        if (TupletVerbose)
+            foreach (var b in ps.Others.Where(b => b != o && Math.Abs(b.C.Cx - c.Cx) < 4 * s && Math.Abs(b.C.Cy - c.Cy) < 2 * s))
+                Console.WriteLine($"      bracket? piece {b.Class} at {b.C.Cx:F0},{b.C.Cy:F0} {b.C.W / s:F2}x{b.C.H / s:F2} fill {b.C.Fill:F2}{(b.St != o.St ? " (another staff's)" : "")}");
         foreach (var b in ps.Others)
         {
             if (b == o || b.Class != "?" || b.St != o.St) continue;
             var bc = b.C;
-            // a bracket half: a hook, or just its horizontal line when the corner came apart
-            if (bc.H > 1.3 * s || bc.W < 0.4 * s || (bc.Fill > 0.3 && bc.H > 0.2 * s) || Math.Abs(bc.Cy - c.Cy) > 1.0 * s) continue;
+            // a bracket half: a hook, or just its horizontal line when the corner came apart. Thin: ink in
+            // under 0.3 of its box, or, a short stout hook, no more than a stroke a fifth of a space thick
+            // along two sides of the box would fill (MuseScore's hooks either side of Bohemian Rhapsody's
+            // 3, bar 124, the owner's seed of 2026-11-01: 0.96 by 0.8 spaces at fill 0.33, which left the
+            // triplet one note; ninetofive's long halves, 3.1 by 0.9 spaces at 0.25, pass by the flat 0.3)
+            bool thin = bc.H <= 0.2 * s || bc.Fill <= 0.3 || bc.Fill <= 0.2 * s * (bc.W + bc.H) / (bc.W * bc.H);
+            if (bc.H > 1.3 * s || bc.W < 0.4 * s || !thin || Math.Abs(bc.Cy - c.Cy) > 1.0 * s) continue;
             // (nor a dash of an octave line the number stands on, another dash on its row further out: a
             // bracket's half ends at its hook. Seed 11's piano008, a triplet's 3 on an 8vb's dashes, the
             // triplet cut to the one note between the two dashes)
@@ -362,8 +374,9 @@ static partial class Symbols
             if (bc.H <= 0.25 * s && ps.Others.Any(q => q != b && q != o && q.C.H <= 0.25 * s && q.C.W >= 0.4 * s && q.C.W <= 1.2 * s
                     && Math.Abs(q.C.Cy - bc.Cy) < 0.15 * s && (onLeft ? bc.MinX - q.C.MaxX : q.C.MinX - bc.MaxX) is var g && g > 0 && g < 1.5 * s))
                 continue;
-            if (bc.MaxX < c.MinX && c.MinX - bc.MaxX < 0.8 * s && (left == null || bc.MaxX > left.C.MaxX)) left = b;
-            if (bc.MinX > c.MaxX && bc.MinX - c.MaxX < 0.8 * s && (right == null || bc.MinX < right.C.MinX)) right = b;
+            // (within a space and a fifth of the number: the same hooks stand 0.9 space off their 3)
+            if (bc.MaxX < c.MinX && c.MinX - bc.MaxX < 1.2 * s && (left == null || bc.MaxX > left.C.MaxX)) left = b;
+            if (bc.MinX > c.MaxX && bc.MinX - c.MaxX < 1.2 * s && (right == null || bc.MinX < right.C.MinX)) right = b;
         }
         // A bracket's line at the height of a ledger line is taken out with the ledger lines
         // (Bravura's meters002, three spaces over the staff): its hook is left alone, a thin upright

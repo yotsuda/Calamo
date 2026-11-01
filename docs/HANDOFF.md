@@ -2,6 +2,37 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 同じ音の隣どうしを結ぶ弧は端が弱くてもタイ: 確かな `tie_r` から 20 間遡る、確かな始まりで終わりの無い弧と弱い両端の弧はインクで確かめる。種 bohemian-124 の連符の括弧（2026-11-01 昼、前の節の次の一手 3 = 7-1 の 20 小節の a''~、と新しい種）
+
+**現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、種は 4/4（当時）、REQUESTS.md に新しい `fixed` はなし（11・12・13 は done）。Lily# の Release の lysc は 14:26 のまま（未解決）。**セッション中の 11:04 にオーナーが新しい種を報告した**（`20261101-110443-bohemian-rhapsody-bar124-p1`、下の 4）。あわせて `data/eval/chopin28-4/src/` にオーナーが Lily# で読んだ `Chop-28-4a-a4*.lys/.omr.json/.p01.png`（10:19・10:21）が untracked で残っている（触っていない。評価台の元ファイルの横に出た読みの出力）。**読み手を変えた**（学習し直しなし）:
+1. **確かな `tie_r` の相手を 20 間まで遡る**（`Symbols.Ties.cs` `DetectedTies`、`StartAt`）: `tie_r`（0.5 以上）の手前の同じ高さの符頭は、今までの 12 間を超えて 20 間まで、その符頭に弧の始まりが見えていれば（`tie_l`/`slur_l` 0.2 以上。頭の右 −0.3〜2.5 間・上下 2 間で、`Assign` と同じ物差し（|dy| + 0.3|dx|）でその和音が最も近いこと: 10-6-scan で隣の声部の `slur_l` を取って正しいスラーを消した）結ぶ。`slur_l` だったら `TieEndsAsSlur` に入れてスラーには使わない。7-1 scan の 18 voice・20 rh・22 rh・22 voice、7-1 ms の 8・10・12・14 rh（MuseScore の小節をまたぐタイ）がこれ。古い刷りのタイは付点のある音符から 12〜17 間、他声部の 8 分の和音の上を越えて次の同じ音へ行き、42 は始まりを 0.26〜0.44、終わりを `tie_r` 0.65〜0.87 で見る＝片方だけ確か。
+2. **確かな始まりで終わりの無い弧は、次の同じ音までインクが届けばタイ**（`DetectedSlurs` の `open` の処理、`TieNext`・`TieEnd`・`JoinedTo`）: 「no end after it, dropped」の前に、始まりが符頭の右端より右から出ていて（`Pair` のタイの条件と同じ）、同じ譜表の次の和音が同じ音（同じ数・同じ pos・臨時記号なし・間に他声部の符頭しかない・20 間以内）で、`Joined` のインクたどりが始まりからその和音の手前（L − 0.2 間、弧の側に 0.7 間）に届けばタイ。`Joined` は点に向ける `JoinedTo(sure, x, y, …)` に分けた。7-1 scan の 16 voice（`slur_l` 0.75、終わりは何も見えない）。
+3. **弱い始まりと弱い終わり**（両方 0.5 未満）が `TieNext` の 2 つの和音に同じ側で立ち、`Fermata`・`Bracket` でなく、`Joined` ならタイ。7-1 scan の 19 voice（0.30 と 0.35）。最初の版は 23 小節 rh の同じ和音 2 つの上のフェルマータの両縁（0.40・0.27、3.6 間）をタイに取った → `Fermata` を通した。
+4. **種 bohemian-rhapsody-bar124**（オーナーの「triplet に一音しか入っていなかった。8 分休符が別の voice に」。正解 `d''4 ees''8 r8 f''4 tuplet 3/2 { ees''4 g''8 }`）: 読みは `ees''4 tuplet 3/2 { g''8 }` で、長さが合わずに r8 が別声部に。**原因は規則**（`Symbols.Tuplets.cs` `BracketHalves`）: 括弧の両半分（0.96 × 0.80 間、fill 0.33・0.32、3 から 0.9 間）が `Fill > 0.3` と「数字から 0.8 間以内」の両方で弾かれ、括弧なしの道で 3 に最も近い g''8 だけが連符になっていた。直し: 半分の fill の上限を「太さ 1/6 間の線が箱の 2 辺に沿う分」`0.16 s (W+H)/(W H)`（典型の 2 × 0.6 間の半分では 0.35、文字の塊は弾く）、隙間 1.2 間まで、括弧の範囲の余白 0.3 → **0.8 間**（MuseScore は右のかぎを最後の符頭の左端に置く: g''8 の中心がかぎの 0.3 間先で範囲の外だった）。`--tuplets` に数字の近くの piece の一覧（class・大きさ・fill）を足した。scratch のビルドで bar 124 が正解と同じ、同じ頁の 10 小節目も `tuplet 3/2 { bes'8~ bes'4~ } bes'8 r8` に直った（前は `tuplet 3/2 { bes'8~ } bes'4~ bes'8 s32` の 2 声）。最初の版は fill の上限を L 字の式だけにして、規則の check で `real.ninetofive.exact` 100 → 99.8（20 小節 bass の長い半分 3.1 × 0.88 間・fill 0.25 を弾き、`r8` が括弧の外に）→ 元の「fill 0.3 以下」を残し、L 字の分（太さ 1/5 間）は**加えて**許す形に。ninetofive は前と同じ読みに戻った。
+5. **Lily# の依頼 `docs/repro/lilysharp-requests-2026-11-01-tuplet-length.md`**（11:13、この種を受けて Lily# が **LYS2020**（音価にならない tuplet の警告、`5b9e11390`）を入れ、OMR 側の取り込みを頼んできた）: `Verify.cs` が lysc のログの `warning LYS2020: … at [NNN..` を拾い、その小節を flag（kind `tuplet`、確信度 0.15 = LYS2017 と同じ）、memo に `the tuplet's bracket is missing a note: what it holds adds up to no note value (lysc LYS2020)`。Lily# `5b9e11390` を `git worktree add` で scratch にビルドして Bohemian の頁で確かめた（9 小節目 p1 に出る、confidence 0.13。worktree は消した）。返事は **`docs/repro/lilysharp-reply-2026-11-01-tuplet-length.md`**、REQUESTS.md に 14 としてお知らせ。再試行（括弧を 1 つ前の音まで広げる）は作らず、原因（4）を直した。
+
+**数字（1〜3、タイの規則、`ed172fe`）**:
+- 7-1 scan の 2 頁目: タイ 13 本中 **2 → 8**（余分 0）。
+- 開発用の台（`-Dev -Reuse`、2 回とも同じ）: 音は **30 台とも同じ**。タイの found 7-1-ms 12 → **16**、7-1-scan 6 → **14**、7-6-ms 8 → 9、10-6-scan 0 → 1。スラー: 7-1-scan の誤り 1 → 0（8 小節の a''~ の始まりと 9 小節の終わりをスラーにしていたもの）。**10-6-scan の slur found 4 → 3**: 13 小節 voice、正解はメリスマの d''( d'')（同じ音 2 つ、間に何もない）で、規則 1 が d''~ に読む。「同じ音の隣どうしの弧はタイ」は `Pair` と同じ読み手の決まり＝転記の判断の違い。その小節は 2 声が和音に混ざって読めていて（voice の todo）、どちらにしても崩れている。`docs/dev-sets.tsv` を写した。
+- 評価台（`-Eval -Reuse`、`setsum.py`）: 音 スキャン 25204 → **25205**（dl-scan +1）、ms 11790（同じ）、その他 17971 → **17973**（dl-ms-09 +2、dl-ms-15 +1、schumann15-7-mutopia −1）。**タイの found スキャン 272 → 300、ms 108 → 114、その他 275 → 284**；タイの誤り スキャン 28 → **33**（dl-scan 12 → 16、kinkel19-3-scan 1 → 2）、ms 6、その他 1 → 0。スラーの始まり found 534 → 533・467・311 → 312、誤り 136 → 134・26 → 25・14 → 13。`docs/eval-sets.tsv` を写した（評価台は見ない）。
+- `check -Detector`（1〜3 の版、`StartAt` の「最も近い和音」を締める前）: **OK（0 better・0 WORSE）**。締めた後の check は 4 と一緒に（下）。規則の check は触らない道（`DetectedTies`・`DetectedSlurs` は検出器ありだけ）。種 4/4（当時）。
+
+**数字（4・5、連符の括弧と LYS2020）**: 規則の check **OK（0 better・0 WORSE）**（L 字だけの版は `real.ninetofive.exact` の WORSE 1、上）。`check -Detector` **6 better・0 WORSE**（gen3・genF の meters の recall/precision/inVoice 99.93 → **100**: 括弧の半分の判定が緩んで meters の連符が 1 つ読めた）→ `-Accept` で基準値に。開発用の台: **1 better・0 worse**（7-1-scan 883 → **888**、タイ・スラーは同じ）、`docs/dev-sets.tsv` を写した。評価台: **3 better・0 worse**（chaminade-paysbleu-ms 1063 → **1069**、chaminade-paysbleu-scan 904 → 905、kinkel7-2-scan 806 → 808。タイ・スラーは同じ）、`docs/eval-sets.tsv` を写した（スキャン 25208・ms 11796・その他 17973）。種: **5/5**（`tools/seeds.ps1` は頁を 1 枚で読むので小節番号が 1 から始まり、124 小節が引けず「?」だった → 番号で見つからなければ種の箱の中心を含む同じパートの小節を取るようにした）。
+
+**7-1 scan の 2 頁目に残るタイ 5 本**: 14 rh（e'''~ の始まりの高さ: 格子では pos 10、加線で 9（y 700 の加線を 12 と見る）→ d''' で終わりの e'''（pos 10）と合わない。古い刷りの加線の読み）、17 rh（c'''4.~ c'''8、13 間、他声部の和音が間に: 始まり `slur_l` 0.38、終わりは何も無し → 「弱い始まり + 終わり無し + インク」が次の候補）、19 rh（d'''4.~: 始まり `slur_l` 0.34 が付点の 2.1 間先で `Fit` の 1 間の窓の外 = by no note、終わり `slur_r` 0.46）、20 voice（a'4.~ a'8: 始まりは何も見えず、終わり `slur_r` 0.21 が by no note。始まりの符頭は「両側に符幹 = 2 声のユニゾン」と読まれている。22 voice も同じユニゾンの読み）、14 voice（2 本中 1 本）。
+
+**分かったこと**:
+1. `--at 0,0` が全部出すのは `DetectedSlurs` の判断だけ。`DetectedTies` の判断は正確な座標（3 間以内）が要る。Zoom = 1 の頁（7-1 scan は 1 間 29.5 px）では `--at` の座標はページ座標（`cropbar.py` の box、`--detections` の出力と同じ）。
+2. 開発用の台の 1 曲を 1 頁だけ読むと、`--by-order` の整列が曲全体の正解に当たるので小節番号は頁の中の番号（7-1 の 2 頁目は 13〜23 → 1〜11）。diffs の小節番号を全曲の run と比べるときは全頁を読む。
+3. `omr read` には `--at`・`--detections`・`--tuplets` が無い（`ReadCommand.Prepare` の表）。種の頁を調べるときは `.score` を書いて `--config … --pages <dir> --from 1 --to 1 --out … --detector` で読む（Bohemian は 5 パート: treble・treble・alto・bass・bass_8）。
+4. `check -Detector` は他の omr を並べて走らせると 25 分（12 分の 2 倍）。走っている間はビルドしない: `dotnet build … -o <scratch>` で別の出力先に作って試す（`detector.onnx` も写される）。
+5. 弱い端の規則は `Symbols.Ties.cs` の 3 か所に分かれた: `DetectedTies`（`tie_r` 確か + 弱い始まり）、`DetectedSlurs` の `open`（確かな始まり + インク）、その後ろ（弱い両端 + インク）。どれも「同じ音の次の和音、間に他声部しかない」= `TieNext` を条件にしている。
+
+**次の一手**:
+1. 7-1 scan の残り 5 本（上）のうち規則で届くもの: 17 rh（弱い始まり + 終わり無し + インク: 2 の条件を弱い始まりにも）、19 rh（タイの始まりは `Fit` の 1 間より右、付点の 2 間先から出る: タイ候補のときだけ窓を広げる）。14 rh は加線の読み（別の領域）。
+2. 前の節の 1〜3（45 の採否、Lily# への連符の弧の依頼 = オーナーの判断、英雄の写真の書体、Release の lysc のビルドし直し）。
+3. 種は `tools/seeds.ps1` で 5/5 を保つ。新しい種の `omr-triage.json` は書いた（cause rules、commit は 4 のコミット）。
+
 ## 45 で増えたスラーの誤りを規則で除く: 連符の弱い数字と松葉の端は入れ、連符の弧の両端が確かな組・符頭から離れた端はタイでない・45 小節のフェルマータは入れない（2026-11-01 朝 2、前の節の次の一手 1）
 
 **現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、新しい種はなし（4/4 とも triage 済み）、REQUESTS.md に新しい `fixed` はなし（11・12・13 は done）。Lily# の Release の lysc は 14:26 のまま（前の節の次の一手 2 の一部、未解決）。**読み手を変えた**（学習し直しなし。前の節の 14 本のうち「規則で除ける」4〜5 本を、45 の読みで 1 本ずつ切り分けてから `Symbols.Ties.cs` に書いた。入ったのは 2 つ、試して外したのが 2 つ、規則にしないと決めたのが 1 つ）:

@@ -690,6 +690,20 @@ sealed class Verify
             else Flag(ek, $"lysc LYS{e.Code}: {(e.Text.Length > 80 ? e.Text[..80] + "..." : e.Text)}", "lysc");
             report.Add($"bar {ek.Bar} {partId}: lysc error LYS{e.Code} | {where.GetValueOrDefault(ek, "not on the pages read")}");
         }
+        // (and a tuplet lysc finds no note value for -- "warning LYS2020: this tuplet sounds 1/12 of a whole note, a
+        // length no note value writes: … at [NNN..MMM)", the span the bracket's own: a note the bracket covers was
+        // left outside it, a quarter and an eighth under a 3 read as the eighth alone in the bracket, the owner's
+        // Bohemian seed of 2026-11-01, bar 124. The bar is short or long with it too (LYS2001/2); this names the
+        // cause. Lily#'s request, docs/repro/lilysharp-requests-2026-11-01-tuplet-length.md)
+        foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(log, @"warning LYS2020: (.+?) at \[(\d+)\.\."))
+        {
+            if (SpanOf(int.Parse(m.Groups[2].Value)) is not { } tk) continue;
+            if (flags.TryGetValue(tk, out var had) && had.Any(f => f.Kind == "tuplet")) continue;
+            flagged.Add(tk); byLysc++;
+            string partId = tk.Part < cfg.Parts.Count ? cfg.Parts[tk.Part].Id : tk.Part.ToString();
+            Flag(tk, "the tuplet's bracket is missing a note: what it holds adds up to no note value (lysc LYS2020)", "tuplet");
+            report.Add($"bar {tk.Bar} {partId}: lysc warning LYS2020 | {where.GetValueOrDefault(tk, "not on the pages read")}");
+        }
         // (a flag on a bar's stems or tuplet numbers is one place to look at with the bar's part flags, not another)
         var places = flagged.Where(k => k.Part != AllParts || !flagged.Any(f => f.Bar == k.Bar && f.Part != AllParts)).ToList();
         lines.Add($"verify: input = {Source}; {reading.Keys.Count(k => k.Part != AllParts)} part-bars, {places.Count} flagged ({byLength} by length{(byTab > 0 ? $", {byTab} by TAB" : "")}{(byLysc > 0 ? $", {byLysc} by lysc's errors" : "")}); the reading has {onlyReading} symbols the input does not show, the input {onlyInput} the reading lacks{(unplaced > 0 ? $"; {unplaced} drawn heads from no bar" : "")}; lysc {sw.Elapsed.TotalSeconds:F1}s");
@@ -732,7 +746,8 @@ sealed class Verify
     /// changes no note: a tie 0.6-0.7, a dot only the scan shows (a staccato as often as not)
     /// 0.8-0.85, a slur 0.85-0.9, a whole-bar rest the text has for a bar the scan shows nothing in 0.85-0.9.
     /// lysc's errors in the .lys: two bars' worth with no bar line between (LYS2017) 0.15, as near certain a
-    /// slip as a note drawn wrong; another (a slur across a repeat, a pedal left open) 0.5.
+    /// slip as a note drawn wrong; a tuplet whose notes add up to no note value (LYS2020, a note left outside
+    /// its bracket) 0.15 likewise; another (a slur across a repeat, a pedal left open) 0.5.
     /// </summary>
     public static double Confidence(IEnumerable<(string Note, string Kind, int Count, int Matched, double Off)> found)
     {
@@ -751,7 +766,7 @@ sealed class Verify
         // (a difference that changes no note, within its band by the same share: a tie 0.6-0.7, a dot
         // 0.8-0.85, a slur or a blank bar 0.85-0.9; a dot the scan shows in a bar too short is the dot
         // the length lacks: the length says it)
-        return new[] { ("barline", 0.15), ("lysc", 0.5), ("tab", 0.3), ("length", length), ("tie", Of("tie", 0.6, 0.1)), ("dot", Of("dot", 0.8, 0.05)), ("slur", Of("slur", 0.85, 0.05)), ("blank", Of("blank", 0.85, 0.05)) }
+        return new[] { ("barline", 0.15), ("tuplet", 0.15), ("lysc", 0.5), ("tab", 0.3), ("length", length), ("tie", Of("tie", 0.6, 0.1)), ("dot", Of("dot", 0.8, 0.05)), ("slur", Of("slur", 0.85, 0.05)), ("blank", Of("blank", 0.85, 0.05)) }
             .Where(k => kinds.Contains(k.Item1)).Select(k => k.Item2).DefaultIfEmpty(0.2).Min();
     }
 
