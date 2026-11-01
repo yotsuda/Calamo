@@ -323,6 +323,32 @@ static partial class Symbols
             if (start?.Class == "slur_l") ps.TieEndsAsSlur.Add(start);
             a.Tie = a.TieByEnd = true;
         }
+        // a chord tied at a note to the next chord, which repeats others of its notes: those are tied too where
+        // the detector sees an end of their own arc (within 0.6 of a space of the head's height), however
+        // unsure (from Detector.WeakSlur) -- tabi's <cis fis>2.~ over the bar line on the owner's photo, the
+        // fis's tie_l at 0.81, the cis's arc at tie_l 0.11 and tie_r 0.43. A tie on one note only was the
+        // chord's in the .lys until it could be written a note at a time (Lily#'s 8a3780d5e)
+        Head Next(Head h) => ps.Heads.Where(o => o != h && o.St == h.St && o.Pos == h.Pos && o.X - h.X > 0.5 * s && o.X - h.X < 20 * s).OrderBy(o => o.X).FirstOrDefault();
+        foreach (var chord in chordOf.Values.Distinct().Where(c => c.Count > 1 && c.Any(h => h.Tie) && !c.All(h => h.Tie)).ToList())
+        {
+            var to = chord.Where(h => h.Tie).Select(Next).FirstOrDefault(n => n != null);
+            if (to == null) continue;
+            foreach (var h in chord.Where(h => !h.Tie))
+            {
+                var n = Next(h);
+                if (n == null || chordOf[n] != chordOf[to]) continue;
+                // (a slur's end seen there is the arc's as well, as a slur_l is a tie's start in StartAt: the
+                // cis's start in bar 3 seen as slur_l 0.31. An end comes in up to 0.6 of a space past the middle of
+                // a second's head set left of the stem: the fis's tie_r at 0.47, 5 pixels right of it)
+                var end = ps.Detections.Where(t => t.Score >= Detector.WeakSlur
+                        && (t.Class is "tie_l" or "slur_l" && t.X - h.X > -0.3 * s && t.X - h.X < 2.0 * s && Math.Abs(t.Y - h.Y) <= 0.6 * s
+                            || t.Class is "tie_r" or "slur_r" && n.X - t.X > -0.6 * s && n.X - t.X < 2.0 * s && Math.Abs(t.Y - n.Y) <= 0.6 * s))
+                    .MaxBy(t => t.Score);
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
+                    Console.WriteLine($"chord-mate of a tied head at {h.X:F0},{h.Y:F0} pos {h.Pos}, repeated at {n.X:F0},{n.Y:F0}: {(end == null ? "no end of its own arc seen" : $"{end.Class} {end.Score:F2} at {end.X:F0},{end.Y:F0}")} -> {end != null}");
+                if (end != null) h.Tie = true;
+            }
+        }
     }
 
     /// <summary>

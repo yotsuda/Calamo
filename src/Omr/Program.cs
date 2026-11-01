@@ -1201,15 +1201,20 @@ static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
     + (e.FullBar || e.Slash ? "" : (e.Dynamic != null ? "@" + e.Dynamic : "") + (e.HairpinEnd != null ? "@!" + e.HairpinEnd : "")
         + (e.HairpinStart != null ? "@" + e.HairpinStart : "") + (e.PedalUp ? "@!sustain" : "") + (e.PedalDown ? "@sustain" : ""))
     + (e.OttavaStart != 0 ? "@" + OttavaName(e.OttavaStart) : "") + (e.OttavaEnd != 0 ? "@!" + OttavaName(e.OttavaEnd) : "")
-    + (e.FullBar || e.Slash || e.IsRest ? "" : (e.Tie ? "~" : "") + (e.SlurEnd ? ")" : "") + (e.SlurStart ? "(" : ""));
+    + (e.FullBar || e.Slash || e.IsRest ? "" : (e.Tie && !MemberTies(e) ? "~" : "") + (e.SlurEnd ? ")" : "") + (e.SlurStart ? "(" : ""));
+
+// a chord tied at some of its notes, not all: each tied note's own "~" in the chord, <c'' f'' d'''~>8. (Lily#
+// 8a3780d5e, REQUESTS 16); a chord tied at all of them, or a note, takes the one "~" after it
+static bool MemberTies(Ev e) => e.Chord != null && e.Tied != null && e.Tied.Any(e.Chord.Contains) && !e.Chord.All(e.Tied.Contains);
 
 // an octave line by the letters printed (1 8va, -1 8vb, 2 15ma, -2 15mb): Lily#'s names for it since 2026-10-28
 static string OttavaName(int ottava) => (Math.Abs(ottava) == 2 ? "15m" : "8v") + (ottava > 0 ? "a" : "b");
 
-// the event itself, without its tie or slur: what an @todo is put after, and what a candidate replaces
+// the event itself, without its tie or slur (but a chord's member's tie, which stands in it): what an @todo is
+// put after, and what a candidate replaces
 static string EvCore(Ev e, int barTicks) => e.FullBar ? FullRest(barTicks, e.MultiBars)
     : e.Slash ? "/" + (Dur.Text(e.Ticks * e.Scale.Den / e.Scale.Num) ?? "4")
-    : (e.IsRest ? "r" : e.Chord != null ? "<" + string.Join(" ", e.Chord.Select(p => Sounding(p, e))) + ">" : Sounding(e.P, e))
+    : (e.IsRest ? "r" : e.Chord != null ? "<" + string.Join(" ", e.Chord.Select(p => Sounding(p, e) + (MemberTies(e) && e.Tied.Contains(p) ? "~" : ""))) + ">" : Sounding(e.P, e))
       + (Dur.Text(e.Ticks * e.Scale.Den / e.Scale.Num) ?? "4");
 
 // a pitch as the .lys writes it: as it sounds, under an octave clef an octave below the place it is printed

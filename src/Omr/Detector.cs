@@ -125,7 +125,8 @@ static class Detector
     public static double WeakPedal = 0.1, WeakStar = 0.2;
     // A slur's end likewise, taken only as the other end of a slur whose one end is sure
     // (Symbols.DetectedSlurs): an old print's slur ends are seen at 0.2-0.5 as often as above
-    // (and a tie's start, tie_l, likewise: a slur's start the detector takes for a tie's)
+    // (and a tie's start, tie_l, likewise: a slur's start the detector takes for a tie's; and a tie's
+    // end, tie_r, as the arc of a note of a chord tied at another, Symbols.DetectedTies: a photo's 0.43)
     public static double WeakSlur = 0.2;
     public static bool IsWeakPedal(Detection t) => t.Class is "ped_r" or "ped_up" or "ped_notch" && t.Score <= Threshold;
     // A rhythm slash likewise, kept apart (Symbols.Find's weakSlashes) and taken only on a one-line
@@ -273,7 +274,7 @@ static class Detector
         int dotClass = Array.IndexOf(Classes, "dot"), blackClass = Array.IndexOf(Classes, "head_black"), graceClass = Array.IndexOf(Classes, "grace_head"), halfClass = Array.IndexOf(Classes, "head_half"), graceHollowClass = Array.IndexOf(Classes, "grace_hollow");
         int tipClass = Array.IndexOf(Classes, "hairpin_tip"), openClass = Array.IndexOf(Classes, "hairpin_open");
         int pedEndClass = Array.IndexOf(Classes, "ped_r"), pedUpClass = Array.IndexOf(Classes, "ped_up"), notchClass = Array.IndexOf(Classes, "ped_notch");
-        int slurL = Array.IndexOf(Classes, "slur_l"), slurR = Array.IndexOf(Classes, "slur_r"), tieL = Array.IndexOf(Classes, "tie_l");
+        int slurL = Array.IndexOf(Classes, "slur_l"), slurR = Array.IndexOf(Classes, "slur_r"), tieL = Array.IndexOf(Classes, "tie_l"), tieR = Array.IndexOf(Classes, "tie_r");
         int slashClass = Array.IndexOf(Classes, "slash_black"), slashHollowClass = Array.IndexOf(Classes, "slash_hollow");
         int ottFirst = Array.IndexOf(Classes, "ott_8va");   // (the four signs' classes follow one another)
         int segnoClass = Array.IndexOf(Classes, "segno"), trillClass = Array.IndexOf(Classes, "orn_trill");
@@ -295,7 +296,7 @@ static class Detector
                         : c == halfClass || c == graceHollowClass ? Math.Min(Threshold, WeakHalf)
                         : c == tipClass || c == openClass ? Math.Min(Threshold, WeakHairpin)
                         : c == pedEndClass || c == pedUpClass || c == notchClass ? Math.Min(Threshold, WeakPedal)
-                        : c == slurL || c == slurR || c == tieL ? Math.Min(Threshold, WeakSlur)
+                        : c == slurL || c == slurR || c == tieL || c == tieR ? Math.Min(Threshold, WeakSlur)
                         : c == slashClass || c == slashHollowClass ? Math.Min(Threshold, WeakSlash)
                         : c >= ottFirst && c < ottFirst + 4 ? Math.Min(Threshold, WeakOttavaSeen)
                         : c == segnoClass ? Math.Min(Threshold, WeakSegno)

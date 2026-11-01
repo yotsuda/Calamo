@@ -630,6 +630,7 @@ static class Ottavas
             {
                 e.P = Up(e.P);
                 if (e.Chord != null) e.Chord = e.Chord.Select(Up).ToList();
+                if (e.Tied != null) e.Tied = e.Tied.Select(Up).ToList();
                 if (e.Graces != null) e.Graces = e.Graces.Select(Up).ToList();
                 foreach (var a in e.Alts ?? new()) if (raisedAlts.Add(a)) { a.From = Up(a.From); a.To = Up(a.To); }
             }
