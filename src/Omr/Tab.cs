@@ -305,8 +305,9 @@ static class Tab
             e.P = e.Chord[^1];
         }
         else e.P = now;
+        e.Respell(was, now);
         var one = single.FirstOrDefault(o => !o.IsRest && o.P == was && Same(o, e, s));
-        if (one != null) one.P = now;
+        if (one != null) { one.P = now; one.Respell(was, now); }
     }
 
     static void Add(Ev e, List<Ev> single, Pitch p, double s)
@@ -319,7 +320,7 @@ static class Tab
         if (one == null) return;
         var c = one.Copy();
         c.P = p;
-        c.Tie = false;
+        c.Tied = null;
         single.Insert(single.IndexOf(one) + 1, c);
     }
 

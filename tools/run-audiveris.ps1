@@ -144,7 +144,7 @@ foreach ($name in $benches.Keys) {
     }
     if ($ownText -match 'truth (\d+), omr \d+; pitch\+duration found (\d+)') {
         $row = [ordered]@{ set = $name; truth = [int]$Matches[1]; found = [int]$Matches[2] }
-        # (a MusicXML truth's ties and slurs, a chord each: found of the truth's, and read right of those read;
+        # (a MusicXML truth's ties, a note each, and slurs, a chord each: found of the truth's, and read right of those read;
         # every row has the columns, blank where the truth marks none: Export-Csv takes the first row's)
         foreach ($m in $marks) {
             foreach ($c in 'Truth', 'Found', 'Omr', 'Right') { $row["$($m[1])$c"] = '' }

@@ -100,7 +100,7 @@ static class Glissandi
             {
                 e.Articulations ??= new List<string>();
                 if (!e.Articulations.Contains("glissando")) e.Articulations.Add("glissando");
-                if (g.Untied) e.Tie = false;
+                if (g.Untied) e.Tied = null;
             }
         }
     }

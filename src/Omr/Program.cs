@@ -750,7 +750,7 @@ for (int si = 0; si < sections.Count; si++)
                     // dropped: two cue blocks side by side are two voices, and Lily# refuses a tie from
                     // one into the next -- the Eroica part's tied "Vln. 1" cues over 10 bars)
                     bool cue = v.Count > 0 && v.All(e => e.Cue) && v.Any(e => !e.IsRest);
-                    if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tie = false;
+                    if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tied = null;
                     string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm);
                     string open = cue ? " { cue { " : " { ";
                     marks.AddRange(vm.Select(m => (m.Ev, music.Length + open.Length + m.At)));
@@ -1232,6 +1232,7 @@ static Ev AltEv(Ev e, EvAlt a)
         }
         else if (v.P == a.From) v.P = a.To;
         else return null;
+        v.Respell(a.From, a.To);
     }
     if (a.DotsBy != 0)
     {

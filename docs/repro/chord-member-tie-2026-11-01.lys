@@ -1,0 +1,26 @@
+// REQUESTS 16: a tie on ONE member of a chord. LilyPond's chord_body takes '~' as a post-event
+// of the member (<c'' f'' d'''~>8. <c'' f'' d'''>16: only the d''' is tied; see the .ly beside this),
+// as Lily# already takes a slur mark on a member (<c e( g>4 <d f) a>). Today lysc rejects it:
+//   <c'' f'' d'''~>8. <c'' f'' d'''>16   -> LYS0002 Expected 'CloseAngle', found 'Tilde'
+// What the OMR reads: a held note on one stem with the inner voice's repeated chords (an old
+// print, kinkel7-1's scan, bar 19: d'''4.~ d'''8 over <c'' f''>8 eighths). A '~' after the chord
+// ties every note the next chord repeats, so the c'' and f'' would be tied too (bar 2 below).
+// Bar 1: the chord's '~' to the same chord (all three tied: right where the print ties all).
+// Bar 2: the chord's '~' where the print ties only the d''' -- the c'' and f'' tied are extra.
+// Bar 3: the chord's '~' to a single note: only the d''' is tied (as LilyPond's tie-column), no warning.
+// Bar 4 (commented out): the spelling asked for.
+octave absolute
+title "A chord member's tie"
+time 3/4
+key c major
+part rh {
+  clef treble
+  section A {
+    <c'' f'' d'''>8.~ <c'' f'' d'''>16 r2 |
+    <c'' f'' d'''>8.~ <c'' f'' d'''>16 r2 |
+    <c'' f'' d'''>8.~ d'''16 r2 |
+    // <c'' f'' d'''~>8. <c'' f'' d'''>16 r2 |
+  }
+}
+form { A }
+score { staff rh }

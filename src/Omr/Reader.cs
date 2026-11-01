@@ -949,7 +949,7 @@ static class Reader
                     Ev Twin(Ev f)
                     {
                         var c = f.Copy();
-                        c.StemX = cx + (f.StemX - f.X); c.X = cx; c.Beam = beam; c.Tie = false; c.SlurStart = c.SlurEnd = false; c.Alts = null; c.Graces = null; c.GraceKind = null;
+                        c.StemX = cx + (f.StemX - f.X); c.X = cx; c.Beam = beam; c.Tied = null; c.SlurStart = c.SlurEnd = false; c.Alts = null; c.Graces = null; c.GraceKind = null;
                         c.ClefBefore = null; c.Tremolo = 0; c.TremoloFirst = false;
                         return c;
                     }
@@ -995,7 +995,7 @@ static class Reader
                     P = pitch, Ticks = Dur.Of(basis, h.Dots) * h.Scale.Num / h.Scale.Den / (h.Tremolo > 0 ? 2 : 1), X = x, Scale = h.Scale, Tuplet = h.Tuplet,
                     Tremolo = h.Tremolo, TremoloFirst = h.TremoloFirst,
                     Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 ? h.Cluster : 0,
-                    Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, Tie = h.Tie,
+                    Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
                     SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
                     Bare = bare && !h.Slash ? new List<int> { dia } : null, OctaveClef = octaveClef,
@@ -1017,7 +1017,7 @@ static class Reader
                 single.Add(ev.Copy());
                 if (mate != null)
                 {
-                    mate.Tie |= ev.Tie;
+                    if (ev.Tie) mate.TieAt(pitch);
                     mate.StemLo = Math.Min(mate.StemLo, ev.StemLo); mate.StemHi = Math.Max(mate.StemHi, ev.StemHi);
                     mate.SlurStart |= ev.SlurStart;
                     mate.SlurEnd |= ev.SlurEnd;
@@ -1441,22 +1441,21 @@ static class Reader
     /// </summary>
     static void CarryTies(List<Ev> prev, List<Ev> cur, int[] keyAlt)
     {
-        static List<Pitch> Pitches(Ev e) => e.Chord ?? new List<Pitch> { e.P };
-        // the steps held into this bar: a tied event's, with no event after it at that step
+        // the steps held into this bar: a tied note's, with no event after it at that step
         var held = new Dictionary<int, int>();
         for (int i = 0; i < prev.Count; i++)
         {
             var e = prev[i];
             if (e.IsRest || e.Slash || !e.Tie) continue;
-            foreach (var p in Pitches(e))
-                if (!prev.Skip(i + 1).Any(x => !x.IsRest && !x.Slash && Pitches(x).Any(q => q.Diatonic == p.Diatonic)))
+            foreach (var p in e.Tied)
+                if (!prev.Skip(i + 1).Any(x => !x.IsRest && !x.Slash && x.Pitches.Any(q => q.Diatonic == p.Diatonic)))
                     held[p.Diatonic] = p.Alter;
         }
         foreach (var e in cur)
         {
             if (held.Count == 0) return;
             if (e.IsRest || e.Slash) continue;
-            var ps = Pitches(e);
+            var ps = e.Pitches;
             for (int k = 0; k < ps.Count; k++)
             {
                 int dia = ps[k].Diatonic;
@@ -1466,6 +1465,7 @@ static class Reader
                 var now = new Pitch(dia, alt);
                 if (e.Chord != null) { e.Chord[k] = now; e.P = e.Chord[^1]; }
                 else e.P = now;
+                e.Respell(old, now);
                 if (e.Alts != null)
                     foreach (var x in e.Alts)
                     {

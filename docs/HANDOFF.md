@@ -2,6 +2,25 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 和音の 1 音だけのタイ: 読みと採点を符頭ごとに（`Ev.Tied`）、書き方は Lily# に依頼（REQUESTS 16）（2026-11-01 夕、前の節の次の一手 1）
+
+**現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、種のフォルダーは 5 つとも `omr-triage.json` あり、REQUESTS.md に新しい `fixed` はなし（15 = Release の lysc のビルドし直しは open のまま、lysc は 2026-10-31 14:26 のまま）。`data/eval/chopin28-4/src/` の untracked 2 つはそのまま。**学習し直しなし。**
+1. **Lily# の書き方を確かめた**（scratch の `.lys` を Release の lysc で描いた）: `<c'' f'' d'''~>8.` は **LYS0002**（`Expected 'CloseAngle', found 'Tilde'`。`ParseChord` が member に受けるのはピッチ・度数・ドラム名・スラーの `(` `)` だけ、`GRAMMAR.md` の `ChordNote = PitchToken, { Annotation }`）。和音の後ろの `~` は**次の項目が繰り返す音だけ**を結ぶ: `<c'' f'' d'''>8.~ d'''16` は d''' だけ結んで警告なし、`<c'' f'' d'''>8.~ <f'' d'''>16` は f''・d'''（LilyPond 2.26.0 も同じ絵。1 音も合わなければ LYS4007）。→ **REQUESTS 16**（`docs/repro/chord-member-tie-2026-11-01.lys` と LilyPond 用の `.ly`）: LilyPond の chord_body の post-event と同じ `<c'' f'' d'''~>`、メンバーのスラー `<c e( g>` と同じ置き方。
+2. **読み手は符頭ごとのタイを持つ**（`Music.cs`）: `Ev.Tie`（bool）→ **`Ev.Tied`**（結ばれた音の `List<Pitch>`、低い順、null = なし）、`Tie` は `Tied != null` の計算プロパティ。`Pitches`（和音の音か 1 音）、`TieAt(p)`（和音の合流: `Reader` の `mate.Tie |= ev.Tie` → `mate.TieAt(pitch)`）、`Respell(was, now)`（音の綴り直しでタイの音も動く: `CarryTies`、`Tab.Replace`、`AltEv`）。`CarryTies` は**結ばれた音だけ**を次の小節へ持ち越す（前は和音の全部の音）。`Copy()` はリストを写す。正解の MusicXML（`Truth.cs`）も音ごとの `tied start` を `Tied` に（和音は `TieAt` で集める）。
+3. **採点を符頭ごとに**（`Scorer.AddTiesSlurs`）: タイは**音ごと**（正解の tied start の音と、読みの `Tied` の音を MIDI で突き合わせ）、スラーは和音ごとのまま。`docs/dev-sets.tsv`・`eval-sets.tsv` の `tie*` 列の意味が変わる（和音のタイ 1 → 音の数）。`run-audiveris.ps1` のコメントも直した。
+4. **書き手は和音の `~` のまま**（`EvText`: `e.Tie ? "~"`）。Lily# が 16 を入れたら、全部結ばれた和音は `~`、一部なら符頭ごとの `~`（`<c'' f'' d'''~>`）に変える（版の切り替えは作らない: 後方互換なしの方針）。
+5. **7-1 scan の 19 rh は書き方だけでは直らない**: 読みは `{ <c'' f'' d'''>8.~ <c'' f''>8 × 8 }` と `{ s4 s8 d'''8 … }` で、d''' の相手の `d'''8` は上の声部にいる。書き方があっても d''' は結べない（LYS4007、c''・f'' の余分は消える）。17 rh は `c'''8.~` が上の声部に分かれているが **`4.` が `8.`**（内声の連桁の符幹を共有するので旗 1 本と読む）で、両方とも声部が 9/8 の長さ（todo）。本当の直しは W4: 連桁の符幹を共有する付点の持続音を、小節の長さの制約で `4.` と読んで上の声部へ。
+
+**数字**（タイの列は意味が変わった: 和音のタイ 1 → 音の数。音・スラーは全部同じ）:
+- 規則の check **OK（0 better・0 WORSE）**、`check -Detector` **OK（0 better・0 WORSE）**（タイの記号単位の採点 `SymEval` は前から符頭ごと）。種 **5/5**。
+- 開発用の台（`-Dev -Reuse`）: 音は **30 台とも同じ**。タイ: 正解 スキャン 53 → 54・ms 53 → 54、found スキャン 32・ms 35（同じ）、誤り スキャン 8 → **9**。lang36-3-scan の found 2 → 3（和音のタイが 2 音に数えられる）、**10-6-scan の found 1 → 0・誤り 1 → 2**: 13 小節 voice で正解の `d'( d')`（メリスマ、62）が読みでは下の声部の d' と和音 `<d' d''>` に混ざってタイに読まれ、前は和音の音の重なりで「found」、今は結ばれた符頭（74 = d''）だけで比べるので外れ（前の節で書いた崩れた小節: 前より正直になっただけ）。`docs/dev-sets.tsv` を写した。
+- 評価台（`-Eval -Reuse`、`setsum.py`）: 音 スキャン 25208・ms 11796・その他 17974（**66 台とも同じ**）。タイ: 正解 スキャン 571 → **806**・ms 214 → **301**・その他 357 → **505**、found 319 → **413**・114 → **156**・286 → **394**（再現率 55.9 → 51.2%・53.3 → 51.8%・80.1 → 78.0%: 和音のタイの取りこぼしが音の数だけ数えられる）、誤り 34 → **46**・6 → **8**・0（精度 9.5 → 9.9% の誤り・5.0 → 4.9%・0）。台ごとは found 28 better・誤り 7 worse（dl-scan 16 → 17、boulanger-scan 2 → 7、holmes16-scan 7 → 11 など: 誤りも音ごとに数えるので、和音の一部だけが正解の所や和音の別の音を結んだ所が音の数だけ出る。前の「和音に 1 音でも共通なら found」より厳しい）。`docs/eval-sets.tsv` を写した（評価台は見ない）。
+
+**次の一手**:
+1. Lily# が REQUESTS 16 を `fixed` にしたら（新しい lysc で `chord-member-tie-2026-11-01.lys` の 4 小節目を確かめて `done`）: `EvText` を符頭ごとの `~` に（全部結ばれていれば和音の `~`）、`check -Detector`（verify）と開発用の台で `.lys` が lysc を通ることを確かめる。REQUESTS 15（Release のビルドし直し）が先に要る。
+2. 7-1 scan の 17 rh・19 rh の声部（上の 5）: 連桁の符幹を共有する付点の持続音。内声の 8 分の連桁の 1 本目の符幹に乗る、付点つきの符頭が、その連桁の声部に入ると小節が 1/16 長く、上の声部が 4. 足りない → 持続音を `4.` にして上の声部へ移す制約。`Reader` の声部の組み立て（W4）。
+3. 前の節の 2・3（45 の採否、Lily# への連符の弧の依頼 = オーナーの判断、英雄の写真の書体、Release の lysc のビルドし直し = REQUESTS 15）、14 rh（加線の読み）、20・22 voice（ユニゾンの読み）。
+
 ## 片方の端しか見えない弧も、同じ音の次（前）の符頭までインクが弓なりに届けばタイ: 7-1 scan の 17 rh・19 rh（2026-11-01 午後、前の節の次の一手 1）
 
 **現在地**: 検出器は **detector42 のまま**（`data/detector.onnx`）。セッションの頭の規則の check は OK（0 better・0 WORSE）、種 5/5、REQUESTS.md に新しい `fixed` はなし（15 = Release の lysc のビルドし直しは open のまま、lysc は 2026-10-31 14:26 のまま）。`data/eval/chopin28-4/src/` の untracked 2 つはそのまま（触っていない）。**読み手を変えた**（学習し直しなし、`Symbols.Ties.cs` の `DetectedSlurs` だけ）:

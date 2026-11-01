@@ -162,8 +162,8 @@ static class NotesTruth
 /// the config. Bars are the measures in order (not their printed numbers). Pitches keep their
 /// spelling. Grace and cue notes and invisible rests (a spacer's) are left out. The staff's
 /// voices go to Voices, chords as one event; with poly, Bars holds each note of a chord on its own
-/// (as the .notes truth does). A note's ties and slurs are kept (Tie, SlurStart, SlurEnd), a chord's
-/// in Voices as any of its notes'.
+/// (as the .notes truth does). A note's ties and slurs are kept (Tied, SlurStart, SlurEnd); a chord's
+/// in Voices holds the notes tied (Tied: some of them, or all) and the slur of any of its notes.
 /// </summary>
 static class MusicXmlTruth
 {
@@ -213,7 +213,7 @@ static class MusicXmlTruth
                                 if (notations.Any(n => n.Element("arpeggiate") != null)) ev.Articulations = new List<string> { "arpeggio" };
                                 // (a tie on the note it starts at; a slur on one note of its chord: Scorer.AddTiesSlurs counts them a chord)
                                 bool Has(string name, string type) => notations.Any(n => n.Elements(name).Any(x => (string)x.Attribute("type") == type));
-                                ev.Tie = Has("tied", "start");
+                                if (Has("tied", "start")) ev.Tied = new List<Pitch> { ev.P };
                                 ev.SlurStart = Has("slur", "start");
                                 ev.SlurEnd = Has("slur", "stop");
                             }
@@ -242,9 +242,10 @@ static class MusicXmlTruth
                                 last.Chord.Sort((a, b) => a.Diatonic.CompareTo(b.Diatonic));
                                 last.P = last.Chord[^1];
                                 if (e.Articulations != null) last.Articulations ??= e.Articulations;
-                                last.Tie |= e.Tie; last.SlurStart |= e.SlurStart; last.SlurEnd |= e.SlurEnd;
+                                if (e.Tie) last.TieAt(e.P);
+                                last.SlurStart |= e.SlurStart; last.SlurEnd |= e.SlurEnd;
                             }
-                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations, Tie = e.Tie, SlurStart = e.SlurStart, SlurEnd = e.SlurEnd });
+                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations, Tied = e.Tied == null ? null : new List<Pitch>(e.Tied), SlurStart = e.SlurStart, SlurEnd = e.SlurEnd });
                         }
                         if (!t.Voices.TryGetValue((bar, id), out var vs)) t.Voices[(bar, id)] = vs = new List<List<Ev>>();
                         vs.Add(line);
@@ -336,9 +337,10 @@ sealed class Scorer
 
     static string ShowChords(List<HashSet<int>> a) => string.Join(" ", a.Select(h => string.Join(",", h.Order())));
 
-    // ties and slurs: a chord's (an event of a voice: the .lys writes "~", "(" and ")" a chord), matched within the
-    // part-bar by a note they share, as arpeggios are. The truth's MusicXML marks a tie on each note it holds and a
-    // slur on one note of its chord; the reading's tie holds every note of its chord the next one repeats.
+    // ties and slurs. A tie is a note's (the truth's MusicXML marks each note it holds, the reading each head an arc
+    // leaves; a chord's tie, every note of it): matched within the part-bar by the note. A slur is a chord's (an
+    // event of a voice: the .lys writes "(" and ")" a chord; the truth's MusicXML marks one note of the chord),
+    // matched within the part-bar by a note they share, as arpeggios are.
     static readonly (string Name, Func<Ev, bool> Has)[] TieSlurMarks = { ("ties", e => e.Tie), ("slur starts", e => e.SlurStart), ("slur ends", e => e.SlurEnd) };
     public readonly int[,] TieSlur = new int[3, 4];   // per mark (ties, slur starts, slur ends): truth, omr, found, read right
     public List<string> TieSlurDiffs = new();
@@ -348,7 +350,9 @@ sealed class Scorer
         for (int k = 0; k < TieSlurMarks.Length; k++)
         {
             var has = TieSlurMarks[k].Has;
-            List<HashSet<int>> Chords(List<List<Ev>> vs) => vs.SelectMany(v => v).Where(e => !e.IsRest && has(e)).Select(e => (e.Chord ?? new List<Pitch> { e.P }).Select(p => p.Midi()).ToHashSet()).ToList();
+            List<HashSet<int>> Chords(List<List<Ev>> vs) => k == 0
+                ? vs.SelectMany(v => v).Where(e => !e.IsRest && e.Tie).SelectMany(e => e.Tied.Select(p => new HashSet<int> { p.Midi() })).ToList()
+                : vs.SelectMany(v => v).Where(e => !e.IsRest && has(e)).Select(e => e.Pitches.Select(p => p.Midi()).ToHashSet()).ToList();
             var t = Chords(truth);
             var o = Chords(omr);
             var (found, right) = MatchChords(t, o);

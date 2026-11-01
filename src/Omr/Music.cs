@@ -100,7 +100,8 @@ sealed class Ev
     public int Beam;                            // OMR: the ink piece of its beamed group (0: no beam)
     public List<Pitch> Chord;                   // two or more pitches, low to high; P = the top
     public bool MidiOnly;                       // truth knows the sounding pitch, not its spelling
-    public bool Tie;                            // OMR: held into the next event (a tie starts at it)
+    public List<Pitch> Tied;                    // the notes a tie starts at, low to high (a chord's: some of them, or all), or null: none
+    public bool Tie => Tied != null;            // held into the next event (a tie starts at one of its notes at least)
     public bool SlurStart, SlurEnd;             // OMR: a slur starts / ends at it
     public int Stem;                            // OMR: +1 stem up, -1 stem down, 0 none (rest, whole note)
     public double Y;                            // OMR: page y (a rest's height hints at its voice)
@@ -127,7 +128,26 @@ sealed class Ev
     {
         var e = (Ev)MemberwiseClone();
         if (Chord != null) e.Chord = new List<Pitch>(Chord);
+        if (Tied != null) e.Tied = new List<Pitch>(Tied);
         return e;
+    }
+
+    /// <summary>Its notes: the chord's, or the one.</summary>
+    public List<Pitch> Pitches => Chord ?? new List<Pitch> { P };
+
+    /// <summary>A tie starts at the note p (one of its notes; the chord's tie, at every note of it).</summary>
+    public void TieAt(Pitch p)
+    {
+        Tied ??= new List<Pitch>();
+        if (!Tied.Contains(p)) { Tied.Add(p); Tied.Sort((a, b) => a.Diatonic.CompareTo(b.Diatonic)); }
+    }
+
+    /// <summary>Its note was respelled or moved (was -> now): a tie at it moves with it.</summary>
+    public void Respell(Pitch was, Pitch now)
+    {
+        if (Tied == null) return;
+        int k = Tied.IndexOf(was);
+        if (k >= 0) Tied[k] = now;
     }
 
     public string Show() => FullBar ? "R"
