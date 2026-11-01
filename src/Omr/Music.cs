@@ -123,6 +123,7 @@ sealed class Ev
     public int Tremolo;                         // OMR: a two-note tremolo's note (Ticks: half its written value): the strokes between the two
     public bool TremoloFirst;                   // OMR: the first of the two
     public bool Cue;                            // OMR: a cue's note or rest, small over the part's own full-bar rest (the .lys writes its voice in cue { })
+    public bool Held;                           // OMR: another voice's held note written on a beamed chord's stem (Head.Held): its value from the bar's time (Reader.HeldNotes)
 
     public Ev Copy()
     {

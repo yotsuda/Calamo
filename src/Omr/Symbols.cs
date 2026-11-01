@@ -32,6 +32,7 @@ sealed class Head
     public int Tremolo;          // a two-note tremolo's note: the strokes between it and its mate (Symbols.Tremolos); each plays half its written value
     public bool TremoloFirst;    // the first note of the two
     public bool TremoloStem;     // one of the two has a stem: both are halves (a hollow head's stem missed, read as a whole's)
+    public bool Held;            // another voice's held note written on a beamed chord's stem, the chord's dot at it alone (Symbols.Classify): its own event, its value from the bar's time (Reader.HeldNotes)
     /// <summary>Whether its sign or dot may be one found on this staff: its own, or the nearest it was moved from (signs and dots go by the nearest staff).</summary>
     public bool On(Staff st) => St == st || Was == st;
 }

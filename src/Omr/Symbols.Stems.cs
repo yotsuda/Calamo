@@ -968,13 +968,18 @@ static partial class Symbols
         var weakTwo = new List<Head>();             // a two the detector half saw where the rules count one
         // (a stem whose piece of ink holds no other stem of the staff, and whose ink right of it, from
         // the tip on, is one run of 0.55 to 0.9 of a space: two flags run together are a space and more)
-        bool LoneFlag(Head h)
+        // the stem's piece of ink holds another stem of the staff within eight spaces (a beam's), or none is found
+        // (any other stem: two sixteenths half a space apart, a short beam between them -- kinkel10-2's)
+        bool SharedPiece(Head h)
         {
             int height = ps.Labels.Length / ps.LabelW;
             int piece = LabelNear(ps.Labels, ps.LabelW, height, h.StemX, (h.Y + h.Tip) / 2, s);
-            // (any other stem: two sixteenths half a space apart, a short beam between them -- kinkel10-2's)
-            if (piece == 0 || ps.Heads.Any(o => o.HasStem && o.St == h.St && Math.Abs(o.StemX - h.StemX) >= 0.3 * s && Math.Abs(o.StemX - h.StemX) < 8 * s
-                                                && LabelNear(ps.Labels, ps.LabelW, height, o.StemX, (o.Y + o.Tip) / 2, s) == piece)) { Dbg("shared piece " + piece); return false; }
+            return piece == 0 || ps.Heads.Any(o => o.HasStem && o.St == h.St && Math.Abs(o.StemX - h.StemX) >= 0.3 * s && Math.Abs(o.StemX - h.StemX) < 8 * s
+                                                   && LabelNear(ps.Labels, ps.LabelW, height, o.StemX, (o.Y + o.Tip) / 2, s) == piece);
+        }
+        bool LoneFlag(Head h)
+        {
+            if (SharedPiece(h)) { Dbg("shared piece"); return false; }
             int dir = h.Up ? 1 : -1, x = (int)Math.Round(h.StemX + 0.5 * s), y = (int)h.Tip, run = 0;
             if (x < 0 || x >= ink.W) return false;
             // (a flag runs right of its stem a space or so, a beam on to the next stem, or left: a scan
@@ -1000,6 +1005,39 @@ static partial class Symbols
             for (int k = 0; k < 0.5 * s; k++, y += dir) if (y >= 0 && y < ink.H && ink[x, y]) return false;
             return true;
         }
+        // a thin stroke runs through the stem's tip to its left over half a space (within 0.6 space of the tip's
+        // row): a slur or a tie. A beam runs left too, but is 0.4 space thick and more, a stroke under 0.3
+        // (genF's broken beams, their ink left of the stem no other stem's piece, were taken for strokes)
+        bool CrossedAtTip(Head h)
+        {
+            int dir = h.Up ? 1 : -1, sx = (int)Math.Round(h.StemX), off = Math.Max(2, (int)(0.15 * s) + 1);
+            bool crossed = false;
+            for (int k = -(int)(0.6 * s); k < 0.6 * s && !crossed; k++)
+            {
+                int yy = (int)h.Tip + dir * k, l = 0;
+                if (yy <= 0 || yy >= ink.H - 1) continue;
+                for (int xx = sx - off; xx > 0 && (ink[xx, yy] || ink[xx, yy - 1] || ink[xx, yy + 1]); xx--) l++;
+                crossed = l > 0.6 * s;
+            }
+            if (!crossed) return false;
+            // (only a held note over the other voice's beamed chord at its x, its stem the other way: a hairpin's
+            // line or a staff line's remnant crosses a plain eighth's tip as well -- kinkel10-1's scan, bar 5's
+            // b'8 under the hairpin, bar 3's b,,8; kinkel7-6's e,8)
+            if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                foreach (var o in ps.Heads.Where(o => o != h && o.St == h.St && Math.Abs(o.X - h.X) < 0.6 * s))
+                    Console.WriteLine($"  crossed tip of {h.X:F0},{h.Y:F0}: the head at {o.X:F0},{o.Y:F0} under it, stem {(o.HasStem ? (o.Up ? "up" : "down") : "none")}, {o.Beams} beams, its piece shared {SharedPiece(o)}");
+            if (!ps.Heads.Any(o => o != h && o.St == h.St && o.HasStem && o.Up != h.Up && Math.Abs(o.X - h.X) < 0.6 * s && o.Beams >= 1 && SharedPiece(o)))
+                return false;
+            // (its thickness: the longest run of ink rows half a space left of the stem, about the tip)
+            int x = sx - off - (int)(0.5 * s), run = 0, thick = 0;
+            if (x <= 0) return false;
+            for (int yy = (int)h.Tip - (int)(0.8 * s); yy <= (int)h.Tip + (int)(0.8 * s); yy++)
+            {
+                if (yy > 0 && yy < ink.H && ink[x, yy]) { run++; thick = Math.Max(thick, run); }
+                else run = 0;
+            }
+            return thick < 0.3 * s;
+        }
         foreach (var h in ps.Heads)
         {
             if (!h.HasStem || h.Hollow) continue;
@@ -1016,7 +1054,18 @@ static partial class Symbols
             }
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                 Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: {(best == null ? "none" : $"{best.Class} at {best.X:F0},{best.Y:F0} ({best.Score:F2})")}, rules counted {h.Beams}");
-            if (best == null) continue;
+            if (best == null)
+            {
+                // (no tip marked at all, and the rules' one flag on an up stem no other stem shares where a stroke
+                // crosses the tip to the left: the stroke's, as below -- kinkel7-1's scan, bar 14's e'''4.~ under its tie)
+                if (h.Beams == 1 && h.Up && ink != null && ps.Labels != null && CrossedAtTip(h) && !SharedPiece(h))
+                {
+                    if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                        Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: no tip marked, a stroke crosses the rules' tip to the left on a stem of its own, no flag's: 0");
+                    h.Beams = 0;
+                }
+                continue;
+            }
             int n = best.Class[5] - '0';
             // (the generator writes next to no 32nd notes, so the detector has seen one three-beam
             // tip and calls them two-beam: where the rules count three at a tip it calls two, three
@@ -1027,6 +1076,16 @@ static partial class Symbols
             // the white between two beams)
             ruled[h] = h.Beams;
             if (n < h.Beams && (h.Up ? best.Y - h.Tip : h.Tip - best.Y) > 0.75 * s) continue;
+            // (a one the detector is less than sure of at a stem the rules count no flag or beam on, where a
+            // stroke runs through the stem's tip to its left over half a space -- a slur or a tie crossing it;
+            // a flag lies to the right alone -- is the stroke's: the rules' none stands. kinkel7-1's scan,
+            // bar 17's c'''4.~ under the bar before's slur, read as an eighth at stem_1 0.55)
+            if (n == 1 && h.Beams == 0 && best.Score < SureScore && ink != null && ps.Labels != null && CrossedAtTip(h) && !SharedPiece(h))
+            {
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                    Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: a stroke crosses the tip to the left, no flag's: the rules' 0 stands");
+                continue;
+            }
             // (an old print's eighth flag, a filled wedge, the detector less than sure calls two: where
             // the rules count one on a stem no other stem shares (a flag, not a beam), its ink beside the
             // stem one run shorter than two flags run together, the one stands -- kinkel10-4's voice,

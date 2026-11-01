@@ -286,13 +286,37 @@ static partial class Symbols
             }
             chords.AddRange(open);
         }
-        foreach (var chord in chords)
+        // An old print writes another voice's held note on a beamed chord's stem, its own dot beside it
+        // (kinkel7-1's scan, bar 19: d'''4.~ on the stem of the inner voice's first <c'' f''>8, the dot at
+        // the d''' alone). A chord's dots stand at every head's height (two heads a second or a third
+        // apart share a space's dot): the dots of a beamed stem at the head farthest from its tip alone,
+        // that head a fourth and more off the next, are such a note's. It leaves the chord (Head.Held:
+        // its own event, its value from the bar's time -- Reader.HeldNotes), the chord's heads undotted.
+        int Cols(IEnumerable<Head> heads)
         {
-            var xs = chord.SelectMany(h => dotsAt.GetValueOrDefault(h) ?? new List<double>()).OrderBy(x => x).ToList();
             int cols = 0;
             double last = double.MinValue;
-            foreach (var x in xs) if (x - last > 0.3 * s) { cols++; last = x; }
-            foreach (var h in chord) h.Dots = cols;
+            foreach (var x in heads.SelectMany(h => dotsAt.GetValueOrDefault(h) ?? new List<double>()).OrderBy(x => x))
+                if (x - last > 0.3 * s) { cols++; last = x; }
+            return cols;
+        }
+        foreach (var chord in chords)
+        {
+            if (chord.Count < 2 || !chord[0].HasStem || chord.Max(h => h.Beams) < 1 || chord.Any(h => h.Grace || h.Slash || h.Cross)) continue;
+            bool up = chord[0].Up;
+            var h = up ? chord.MaxBy(x => x.Y) : chord.MinBy(x => x.Y);
+            var next = chord.Where(x => x != h).MinBy(x => Math.Abs(x.Pos - h.Pos));
+            string why = Math.Abs(h.Pos - next.Pos) < 3 ? $"the next head at pos {next.Pos}, under a fourth off"
+                : !dotsAt.ContainsKey(h) ? "no dot of its own"
+                : chord.Any(x => x != h && dotsAt.ContainsKey(x)) ? "the chord's other heads dotted too" : null;
+            if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 2 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
+                Console.WriteLine($"held note? head at {h.X:F0},{h.Y:F0} pos {h.Pos} farthest from the tip of the beamed stem {(up ? "up" : "down")} at x {h.StemX:F0}, the chord's other heads at pos {string.Join(" ", chord.Where(x => x != h).Select(x => x.Pos))}: {why ?? "held"}");
+            if (why == null) h.Held = true;
+        }
+        foreach (var chord in chords)
+        {
+            int cols = Cols(chord.Where(h => !h.Held));
+            foreach (var h in chord) h.Dots = h.Held ? Cols(new[] { h }) : cols;
         }
         if (ps.Detections != null) Doubts(ps, s);
     }

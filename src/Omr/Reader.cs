@@ -994,7 +994,7 @@ static class Reader
                     // (a two-note tremolo's two notes alternate for the time of one: each plays half its written value)
                     P = pitch, Ticks = Dur.Of(basis, h.Dots) * h.Scale.Num / h.Scale.Den / (h.Tremolo > 0 ? 2 : 1), X = x, Scale = h.Scale, Tuplet = h.Tuplet,
                     Tremolo = h.Tremolo, TremoloFirst = h.TremoloFirst,
-                    Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 ? h.Cluster : 0,
+                    Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 && !h.Held ? h.Cluster : 0, Held = h.Held,
                     Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
                     SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
@@ -1008,7 +1008,8 @@ static class Reader
                 // <c,, c,>16 read with a quarter's head)
                 bool Along(Ev e) => ev.Y >= e.StemLo - 0.5 * s && ev.Y <= e.StemHi + 0.5 * s || e.Y >= ev.StemLo - 0.5 * s && e.Y <= ev.StemHi + 0.5 * s;
                 bool Apart(Ev e) => e.StemHi > e.StemLo && e.Ticks != ev.Ticks && e.Ticks < Dur.Whole / 4 && ev.Ticks < Dur.Whole / 4 && !Along(e);
-                var mate = evs.LastOrDefault(e => !e.IsRest && !e.Slash && !ev.Slash && e.Stem == ev.Stem &&
+                // (another voice's held note on the chord's stem is its own event: Head.Held, HeldNotes)
+                var mate = h.Held ? null : evs.LastOrDefault(e => !e.IsRest && !e.Slash && !ev.Slash && !e.Held && e.Stem == ev.Stem &&
                     (ev.Stem != 0 ? Math.Abs(e.StemX - ev.StemX) < 0.3 * s && !Apart(e) : Math.Abs(e.X - x) < 0.35 * s));
                 // (a clef just before it is written before it, or before its chord)
                 if (clefBefore != null) { if (mate != null) mate.ClefBefore ??= clefBefore; else ev.ClefBefore = clefBefore; clefBefore = null; }
@@ -1131,6 +1132,7 @@ static class Reader
                 if (pair) k++;
             }
         }
+        if (barTicks > 0 && evs.Any(e => e.Held)) HeldNotes(evs, single, barTicks, s);
         // a lone whole rest fills the bar
         if (barTicks > 0)
             foreach (var list in new[] { evs, single })
@@ -1154,6 +1156,75 @@ static class Reader
         if (cue && evs.Any(e => e.FullBar))
             foreach (var e in evs.Concat(single).Where(e => !e.FullBar)) e.Cue = true;
         return (evs, single);
+    }
+
+    /// <summary>
+    /// Another voice's held note written on a beamed chord's stem (Head.Held), its value told by the
+    /// bar's time: the beamed voice (the stems the chord's way) sets the grid when it fills the bar
+    /// exactly without the held note, the held note's voice is the stems the other way, and the time
+    /// from the chord to that voice's next note (the beamed voice's note in its column; the bar's end
+    /// when there is none) is its value when that is one value with its dot. kinkel7-1's scan, bar 19:
+    /// d'''4.~ over <c'' f''>8 <c'' f''>8 <c'' f''>8, the dotted d''' on the first chord's stem, the
+    /// upper voice's d'''8 on the fourth. A held note the bar's time does not bear out goes back into
+    /// its chord, dotted, as a chord's dot was read before.
+    /// </summary>
+    static void HeldNotes(List<Ev> evs, List<Ev> single, int barTicks, double s)
+    {
+        foreach (var e in evs.Where(e => e.Held).ToList())
+        {
+            var o = evs.Where(x => x != e && !x.IsRest && !x.Held && x.Stem != 0 && x.Beam != 0 && Math.Abs(x.StemX - e.StemX) < 0.3 * s && Math.Abs(x.X - e.X) < 0.6 * s)
+                       .OrderBy(x => Math.Abs(x.X - e.X)).FirstOrDefault();
+            bool dbg = Symbols.DebugAt.HasValue && Math.Abs(e.X - Symbols.DebugAt.Value.X) < 2 * s && Math.Abs(e.Y - Symbols.DebugAt.Value.Y) < 3 * s;
+            int dots = Dur.Text(e.Ticks)?.Count(c => c == '.') ?? 1;
+            string why = null;
+            int ticks = 0;
+            if (o == null) why = "no beamed chord on its stem";
+            else
+            {
+                var grid = evs.Where(x => !x.Held && !x.IsRest && x.Stem == o.Stem).OrderBy(x => x.X).ToList();
+                var voice = evs.Where(x => x != e && !x.Held && !x.IsRest && x.Stem == -o.Stem).ToList();
+                int sum = grid.Sum(x => x.Ticks);
+                if (sum != barTicks) why = $"the beamed voice is {Dur.Text(sum) ?? sum.ToString()} of the bar's {Dur.Text(barTicks) ?? barTicks.ToString()}";
+                else if (voice.Count == 0 && !e.Tie) why = "no other note of its voice";
+                else
+                {
+                    int t0 = grid.Take(grid.IndexOf(o)).Sum(x => x.Ticks);
+                    var next = voice.Where(x => x.X > e.X + 0.5 * s).OrderBy(x => x.X).FirstOrDefault();
+                    int at = next == null ? grid.Count : grid.FindIndex(x => Math.Abs(x.X - next.X) < 0.6 * s);
+                    if (at < 0) why = "its voice's next note in no column of the beamed voice";
+                    else
+                    {
+                        ticks = grid.Take(at).Sum(x => x.Ticks) - t0;
+                        string text = ticks > 0 ? Dur.Text(ticks) : null;
+                        if (text == null || text.Count(c => c == '.') != dots) why = $"{ticks} ticks to its voice's next note is no value with {dots} dot{(dots == 1 ? "" : "s")}";
+                    }
+                }
+            }
+            if (dbg) Console.WriteLine($"held note {e.Show()} at {e.X:F0},{e.Y:F0}: {(why == null ? $"{Dur.Text(ticks)} by the bar's time, in the voice of the stems {(o.Stem > 0 ? "down" : "up")}" : why + (o != null ? ", back into the chord" : ", left as read"))}");
+            var copies = single.Where(c => c.Held && !c.IsRest && c.P == e.P && Math.Abs(c.X - e.X) < 0.01).ToList();
+            if (why == null)
+            {
+                e.Ticks = ticks; e.Stem = -o.Stem; e.Beam = 0;
+                foreach (var c in copies) { c.Ticks = ticks; c.Stem = e.Stem; c.Beam = 0; }
+                continue;
+            }
+            e.Held = false;
+            foreach (var c in copies) c.Held = false;
+            if (o == null) continue;
+            // (as the head would have joined its chord above)
+            if (e.Tie) o.TieAt(e.P);
+            o.StemLo = Math.Min(o.StemLo, e.StemLo); o.StemHi = Math.Max(o.StemHi, e.StemHi);
+            o.SlurStart |= e.SlurStart; o.SlurEnd |= e.SlurEnd;
+            if (e.Alts != null) o.Alts = (o.Alts ?? new()).Concat(e.Alts).ToList();
+            if (e.Bare != null) o.Bare = (o.Bare ?? new()).Concat(e.Bare).ToList();
+            o.Chord ??= new List<Pitch> { o.P };
+            o.Chord.Add(e.P);
+            o.Chord.Sort((p1, p2) => p1.Diatonic.CompareTo(p2.Diatonic));
+            o.P = o.Chord[^1];
+            o.Ticks = e.Ticks;
+            evs.Remove(e);
+            foreach (var c in single.Where(c => !c.IsRest && c.Stem == o.Stem && Math.Abs(c.StemX - o.StemX) < 0.3 * s && o.Chord.Contains(c.P))) c.Ticks = o.Ticks;
+        }
     }
 
     /// <summary>
