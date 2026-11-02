@@ -67,6 +67,14 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genO -Reuse -OmrArgs $omrArgs | Out-N
 $genOS = "$root\out\gen-ott-scan"
 if ($Fresh -or -not (Test-Path "$genOS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genOS -Suite 'basic,ledger,piano' -Count 10 -Seed 7 -GenArgs '--ottava' -Degrade -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genOS -Reuse -OmrArgs $omrArgs | Out-Null }
+# the same lines drawn as an old print's wave with no hook (--ottava-wave 1: Lily#'s layout { ottavaLine wave },
+# REQUESTS 17), the same music as gen-ott, clean and printed and scanned
+$genOW = "$root\out\gen-ottw"
+if ($Fresh -or -not (Test-Path "$genOW\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genOW -Suite 'basic,ledger,piano' -Count 10 -Seed 7 -GenArgs '--ottava', '--ottava-wave', '1' -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genOW -Reuse -OmrArgs $omrArgs | Out-Null }
+$genOWS = "$root\out\gen-ottw-scan"
+if ($Fresh -or -not (Test-Path "$genOWS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genOWS -Suite 'basic,ledger,piano' -Count 10 -Seed 7 -GenArgs '--ottava', '--ottava-wave', '1' -Degrade -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genOWS -Reuse -OmrArgs $omrArgs | Out-Null }
 # grace notes (OmrGen --graces: acciaccaturas, appoggiaturas, two or three sixteenths before the notes)
 # on the basic, chords and piano suites, clean and printed and scanned (S21; tools/score-marks.ps1
 # counts the grace notes themselves, which the note truth leaves out)
@@ -162,6 +170,7 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genLo10 -Reuse -OmrArgs $omrArgs | Ou
 $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'genLo7'; Sym = 'symLo7' }, @{ Dir = $genLo10; Tag = 'genLo10'; Sym = 'symLo10' }, @{ Dir = $gen3; Tag = 'gen3'; Sym = 'sym3' }, @{ Dir = $genS; Tag = 'genS'; Sym = 'symS' }, @{ Dir = $genL; Tag = 'genL'; Sym = 'symL' },
           @{ Dir = $genA; Tag = 'genA'; Sym = 'symA' }, @{ Dir = $genR; Tag = 'genR'; Sym = 'symR' }, @{ Dir = $genRS; Tag = 'genRS'; Sym = 'symRS' },
           @{ Dir = $genT; Tag = 'genT'; Sym = 'symT' }, @{ Dir = $genTS; Tag = 'genTS'; Sym = 'symTS' }, @{ Dir = $genO; Tag = 'genO'; Sym = 'symO' }, @{ Dir = $genOS; Tag = 'genOS'; Sym = 'symOS' },
+          @{ Dir = $genOW; Tag = 'genOW'; Sym = 'symOW' }, @{ Dir = $genOWS; Tag = 'genOWS'; Sym = 'symOWS' },
           @{ Dir = $genG; Tag = 'genG'; Sym = 'symG' }, @{ Dir = $genGS; Tag = 'genGS'; Sym = 'symGS' }, @{ Dir = $genP; Tag = 'genP'; Sym = 'symP' }, @{ Dir = $genPS; Tag = 'genPS'; Sym = 'symPS' },
           @{ Dir = $genN; Tag = 'genN'; Sym = 'symN' }, @{ Dir = $genNS; Tag = 'genNS'; Sym = 'symNS' },
           @{ Dir = $genK; Tag = 'genK'; Sym = 'symK' }, @{ Dir = $genKS; Tag = 'genKS'; Sym = 'symKS' },

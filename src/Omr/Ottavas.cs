@@ -172,11 +172,14 @@ static class Ottavas
     /// every third of a space). From the letters' right edge (a space and a half on at most), a thin band of ink
     /// (0.1 to 0.65 of a space a column) within a space of the sign's height, followed column by column (its
     /// middle moving a fifth of a space at most; gaps of a quarter of a space, and ink across it -- a stem
-    /// touching it -- passed over) for three spaces and more, that waves: its middle turns (by 0.08 of a space)
-    /// once every space and a half at least. A slur, a beam or the dashes run on without turning. The end of
+    /// touching it -- passed over) for MINLENGTH spaces and more, that waves: its middle turns (by 0.08 of a space)
+    /// once every space and a half at least; under three spaces, once every three quarters of a space, as Lily#'s
+    /// wave does (a line over two notes, its wave 2.3 spaces long, was taken by its last turn for a hook up, an
+    /// 8va hung as an 8vb under the staff above: gen-ottw's piano001). A slur, a beam or the dashes run on
+    /// without turning. The end of
     /// its last column, or NaN for none; top and bottom: the rows the band covers
     /// </summary>
-    public static double WaveEnd(Img ink, double s, double x, double y, out double top, out double bottom)
+    public static double WaveEnd(Img ink, double s, double x, double y, double minLength, out double top, out double bottom)
     {
         top = bottom = double.NaN;
         int lo = (int)Math.Max(0, y - s), hi = (int)Math.Min(ink.H - 1, y + s);
@@ -213,7 +216,7 @@ static class Ottavas
                 up = Math.Min(up, t); down = Math.Max(down, b);
             }
             double length = last - x0;
-            if (length < 3 * s) continue;
+            if (length < minLength * s) continue;
             // (the turns, each a move back of 0.08 of a space from the furthest the middle went the other way)
             int turns = 0, dir = 0; double ext = mids[0], least = mids[0], most = mids[0], h = 0.08 * s;
             foreach (var m in mids)
@@ -226,7 +229,7 @@ static class Ottavas
                 else if (dir * (m - ext) > 0) ext = m;
                 else if (dir * (ext - m) >= h) { turns++; dir = -dir; ext = m; }
             }
-            if (turns < length / (1.5 * s)) continue;
+            if (turns < (length < 3 * s ? length / (0.75 * s) : length / (1.5 * s))) continue;
             top = up; bottom = down;
             return last;
         }
@@ -275,7 +278,15 @@ static class Ottavas
 
     /// <summary>An unsure sign's line runs on from it: its dashes (<see cref="DashesOn"/>) or an old print's wave (<see cref="WaveEnd"/>)</summary>
     public static bool LineOn(Img ink, double s, Detection t, IEnumerable<Detection> ends)
-        => DashesOn(ink, s, t, ends) || !double.IsNaN(WaveEnd(ink, s, t.X + HalfWidth(t) * s, t.Y, out _, out _));
+        => DashesOn(ink, s, t, ends) || !double.IsNaN(WaveEnd(ink, s, t, out _, out _));
+
+    /// <summary>
+    /// The wave on from a sign's letters (<see cref="WaveEnd(Img, double, double, double, double, out double, out double)"/>):
+    /// two spaces long at least after a sign the detector sees at its threshold, three after an unsure one (the
+    /// "ce." after the "va" of kinkel10-6's scan's "vivace", an 8va at 0.31, waves for 2.7 spaces)
+    /// </summary>
+    public static double WaveEnd(Img ink, double s, Detection t, out double top, out double bottom)
+        => WaveEnd(ink, s, t.X + HalfWidth(t) * s, t.Y, t.Score >= Detector.Threshold ? 2 : 3, out top, out bottom);
 
     /// <summary>
     /// The detector's unsure signs, those at one place (within a space and a half across, 0.6 of a space
@@ -317,7 +328,7 @@ static class Ottavas
         (double End, double Top, double Bottom) Wave(Detection t)
         {
             if (!waves.TryGetValue(t, out var w))
-                waves[t] = w = (WaveEnd(ink, s, t.X + HalfWidth(t) * s, t.Y, out double top, out double bottom), top, bottom);
+                waves[t] = w = (WaveEnd(ink, s, t, out double top, out double bottom), top, bottom);
             return w;
         }
         bool Wavy(Detection t) => !double.IsNaN(Wave(t).End);

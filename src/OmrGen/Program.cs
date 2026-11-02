@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmrGen;
 
-// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
+// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>] [--ottava-wave <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
 // ("all" is Gen.Suites; "band", the band scores' pieces, and "lied", songs whose voice's staff
 // is hidden where it rests, are asked for by name; --lyrics puts words under lied's voice)
 //
@@ -48,6 +48,10 @@ static class Program
         // --ottava-15 <share>: the share of the lines that are 15ma or 15mb (0.2 if not given; the
         // draws stay in step, so the same seed lays the same lines, more of them two octaves)
         if (opt.TryGetValue("ottava-15", out var o15)) Gen.Ottava15 = double.Parse(o15, CultureInfo.InvariantCulture);
+        // --ottava-wave <share>: the share of the pieces whose octave lines are drawn as an old print's
+        // wave with no hook (layout { ottavaLine wave }, Lily#'s since REQUESTS 17), the others dashed
+        // (0 if not given)
+        double ottavaWave = opt.TryGetValue("ottava-wave", out var ow) ? double.Parse(ow, CultureInfo.InvariantCulture) : 0;
         // --graces: grace notes (acciaccaturas, appoggiaturas, two or three sixteenths) before notes
         // of every suite (S21; lied's --grace is its own, a few before the voice's and right hand's)
         bool graces = opt.ContainsKey("graces");
@@ -99,6 +103,8 @@ static class Program
                 // 0.91): detector41, taught it, took an old print's small full-size heads for grace notes --
                 // kinkel19-6's and 19-2's scans, 11 grace groups read as 19 and 16, 35 and 34 notes lost)
                 Writer.CueSize = cues ? new Random(seed * 7919 + n * 104729 + suiteKey + 20).Next(-4, -2) : null;
+                // (--ottava-wave: whether the piece's octave lines are waves, from a stream of its own likewise)
+                Writer.OttavaWave = ottava && ottavaWave > 0 && new Random(seed * 7919 + n * 104729 + suiteKey + 21).NextDouble() < ottavaWave;
                 // (--headers: a title, subtitle, composer, poet and tempo, from a stream of their own likewise)
                 Writer.HeaderRng = opt.ContainsKey("headers") ? new Random(seed * 7919 + n * 104729 + suiteKey + 3) : null;
                 // (--tuplets: which kind a tuplet group is, from a stream of its own likewise: the
@@ -243,6 +249,7 @@ static class Writer
         var layout = new List<string>(Style?.Layout ?? new());
         // (in the one layout block: of several, Lily# keeps the last only, LYS4005)
         if (CueSize != null) layout.Add($"cueSize {CueSize}");
+        if (OttavaWave) layout.Add("ottavaLine wave");
         if (paper.Count > 0) lys.AppendLine("paper { " + string.Join("  ", paper) + " }");
         if (layout.Count > 0) lys.AppendLine("layout { " + string.Join("  ", layout) + " }");
     }
@@ -255,6 +262,11 @@ static class Writer
     /// as layout { cueSize N } (-4, Lily#'s default, is 0.63 of full size; -3 0.71), or null: not
     /// written. The detector learns a cue's glyphs over the sizes a part's cues come in.</summary>
     public static int? CueSize;
+
+    /// <summary>Whether the piece's octave lines are drawn as waves with no hook (OmrGen --ottava-wave),
+    /// written as layout { ottavaLine wave }: an old print's "8va~~~~", whose letters the detector
+    /// learns beside a wave as well as beside dashes.</summary>
+    public static bool OttavaWave;
 
     /// <summary>A piece's engraving settings, drawn: a quarter of the pieces keep the defaults, the
     /// others each setting with odds of two in three. The ranges are the proposal's (Lily# P2-P4,

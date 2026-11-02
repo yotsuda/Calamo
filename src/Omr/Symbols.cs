@@ -641,7 +641,7 @@ static partial class Symbols
                 .Concat((weakOttavas == null ? null : Ottavas.Pooled(weakOttavas, s))?.Where(t => t.Score > Detector.WeakOttava && Ottavas.LineOn(d, s, t, ends)) ?? Enumerable.Empty<Detection>()).ToList();
             ps.OctaveSigns = marks.Where(Ottavas.IsSign).ToList();
             foreach (var t in ps.OctaveSigns)
-                if (Ottavas.WaveEnd(d, s, t.X + Ottavas.HalfWidth(t) * s, t.Y, out double top, out double bottom) is var end && !double.IsNaN(end))
+                if (Ottavas.WaveEnd(d, s, t, out double top, out double bottom) is var end && !double.IsNaN(end))
                     ps.OctaveWaves.Add((t.X + Ottavas.HalfWidth(t) * s, end, top, bottom));
             Drop("a dynamic or the pedal", h => marks.Any(t => Math.Abs(t.X - h.X) < (Ottavas.IsSign(t) ? Ottavas.HalfWidth(t) + 0.2 : t.Class == "ped" ? 1.6 : 0.8) * s && Math.Abs(t.Y - h.Y) < (Ottavas.IsSign(t) ? 0.9 : 0.8) * s));
             // nor an articulation (S15: a marcato's or a fermata's ink, a staccato's dot) or an ornament
