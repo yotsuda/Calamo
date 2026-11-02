@@ -1,0 +1,25 @@
+// REQUESTS 19: a tuplet drawn WITHOUT its number (and its bracket), for the OMR's training pages.
+// An engraver prints the "3" over the first triplets only, or none where the music plainly runs
+// in threes: Beethoven's Op.27/2 (Moonlight) prints it in bar 1 only (Scoring Notes 2024's
+// Sibelius PDF), Schumann's Op.15/1 nowhere. Triplets with no number are the largest cause of the
+// OMR's errors on its evaluation set (942 notes, 24 %), and the generator cannot draw them: lysc
+// 0.14.0 has no layout key for it and refuses 'override TupletNumber.transparent = true' and
+// 'override TupletBracket.transparent = true' (LYS1029).
+// Bars 1-2: triplets as lysc draws them now (beamed eighths: the number; quarters: number and bracket).
+// Bars 3-4: the same music, to be drawn with no number and no bracket (the spelling is Lily#'s to choose;
+// LilyPond 2.26.0: \omit TupletNumber \omit TupletBracket, see the .ly beside this).
+octave absolute
+title "Tuplets without numbers"
+time 4/4
+key c major
+part rh {
+  clef treble
+  section A {
+    tuplet 3/2 { g'8 c'' e'' } tuplet 3/2 { g'8 c'' e'' } tuplet 3/2 { g'8 c'' e'' } tuplet 3/2 { g'8 c'' e'' } |
+    tuplet 3/2 { c''4 d'' e'' } tuplet 3/2 { f''4 e'' d'' } |
+    tuplet 3/2 { a'8 c'' e'' } tuplet 3/2 { a'8 c'' e'' } tuplet 3/2 { a'8 c'' e'' } tuplet 3/2 { a'8 c'' e'' } |
+    tuplet 3/2 { c''4 d'' e'' } tuplet 3/2 { f''4 e'' d'' } |
+  }
+}
+form { A }
+score { staff rh }
