@@ -152,8 +152,13 @@ static class Gen
     /// staff, two pieces in three: the triplets under a melody in the right hand's second voice,
     /// a bass below (some bars the triplets alone), or in the left hand under the right hand's
     /// melody; else one staff, the triplets with a melody over them now and then. Eighths three
-    /// to a quarter, or sixteenths six to it; in some pieces each group opens on a rest. Not one
-    /// of <see cref="Suites"/> (asked for by name).
+    /// to a quarter, or sixteenths six to it, or in 2/2 quarters three to a half (printed with a
+    /// bracket, which -NoNumbers takes off too); in some pieces each group opens on a rest. The
+    /// shapes that cross the reader's measure: in the right hand's lower voice, groups that reach
+    /// down to the ledger lines near the left hand's staff (Op.27-2's bar 5), and a melody note
+    /// that shares its head with the group's first; two against three, the triplets in one hand
+    /// against plain notes of the same value in the other. Not one of <see cref="Suites"/> (asked
+    /// for by name).
     /// </summary>
     static void Threes(GPiece p, Random rng, int bars)
     {
@@ -161,8 +166,10 @@ static class Gen
         p.Time = Pick(rng, ThreesTimes);
         // (every draw of the piece's shape made whether used or not: the draws stay in step)
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
-        int mode = shape < 0.4 ? 0 : shape < 0.67 ? 1 : 2;   // 0: the right hand's lower voice, 1: the left hand, 2: one staff
-        int value = unit < 0.7 ? 240 : 120;
+        double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
+        // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three
+        int mode = shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        int value = p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
         bool restOpens = rests < 0.2;
         // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first
         int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
@@ -200,6 +207,44 @@ static class Gen
                     }
             }
             return evs;
+        }
+        // a bar of plain notes of the triplets' value from dia on (two against three): the half
+        // bar's chord broken up and down, beat / value a beat
+        List<GEv> Plain(int b, int from)
+        {
+            var evs = new List<GEv>();
+            for (int k = 0; k < beats; k++)
+            {
+                var tones = Tones(2 * b + (2 * k >= beats ? 1 : 0), from);
+                for (int i = 0; i < beat / value; i++)
+                {
+                    var e = new GEv { Ticks = value };
+                    e.Pitches.Add(tones[new[] { 0, 1, 2, 1 }[i % 4]]);
+                    evs.Add(e);
+                }
+            }
+            return evs;
+        }
+        // a melody note on a beat now and then takes the head of the triplets' group under it:
+        // the group turned to open on its top tone, the melody's note that tone
+        void Share(List<GEv> melody, List<GEv> tri)
+        {
+            int t = 0;
+            foreach (var e in melody)
+            {
+                if (!e.IsRest && t % beat == 0 && rng.NextDouble() < 0.5)
+                {
+                    int g = t / beat * 3 * (beat / (2 * value));
+                    var group = tri.GetRange(g, 3);
+                    if (group.All(n => !n.IsRest))
+                    {
+                        var top = group.MaxBy(n => n.Pitches[0].Dia);
+                        (group[0].Pitches, top.Pitches) = (top.Pitches, group[0].Pitches);
+                        e.Pitches = new() { group[0].Pitches[0] };
+                    }
+                }
+                t += e.Ticks;
+            }
         }
         // a melody's bar: half notes, dotted halves, quarters, a quarter's rest, two eighths, a dotted
         // eighth and a sixteenth (Op.27-2's against the triplets' third), a chord tone or a step from the last
@@ -262,10 +307,23 @@ static class Gen
         {
             if (mode == 0)
             {
-                // (Op.27-2's first bars: the triplets alone)
-                var tri = Triplets(b, 29);
-                rh.Bars.Add(b < 2 || rng.NextDouble() < 0.2 ? new() { tri } : new() { Melody(b, 36, 41), tri });
+                // (Op.27-2's first bars: the triplets alone; in some pieces half the bars' groups
+                // from the G below middle C, on the ledger lines over the left hand's staff)
+                var tri = Triplets(b, low < 0.4 && rng.NextDouble() < 0.5 ? 25 : 29);
+                if (b < 2 || rng.NextDouble() < 0.2) rh.Bars.Add(new() { tri });
+                else
+                {
+                    var melody = Melody(b, 36, 41);
+                    if (share < 0.4) Share(melody, tri);
+                    rh.Bars.Add(new() { melody, tri });
+                }
                 lh.Bars.Add(new() { Bass(b) });
+            }
+            else if (mode == 3)
+            {
+                bool up = plainUp < 0.5;
+                rh.Bars.Add(new() { up ? Plain(b, 31) : Triplets(b, 31) });
+                lh.Bars.Add(new() { up ? Triplets(b, 17) : Plain(b, 17) });
             }
             else
             {
@@ -277,7 +335,7 @@ static class Gen
         p.Parts.Add(lh);
     }
 
-    static readonly string[] ThreesTimes = { "4/4", "4/4", "3/4", "2/4" };
+    static readonly string[] ThreesTimes = { "4/4", "4/4", "3/4", "2/4", "2/2" };
 
     // OmrGen --texts: a tempo marking and words of expression in lied
     public static bool Texts;

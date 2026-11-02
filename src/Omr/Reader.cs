@@ -48,6 +48,8 @@ sealed class ReaderState
     public HashSet<(int Bar, int Part)> TwoBarCarried = new();
     /// <summary>Per part p: how often the systems showing every staff had p and p+1 share their barlines, and not.</summary>
     public Dictionary<int, (int Yes, int No)> SharedBars = new();
+    /// <summary>The parts whose music ran in threes on an earlier page (TripletsInThrees): a page turn does not stop it.</summary>
+    public HashSet<int> InThrees = new();
 
     public ReaderState(int parts) { Fifths = new int?[parts]; Clefs = new string[parts]; }
 }
@@ -634,7 +636,8 @@ static class Reader
         var groups = new List<List<int>>();
         // (the groups of two under a beam and a rest, before a rest is given to one only)
         var restPairs = new List<List<int>>();
-        // (inThrees: the groups that are a pair alone under a beam, a group with a note unseen or no group at all)
+        // (inThrees: the groups that are a pair alone under a beam, a group with a note unseen or no group at all;
+        // and the groups with no beam, triplets or a melody's notes)
         var pairsAlone = new List<int>();
         // (a bar too long as read, some voice past the bar: a beam of six split into triplets only then -- a bar a
         // voice short would fill by the voices run into one, kinkel19-2's 3/4 bar of "<des f>4" under six eighths)
@@ -689,6 +692,44 @@ static class Reader
             int r = pair.Single(i => evs[i].IsRest);
             double Off(List<int> g) => Math.Abs(evs[r].Y - g.Where(i => !evs[i].IsRest).Average(i => evs[i].Y));
             if (!restPairs.Any(o => o != pair && o.Contains(r) && Off(o) < Off(pair))) groups.Add(pair);
+        }
+        // (and, in a bar too long as read, notes of one value with no beam, quarters or flagged eighths, in threes
+        // along their side of the staff, a rest of their value among them: a triplet's bracket left off where the
+        // music plainly runs in threes -- gen-threes' 2/2 pieces, "r4 b,4 e4" twice a bar. A rest goes with the
+        // side whose note is nearest it in height; a run of a length not of threes is no group. In a bar of one line,
+        // no two events in a column, one side: one voice's stems go each way with its notes' height, and the bar
+        // too long as it is one line, not as two voices of the stems' sides)
+        if (tooLong || oneLine && evs.Sum(e => e.Ticks) > barTicks)
+        {
+            bool Loose(Ev e) => e.Beam == 0 && !e.FullBar && e.Scale == (1, 1) && (e.Ticks == Dur.Of(4, 0) || e.Ticks == Dur.Of(8, 0) && (e.IsRest || e.Stem != 0));
+            var loose = Enumerable.Range(0, evs.Count).Where(i => Loose(evs[i])).ToList();
+            var notes = loose.Where(i => !evs[i].IsRest).ToList();
+            int Side(int i) => oneLine ? 0 : !evs[i].IsRest ? evs[i].Stem : notes.Count == 0 ? 0 : evs[notes.MinBy(j => Math.Abs(evs[j].Y - evs[i].Y))].Stem;
+            foreach (var side in notes.Select(Side).Distinct().ToList())
+            {
+                var mine = loose.Where(i => Side(i) == side).OrderBy(i => evs[i].X).ToList();
+                var run = new List<int>();
+                // (inThrees: such a group may as well be a melody's three quarters over the triplets, so it is one
+                // the last resort below may leave out, as a pair alone -- Op.27-2's bar 30, "cis''4 e''4 cis''4")
+                void Close()
+                {
+                    if (run.Count >= 3 && run.Count % 3 == 0 && run.Any(i => !evs[i].IsRest))
+                        foreach (var c in run.Chunk(3))
+                        {
+                            if (inThrees) pairsAlone.Add(groups.Count);
+                            groups.Add(c.ToList());
+                        }
+                    run.Clear();
+                }
+                foreach (int i in mine)
+                {
+                    // (one value, and nothing of their side between: no other note, no rest)
+                    if (run.Count > 0 && (evs[i].Ticks != evs[run[^1]].Ticks
+                                          || evs.Any(e => e.X > evs[run[^1]].X && e.X < evs[i].X && (oneLine || e.Stem == side || e.IsRest) && !mine.Contains(evs.IndexOf(e))))) Close();
+                    run.Add(i);
+                }
+                Close();
+            }
         }
         // (and, in a bar too long as read, the beamed notes no group took, in threes along their side of the staff
         // where a beam broke apart: a scan's beam cut in two, its triplet two under one piece and one under another --
@@ -794,11 +835,13 @@ static class Reader
         // A pair alone may be a melody's two eighths: the most of them that do, all first)
         if (chosen < 0 && inThrees && pairsAlone.Count <= 4)
         {
-            int most = 2 * groups.Max(g => evs[g[0]].Ticks), pairBits = pairsAlone.Sum(k => 1 << k);
+            int pairBits = pairsAlone.Sum(k => 1 << k);
             foreach (int drop in Enumerable.Range(0, 1 << pairsAlone.Count).OrderBy(d => System.Numerics.BitOperations.PopCount((uint)d)))
             {
                 int mask = all & ~pairsAlone.Where((k, i) => (drop >> i & 1) == 1).Sum(k => 1 << k);
                 if ((mask & ~pairBits) == 0) break;
+                // (a group's length, of the groups read so: not a melody's quarters left out)
+                int most = 2 * Enumerable.Range(0, groups.Count).Where(k => In(mask, k)).Max(k => evs[groups[k][0]].Ticks);
                 var (voices, group) = Scaled(mask);
                 if (voices.Where(v => v.Any(e => In(mask, group[e]))).All(v => v.Sum(e => e.Ticks) <= barTicks && barTicks - v.Sum(e => e.Ticks) < most)) { chosen = mask; break; }
             }
@@ -806,19 +849,25 @@ static class Reader
         if (chosen < 0) return null;
         if (Symbols.TupletVerbose) Console.WriteLine($"      -> {System.Numerics.BitOperations.PopCount((uint)chosen)} of the {groups.Count} groups triplets");
         var changed = new List<Ev>();
+        // (a group's beam and side; a group with no beam, beam 0 and its notes' side)
+        (int, int) GroupKey(int k) => groups[k].FirstOrDefault(i => evs[i].Beam != 0, -1) is int i and >= 0 ? Key(evs[i]) : (0, evs[groups[k].First(i => !evs[i].IsRest)].Stem);
         for (int k = 0; k < groups.Count; k++)
         {
             if ((chosen >> k & 1) == 0) continue;
-            var key = Key(evs[groups[k].First(i => evs[i].Beam != 0)]);
+            var key = GroupKey(k);
             // (the group's events, and their copies in single: a beamed note's by the beam and its place
-            // on it -- a beam of six holds two groups -- a rest's by its place)
+            // on it -- a beam of six holds two groups -- a rest's by its place, a note with no beam's by the
+            // nearest such note)
             var mine = groups[k].Select(i => evs[i]).ToList();
             // (a single copy is the group's when the nearest event on its beam is: a group may span two pieces of beam)
             var keys = mine.Where(e => !e.IsRest && e.Beam != 0).Select(Key).ToHashSet();
             bool Mine(Ev e) => mine.Contains(evs.Where(o => !o.IsRest && o.Beam != 0 && Key(o) == Key(e)).MinBy(o => Math.Abs(o.X - e.X)));
-            var alike = single.Where(e => e.Beam != 0 ? keys.Contains(Key(e)) && Mine(e) : mine.Any(r => r.IsRest && e.IsRest && e.X == r.X && e.Ticks == r.Ticks)).ToList();
+            bool MineLoose(Ev e) => mine.Contains(evs.Where(o => !o.IsRest && o.Beam == 0 && o.Stem == e.Stem).MinBy(o => Math.Abs(o.X - e.X)));
+            var alike = single.Where(e => e.Beam != 0 ? keys.Contains(Key(e)) && Mine(e)
+                                        : e.IsRest ? mine.Any(r => r.IsRest && e.X == r.X && e.Ticks == r.Ticks)
+                                        : key.Item1 == 0 && MineLoose(e)).ToList();
             // (the how-manieth group on its beam)
-            int nth = Enumerable.Range(0, k).Count(j => groups[j].Any(i => evs[i].Beam != 0 && Key(evs[i]) == key));
+            int nth = Enumerable.Range(0, k).Count(j => key.Item1 != 0 ? groups[j].Any(i => evs[i].Beam != 0 && Key(evs[i]) == key) : GroupKey(j) == key);
             foreach (var e in mine.Concat(alike))
             {
                 e.Ticks = e.Ticks * 2 / 3;
@@ -884,7 +933,9 @@ static class Reader
         int eighth = Dur.Of(8, 0), sixteenth = Dur.Of(16, 0);
         shown |= kept.Count(u => res.Voices[u.Key].All(v => v.Sum(e => e.Ticks) == Dur.OfTime(state.BarTime[u.Key.Bar]))
                                  && !res.Voices[u.Key].Any(v => v.Any(e => !e.IsRest && e.Beam != 0 && e.Scale == (1, 1) && (e.Ticks == eighth || e.Ticks == sixteenth)))) >= 2;
-        foreach (var part in kept.GroupBy(u => u.Key.Part).Where(g => g.Count() == 1 || !shown))
+        // (a part that ran in threes on an earlier page runs on in them: a page of two bars has one such bar
+        // where the other's note went unseen -- gen-threes' threes010 in a scan)
+        foreach (var part in kept.GroupBy(u => u.Key.Part).Where(g => (g.Count() == 1 || !shown) && !state.InThrees.Contains(g.Key)))
             foreach (var ((b, p), (st, evs)) in part)
             {
                 // (a lone bar two or more of whose groups read as triplets runs in threes: one misreading
@@ -914,10 +965,19 @@ static class Reader
         int eighth = Dur.Of(8, 0), sixteenth = Dur.Of(16, 0);
         bool Threes(KeyValuePair<(int Bar, int Part), List<List<Ev>>> kv)
         {
-            var beamed = kv.Value.SelectMany(v => v).Where(e => !e.IsRest && e.Beam != 0 && (e.Scale == (2, 3) || e.Ticks == eighth || e.Ticks == sixteenth)).ToList();
+            // (a triplet's notes with no beam too: 2/2's quarters three to a half. Only the voices with triplets in
+            // them: a melody's two beamed eighths over them are no sign of a misread time -- threes010's bar 15)
+            var beamed = kv.Value.Where(v => v.Any(e => e.Scale == (2, 3)))
+                                 .SelectMany(v => v).Where(e => !e.IsRest && (e.Scale == (2, 3) || e.Beam != 0 && (e.Ticks == eighth || e.Ticks == sixteenth))).ToList();
             return beamed.Count >= 3 && beamed.All(e => e.Scale == (2, 3)) && kv.Value.All(v => v.Sum(e => e.Ticks) == Dur.OfTime(state.BarTime[kv.Key.Bar]));
         }
-        foreach (var part in res.Voices.GroupBy(kv => kv.Key.Part).Where(g => g.Count(Threes) >= 2).ToList())
+        // (or one, on a page after one where the part ran in threes: a page of two bars, the last a note unseen --
+        // gen-threes' threes010 in a scan)
+        var running = res.Voices.GroupBy(kv => kv.Key.Part).Where(g => g.Count(Threes) >= (state.InThrees.Contains(g.Key) ? 1 : 2)).ToList();
+        state.InThrees.UnionWith(running.Select(g => g.Key));
+        if (Symbols.TupletVerbose)
+            foreach (var g in res.Voices.GroupBy(kv => kv.Key.Part)) Console.WriteLine($"  page {res.Page} part {g.Key}: {g.Count(Threes)} bars in threes{(state.InThrees.Contains(g.Key) ? ", running" : "")}");
+        foreach (var part in running)
             foreach (var (b, p) in part.Where(kv => !Threes(kv)).Select(kv => kv.Key).ToList())
             {
                 int barTicks = Dur.OfTime(state.BarTime[b]);
@@ -1391,8 +1451,12 @@ static class Reader
             int best = readings.Where(r => r.Den == den).GroupBy(r => r.Num).OrderByDescending(grp => grp.Count()).First().Key;
             int read = best;
             for (int k = 1; k <= 16; k++) if (Filled(k * unit) > Filled(best * unit)) best = k;
-            // (the sign read stands where more measures fill it in threes than fill the best as read)
-            if (best != read && contents.Count(evs => FillsInThrees(evs, read * unit, den)) > Filled(best * unit)) best = read;
+            // (the sign read stands where more measures fill it in threes than fill the best as read; or as many,
+            // each of two voices, two events in a column: the best as read the voices run into one -- gen-threes'
+            // 2/4 under a melody taken for 5/4. Not 6/8 read as 2/4, its one voice's eighths filling 3/4)
+            var inThrees = contents.Where(evs => FillsInThrees(evs, read * unit, den)).ToList();
+            static bool TwoVoices(List<Ev> evs, double s) => evs.Any(a => !a.IsRest && evs.Any(b => b != a && !b.IsRest && Math.Abs(a.X - b.X) < 0.3 * s));
+            if (best != read && (inThrees.Count > Filled(best * unit) || inThrees.Count == Filled(best * unit) && inThrees.All(evs => TwoVoices(evs, s)))) best = read;
             if (Signatures.Verbose)
                 Console.WriteLine($"    time {string.Join(" ", group.Select(g => g.Time).Distinct())} at x {x:F0}, system {sys.Index + 1}: of {contents.Count} staff-measures {Filled(best * unit)} fill {best}/{den}"
                                   + string.Concat(readings.Select(r => (r.Num, r.Den)).Distinct().Select(r => $", {Filled(Dur.Whole * r.Num / r.Den)} fill {r.Num}/{r.Den}")));
@@ -1679,7 +1743,10 @@ static class Reader
             if (fa && fb) return false;
             var joined = ea.Concat(eb).ToList();
             // a lone whole rest on one side is the whole measure; joined with nothing it stays so
-            if (!Fills(joined, ticks)) { if (ea.Count > 0 && eb.Count > 0 && Entered(joined)) entered++; continue; }
+            // (or the two fill it in threes, no number printed: a triplet's first stem, from its beam over
+            // the staff to a low head, taken for a barline -- gen-threes' threes007, 4/4's twelve eighths)
+            if (!Fills(joined, ticks) && !(ea.Count > 0 && eb.Count > 0 && a.Time?.Split('/') is [_, var d] && int.TryParse(d, out int den) && FillsInThrees(joined, ticks, den)))
+            { if (ea.Count > 0 && eb.Count > 0 && Entered(joined)) entered++; continue; }
             joins++;
             broken = true;
         }
