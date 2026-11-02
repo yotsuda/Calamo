@@ -214,6 +214,7 @@ static class Detector
         var tops = new List<int>();
         for (int top = 0; top < Math.Max(1, rh - Height + Step); top += Step) tops.Add(top);
         var input = new DenseTensor<float>(new[] { 1, 1, Height, w4 });
+        var edge = new List<Detection>();
         for (int k = 0; k < tops.Count; k++)
         {
             int top = tops[k];
@@ -226,13 +227,22 @@ static class Detector
             // a band answers for its middle rows; the first for its top rows too, the last for its bottom ones.
             // Which band a peak belongs to goes by its grid row, not by its refined centre: a peak on the
             // rows where two bands meet had its centre put a little above the line by one band and a
-            // little below by the other, and both kept it (a key's flat counted twice: meters004)
+            // little below by the other, and both kept it (a key's flat counted twice: meters004).
+            // The two bands may also put the peak one grid row apart, each just outside its own rows: a
+            // peak a row past the band's own rows is kept apart, taken below when the other band found
+            // nothing of its class there (gen-lied-all's lied009, a head on the seam lost with detector47)
             int lo = k == 0 ? 0 : Step / 2, hi = k == tops.Count - 1 ? Height : Step / 2 + Step;
             foreach (var (c, fx, fy, score, gy) in Peaks(heat))
-                if (gy >= lo && gy < hi)
-                    found.Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score,
-                                              Digits = IsTab(c) ? DigitScores(heat, (int)Math.Round(fx / Stride), gy / Stride) : null });
+            {
+                bool own = gy >= lo && gy < hi;
+                if (!own && !(gy >= lo - Stride && gy < hi + Stride)) continue;
+                (own ? found : edge).Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score,
+                                                         Digits = IsTab(c) ? DigitScores(heat, (int)Math.Round(fx / Stride), gy / Stride) : null });
+            }
         }
+        foreach (var e in edge)
+            if (!found.Any(t => t.Class == e.Class && Math.Abs(t.X - e.X) < 0.5 * s && Math.Abs(t.Y - e.Y) < 0.5 * s))
+                found.Add(e);
         return found;
     }
 

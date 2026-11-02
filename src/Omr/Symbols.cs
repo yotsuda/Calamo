@@ -547,11 +547,14 @@ static partial class Symbols
         // with another loop straight above or below it is a digit. A digit stands on the staff: a
         // whole note the detector trusts on ledger lines above it, a chord name's a and d straight
         // above, is no digit (a title's g, loops over loops, is: the rules' heads drop as before);
-        // and a loop that is another whole note the detector trusts, as this one, is a chord's (b d' f'')
+        // and a loop that is another whole note the detector trusts, as this one, is a chord's (b d' f'').
+        // Nor is a loop among a stemmed chord's black heads, the white left between heads a third
+        // apart, a digit's: a second voice's whole note under a chord (gen-lied-all lied001 bar 2 lh)
         bool OffStaff(Head h, double y) => h.Score >= TrustScore && Math.Abs(h.St.Pos(y)) > 5;
         Drop("digit", h => !h.HasStem && !OffStaff(h, h.Y) && inkHoles.Any(o =>
             o.W > 0.3 * s && Math.Abs(o.Cx - h.X) < 0.5 * s && Math.Abs(o.Cy - h.Y) > 1.2 * s && Math.Abs(o.Cy - h.Y) < 3.0 * s
             && !OffStaff(h, o.Cy)
+            && !ps.Heads.Any(q => q.HasStem && !q.Hollow && q.Score >= TrustScore && Math.Abs(q.X - o.Cx) < 0.8 * s && Math.Abs(q.Y - o.Cy) < 0.8 * s)
             && !(h.Score >= TrustScore && ps.Heads.Any(q => q != h && q.Hollow && !q.HasStem && q.Score >= TrustScore
                                                             && Math.Abs(q.X - o.Cx) < 0.4 * s && Math.Abs(q.Y - o.Cy) < 0.4 * s))));
         // a whole note stands clear of other notes: a white patch shut in between an accidental

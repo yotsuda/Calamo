@@ -172,7 +172,7 @@ static class Ottavas
     /// every third of a space). From the letters' right edge (a space and a half on at most), a thin band of ink
     /// (0.1 to 0.65 of a space a column) within a space of the sign's height, followed column by column (its
     /// middle moving a fifth of a space at most; gaps of a quarter of a space, and ink across it -- a stem
-    /// touching it -- passed over) for MINLENGTH spaces and more, that waves: its middle turns (by 0.08 of a space)
+    /// touching it -- passed over) for MINLENGTH spaces and more, unbroken, that waves: its middle turns (by 0.08 of a space)
     /// once every space and a half at least; under three spaces, once every three quarters of a space, as Lily#'s
     /// wave does (a line over two notes, its wave 2.3 spaces long, was taken by its last turn for a hook up, an
     /// 8va hung as an 8vb under the staff above: gen-ottw's piano001). A slur, a beam or the dashes run on
@@ -230,6 +230,10 @@ static class Ottavas
                 else if (dir * (ext - m) >= h) { turns++; dir = -dir; ext = m; }
             }
             if (turns < (length < 3 * s ? length / (0.75 * s) : length / (1.5 * s))) continue;
+            // (and is one stroke: its band in three columns of four and more -- Lily#'s waves 0.99, kinkel7-1's
+            // scan's 0.97. A word's letters wave too, but apart: the "moto" of gen-lied-all lied009's "con moto",
+            // under an 8va at 0.30 in its "on", 0.38)
+            if (mids.Count < 0.75 * (last - x0 + 1)) continue;
             top = up; bottom = down;
             return last;
         }
@@ -360,7 +364,9 @@ static class Ottavas
         // "(8vb)" at a system's start reaches 0.8; "poco" seen at 0.25 runs on 0.7) with nothing just before
         // it (the opening bracket of an unsure "(15mb)"), or for one past an unsure one ("molto" seen at 0.27
         // in its middle runs on 1.2). A letter's column: ink a third of a space tall and more at its height,
-        // not the whole window (a stem); the dashes are flat
+        // not the whole window (a stem); the dashes are flat. Past an unsure one, a word may follow a word's
+        // space on (a space at most), two spaces long and more, wider than a note: the "on" of a "con moto" under
+        // the staff seen as an 8va at 0.30, its box over the whole "con", the "moto" 0.8 on (gen-lied-all lied009)
         bool InWords(Detection t)
         {
             int y0 = Math.Max(0, (int)(t.Y - 0.6 * s)), y1 = Math.Min(ink.H - 1, (int)(t.Y + 0.6 * s));
@@ -372,9 +378,14 @@ static class Ottavas
                 return n >= 0.35 * s && !(ink[x, y0] && ink[x, y1]);
             }
             int x0 = (int)(t.X + HalfWidth(t) * s) + 1, x1 = Math.Min(ink.W - 1, (int)(t.X + HalfWidth(t) * s + 4 * s));
-            int last = x0;
-            for (int x = x0; x <= x1 && x - last <= 0.5 * s; x++)
-                if (Letter(x)) last = x;
+            int last = x0, start = -1;
+            for (int x = x0; x <= x1 && x - last <= (start < 0 && t.Score < Detector.Threshold ? 1.0 : 0.5) * s; x++)
+                if (Letter(x)) { if (start < 0) start = x; last = x; }
+            if (start - x0 > 0.5 * s)
+            {
+                if (Verbose) Console.WriteLine($"  octave sign {t.Class} {t.Score:F2} at {t.X:F0},{t.Y:F0}: a word {(last - start) / s:F2} spaces long {(start - x0) / s:F2} past it");
+                return last - start >= 2 * s;
+            }
             // (and just before it: a bracket, or the word's own letters)
             int left = (int)(t.X - HalfWidth(t) * s) - 1, first = left;
             for (int x = left; x >= Math.Max(0, left - (int)(4 * s)) && first - x <= 0.5 * s; x--)

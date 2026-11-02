@@ -43,8 +43,10 @@ static partial class Symbols
             if (len < 1.5 * s || Nearest(staves, foot, s) != near.St) continue;
             bool dbg = DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < s && Math.Abs(t.Y - DebugAt.Value.Y) < 2 * s;
             if (!SlashAt(ink, bestX, foot, dir, s, out var end, dbg)) continue;
-            // (a head the detector is sure of at the foot is the stem's own, missed above)
-            if (ps.Heads.Any(h => !Loose(h) && h.St == near.St && Math.Abs(h.X - bestX) < 1.2 * s && Math.Abs(h.Y - foot) < 1.2 * s)) continue;
+            // (a head the detector is sure of at the foot is the stem's own, missed above; so is a slash it
+            // sees at its threshold: a rhythm slash's, the repeat's thin slash seen under it -- detector47 sees
+            // the band suite's dotted guitar slash at 0.84 and its beam's end as a tip at 0.50, band002 bar 7)
+            if (ps.Heads.Any(h => (!Loose(h) || h.Slash && h.Score >= TrustScore) && h.St == near.St && Math.Abs(h.X - bestX) < 1.2 * s && Math.Abs(h.Y - foot) < 1.2 * s)) continue;
             int beams = t.Class[5] - '0';
             // (removing the staff lines cuts the slash from its stem: its pieces read as a triplet's 3)
             ps.RepeatSlashes.Add((Math.Min(bestX, end.X) - 0.3 * s, Math.Min(foot, end.Y) - 0.3 * s, Math.Max(bestX, end.X) + 0.3 * s, Math.Max(foot, end.Y) + 0.3 * s));
