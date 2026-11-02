@@ -4,8 +4,9 @@ using System.Text;
 namespace OmrGen;
 
 // OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>] [--ottava-wave <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
-// ("all" is Gen.Suites; "band", the band scores' pieces, and "lied", songs whose voice's staff
-// is hidden where it rests, are asked for by name; --lyrics puts words under lied's voice)
+// ("all" is Gen.Suites; "band", the band scores' pieces, "lied", songs whose voice's staff
+// is hidden where it rests, and "threes", music in triplets from end to end, are asked for by
+// name; --lyrics puts words under lied's voice)
 //
 // Writes test scores for the OMR: per piece a folder with <name>.lys (engraved by Lily#),
 // <name>.score (the OMR's part list, plus the clefs/key/time it should read), and the truth,

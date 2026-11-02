@@ -126,6 +126,14 @@ static class Program
             if (f.Length < 6 || !f[1].StartsWith(prefix)) continue;
             double l = double.Parse(f[2], CultureInfo.InvariantCulture), t = double.Parse(f[3], CultureInfo.InvariantCulture);
             double r = double.Parse(f[4], CultureInfo.InvariantCulture), b = double.Parse(f[5], CultureInfo.InvariantCulture);
+            // (a line, a tuplet bracket's rule or hook: its box with its stroke, whited out and a pixel round it)
+            if (f[0] == "line")
+            {
+                for (int y = Math.Max(0, (int)Math.Floor(t) - 1); y <= Math.Min(h - 1, (int)Math.Ceiling(b) + 1); y++)
+                    for (int x = Math.Max(0, (int)Math.Floor(l) - 1); x <= Math.Min(w - 1, (int)Math.Ceiling(r) + 1); x++)
+                        if (g[y * w + x] < 1) { g[y * w + x] = 1; erased++; }
+                continue;
+            }
             double cx = (l + r) / 2, cy = (t + b) / 2, hw = (r - l) / 2, hh = (b - t) / 2;
             int ox0 = (int)Math.Floor(cx - 2 * hw), ox1 = (int)Math.Ceiling(cx + 2 * hw), oy0 = (int)Math.Floor(cy - 2 * hh), oy1 = (int)Math.Ceiling(cy + 2 * hh);
             var seen = new HashSet<int>();

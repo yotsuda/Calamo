@@ -395,6 +395,11 @@ for (int page = from; page <= to; page++)
                 // a tuplet number: small italic text centred at its point (a box a space around it)
                 foreach (var tn in svg.Tuplets)
                     tsv.Append("glyph\ttuplet.").Append(tn.Text).Append('\t').Append(F(tn.X - hs)).Append('\t').Append(F(tn.Y - hs)).Append('\t').Append(F(tn.X + hs)).Append('\t').Append(F(tn.Y + hs)).Append('\t').Append(tn.Src).Append('\n');
+                // a tuplet bracket's rules and hooks, each a line's box with its stroke (kind line: no glyph the
+                // detector learns; OmrDegrade --erase takes them off the page with the numbers, run-gen -NoNumbers)
+                foreach (var tb in svg.TupletBrackets)
+                    tsv.Append("line\ttuplet.bracket\t").Append(F(Math.Min(tb.X1, tb.X2) - tb.W / 2)).Append('\t').Append(F(Math.Min(tb.Y1, tb.Y2) - tb.W / 2)).Append('\t')
+                       .Append(F(Math.Max(tb.X1, tb.X2) + tb.W / 2)).Append('\t').Append(F(Math.Max(tb.Y1, tb.Y2) + tb.W / 2)).Append('\t').Append(tb.Src).Append('\n');
                 // a barline: a thin rectangle a staff tall, one per staff it crosses (its centre is the
                 // staff's middle). Measured in the SVG's own staff space: a scan's print may be
                 // smaller than the page the SVG is scaled to (ties004), and the reader's space is then not the SVG's

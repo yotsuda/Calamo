@@ -43,6 +43,8 @@ sealed class SvgPage
     public List<(double X1, double Y1, double X2, double Y2, int Src, int EndSrc)> Slurs = new();
     // tuplet numbers: small italic text (not a music glyph), centred at X, Y
     public List<(double X, double Y, string Text, int Src)> Tuplets = new();
+    // tuplet brackets: their rules and hooks, each a line in pixels (its source the "tuplet" that makes it)
+    public List<(double X1, double Y1, double X2, double Y2, double W, int Src)> TupletBrackets = new();
     // percent repeats (B3): a slanted bar or two (%%: a two-bar repeat) between two dots, centred at
     // X, Y; the source position is the "repeat" that makes it (every % of one repeat shares it), or the % mark's
     public List<(double X, double Y, int Slashes, int Src)> Percents = new();
@@ -220,6 +222,7 @@ sealed class SvgPage
                     if (pedal || mark.TrimStart('@', '!') is "cresc" or "decresc" or "dim")
                         markLines.Add((Math.Min(p1.X, p2.X), p1.X <= p2.X ? p1.Y : p2.Y, Math.Max(p1.X, p2.X), p1.X <= p2.X ? p2.Y : p1.Y, pedal, Src()));
                     if (!pedal) page.Lines.Add((p1.X, p1.Y, p2.X, p2.Y, N(a.GetValueOrDefault("stroke-width", "0")) * tr.Sx * page.Ppu));
+                    if (FormSign(Src(), "tuplet")) page.TupletBrackets.Add((p1.X, p1.Y, p2.X, p2.Y, N(a.GetValueOrDefault("stroke-width", "0")) * tr.Sx * page.Ppu, Src()));
                     break;
                 }
                 case "rect":

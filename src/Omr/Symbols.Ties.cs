@@ -111,6 +111,16 @@ static partial class Symbols
                 if (sign) continue;
             }
             int thinMax = (int)(0.3 * s);
+            // the stroke's height on the page with the staff's line rows in: a beam along a staff line is a thin
+            // edge either side of it with the line's rows left out (gen-threes' threes009, a beam of six
+            // sixteenths on the top line, its lower edge followed from the top note to the same note three on)
+            int Whole(int x, (int T, int B) r)
+            {
+                int t = r.T, b = r.B;
+                while (t > 0 && d[x, t - 1]) t--;
+                while (b < d.H - 1 && d[x, b + 1]) b++;
+                return b - t + 1;
+            }
             bool tied = false;
             string why = "no stroke";
             // the stroke starts just past the head's edge (a short tie between close chords a little
@@ -119,7 +129,7 @@ static partial class Symbols
             for (int x0 = xr + (int)(0.15 * s); x0 < Math.Min(xr + 0.8 * s, goal) && !tied; x0++)
                 // (a stroke at the head's own height is a ledger line running on to the next head, not a tie)
                 foreach (var start in Runs(x0).Where(r => r.B - r.T + 1 <= thinMax && Math.Abs((r.T + r.B) / 2.0 - h.Y) <= startNear
-                                                          && Math.Abs((r.T + r.B) / 2.0 - h.Y) >= 0.3 * s)
+                                                          && Math.Abs((r.T + r.B) / 2.0 - h.Y) >= 0.3 * s && Whole(x0, r) <= 0.45 * s)
                                               .OrderBy(r => Math.Abs((r.T + r.B) / 2.0 - h.Y)))
                 {
                     var cur = start;
