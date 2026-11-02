@@ -86,7 +86,11 @@ if ($Dev) {
 $total = @{ audiveris = @(0, 0); this = @(0, 0) }   # notes+rests found, of the truth's
 $rows = [System.Collections.Generic.List[object]]::new()   # this reader's count per set
 $pattern = 'exact events|notes\+rests|^align:|^ties:|^slur (starts|ends):'
-$marks = @(@('ties', 'tie'), @('slur starts', 'slurStart'), @('slur ends', 'slurEnd'))   # (the summary's name, the column's)
+$marks = @(@('ties', 'tie'), @('slur starts', 'slurStart'), @('slur ends', 'slurEnd'), @('arpeggios', 'arp'),
+           @('dynamics', 'dyn'), @('hairpins', 'hairpin'), @('articulations', 'artic'), @('ornaments', 'orn'), @('fermatas', 'fermata'), @('pedals', 'pedal'))   # (the summary's name, the column's)
+# (why the part-bars read wrong are wrong, in events: Scorer.CauseNames, a column each)
+$causes = @('lost', 'missed', 'extra', 'extraMeasure', 'value', 'tuplet', 'key', 'accidental', 'octave', 'clef', 'pitch', 'voice')
+$causeTotal = [ordered]@{}; foreach ($c in $causes) { $causeTotal[$c] = 0 }
 foreach ($name in $benches.Keys) {
     if ($Sets.Count -gt 0 -and $Sets -notcontains $name) { continue }
     $b = $benches[$name]
@@ -153,12 +157,26 @@ foreach ($name in $benches.Keys) {
                 $row["$($m[1])Omr"] = [int]$Matches[2]; $row["$($m[1])Right"] = [int]$Matches[4]
             }
         }
+        foreach ($c in $causes) { $row["c_$c"] = '' }
+        if ($ownText -match '(?m)^causes: (.*)$') {
+            foreach ($kv in $Matches[1].Trim() -split ', ') { $f = $kv -split ' '; $row["c_$($f[0])"] = [int]$f[1]; $causeTotal[$f[0]] += [int]$f[1] }
+        }
         $rows.Add([pscustomobject]$row)
     }
 }
 foreach ($k in 'audiveris', 'this') {
     if ($total[$k][1] -gt 0) { "total {0,-10} notes+rests found {1}/{2} ({3:F1}%)" -f $k, $total[$k][0], $total[$k][1], (100.0 * $total[$k][0] / $total[$k][1]) }
 }
+# (this reader's marks over every set: found of the truth's, and read right of those read; and its errors by cause)
+foreach ($m in $marks) {
+    $tr = ($rows | ForEach-Object { "$($_."$($m[1])Truth")" } | Where-Object { $_ -ne '' } | Measure-Object -Sum).Sum
+    if (-not $tr) { continue }
+    $fo = ($rows | ForEach-Object { "$($_."$($m[1])Found")" } | Where-Object { $_ -ne '' } | Measure-Object -Sum).Sum
+    $om = ($rows | ForEach-Object { "$($_."$($m[1])Omr")" } | Where-Object { $_ -ne '' } | Measure-Object -Sum).Sum
+    $ri = ($rows | ForEach-Object { "$($_."$($m[1])Right")" } | Where-Object { $_ -ne '' } | Measure-Object -Sum).Sum
+    "total this       {0,-13} found {1}/{2} ({3:F1}%), read right {4}/{5} ({6:F1}%)" -f $m[0], $fo, $tr, (100.0 * $fo / $tr), $ri, $om, $(if ($om) { 100.0 * $ri / $om } else { 0 })
+}
+"total this       causes: " + (($causeTotal.GetEnumerator() | ForEach-Object { "$($_.Key) $($_.Value)" }) -join ', ')
 # this reader's count per set, kept (docs/<kind>-sets.tsv: committed with the run it records, as check.ps1's
 # baseline is) so that the next run says which sets went up or down -- the totals alone hid elgar60-1's
 # 539 -> 517 behind other sets' gains (ROADMAP section 7). A run of every set writes out/audiveris/<kind>-sets.tsv
@@ -190,7 +208,15 @@ if ($Sets.Count -eq 0 -and $rows.Count -gt 0) {
                 }
             }
         }
-        "sets against docs\$kind-sets.tsv: $up better, $down worse, $($rows.Count - $up - $down) the same; ties and slurs $mUp better, $mDown worse (copy out\audiveris\$kind-sets.tsv over it to keep these)"
+        "sets against docs\$kind-sets.tsv: $up better, $down worse, $($rows.Count - $up - $down) the same; marks $mUp better, $mDown worse (copy out\audiveris\$kind-sets.tsv over it to keep these)"
+        # (the errors by cause, over the sets both tables hold, against the kept table's: fewer is better)
+        $common = @($rows | Where-Object { $was.ContainsKey($_.set) -and "$($was[$_.set].c_missed)" -ne '' })
+        if ($common.Count -gt 0) {
+            "causes against docs\$kind-sets.tsv: " + (($causes | ForEach-Object {
+                $c = "c_$_"; $now = ($common | ForEach-Object { [int]"0$($_.$c)" } | Measure-Object -Sum).Sum
+                $then = ($common | ForEach-Object { [int]"0$($was[$_.set].$c)" } | Measure-Object -Sum).Sum
+                "$_ $then -> $now" }) -join ', ')
+        }
     }
     else { "no docs\$kind-sets.tsv yet: copy out\audiveris\$kind-sets.tsv there to compare the next run with this one" }
 }

@@ -10,6 +10,10 @@ sealed class Truth
 {
     public Dictionary<(int Bar, string Part), List<Ev>> Bars = new();
     public Dictionary<(int Bar, string Part), List<List<Ev>>> Voices = new();
+    // (a MusicXML truth's: the marks of each part-bar, its key, and which staves are one part's -- a grand staff's two)
+    public Dictionary<(int Bar, string Part), List<Mark>> Marks = new();
+    public Dictionary<(int Bar, string Part), int> Fifths = new();
+    public Dictionary<string, int> Group = new();
 
     // an annotation's argument is a quoted string or a number: "@p(" is a dynamic plus a slur
     static readonly Regex Annot = new(@"@!?[A-Za-z]+(\(""[^""]*""\)|\(\d+\))?(\.(up|down))?");
@@ -172,15 +176,18 @@ static class MusicXmlTruth
     {
         var t = into ?? new Truth();
         var doc = System.Xml.Linq.XDocument.Load(path);
-        int staffBase = 0;
+        int staffBase = 0, partNo = 0;
         foreach (var part in doc.Root.Elements("part"))
         {
-            int divisions = 1, staves = 1, bar = barBase;
+            int divisions = 1, staves = 1, bar = barBase, fifths = 0;
+            partNo++;
             foreach (var measure in part.Elements("measure"))
             {
                 bar++;
                 // per staff and voice: the events in order, and where the voice's time stands
                 var voices = new SortedDictionary<(int Staff, int Voice), List<Ev>>();
+                // (and the marks a direction sets at a time of a staff: dynamics, hairpins, the pedal)
+                var directions = new List<(int Staff, int Time, string Family, string Label)>();
                 int now = 0, lastStart = 0;
                 foreach (var el in measure.Elements())
                 {
@@ -189,9 +196,27 @@ static class MusicXmlTruth
                         case "attributes":
                             if (el.Element("divisions") is { } d) divisions = int.Parse(d.Value);
                             if (el.Element("staves") is { } s) staves = int.Parse(s.Value);
+                            if (el.Element("key")?.Element("fifths") is { } k) fifths = int.Parse(k.Value);
                             break;
                         case "backup": now -= Ticks(el); break;
                         case "forward": now += Ticks(el); break;
+                        case "direction":
+                        {
+                            int at = now + (el.Element("offset") is { } off && divisions > 0
+                                ? (int)Math.Round(double.Parse(off.Value, System.Globalization.CultureInfo.InvariantCulture) * Dur.Whole / (4 * divisions)) : 0);
+                            int dStaff = int.Parse(el.Element("staff")?.Value ?? "1");
+                            foreach (var dt in el.Elements("direction-type"))
+                            {
+                                foreach (var dyn in dt.Elements("dynamics"))
+                                    foreach (var c in dyn.Elements())
+                                        directions.Add((dStaff, at, "dynamics", c.Name.LocalName == "other-dynamics" ? c.Value.Trim() : c.Name.LocalName));
+                                if (dt.Element("wedge") is { } w && Mark.Wedges.TryGetValue((string)w.Attribute("type") ?? "", out var kind))
+                                    directions.Add((dStaff, at, "hairpins", kind));
+                                if (dt.Element("pedal") is { } pd && Mark.Pedals.TryGetValue((string)pd.Attribute("type") ?? "", out var how))
+                                    directions.Add((dStaff, at, "pedals", how));
+                            }
+                            break;
+                        }
                         case "note":
                             if (el.Element("grace") != null || el.Element("cue") != null) break;
                             bool chord = el.Element("chord") != null;
@@ -211,6 +236,11 @@ static class MusicXmlTruth
                                 // (an arpeggio, on each note of its chord: Scorer.AddArpeggios counts it once a chord)
                                 var notations = el.Elements("notations").ToList();
                                 if (notations.Any(n => n.Element("arpeggiate") != null)) ev.Articulations = new List<string> { "arpeggio" };
+                                // (its articulations, ornaments and fermata, by the names the .lys writes; a dynamic set on the note itself)
+                                foreach (var mk in notations.SelectMany(n => n.Elements("articulations").Concat(n.Elements("ornaments")).Concat(n.Elements("technical")).SelectMany(g => g.Elements()).Concat(n.Elements("fermata"))))
+                                    if (Mark.Names.TryGetValue(mk.Name.LocalName, out var name)) (ev.Articulations ??= new List<string>()).Add(name);
+                                if (notations.SelectMany(n => n.Elements("dynamics")).SelectMany(g => g.Elements()).FirstOrDefault() is { } nd)
+                                    ev.Dynamic = nd.Name.LocalName == "other-dynamics" ? nd.Value.Trim() : nd.Name.LocalName;
                                 // (a tie on the note it starts at; a slur on one note of its chord: Scorer.AddTiesSlurs counts them a chord)
                                 bool Has(string name, string type) => notations.Any(n => n.Elements(name).Any(x => (string)x.Attribute("type") == type));
                                 if (Has("tied", "start")) ev.Tied = new List<Pitch> { ev.P };
@@ -227,7 +257,10 @@ static class MusicXmlTruth
                 {
                     if (staffBase + s - 1 >= parts.Count) break;
                     string id = parts[staffBase + s - 1];
+                    t.Group[id] = partNo;
+                    t.Fifths[(bar, id)] = fifths;
                     var all = new List<Ev>();
+                    var chords = new List<Ev>();
                     foreach (var (_, evs) in voices.Where(v => v.Key.Staff == s))
                     {
                         // one voice's line: a chord's notes (same start) as one event
@@ -241,17 +274,20 @@ static class MusicXmlTruth
                                 last.Chord.Add(e.P);
                                 last.Chord.Sort((a, b) => a.Diatonic.CompareTo(b.Diatonic));
                                 last.P = last.Chord[^1];
-                                if (e.Articulations != null) last.Articulations ??= e.Articulations;
+                                if (e.Articulations != null) { last.Articulations ??= new List<string>(); last.Articulations.AddRange(e.Articulations.Except(last.Articulations)); }
+                                last.Dynamic ??= e.Dynamic;
                                 if (e.Tie) last.TieAt(e.P);
                                 last.SlurStart |= e.SlurStart; last.SlurEnd |= e.SlurEnd;
                             }
-                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations, Tied = e.Tied == null ? null : new List<Pitch>(e.Tied), SlurStart = e.SlurStart, SlurEnd = e.SlurEnd });
+                            else line.Add(new Ev { IsRest = e.IsRest, FullBar = e.FullBar, P = e.P, Ticks = e.Ticks, X = e.X, Articulations = e.Articulations == null ? null : new List<string>(e.Articulations), Dynamic = e.Dynamic, Tied = e.Tied == null ? null : new List<Pitch>(e.Tied), SlurStart = e.SlurStart, SlurEnd = e.SlurEnd });
                         }
                         if (!t.Voices.TryGetValue((bar, id), out var vs)) t.Voices[(bar, id)] = vs = new List<List<Ev>>();
                         vs.Add(line);
                         all.AddRange(poly ? evs : line);
+                        chords.AddRange(line.Where(e => !e.IsRest));
                     }
                     t.Bars[(bar, id)] = all.OrderBy(e => e.X).ToList();   // (stable: a voice's order kept at one time)
+                    t.Marks[(bar, id)] = Mark.OfTruth(chords, directions.Where(m => m.Staff == s).Select(m => (m.Time, m.Family, m.Label)).ToList());
                 }
             }
             staffBase += staves;
@@ -292,6 +328,89 @@ static class BarAlign
             else b++;
         }
         return map;
+    }
+}
+
+/// <summary>
+/// A mark scored on the real prints (S52): its family, what it says (mf, cresc, staccato, down), and the
+/// notes (MIDI) of the chord it is on. The truth's MusicXML puts a dynamic, a hairpin and the pedal at a
+/// time of a staff (a direction): they are on the chord that starts there or next (the last one before,
+/// at the bar's end), and a release on the chord sounding then as well as the next (the reader marks the
+/// note under the sign, MuseScore's sign may stand at the end of the note before it). A release and a
+/// press at one time are a change, the press alone, as the reader writes it.
+/// </summary>
+sealed record Mark(string Family, string Label, HashSet<int> Notes)
+{
+    public static readonly string[] Families = { "dynamics", "hairpins", "articulations", "ornaments", "fermatas", "pedals" };
+    /// <summary>The families a direction sets, which may stand on either staff of a grand staff.</summary>
+    public static readonly HashSet<string> OfTime = new() { "dynamics", "hairpins", "pedals" };
+
+    // MusicXML's elements, as the .lys names them (Articulations.Names)
+    public static readonly Dictionary<string, string> Names = new()
+    {
+        ["staccato"] = "staccato", ["accent"] = "accent", ["tenuto"] = "tenuto", ["strong-accent"] = "marcato",
+        ["staccatissimo"] = "staccatissimo", ["detached-legato"] = "portato", ["stopped"] = "stopped", ["fermata"] = "fermata",
+        ["trill-mark"] = "trill", ["mordent"] = "mordent", ["inverted-mordent"] = "prall", ["turn"] = "turn", ["inverted-turn"] = "reverseTurn",
+    };
+    static readonly HashSet<string> Ornaments = new() { "trill", "mordent", "prall", "turn", "reverseTurn", "pralltriller" };
+    static readonly HashSet<string> Articulations = new() { "staccato", "accent", "tenuto", "marcato", "staccatissimo", "portato", "stopped" };
+    public static readonly Dictionary<string, string> Wedges = new() { ["crescendo"] = "cresc", ["diminuendo"] = "decresc" };
+    public static readonly Dictionary<string, string> Pedals = new() { ["start"] = "down", ["change"] = "down", ["resume"] = "down", ["stop"] = "up" };
+
+    static string FamilyOf(string label) => label == "fermata" ? "fermatas" : Ornaments.Contains(label) ? "ornaments" : Articulations.Contains(label) ? "articulations" : null;
+
+    static IEnumerable<int> Midis(Ev e) => e.Pitches.Select(p => p.Midi());
+
+    /// <summary>A chord's own marks (its articulations, ornaments, fermata, a dynamic on it), at its x.</summary>
+    static IEnumerable<(string Family, string Label, double X, Ev E)> Own(Ev e)
+    {
+        foreach (var a in e.Articulations ?? new List<string>())
+            if (FamilyOf(a) is { } f) yield return (f, a, e.X, e);
+        if (e.Dynamic != null) yield return ("dynamics", e.Dynamic.Replace(".up", "").Replace(".down", ""), e.X, e);
+    }
+
+    /// <summary>The marks at one x (a chord's copies in two voices, one mark on two voices' chords): one mark, their notes.</summary>
+    static List<Mark> Gather(IEnumerable<(string Family, string Label, double X, IEnumerable<int> Notes)> marks) =>
+        marks.GroupBy(m => (m.Family, m.Label)).SelectMany(g =>
+        {
+            var one = new List<(double X, HashSet<int> Notes)>();
+            foreach (var m in g.OrderBy(m => m.X))
+                if (one.Count > 0 && m.X - one[^1].X < 1) one[^1].Notes.UnionWith(m.Notes);
+                else one.Add((m.X, m.Notes.ToHashSet()));
+            return one.Select(o => new Mark(g.Key.Family, g.Key.Label, o.Notes));
+        }).ToList();
+
+    /// <summary>A truth's part-bar: its chords (X: their start) and the directions of its staff.</summary>
+    public static List<Mark> OfTruth(List<Ev> chords, List<(int Time, string Family, string Label)> directions)
+    {
+        var marks = chords.SelectMany(Own).Select(m => (m.Family, m.Label, m.X, Notes: Midis(m.E))).ToList();
+        var onsets = chords.Select(c => c.X).Distinct().Order().ToList();
+        IEnumerable<int> At(double x) => chords.Where(c => c.X == x).SelectMany(Midis);
+        foreach (var (time, family, label) in directions)
+        {
+            if (onsets.Count == 0) continue;
+            if (family == "pedals" && label == "up" && directions.Any(d => d.Time == time && d.Family == "pedals" && d.Label == "down")) continue;
+            double? after = onsets.Where(x => x >= time).Cast<double?>().FirstOrDefault(), before = onsets.Where(x => x < time).Cast<double?>().LastOrDefault();
+            var notes = family == "pedals" && label == "up"
+                ? (before is { } b ? At(b) : []).Concat(after is { } a ? At(a) : [])
+                : At(after ?? before.Value);
+            marks.Add((family, label, after ?? before.Value, notes));
+        }
+        return Gather(marks);
+    }
+
+    /// <summary>A part-bar as read: its voices' chords' marks, and the hairpins and the pedal the reader hung on them.</summary>
+    public static List<Mark> OfRead(IEnumerable<List<Ev>> voices)
+    {
+        var marks = new List<(string Family, string Label, double X, IEnumerable<int> Notes)>();
+        foreach (var e in voices.SelectMany(v => v).Where(e => !e.IsRest && !e.Slash))
+        {
+            foreach (var m in Own(e)) marks.Add((m.Family, m.Label, m.X, Midis(e)));
+            if (e.HairpinStart != null) marks.Add(("hairpins", e.HairpinStart, e.X, Midis(e)));
+            if (e.PedalDown) marks.Add(("pedals", "down", e.X, Midis(e)));
+            if (e.PedalUp) marks.Add(("pedals", "up", e.X, Midis(e)));
+        }
+        return Gather(marks);
     }
 }
 
@@ -368,6 +487,154 @@ sealed class Scorer
             $"{m.Name}: truth {TieSlur[k, 0]}, omr {TieSlur[k, 1]}, found {TieSlur[k, 2]}, read right {TieSlur[k, 3]} (recall {P(TieSlur[k, 2], TieSlur[k, 0]):F1}%, precision {P(TieSlur[k, 3], TieSlur[k, 1]):F1}%)"));
     }
 
+    // the marks of a MusicXML truth (Mark): matched one to one within the part-bar by what they say and a note in
+    // common; then a dynamic, hairpin or pedal mark of the truth's left over by one the reader hung on the other
+    // staff of its part (a grand staff's dynamics stand between the two, the truth's staff for them is MuseScore's guess)
+    public readonly Dictionary<string, int[]> MarkCount = new();   // per family, and per "family label": truth, omr, found
+    public List<string> MarkDiffs = new();
+
+    public void AddMarks(int bar, Truth truth, IReadOnlyList<(string Part, List<List<Ev>> Voices)> parts)
+    {
+        var t = parts.Select(p => (truth.Marks.GetValueOrDefault((bar, p.Part)) ?? new List<Mark>()).ToList()).ToList();
+        var o = parts.Select(p => Mark.OfRead(p.Voices)).ToList();
+        void Count(string key, int k) { if (!MarkCount.TryGetValue(key, out var c)) MarkCount[key] = c = new int[3]; c[k]++; }
+        for (int i = 0; i < parts.Count; i++)
+        {
+            foreach (var m in t[i]) { Count(m.Family, 0); Count($"{m.Family} {m.Label}", 0); }
+            foreach (var m in o[i]) { Count(m.Family, 1); Count($"{m.Family} {m.Label}", 1); }
+        }
+        bool Take(int i, int j, Func<Mark, bool> which)
+        {
+            bool any = false;
+            foreach (var m in t[i].Where(which).ToList())
+                if (o[j].FirstOrDefault(r => r.Family == m.Family && r.Label == m.Label && r.Notes.Overlaps(m.Notes)) is { } hit)
+                {
+                    t[i].Remove(m); o[j].Remove(hit); Count(m.Family, 2); Count($"{m.Family} {m.Label}", 2); any = true;
+                }
+            return any;
+        }
+        for (int i = 0; i < parts.Count; i++) Take(i, i, _ => true);
+        for (int i = 0; i < parts.Count; i++)
+            for (int j = 0; j < parts.Count; j++)
+                if (j != i && truth.Group.TryGetValue(parts[i].Part, out var gi) && truth.Group.TryGetValue(parts[j].Part, out var gj) && gi == gj)
+                    Take(i, j, m => Mark.OfTime.Contains(m.Family));
+        static string Show(IEnumerable<Mark> ms) => string.Join(" ", ms.Select(m => $"{m.Label}({string.Join(",", m.Notes.Order())})"));
+        for (int i = 0; i < parts.Count; i++)
+            foreach (var f in Mark.Families)
+            {
+                var missed = t[i].Where(m => m.Family == f).ToList();
+                var extra = o[i].Where(m => m.Family == f).ToList();
+                if (missed.Count + extra.Count > 0) MarkDiffs.Add($"{bar,4} {parts[i].Part,-5} {f}: missed {Show(missed)} / extra {Show(extra)}");
+            }
+    }
+
+    public string MarkSummary()
+    {
+        double P(int x, int of) => of == 0 ? 0 : 100.0 * x / of;
+        var lines = Mark.Families.Where(MarkCount.ContainsKey).Select(f =>
+        {
+            var c = MarkCount[f];
+            return $"{f}: truth {c[0]}, omr {c[1]}, found {c[2]}, read right {c[2]} (recall {P(c[2], c[0]):F1}%, precision {P(c[2], c[1]):F1}%)";
+        }).ToList();
+        var kinds = MarkCount.Where(kv => kv.Key.Contains(' ')).OrderByDescending(kv => kv.Value[0]).Select(kv => $"{kv.Key.Split(' ')[1]} {kv.Value[2]}/{kv.Value[0]} (read {kv.Value[1]})");
+        lines.Add("marks by kind, found/truth: " + string.Join(", ", kinds));
+        return string.Join("\n", lines);
+    }
+
+    // why a part-bar is wrong (S52): its events and the reading's paired in order, the exact ones first, then by what
+    // they share (a note's pitch: its value wrong, by a tuplet's or not; its value: its pitch wrong, by a key
+    // signature's sign, another accidental, an octave, a shift the bar's notes share (a clef), or else), the rest
+    // of the truth's missed and of the reading extra. A part-bar whose notes are all found but not in their voices
+    // counts its voice; a bar no system was found for, its notes lost. Counted in events (in order, so a little
+    // more than the multiset score's errors where it finds a note far off in the bar).
+    public static readonly string[] CauseNames = { "lost", "missed", "extra", "extraMeasure", "value", "tuplet", "key", "accidental", "octave", "clef", "pitch", "voice" };
+    public readonly Dictionary<string, int> Causes = CauseNames.ToDictionary(c => c, _ => 0);
+    public List<string> CauseDiffs = new();
+    public HashSet<int> Lost = new();
+    public Truth Truth;   // (its keys: a sign of the key missed or too many)
+
+    void Classify(int bar, string part, List<Ev> truth, List<Ev> omr)
+    {
+        var here = CauseNames.ToDictionary(c => c, _ => 0);
+        if (Lost.Contains(bar)) here["lost"] = truth.Count;
+        else
+        {
+            static int Midi(Ev e) => e.IsRest ? -1 : e.P.Midi();
+            var t = truth.OrderBy(e => e.X).ThenBy(Midi).ToList();
+            var o = omr.OrderBy(e => e.X).ThenBy(Midi).ToList();
+            // (a pitch's height: by step where the truth spells its notes, by semitone where it knows the MIDI note only)
+            bool spelled = t.Any(e => !e.IsRest && !e.MidiOnly);
+            int H(Ev e) => spelled ? e.P.Diatonic : e.P.Midi();
+            // the bar's notes shifted as one (a clef or an octave line misread): the shift that pairs most of them with
+            // notes read of their value, half the bar's notes at least and three or more, and more than are read right.
+            // Looked for before anything is paired: paired first, the notes of an octave read low would take others of
+            // their name an octave on, and the shift the bar shares would be lost (a chord's heads stand in no order of x)
+            int notes = t.Count(e => !e.IsRest);
+            List<(Ev T, Ev O)> ShiftedBy(int s)
+            {
+                var left = o.Where(e => !e.IsRest).ToList();
+                var got = new List<(Ev T, Ev O)>();
+                foreach (var e in t.Where(e => !e.IsRest))
+                    if (left.FirstOrDefault(r => H(r) - H(e) == s && SameDur(e, r)) is { } hit) { left.Remove(hit); got.Add((e, hit)); }
+                return got;
+            }
+            var shifts = t.Where(e => !e.IsRest).SelectMany(e => o.Where(r => !r.IsRest && SameDur(e, r)).Select(r => H(r) - H(e))).Where(s => s != 0).Distinct()
+                          .Select(s => (S: s, Pairs: ShiftedBy(s))).OrderByDescending(x => x.Pairs.Count).FirstOrDefault();
+            if (shifts.Pairs != null && shifts.Pairs.Count >= Math.Max(3, (notes + 1) / 2) && shifts.Pairs.Count > ShiftedBy(0).Count)
+            {
+                bool octave = shifts.S % (spelled ? 7 : 12) == 0;
+                here[octave ? "octave" : "clef"] += shifts.Pairs.Count;
+                foreach (var (x, y) in shifts.Pairs) { t.Remove(x); o.Remove(y); }
+            }
+            // the rest paired off: the exact ones in any order, as the multiset score finds them, then in order by what they share
+            foreach (var e in t.ToList())
+                if (o.FirstOrDefault(r => r.IsRest == e.IsRest && Midi(r) == Midi(e) && SameDur(e, r)) is { } hit) { t.Remove(e); o.Remove(hit); }
+            static int W(Ev a, Ev b) => a.IsRest != b.IsRest ? 0 : a.IsRest ? 2 : a.P.Midi() == b.P.Midi() || a.Ticks == b.Ticks ? 2 : 0;
+            int n = t.Count, m = o.Count;
+            var dp = new int[n + 1, m + 1];
+            for (int i = n - 1; i >= 0; i--)
+                for (int j = m - 1; j >= 0; j--)
+                    dp[i, j] = Math.Max(Math.Max(dp[i + 1, j], dp[i, j + 1]), W(t[i], o[j]) > 0 ? dp[i + 1, j + 1] + W(t[i], o[j]) : 0);
+            var pairs = new List<(Ev T, Ev O)>();
+            int a = 0, b = 0;
+            while (a < n && b < m)
+            {
+                if (W(t[a], o[b]) > 0 && dp[a, b] == dp[a + 1, b + 1] + W(t[a], o[b])) { pairs.Add((t[a], o[b])); a++; b++; }
+                else if (dp[a, b] == dp[a + 1, b]) a++;
+                else b++;
+            }
+            here["missed"] = n - pairs.Count;
+            here["extra"] = m - pairs.Count;
+            int fifths = Truth?.Fifths.GetValueOrDefault((bar, part)) ?? 0;
+            foreach (var p in pairs)
+            {
+                string cause;
+                if (p.T.IsRest || p.T.P.Midi() == p.O.P.Midi())
+                    cause = !p.T.IsRest && (Dur.Text(p.T.Ticks) == null || Dur.Text(p.O.Ticks) == null) ? "tuplet" : "value";
+                else
+                {
+                    int d = H(p.O) - H(p.T), dm = p.O.P.Midi() - p.T.P.Midi();
+                    if (spelled ? d == 0 : Math.Abs(d) <= 2)
+                        cause = spelled && KeySign(fifths, Pitch.Mod7(p.T.P.Diatonic), p.T.P.Alter, p.O.P.Alter) ? "key" : "accidental";
+                    else if (dm % 12 == 0 && (!spelled || d % 7 == 0)) cause = "octave";
+                    else cause = "pitch";
+                }
+                here[cause]++;
+            }
+        }
+        foreach (var (c, k) in here) Causes[c] += k;
+        if (here.Values.Any(k => k > 0)) CauseDiffs.Add($"{bar,4} {part,-5} {string.Join(", ", here.Where(kv => kv.Value > 0).Select(kv => $"{kv.Key} {kv.Value}"))}");
+    }
+
+    /// <summary>A note read with another alteration where a key signature of a sign more or less would give it.</summary>
+    static bool KeySign(int fifths, int step, int truthAlter, int readAlter)
+    {
+        if (Math.Abs(fifths) > 7 || Keys.Alterations(fifths)[step] != truthAlter) return false;
+        return new[] { fifths - 1, fifths + 1 }.Any(f => Math.Abs(f) <= 7 && Keys.Alterations(f)[step] == readAlter);
+    }
+
+    public string CauseSummary() => "causes: " + string.Join(", ", CauseNames.Select(c => $"{c} {Causes[c]}"));
+
     public string ArpeggioSummary()
     {
         double P(int x, int of) => of == 0 ? 0 : 100.0 * x / of;
@@ -402,7 +669,7 @@ sealed class Scorer
             else b++;
         }
         if (exact == n && n == m) BarsExact++;
-        else { Wrong.Add((bar, part)); Diffs.Add($"{bar,4} {part,-4} T: {string.Join(" ", truth.Select(e => e.Show()))}\n          O: {string.Join(" ", omr.Select(e => e.Show()))}"); }
+        else { Wrong.Add((bar, part)); Classify(bar, part, truth, omr); Diffs.Add($"{bar,4} {part,-4} T: {string.Join(" ", truth.Select(e => e.Show()))}\n          O: {string.Join(" ", omr.Select(e => e.Show()))}"); }
     }
 
     static bool SamePitch(Ev t, Ev o)
@@ -444,6 +711,7 @@ sealed class Scorer
         if (omr.Count == 0) return;
         AddArpeggios(at, part, new List<Ev>(), omr);
         OmrEvents += omr.Count; MsOmr += omr.Count;
+        Causes["extraMeasure"] += omr.Count;
         Diffs.Add($"  +{at,-3} {part,-5} O: {string.Join(" ", omr.Select(e => e.Show()))}   (read measure {at}: no bar of the truth)");
     }
 
@@ -454,7 +722,7 @@ sealed class Scorer
         int exact = Common(truth, omr, true), pitch = Common(truth, omr, false);
         MsTruth += truth.Count; MsOmr += omr.Count; MsExact += exact; MsPitch += pitch;
         if (exact == truth.Count && omr.Count == truth.Count) BarsExact++;
-        else { Wrong.Add((bar, part)); Diffs.Add($"{bar,4} {part,-5} T: {string.Join(" ", truth.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}\n           O: {string.Join(" ", omr.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}"); }
+        else { Wrong.Add((bar, part)); Classify(bar, part, truth, omr); Diffs.Add($"{bar,4} {part,-5} T: {string.Join(" ", truth.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}\n           O: {string.Join(" ", omr.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}"); }
     }
 
     // voices: each truth voice matched with the OMR voice that agrees with it best
@@ -485,6 +753,8 @@ sealed class Scorer
         if (t.Count == o.Count && best == tn && on == tn) VBarsExact++;
         else
         {
+            // (its notes all found, in the wrong voices: the voices' fault; a part-bar wrong is counted by its notes)
+            if (!Wrong.Contains((bar, part)) && tn > best) { Causes["voice"] += tn - best; CauseDiffs.Add($"{bar,4} {part,-5} voice {tn - best}"); }
             string Show(List<List<Ev>> vs) => string.Join("  //  ", vs.Select(v => string.Join(" ", v.Select(e => e.Show()))));
             VDiffs.Add($"{bar,4} {part,-5} T: {Show(t)}\n           O: {Show(o)}");
         }

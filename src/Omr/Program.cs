@@ -137,7 +137,7 @@ if (opt.TryGetValue("pred", out var predPaths) && truth != null)
     }
     int first0 = cfg.PageFirstBar.TryGetValue(from, out var s0) ? s0 : 1;
     int last0 = cfg.PageFirstBar.TryGetValue(to + 1, out var n0) ? n0 - 1 : truth.Bars.Keys.Select(k => k.Bar).DefaultIfEmpty(0).Max();
-    var psc = new Scorer();
+    var psc = new Scorer { Truth = truth };
     if (opt.ContainsKey("align"))
     {
         var tbars = truth.Bars.Keys.Select(k => k.Bar).Where(b => b >= first0 && b <= last0).Distinct().Order().ToList();
@@ -159,6 +159,7 @@ if (opt.TryGetValue("pred", out var predPaths) && truth != null)
         }
     Console.WriteLine($"pred: {read.Keys.Select(k => k.Bar).Distinct().Count()} measures read, bars {first0}-{last0} scored");
     Console.WriteLine(poly ? psc.MultisetSummary() : psc.Summary());
+    Console.WriteLine(psc.CauseSummary());
     Directory.CreateDirectory(opt.GetValueOrDefault("out", "out"));
     File.WriteAllText(Path.Combine(opt.GetValueOrDefault("out", "out"), "diffs.txt"), string.Join("\n", psc.Diffs));
     return;
@@ -925,6 +926,8 @@ if (truth != null)
     if (lost.Count > 0) Console.WriteLine($"bars not read (no system found for them): {string.Join(" ", lost)}");
     foreach (var bar in lost) all[bar] = new List<Ev>[cfg.Parts.Count];   // (the .lys is written above; all serves the scoring only from here)
     lostBars = lost;
+    sc.Truth = truth;
+    sc.Lost = lost.ToHashSet();
     // a part the truth says nothing of (a band's drums: no .notes) is not scored
     var scored = cfg.Parts.Select(q => truth.Bars.Keys.Any(k => k.Part == q.Id)).ToArray();
     // (a rhythm slash is no note: the truth has none)
@@ -995,6 +998,15 @@ if (truth != null)
                 sc.AddVoices(bar, cfg.Parts[pi].Id, tv, ov);
                 sc.AddTiesSlurs(bar, cfg.Parts[pi].Id, tv, ov);
             }
+        // (a truth that marks no dynamic, hairpin, articulation, ornament, fermata or pedal: nothing to say)
+        if (truth.Marks.Values.Any(ms => ms.Count > 0))
+        {
+            foreach (var bar in all.Keys)
+                sc.AddMarks(bar, truth, Enumerable.Range(0, cfg.Parts.Count).Where(pi => scored[pi])
+                    .Select(pi => (cfg.Parts[pi].Id, (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).Select(Notes).ToList())).ToList());
+            Console.WriteLine(sc.MarkSummary());
+            File.WriteAllText(Path.Combine(outDir, "mark-diffs.txt"), string.Join("\n", sc.MarkDiffs));
+        }
         Console.WriteLine(sc.VoiceSummary());
         File.WriteAllText(Path.Combine(outDir, "voice-diffs.txt"), string.Join("\n", sc.VDiffs));
         // (a truth that marks no tie or slur, a .notes file's: nothing to say)
@@ -1004,6 +1016,8 @@ if (truth != null)
             File.WriteAllText(Path.Combine(outDir, "tie-slur-diffs.txt"), string.Join("\n", sc.TieSlurDiffs));
         }
     }
+    Console.WriteLine(sc.CauseSummary());
+    File.WriteAllText(Path.Combine(outDir, "causes.txt"), string.Join("\n", sc.CauseDiffs));
     // the note todos against the truth: of each reading offered, does the bar read the other way
     // match more of the truth's notes (pitch and length; "other"), fewer ("as read"), or as many
     // (todos.txt is written every time, empty too: no old one is left to count)
