@@ -95,6 +95,11 @@ static class Fixes
                 var (chords, single, x0, x1) = state.Played[(b, p)];
                 var cands = Candidates(res, st, chords, barTicks, x0, x1, s, dets, staves);
                 var fitting = cands.Where(c => Voices.Separate(c.Trial, barTicks, st.Mid, st.S).All(v => v.Sum(e => e.Ticks) == barTicks)).ToList();
+                // (two rests half seen that fill the bar together, against one of them a value longer that fills it
+                // alone: the two, each a rest the detector sees -- kinkel19-1's scan, bar 3's right hand, an old print's
+                // two 16th rests seen at 0.45-0.49, one of them as an eighth's too)
+                var two = fitting.Where(c => c.Why == "two rests half seen").ToList();
+                if (fitting.Count > 1 && two.Count == 1 && two[0].Evidence >= 0.4 && fitting.All(c => c == two[0] || c.Why == "a rest half seen")) fitting = two;
                 if (Verbose)
                 {
                     Console.WriteLine($"  fixes: bar {b} part {p} ({string.Join(" ", chords.Select(e => e.Show()))}; {Memo.BarLength(res.Voices[(b, p)].Select(v => v.Sum(e => e.Ticks)).ToList(), barTicks, time)}): {cands.Count} candidates, {fitting.Count} fill the bar");
@@ -261,6 +266,30 @@ static class Fixes
                     }
                 }, trial, r1.X, r1.Y));
             }
+        // a dotted rest's dot a piece of the next rest, the detector half seeing that rest: the dot taken
+        // away and the rest put in, together (each alone leaves the bar off) -- kinkel10-2's scan, bars 34
+        // and 36 of the right hand, r16. and no r16 after it, the second rest seen at 0.44 by detector47
+        foreach (var (r, score) in halfSeen)
+        {
+            int i = chords.FindLastIndex(e => e.IsRest && e.X < r.X);
+            if (i < 0 || r.X - chords[i].X > 3 * s || chords.Any(e => e.X > chords[i].X + 0.5 * s && e.X < r.X)) continue;
+            var e = chords[i];
+            string text = Dur.Text(e.Ticks * e.Scale.Den / e.Scale.Num);
+            if (text == null || !text.EndsWith('.') || text.EndsWith("..")) continue;
+            double sDot = dets.Where(t => t.Class == "dot" && t.X > e.X && t.X < r.X && Math.Abs(t.Y - e.Y) < 1.2 * s).Select(t => t.Score).DefaultIfEmpty(0).Max();
+            if (sDot >= 0.3) continue;
+            int newTicks = Dur.Of(int.Parse(text.TrimEnd('.')), 0) * e.Scale.Num / e.Scale.Den;
+            var trial = chords.Select(x => x.Copy()).ToList();
+            trial[i].Ticks = newTicks;
+            trial = trial.Append(r.Copy()).OrderBy(x => x.X).ToList();
+            var ev = e;
+            cands.Add(new Cand("its dot a rest half seen", $"{e.Show()} -", $"{trial.First(x => x.IsRest && Math.Abs(x.X - e.X) < 0.01).Show()} {r.Show()}", Math.Round(Math.Min(score, 0.5 - sDot), 2), () =>
+            {
+                ev.Ticks = newTicks;
+                int at = chords.FindIndex(x => x.X > r.X);
+                chords.Insert(at < 0 ? chords.Count : at, r);
+            }, trial, r.X, r.Y));
+        }
         return cands;
     }
 

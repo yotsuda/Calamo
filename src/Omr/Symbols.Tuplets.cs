@@ -152,6 +152,12 @@ static partial class Symbols
                     return gap < (line ? 1.0 : 0.35) * s;
                 }))
             { if (TupletVerbose) Console.WriteLine("      -> a letter beside it: a word's"); continue; }
+            // nor a piece of an accidental the detector trusts, a staff line cutting it in two (kinkel10-2's scan, bar 5's
+            // left hand, a natural's lower half read as a 3 over the b,16 beamed across the barline; lang36-3's scan,
+            // bar 48's left hand, a sharp's lower half read as a 3 over the bar's sixteenths)
+            if (!det && ps.Detections != null && ps.Detections.Any(t => t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && t.Score >= TrustScore
+                                                                        && Math.Abs(t.X - c.Cx) < 0.5 * s && Math.Abs(t.Y - c.Cy) < 1.2 * s))
+            { if (TupletVerbose) Console.WriteLine("      -> a piece of a detected accidental"); continue; }
             // nor a beam's end by its stem: a number stands past the stem's tip, beyond the beam, never
             // alongside the stem (Gonville's sixteenth stub over the eighth beam, cut free by the staff
             // line, band010's dotted rhythm read as a triplet)

@@ -521,7 +521,11 @@ static partial class Symbols
             bool graceSign = owner != null && !restSeen && owner.Class is "rest" or "sharp" or "flat" or "natural" or "dsharp" or "dflat"
                              && ps.Graces.Any(g => g.On(st) && g.L - right >= -0.15 * s && g.L - right <= 1.5 * s && Math.Abs(g.Y - at) < 0.5 * s
                                                    && !ps.Heads.Any(h => h.On(st) && h.L - right >= -0.15 * s && h.L < g.L && Math.Abs(h.Y - at) < 0.5 * s));
-            bool overRest = owner != null && owner.Class == "rest" && !restSeen && (t.Score >= SureScore || graceSign);
+            // (or one it trusts with a head of no sign just right of it at its height: an old print's flat
+            // a rest to the rules, seen at 0.66 by a detector retrained -- kinkel10-2's scan, bar 3, the
+            // right hand's <aes' des''>16 read a')
+            bool headBeside = ps.Heads.Any(hd => hd.On(st) && hd.Acc == null && hd.L - right >= -0.15 * s && hd.L - right <= 1.2 * s && Math.Abs(hd.Y - at) <= 0.3 * s);
+            bool overRest = owner != null && owner.Class == "rest" && !restSeen && (t.Score >= SureScore || graceSign || headBeside);
             if (owner != null && owner.Class != "?" && !overRest && !graceSign)
             {
                 if (DebugAt.HasValue && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
@@ -530,12 +534,17 @@ static partial class Symbols
             }
             Head best = null;
             double bd = double.MaxValue;
+            // (a chord with a head pushed left of its stem by a second sets its signs a head's width further
+            // left: kinkel7-6's MuseScore page, bar 7's left hand, <c f g aes>8, the g left of the stem, the
+            // flat by it and the natural before the flat, 2.6 spaces off the f)
+            bool Pushed(Head hd) => hd.HasStem && ps.Heads.Any(o => o != hd && o.St == hd.St && o.HasStem && Math.Abs(o.StemX - hd.StemX) < 0.3 * s
+                                                                     && o.X < hd.X - 0.6 * s);
             // (a grace note's sign, small, is the sign it is: the grace note's head is the nearer one right of it, S21)
             foreach (var hd in ps.Heads.Concat(ps.Graces))
             {
                 if (!hd.On(st) || hd.Acc != null) continue;
                 double gap = hd.L - right, dy = Math.Abs(hd.Y - AtOf(hd));
-                if (gap < -0.15 * s || gap > 2.6 * s || dy > 0.3 * s) continue;
+                if (gap < -0.15 * s || gap > (2.6 + (gap > 2.6 * s && Pushed(hd) ? 1.3 : 0)) * s || dy > 0.3 * s) continue;
                 if (gap < bd) { bd = gap; best = hd; }
             }
             // (none at its height: an old print's flat is short, its bowl nearer its box's centre as a grace

@@ -390,6 +390,26 @@ static class Signatures
             if (a != null && b != null && b.MinX - a.MaxX <= 0.35 * s) continue;
             signs.RemoveRange(i, signs.Count - i); break;
         }
+        // (the signs stand evenly spaced: a gap twice their step with a faint sign of their kind in it is a sign
+        // unseen -- kinkel19-2's scan, the voice's four flats, the E flat seen at 0.46 by detector47, the B, A and
+        // D flats left, which pass for three flats as the D stands within a step of the E's place)
+        var seen = signs;
+        if (!weak && seen.Count >= 2 && seen.Select(t => t.Class).Distinct().Count() == 1)
+        {
+            double step = Enumerable.Range(1, seen.Count - 1).Min(i => seen[i].X - seen[i - 1].X);
+            if (step >= 0.6 * s && step <= 1.3 * s)
+                for (int i = seen.Count - 1; i >= 1; i--)
+                {
+                    double gap = seen[i].X - seen[i - 1].X;
+                    if (gap < 1.7 * step || gap > 2.4 * step) continue;
+                    var (a, b) = (seen[i - 1], seen[i]);
+                    var faint = ps.Detections.Concat(ps.WeakSigns).Where(t => t.Class == a.Class && t.Score >= Detector.WeakKey && !seen.Contains(t) && t.X - a.X >= 0.6 * step && b.X - t.X >= 0.6 * step
+                                                                              && Math.Abs(st.Pos(t.Y)) <= 7).MaxBy(t => t.Score);
+                    if (faint == null) continue;
+                    if (Verbose) Console.WriteLine($"    key from the detector, staff {st.System + 1}/{st.Part}: a gap of {gap / step:F1} steps at x {a.X:F0}-{b.X:F0}, its faint {faint.Class}@{faint.X:F0},pos{st.Pos(faint.Y):F1}({faint.Score:F2}) taken");
+                    seen.Insert(i, faint);
+                }
+        }
         if (Verbose && signs.Count > 0) Console.WriteLine($"    key signs from the detector, staff {st.System + 1}/{st.Part}: {string.Join(" ", signs.Select(t => $"{t.Class}@{t.X:F0},pos{st.Pos(t.Y):F1}({t.Score:F2})"))}"
             + (weak ? "" : $"; weak: {string.Join(" ", ps.WeakSigns.Where(t => t.X > startX && t.X < startX + 13 * s && Math.Abs(st.Pos(t.Y)) <= 7).Select(t => $"{t.Class}@{t.X:F0},pos{st.Pos(t.Y):F1}({t.Score:F2})"))}"));
         if (signs.Count == 0 || signs.Count > 7 || signs.Select(t => t.Class).Distinct().Count() > 1) return null;
@@ -789,7 +809,11 @@ static class Signatures
             // (the clef's own columns: about the detection, within the body -- the body may have gathered the notes beside it)
             double x0 = Math.Max(bx0, t.X - 1.6 * s) - 0.2 * s, x1 = Math.Min(bx1, t.X + 1.6 * s) + (kind == "bass" ? 1.2 * s : 0.3 * s);
             // (its pieces of ink, so that nothing reads them as rests, signs or dots; and no head stands on its body)
-            foreach (var o in mine.Where(o => (o.Class == "?" || o.Class == "dot") && o.C.MaxX > x0 && o.C.MinX < x1 && o.C.MinY < st.Bottom + 2 * s && o.C.MaxY > st.Top - 2 * s && o.C.W <= 10 * s)) o.Class = "clef";
+            // (but not a sign the detector is sure of past its body, the next note's: kinkel10-6's MuseScore page, bar 18's
+            // left hand, the sharp of fis after the small F clef, inside the bass clef's reach for its dots)
+            bool Sign(Other o) => ps.Detections.Any(d => d.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && d.Score >= Detector.Threshold && d.X > bx1
+                                                         && d.X >= o.C.MinX && d.X <= o.C.MaxX && d.Y >= o.C.MinY && d.Y <= o.C.MaxY);
+            foreach (var o in mine.Where(o => (o.Class == "?" || o.Class == "dot") && o.C.MaxX > x0 && o.C.MinX < x1 && o.C.MinY < st.Bottom + 2 * s && o.C.MaxY > st.Top - 2 * s && o.C.W <= 10 * s && !Sign(o))) o.Class = "clef";
             ps.Heads.RemoveAll(h => h.St == st && Math.Abs(h.X - t.X) < 1.2 * s && h.Y > Math.Max(by0, st.Top - 3.5 * s) && h.Y < Math.Min(by1, st.Bottom + 3.5 * s));
             ps.Sigs.Add(new Sig { St = st, X = x0, Clef = kind, Mid = true });
         }
