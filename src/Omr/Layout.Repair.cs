@@ -138,12 +138,61 @@ static partial class Layout
                  : !thin ? $"a line thicker than half a space or into the one above, no five-line staff (rows {string.Join(" ", ls.Select(l => $"{l.Top}-{l.Bot}"))})"
                  : !inked5 ? $"the middle line's ink lies in lattices (chord diagrams) for {inLattice:F2} of it, no staff"
                  : $"recovered, lines at {string.Join(" ", ls.Select(l => l.Y.ToString("F0")))}{(inLattice > 0 ? $" ({inLattice:F2} of the middle line's ink in lattices)" : "")}"));
-            if (!lines || !thin || !inked5) continue;
+            // (a photo's staff that still bows: over the whole width its lines smear into thick bands or into
+            // no peaks at all, though each stretch of it holds five clean lines -- Nutcracker's piano and cello)
+            var bowed = !lines || !thin ? BowedComb(d, left, right, mid, s) : null;
+            if (bowed != null) Console.WriteLine($"  staff at y {mid:F0}: five lines stretch by stretch, a bowed staff, lines at {string.Join(" ", bowed.Select(l => l.Y.ToString("F0")))}");
+            if (bowed != null) ls = bowed;
+            else if (!lines || !thin || !inked5) continue;
             staves.Add(new Staff { Lines = ls, Left = left, Right = right });
             // (the one-line staves taken from its lines that were left are no staves of their own)
             extras?.RemoveAll(st => st.Kind == "line" && st.Mid > ls[0].Y - 0.5 * s && st.Mid < ls[4].Y + 0.5 * s);
         }
         staves.Sort((a, b) => a.Top.CompareTo(b.Top));
+    }
+
+    /// <summary>
+    /// The five lines of a staff too bowed for a comb over its whole width: stretches of twelve spaces,
+    /// each with five rows a space apart, each row dark on most of the stretch's columns. Three stretches
+    /// and a third of them must hold them (the notes hide the rest: a cello's busy bars), at heights that
+    /// drift by under a space from one to the next (a bow is smooth). The lines are the stretches' median, or null.
+    /// </summary>
+    static Line[] BowedComb(Img d, int left, int right, double mid, double s)
+    {
+        int width = (int)(12 * s), count = (right - left + 1) / width;
+        if (count < 3) return null;
+        var found = new List<Line[]>();
+        double? last = null;
+        for (int i = 0; i < count; i++)
+        {
+            int x0 = left + i * width, x1 = x0 + width - 1;
+            // (the rows of this stretch dark on most of its columns, by the binarized page)
+            int y0 = Math.Max(0, (int)(mid - 3.5 * s)), y1 = Math.Min(d.H - 1, (int)(mid + 3.5 * s));
+            var lines = new List<Line>();
+            for (int y = y0; y <= y1; y++)
+            {
+                int dark = 0;
+                for (int x = x0; x <= x1; x++) if (d[x, y]) dark++;
+                if (dark < 0.5 * width) continue;
+                if (lines.Count > 0 && lines[^1].Bot == y - 1) lines[^1] = new Line { Top = lines[^1].Top, Bot = y };
+                else lines.Add(new Line { Top = y, Bot = y });
+            }
+            if (lines.Count != 5) continue;
+            // (a photo's lines are blurred thick, 16 rows at a space of 28 at the foot of Nutcracker's third page: white between them is what tells five lines)
+            bool even = Enumerable.Range(0, 5).All(k => lines[k].Bot - lines[k].Top + 1 <= 0.7 * s)
+                        && Enumerable.Range(1, 4).All(k => Math.Abs(lines[k].Y - lines[k - 1].Y - s) <= 0.15 * s);
+            if (!even || last != null && Math.Abs(lines[2].Y - last.Value) >= s) continue;
+            last = lines[2].Y;
+            found.Add(lines.ToArray());
+        }
+        if (found.Count < 3 || found.Count * 3 < count) return null;
+        var result = new Line[5];
+        for (int k = 0; k < 5; k++)
+        {
+            var at = found.OrderBy(f => f[k].Y).ToList()[found.Count / 2][k];
+            result[k] = new Line { Top = at.Top, Bot = at.Bot };
+        }
+        return result;
     }
 
     /// <summary>

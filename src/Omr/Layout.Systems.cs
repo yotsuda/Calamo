@@ -16,8 +16,13 @@ static partial class Layout
     public static List<SystemInfo> GroupSystems(List<Staff> staves, int partsPerSystem, Img d, double s, List<Detection> det = null)
     {
         if (partsPerSystem < 2 || staves.Count == 0) return GroupSystems(staves, partsPerSystem);
+        // (the page's usual start, as in SystemKinds: a staff measured to start late puts the line outside a
+        // window about the two staves' own, and the system falls in two there -- a photo's percussion
+        // staves, 1149 and 1644 for 910: Nutcracker's first page, which looked split at its second tempo mark)
+        var lefts = staves.Select(st => st.Left).OrderBy(v => v).ToList();
+        int usual = lefts[lefts.Count / 2];
         var joined = new bool[staves.Count];     // joined[i]: staff i and the one below it open one system
-        for (int i = 0; i + 1 < staves.Count; i++) joined[i] = Opened(d, staves[i], staves[i + 1], s) >= 0;
+        for (int i = 0; i + 1 < staves.Count; i++) joined[i] = Opened(d, staves[i], staves[i + 1], s, usual) >= 0;
         bool whole = staves.Count % partsPerSystem == 0;
         for (int i = 0; whole && i < staves.Count; i++)
             if (i % partsPerSystem != partsPerSystem - 1 && !joined[i]) whole = false;
