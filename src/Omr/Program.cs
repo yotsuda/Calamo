@@ -216,7 +216,7 @@ if (opt.ContainsKey("fixed-threshold")) Img.OtsuThreshold = false;
 if (opt.TryGetValue("save-bin", out var sb)) Img.SaveBinarized = sb;
 if (opt.TryGetValue("save-gray", out var sg)) Img.SaveGray = sg;
 if (opt.TryGetValue("save-ink", out var inkPath)) Img.SaveInk = inkPath;
-Img.NoZoom = opt.ContainsKey("no-zoom");Reader.NoFill = opt.ContainsKey("no-fill");
+Img.NoZoom = opt.ContainsKey("no-zoom");Img.NoLean = opt.ContainsKey("no-lean");Reader.NoFill = opt.ContainsKey("no-fill");
 Layout.TraceJoins = Img.Trace = opt.ContainsKey("trace");   // --trace: how the page was levelled, the staves, their extents and the systems found
 Reader.NoTab = opt.ContainsKey("no-tab");
 Reader.NoUnprinted = opt.ContainsKey("no-unprinted");

@@ -3,14 +3,16 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--erase boxes.tsv [--erase-names prefix]] [--seed n]
+// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--erase boxes.tsv [--erase-names prefix]] [--keystone k] [--shear a] [--bend b] [--seed n]
 //
 // Makes a clean engraving look printed and scanned: a lower resolution (scale), ink that bleeds
 // (blur) and is not quite black (ink), paper that is not quite white and not evenly lit (paper),
 // sensor grain (noise), dust and pinholes (specks), a scanner's tone curve (gamma), and toner
 // that does not cover a solid area evenly (fill: the inside of a head or a beam goes grey and
 // mottled while its edge and every thin stroke stay dark, as a laser print does). The geometry
-// is untouched (no rotation), so the SVG truth still fits by the image's width.
+// is untouched (no rotation), so the SVG truth still fits by the image's width -- unless asked:
+// --keystone, --shear and --bend draw a page photographed off square, which the reader must
+// stand up and level itself (Omr's Lean and Bow) for the truth to fit.
 static class Program
 {
     static int Main(string[] args)
@@ -39,6 +41,11 @@ static class Program
         // page, as an engraver that leaves them unprinted would (a triplet's 3 after the first few)
         if (opt.TryGetValue("erase", out var boxes)) Erase(w, h, g, boxes, opt.GetValueOrDefault("erase-names", "tuplet."));
         if (fill > 0) g = Unfill(w, h, g, fill, fillEdge, rng);
+        // --keystone k: the corners' columns moved by k of the page's width, inward at the top and outward
+        // at the bottom (the page narrows away from the camera); --shear a: every upright line leaning a
+        // of the page's width over its height; --bend b: the rows at the page's sides moved b of its height
+        double keystone = P("keystone", 0), shear = P("shear", 0), bend = P("bend", 0);
+        if (keystone != 0 || shear != 0 || bend != 0) g = Warp(w, h, g, keystone, shear, bend);
         if (Math.Abs(scale - 1.0) > 1e-6) (w, h, g) = Resample(w, h, g, scale);
         if (blur > 0) g = Blur(w, h, g, blur);
         // ink lifted off black, paper pulled off white, unevenly
@@ -228,6 +235,29 @@ static class Program
                 }
         }
         Console.WriteLine($"erased {erased} pieces of {prefix}*");
+    }
+
+    /// <summary>A page off square: each pixel taken (bilinearly) from where the page's lean and bend put it, paper beyond the edges.</summary>
+    static double[] Warp(int w, int h, double[] g, double keystone, double shear, double bend)
+    {
+        var o = new double[w * h];
+        double cx = w / 2.0, cy = h / 2.0;
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                double u = (x - cx) / cx, v = (y - cy) / cy;
+                // (a corner moves keystone * w: u = v = 1 there; the rows bend away from the page's middle
+                // column, which stays, as Omr's Bow levels them to it: the truth still fits once it has)
+                double sx = x - keystone * w * u * v - shear * w * v / 2;
+                double sy = y - bend * h * u * u;
+                int x0 = (int)Math.Floor(sx), y0 = (int)Math.Floor(sy);
+                if (x0 < 0 || y0 < 0 || x0 + 1 >= w || y0 + 1 >= h) { o[y * w + x] = 1; continue; }
+                double fx = sx - x0, fy = sy - y0;
+                double a = g[y0 * w + x0] * (1 - fx) + g[y0 * w + x0 + 1] * fx;
+                double b = g[(y0 + 1) * w + x0] * (1 - fx) + g[(y0 + 1) * w + x0 + 1] * fx;
+                o[y * w + x] = a * (1 - fy) + b * fy;
+            }
+        return o;
     }
 
     /// <summary>Otsu's threshold: the grey level that best splits the page into two classes.</summary>

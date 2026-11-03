@@ -89,15 +89,22 @@ sealed class Img
         LastBow = null;
         var bow = Bow(img, zoom != 1 ? ZoomTo : est);
         if (bow != null) { img = Unbow(img, bow); if (unclean != null) unclean = Unbow(unclean, bow); }
+        // and a page photographed from a little off square: its upright lines lean, the further right
+        // the more (Lean.Measure), each row taken from where its columns have slid to
+        var lean = NoLean ? null : Lean.Measure(img, zoom != 1 ? ZoomTo : est);
+        LastLean = lean;
+        if (lean != null) { img = lean.Upright(img); if (unclean != null) unclean = lean.Upright(unclean); }
         img.Raw = unclean;
         img.Turned = Math.Abs(angle) >= 0.03 ? -angle : 0;
         img.Bowed = bow;
+        img.Leaned = lean;
         img.Zoom = zoom;
         if (SaveBinarized != null) img.SavePng(SaveBinarized);
         // the grey page turned level, in the same frame as everything the reader reports: what
         // the learnt detector reads (--save-gray writes it out)
         img.Gray = Math.Abs(angle) >= 0.03 ? RotateGray(gray, w, h, -angle) : gray;
         if (bow != null) img.Gray = UnbowGray(img.Gray, w, h, bow);
+        if (lean != null) img.Gray = lean.Upright(img.Gray, w, h);
         if (SaveGray != null) SaveGrayPng(SaveGray, w, h, img.Gray);
         return img;
     }
@@ -120,12 +127,14 @@ sealed class Img
     public Img Raw;                         // a grainy page as binarized, before its lone pixels were cleaned away
     public double Turned;                   // the degrees the page was turned by (0: not turned)
     public Warp Bowed;                      // how the page was levelled cell by cell (null: not bowed)
+    public Lean Leaned;                     // how the page's upright lines were stood up (null: they stood)
     public double Zoom = 1;                 // how much the page was enlarged by before reading (1: not)
 
-    /// <summary>Where a point of the levelled page lies on the page as loaded (undoes Unbow, then Rotate, then the enlarging).</summary>
+    /// <summary>Where a point of the levelled page lies on the page as loaded (undoes Lean, Unbow, then Rotate, then the enlarging).</summary>
     public (double X, double Y) ToSource(double x, double y)
     {
         double cx = W / 2.0, cy = H / 2.0;
+        if (Leaned != null) x += Leaned.At(x, y);
         if (Bowed != null) y += Bowed.At(x, y);
         if (Turned != 0)
         {
@@ -135,6 +144,8 @@ sealed class Img
         return (x / Zoom, y / Zoom);
     }
 
+    public static bool NoLean;              // --no-lean: read a leaning page as it is (to tell what standing it up does)
+    public static Lean LastLean;
     public static bool NoZoom;              // --no-zoom: read a small page as it is (to tell what the enlarging does)
     // (with the detector the gain is all under 12: gen-lo18's 10 pixels 90 -> 100 percent, gen-lo25's 14
     // already 100 without; and the held-out lied-boulanger-scan, 16 pixels, fell 535 -> 405 notes enlarged)

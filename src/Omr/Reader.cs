@@ -80,6 +80,7 @@ static class Reader
         var staves = Layout.FindStaves(d, extras);
         if (Math.Abs(Img.LastSkew) >= 0.03) Console.WriteLine($"  page {page}: turned by {-Img.LastSkew:F2} degrees");
         if (Img.LastBow != null) Console.WriteLine($"  page {page}: bowed, its strips shifted {string.Join(" / ", Img.LastBow.Select(band => string.Join(" ", band.Select(v => v.ToString("F0")))))} rows (bands of rows, left to right), levelled");
+        if (Img.LastLean != null) Console.WriteLine($"  page {page}: {Img.LastLean}, stood up");
         // (a black-and-white scan whose staff lines the cleaning took away, dots that they were:
         // with no clear staff on the cleaned page, the staves are found on the page as binarized
         // too, and the reading that finds more of them stands)

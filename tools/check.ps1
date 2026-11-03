@@ -171,6 +171,14 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genES -Reuse -OmrArgs $omrArgs | Out-
 $genE2 = "$root\out\gen-threes2"
 if ($Fresh -or -not (Test-Path "$genE2\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genE2 -Suite threes -Count 40 -Seed 11 -NoNumbers -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genE2 -Reuse -OmrArgs $omrArgs | Out-Null }
+# pages photographed off square (OmrDegrade --keystone, --shear, --bend), which Lean stands up and Bow levels so that the truth
+# fits. A corner moved 2 percent of the width, more than the Nutcracker's photo (0.8), for a grand staff's barlines to part as a
+# score's twenty staves do: Lean acts only then (without it, on piano, 34 barlines off and 594 heads, with it 10 and 273).
+# A band score's barlines a staff tall tell no lean across the page: left as it is
+# (BowedComb stays unguarded: a bend this even is levelled by Bow before any staff is looked for)
+$genQ = "$root\out\gen-warp"
+if ($Fresh -or -not (Test-Path "$genQ\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genQ -Suite 'piano,band' -Count 10 -Seed 7 -Degrade -DegradeArgs '--scale 0.5 --blur 0.9 --ink 0.15 --paper 0.15 --noise 10 --specks 0.0003 --keystone 0.02 --shear 0.008 --bend 0.003' -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genQ -Reuse -OmrArgs $omrArgs | Out-Null }
 # pages printed small (OmrDegrade --scale 0.13 and 0.18: a space of 7 and 10 pixels, IMSLP's 96 dpi
 # pages and about 140 dpi), read enlarged (Img.Load); the basic and piano suites
 $loArgs = '--blur 0.4 --ink 0.05 --paper 0.05 --noise 3 --specks 0'
@@ -192,7 +200,7 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genY; Tag = 'genY'; Sym = 'symY' }, @{ Dir = $genYS; Tag = 'genYS'; Sym = 'symYS' },
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
-           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' })
+           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it
