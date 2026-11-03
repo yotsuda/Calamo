@@ -1,0 +1,29 @@
+// OMR S55 step 3: a triplet group begun in the left hand and ended on the right hand's staff (Op.27-2 bars 37-42).
+// Today lysc draws every @cross note on its own part's staff.
+title "cross-staff"
+octave absolute
+time 4/4
+key c major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    r2 e''2 |
+    r2 g''2 |
+  }
+  lh {
+    tuplet 3/2 { c8 e8 g8@cross } tuplet 3/2 { c8 e8 g8@cross } tuplet 3/2 { c8 g8@cross c'8@cross } tuplet 3/2 { c8 g8@cross c'8@cross } |
+    tuplet 3/2 { g,8 d8 g8 } tuplet 3/2 { g,8 d8 g8 } c8 g8@cross c'4@cross |
+  }
+}
+
+form { ~Piece }
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}

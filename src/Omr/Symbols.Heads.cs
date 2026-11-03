@@ -482,6 +482,10 @@ static partial class Symbols
                 continue;
             }
             if (ow < 0.95 * s || ow > 2.2 * s || oh < 0.7 * s || oh > 1.35 * s) continue;
+            // a head's hole is a slanted oval (it fills 0.33-0.6 of its box on gen) under a thin rim;
+            // a box of white between two stems and two beams fills its box, a beam's thickness above
+            // and below (two sixteenth beams over the top line, threes010 on threes-dev)
+            if (c.Fill > 0.9 && ru >= 0.35 * s && rd >= 0.35 * s) continue;
             // the head's own edges: a rim is thin, so a touching neighbour (a second, a unison in
             // another voice) is cut off where the stem is looked for
             int rim = (int)(0.45 * s);

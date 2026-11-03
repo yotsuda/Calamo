@@ -87,6 +87,7 @@ sealed class SymEval
         public bool Hollow, Stem, Up;
         public int Chord;            // heads on one stem (stemless: at one x) share it
         public int Beams, Dots;
+        public (bool Up, int Beams)? Other;   // a second stem the other way, rooted at this head (another voice's)
         public int? Acc;
         public Head Found;
     }
@@ -147,23 +148,41 @@ sealed class SymEval
                 bool HeadAt(double y) => heads.Any(o => Math.Abs(o.G.Cy - y) < 0.7 * s && l.X1 >= o.G.L - 0.25 * s && l.X1 <= o.G.R + 0.25 * s);
                 bool atTop = HeadAt(top), atBot = HeadAt(bot);
                 h.Up = atBot != atTop ? atBot : Math.Abs(top - h.G.Cy) > Math.Abs(bot - h.G.Cy);
-                double tip = h.Up ? top : bot;
-                // flags at the tip, or beams crossing the stem near it
-                foreach (var f in music.Where(f => f.Name.StartsWith("flags.") && Math.Abs(f.X - l.X1) < 0.4 * s && Math.Abs(f.Y - tip) < 0.8 * s))
-                    h.Beams = Math.Max(h.Beams, f.Name.EndsWith('3') ? 1 : f.Name.EndsWith('4') ? 2 : f.Name.EndsWith('5') ? 3 : 1);
-                int beams = 0;
-                foreach (var p in svg.Polys)
-                {
-                    if (p.Count != 4) continue;
-                    var (y0, y1) = PolyAt(p, l.X1);
-                    if (double.IsNaN(y0) || y1 - y0 > 0.8 * s) continue;
-                    double ym = (y0 + y1) / 2;
-                    // from the tip back toward the head, within the room three beams take
-                    double into = h.Up ? ym - tip : tip - ym;
-                    if (into > -0.5 * s && into < 2.4 * s) beams++;
-                }
-                h.Beams = Math.Max(h.Beams, beams);
+                h.Beams = BeamsAt(l, h.Up);
+                // a melody's note on the head of the voice under it (one head drawn for both, a stem
+                // each way: threes): the other stem rooted at this head, read for it, is right too
+                if (twins.Count == 0)
+                    for (int lj = 0; lj < stems.Count; lj++)
+                    {
+                        var o = stems[lj];
+                        if (lj == li || o.X1 < h.G.L - 0.25 * s || o.X1 > h.G.R + 0.25 * s) continue;
+                        double ot = Math.Min(o.Y1, o.Y2), ob = Math.Max(o.Y1, o.Y2);
+                        bool up = Math.Abs(ob - h.G.Cy) < 0.35 * s, down = Math.Abs(ot - h.G.Cy) < 0.35 * s;
+                        if (up == down || up == h.Up) continue;
+                        h.Other = (up, BeamsAt(o, up));
+                        break;
+                    }
             }
+        }
+        // a stem's flags at its tip, or beams crossing it near the tip
+        int BeamsAt((double X1, double Y1, double X2, double Y2, double W) l, bool up)
+        {
+            double tip = up ? Math.Min(l.Y1, l.Y2) : Math.Max(l.Y1, l.Y2);
+            int n = 0;
+            foreach (var f in music.Where(f => f.Name.StartsWith("flags.") && Math.Abs(f.X - l.X1) < 0.4 * s && Math.Abs(f.Y - tip) < 0.8 * s))
+                n = Math.Max(n, f.Name.EndsWith('3') ? 1 : f.Name.EndsWith('4') ? 2 : f.Name.EndsWith('5') ? 3 : 1);
+            int beams = 0;
+            foreach (var p in svg.Polys)
+            {
+                if (p.Count != 4) continue;
+                var (y0, y1) = PolyAt(p, l.X1);
+                if (double.IsNaN(y0) || y1 - y0 > 0.8 * s) continue;
+                double ym = (y0 + y1) / 2;
+                // from the tip back toward the head, within the room three beams take
+                double into = up ? ym - tip : tip - ym;
+                if (into > -0.5 * s && into < 2.4 * s) beams++;
+            }
+            return Math.Max(n, beams);
         }
         // dots: a rest's come from its own source token; a note's stand in columns
         // right of the chord (every head of a chord has the chord's dots)
@@ -245,8 +264,9 @@ sealed class SymEval
             }
             Check("head.pos", f.Pos == t.Pos, $"pos {f.Pos}");
             Check("head.hollow", f.Hollow == t.Hollow, f.Hollow ? "hollow" : "filled");
-            Check("head.stem", f.HasStem == t.Stem && (!t.Stem || f.Up == t.Up), f.HasStem ? (f.Up ? "up" : "down") : "none");
-            if (t.Stem && !t.Hollow) Check("head.beams", f.Beams == t.Beams, $"{f.Beams} for {t.Beams}");
+            bool other = t.Other is { } o && f.HasStem && f.Up == o.Up;
+            Check("head.stem", other || f.HasStem == t.Stem && (!t.Stem || f.Up == t.Up), f.HasStem ? (f.Up ? "up" : "down") : "none");
+            if (t.Stem && !t.Hollow) Check("head.beams", other ? f.Beams == t.Other.Value.Beams : f.Beams == t.Beams, $"{f.Beams} for {t.Beams}");
             Check("head.dots", f.Dots == t.Dots, $"{f.Dots} for {t.Dots}");
             Check("head.acc", f.Acc == t.Acc, $"{Show(f.Acc)} for {Show(t.Acc)}");
         }
