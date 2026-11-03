@@ -156,7 +156,8 @@ static class Gen
     /// bracket, which -NoNumbers takes off too); in some pieces each group opens on a rest. The
     /// shapes that cross the reader's measure: in the right hand's lower voice, groups that reach
     /// down to the ledger lines near the left hand's staff (Op.27-2's bar 5), and a melody note
-    /// that shares its head with the group's first; two against three, the triplets in one hand
+    /// that shares its head with the group's first; in the left hand, a bass a beat under the
+    /// triplets on their staff (Op.15-1); two against three, the triplets in one hand
     /// against plain notes of the same value in the other. Not one of <see cref="Suites"/> (asked
     /// for by name).
     /// </summary>
@@ -286,6 +287,21 @@ static class Gen
             }
             return evs;
         }
+        // a bass a beat under the triplets on their staff: the half bar's root, or a step from the last
+        int low1 = 14;
+        List<GEv> BassBeats(int b)
+        {
+            var evs = new List<GEv>();
+            for (int k = 0; k < beats; k++)
+            {
+                int root = 14 + (tonic + chords[2 * b + (2 * k >= beats ? 1 : 0)]) % 7;
+                low1 = k == 0 || rng.NextDouble() < 0.5 ? root : Math.Clamp(low1 + rng.Next(-1, 2), 12, 20);
+                var e = new GEv { Ticks = beat };
+                e.Pitches.Add(At(low1));
+                evs.Add(e);
+            }
+            return evs;
+        }
         if (mode == 2)
         {
             string clef = rng.NextDouble() < 0.7 ? "treble" : "bass";
@@ -328,7 +344,8 @@ static class Gen
             else
             {
                 rh.Bars.Add(new() { Melody(b, 33, 40) });
-                lh.Bars.Add(new() { Triplets(b, 17) });
+                // (Op.15-1's left hand in some pieces: the triplets over a bass a beat on the same staff)
+                lh.Bars.Add(low < 0.5 ? new() { Triplets(b, 21), BassBeats(b) } : new() { Triplets(b, 17) });
             }
         }
         p.Parts.Add(rh);

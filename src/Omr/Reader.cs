@@ -645,9 +645,7 @@ static class Reader
         // (so too a bar of one line, no two events in a column, longer than the bar: a voice's beams with
         // their stems each way, taken for two voices each short of the bar -- gen-threes' threes009, 3/4's
         // eighteen sixteenths, six to a beam, the third beam's stems down)
-        var xs = evs.Select(e => e.X).OrderBy(x => x).ToList();
-        var gaps = xs.Zip(xs.Skip(1), (a, b) => b - a).OrderBy(g => g).ToList();
-        bool oneLine = gaps.Count > 0 && gaps[0] > 0.25 * gaps[gaps.Count / 2];
+        bool oneLine = OneLine(evs);
         // (only in music that runs in threes: Bohemian's bar 31, 6/4 read as 4/4, its second violin's twelve
         // eighths on two beams, up and down, were read as four triplets to fill the wrong time)
         tooLong |= inThrees && oneLine && evs.Any(e => e.Stem > 0) && evs.Any(e => e.Stem < 0) && evs.Sum(e => e.Ticks) > barTicks;
@@ -704,10 +702,28 @@ static class Reader
             bool Loose(Ev e) => e.Beam == 0 && !e.FullBar && e.Scale == (1, 1) && (e.Ticks == Dur.Of(4, 0) || e.Ticks == Dur.Of(8, 0) && (e.IsRest || e.Stem != 0));
             var loose = Enumerable.Range(0, evs.Count).Where(i => Loose(evs[i])).ToList();
             var notes = loose.Where(i => !evs[i].IsRest).ToList();
-            int Side(int i) => oneLine ? 0 : !evs[i].IsRest ? evs[i].Stem : notes.Count == 0 ? 0 : evs[notes.MinBy(j => Math.Abs(evs[j].Y - evs[i].Y))].Stem;
+            // (a rest in a column with notes of one side only is the other side's, whatever its height: a group's
+            // rest under a melody's quarter -- seed 11's threes035, "r4 e'4 cis''4" under "d''4 e''4")
+            var noteXs = notes.Select(i => evs[i].X).OrderBy(x => x).ToList();
+            var noteSteps = noteXs.Zip(noteXs.Skip(1), (a, b) => b - a).OrderBy(g => g).ToList();
+            double column = noteSteps.Count == 0 ? 0 : 0.25 * noteSteps[noteSteps.Count / 2];
+            int Side(int i)
+            {
+                if (oneLine) return 0;
+                if (!evs[i].IsRest) return evs[i].Stem;
+                if (notes.Count == 0) return 0;
+                var by = notes.Where(j => Math.Abs(evs[j].X - evs[i].X) < column).Select(j => evs[j].Stem).Distinct().ToList();
+                if (by.Count == 1 && by[0] != 0 && notes.Any(j => evs[j].Stem == -by[0])) return -by[0];
+                return evs[notes.MinBy(j => Math.Abs(evs[j].Y - evs[i].Y))].Stem;
+            }
             foreach (var side in notes.Select(Side).Distinct().ToList())
             {
                 var mine = loose.Where(i => Side(i) == side).OrderBy(i => evs[i].X).ToList();
+                // (a rest in a column with an event of the side is another voice's: a melody's "r2 e''2" over 2/2's
+                // quarters in threes, its rest beside the group's first note or rest -- seed 11's threes029, threes035)
+                var steps = mine.Zip(mine.Skip(1), (a, b) => evs[b].X - evs[a].X).OrderBy(g => g).ToList();
+                double step = steps.Count == 0 ? 0 : steps[steps.Count / 2];
+                bool Aside(Ev e) => e.IsRest && mine.Any(i => evs[i] != e && Math.Abs(evs[i].X - e.X) < 0.25 * step);
                 var run = new List<int>();
                 // (inThrees: such a group may as well be a melody's three quarters over the triplets, so it is one
                 // the last resort below may leave out, as a pair alone -- Op.27-2's bar 30, "cis''4 e''4 cis''4")
@@ -725,7 +741,7 @@ static class Reader
                 {
                     // (one value, and nothing of their side between: no other note, no rest)
                     if (run.Count > 0 && (evs[i].Ticks != evs[run[^1]].Ticks
-                                          || evs.Any(e => e.X > evs[run[^1]].X && e.X < evs[i].X && (oneLine || e.Stem == side || e.IsRest) && !mine.Contains(evs.IndexOf(e))))) Close();
+                                          || evs.Any(e => e.X > evs[run[^1]].X && e.X < evs[i].X && (oneLine || e.Stem == side || e.IsRest && !Aside(e)) && !mine.Contains(evs.IndexOf(e))))) Close();
                     run.Add(i);
                 }
                 Close();
@@ -766,7 +782,7 @@ static class Reader
         for (int k = 0; k < groups.Count; k++) foreach (int i in groups[k]) groupOf[i] = k;
         bool In(int mask, int k) => k >= 0 && (mask >> k & 1) == 1;
         // the bar's voices with the groups of the mask read as triplets (each trial event's group as evs')
-        (List<List<Ev>> Voices, Dictionary<Ev, int> Group) Scaled(int mask)
+        (List<List<Ev>> Voices, Dictionary<Ev, int> Group) Scaled(int mask, bool line = false)
         {
             var trial = evs.Select(e => e.Copy()).ToList();
             var group = new Dictionary<Ev, int>();
@@ -775,11 +791,16 @@ static class Reader
                 group[trial[i]] = groupOf[i];
                 if (In(mask, groupOf[i])) trial[i].Ticks = trial[i].Ticks * 2 / 3;
             }
+            if (line) return (new List<List<Ev>> { trial.OrderBy(e => e.X).ToList() }, group);
             return (Voices.Separate(trial, barTicks, 0), group);
         }
-        bool Works(int mask)
+        // (a bar of one line may be one voice, its stems each way with its notes' height: four groups down and four
+        // up taken for two voices, each half the bar -- seed 11's threes073, "r16 b'16 d''16" eight times in a C bar.
+        // The voices as separated first: a melody's note on a group's head is one event of the line)
+        bool Works(int mask) => WorksAs(mask, false) || oneLine && WorksAs(mask, true);
+        bool WorksAs(int mask, bool line)
         {
-            var (voices, group) = Scaled(mask);
+            var (voices, group) = Scaled(mask, line);
             if (!voices.All(v => v.Sum(e => e.Ticks) == barTicks)) return false;
             // each group on its own length's beat in its voice
             foreach (var v in voices)
@@ -1453,10 +1474,12 @@ static class Reader
             for (int k = 1; k <= 16; k++) if (Filled(k * unit) > Filled(best * unit)) best = k;
             // (the sign read stands where more measures fill it in threes than fill the best as read; or as many,
             // each of two voices, two events in a column: the best as read the voices run into one -- gen-threes'
-            // 2/4 under a melody taken for 5/4. Not 6/8 read as 2/4, its one voice's eighths filling 3/4)
+            // 2/4 under a melody taken for 5/4; or as many under a C, no misreading of figures -- seed 11's threes073,
+            // "r16 b'16 d''16" eight times a bar taken for 6/4. Not 6/8 read as 2/4, its one voice's eighths filling 3/4)
             var inThrees = contents.Where(evs => FillsInThrees(evs, read * unit, den)).ToList();
             static bool TwoVoices(List<Ev> evs, double s) => evs.Any(a => !a.IsRest && evs.Any(b => b != a && !b.IsRest && Math.Abs(a.X - b.X) < 0.3 * s));
-            if (best != read && (inThrees.Count > Filled(best * unit) || inThrees.Count == Filled(best * unit) && inThrees.All(evs => TwoVoices(evs, s)))) best = read;
+            if (best != read && (inThrees.Count > Filled(best * unit)
+                                 || inThrees.Count == Filled(best * unit) && (inThrees.All(evs => TwoVoices(evs, s)) || group.All(g => g.Sign)))) best = read;
             if (Signatures.Verbose)
                 Console.WriteLine($"    time {string.Join(" ", group.Select(g => g.Time).Distinct())} at x {x:F0}, system {sys.Index + 1}: of {contents.Count} staff-measures {Filled(best * unit)} fill {best}/{den}"
                                   + string.Concat(readings.Select(r => (r.Num, r.Den)).Distinct().Select(r => $", {Filled(Dur.Whole * r.Num / r.Den)} fill {r.Num}/{r.Den}")));
@@ -1822,6 +1845,19 @@ static class Reader
     {
         if (Fills(evs, barTicks)) return true;
         var copy = evs.Select(e => e.Copy()).ToList();
-        return UnprintedTriplets(copy, new List<Ev>(), barTicks, $"{barTicks * den / Dur.Whole}/{den}") != null && Fills(copy, barTicks);
+        // (a bar of one line filling it as one voice: its stems each way are no two voices -- seed 11's threes073)
+        return UnprintedTriplets(copy, new List<Ev>(), barTicks, $"{barTicks * den / Dur.Whole}/{den}") != null
+               && (Fills(copy, barTicks) || OneLine(copy) && copy.Sum(e => e.Ticks) == barTicks);
+    }
+
+    /// <summary>
+    /// Whether a staff's bar is one line, no two events in a column: the narrowest gap between
+    /// them not much under the usual one.
+    /// </summary>
+    static bool OneLine(List<Ev> evs)
+    {
+        var xs = evs.Select(e => e.X).OrderBy(x => x).ToList();
+        var gaps = xs.Zip(xs.Skip(1), (a, b) => b - a).OrderBy(g => g).ToList();
+        return gaps.Count > 0 && gaps[0] > 0.25 * gaps[gaps.Count / 2];
     }
 }

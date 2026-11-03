@@ -9,6 +9,7 @@ sealed class Sig
     public int? Fifths;      // key signature: + sharps, - flats
     public string Time;      // "12/8"
     public bool Guessed;     // no sign printed: the time the measures fill (Reader.CheckTimes), not a glyph read
+    public bool Sign;        // a C or a cut C, no figures: never 6/8's misread
     public bool Mid;         // a clef inside the staff, past its start (a change within or between measures, MidClefs): not the staff's opening clef
 }
 
@@ -1266,7 +1267,7 @@ static class Signatures
             // Petaluma's ¢ is 5.5 spaces tall, beyond the rules' C)
             bool cut = c != null && mine.Any(o => o.C.MinX <= c.X + 0.4 * s && o.C.MaxX >= c.X - 0.4 * s
                                                   && o.C.MinY < c.Y - 1.35 * s && o.C.MaxY > c.Y - 0.5 * s);
-            if (c != null) { sig = new Sig { St = st, X = c.X - 0.7 * s, Time = cut ? "2/2" : "4/4" }; least = c.Score; }
+            if (c != null) { sig = new Sig { St = st, X = c.X - 0.7 * s, Time = cut ? "2/2" : "4/4", Sign = true }; least = c.Score; }
         }
         else if (up.Count == 0 && low.Count <= 2 && rules == null)
         {
@@ -1422,11 +1423,11 @@ static class Signatures
         switch (label)
         {
             case "t:none": return (null, true, box);
-            case "t:timesig.C44": return (new Sig { St = st, X = box.MinX, Time = "4/4" }, true, box);
+            case "t:timesig.C44": return (new Sig { St = st, X = box.MinX, Time = "4/4", Sign = true }, true, box);
             // (cut time's stroke stands out of the C, above and below: 2.8 spaces tall in Emmentaler,
             // 2.9-5.5 in the SMuFL fonts, where the C is 2.0-2.4. A C read as cut over thick staff
             // lines, their remnants on it, is no taller than a C)
-            case "t:timesig.C22": return (new Sig { St = st, X = box.MinX, Time = box.H < 2.45 * s ? "4/4" : "2/2" }, true, box);
+            case "t:timesig.C22": return (new Sig { St = st, X = box.MinX, Time = box.H < 2.45 * s ? "4/4" : "2/2", Sign = true }, true, box);
         }
         // numbers: every digit must be one the classifier knows
         var nums = new List<int>();
@@ -1490,7 +1491,7 @@ static class Signatures
             int mx = (k0.MinX + k0.MaxX) / 2, reach = (int)(0.2 * s);
             bool strokeAbove = false;
             for (int x = mx - reach; x <= mx + reach && !strokeAbove; x++) strokeAbove = ink[x, k0.MinY - (int)(0.3 * s)];
-            return new Sig { St = st, X = cSign.C.MinX, Time = cSign.C.H > 2.6 * s || strokeAbove ? "2/2" : "4/4" };
+            return new Sig { St = st, X = cSign.C.MinX, Time = cSign.C.H > 2.6 * s || strokeAbove ? "2/2" : "4/4", Sign = true };
         }
         int mid = (int)Math.Round(st.Mid);
         if (Verbose && st.Part == 0)
