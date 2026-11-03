@@ -628,7 +628,8 @@ static class Signatures
         {
             double top = st.Pos(minY), bottom = st.Pos(maxY), w = (maxX - minX + 1) / s, h = (maxY - minY + 1) / s;
             double reach = cut ? 4.2 : 4.5;
-            if (kind == "treble") return top > reach && bottom < -reach && w >= (cut ? 1.6 : 1.2) ? null : $"no G clef's shape (pos {top:F1}..{bottom:F1}, {w:F1} wide)";
+            // (its top worn a little short where its tail reaches well down: an old print's, kinkel19-6's scan, pos 4.1..-5.3)
+            if (kind == "treble") return (top > reach && bottom < -reach || top > 4 && bottom < -5) && w >= (cut ? 1.6 : 1.2) ? null : $"no G clef's shape (pos {top:F1}..{bottom:F1}, {w:F1} wide)";
             if (kind != "bass") return "a C clef half seen";
             // (its two dots: small round pieces right of the body, one in each space about the F line)
             var dots = mine.Where(o => (o.Class == "?" || o.Class == "dot") && SmallRound(o.C, s) && o.C.MinX > maxX - 0.3 * s && o.C.MinX < maxX + 1.2 * s).ToList();
