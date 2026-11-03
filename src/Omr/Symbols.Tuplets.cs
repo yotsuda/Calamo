@@ -306,6 +306,9 @@ static partial class Symbols
                 // (a 2 over three beamed notes of one value is no duplet, which holds two: a fingering's
                 // 2 between the staves, over the left hand's beamed threes -- kinkel19-6's fourth page)
                 if (value == 2 && alike && !rest && n >= 3) { if (TupletVerbose) Console.WriteLine($"      -> a 2 over {n} beamed notes alike: no duplet"); o.Class = "?"; continue; }
+                // (likewise a 3 over four beamed notes of one value, which no triplet holds: a verse's number
+                // over the staff, "3. Und" over kinkel10-1's four eighths)
+                if (value == 3 && alike && !rest && n == 4 && !(left != null && right != null)) { if (TupletVerbose) Console.WriteLine("      -> a 3 over 4 beamed notes alike: no triplet"); o.Class = "?"; continue; }
             }
             if (TupletVerbose) Console.WriteLine($"      -> tuplet {value} over x {x0:F0}-{x1:F0}, bracket {(left != null && right != null)}");
             if (pieceOf.TryGetValue(o, out var parts)) foreach (var q in parts) q.Class = o.Class;
