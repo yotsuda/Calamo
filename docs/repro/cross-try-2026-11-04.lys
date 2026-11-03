@@ -1,0 +1,60 @@
+// Trying @cross and bare together: a beamed triplet climbing from the left hand's staff to the right's,
+// its number on the first bar only, a melody over it and a bass under it (the shape of Op.15-1).
+// Sections: plain; a sign on a moved note and a rest on the staff it moves to; a slur over a moved group.
+title "cross-try"
+octave absolute
+time 2/4
+key g major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  rh {
+    b'4 g''4 |
+    fis''4 e''4 |
+    d''4 c''4 |
+    b'2 |
+  }
+  lh {
+    voice { tuplet 3/2 { d8 g8@cross b8@cross } tuplet 3/2 { d8 g8@cross b8@cross } } { g,8 r8 g,8 r8 } |
+    voice { tuplet 3/2 bare { d8 a8@cross c'8@cross } tuplet 3/2 bare { c8 g8@cross c'8@cross } } { a,8 r8 c8 r8 } |
+    voice { tuplet 3/2 bare { b,8 g8@cross b8@cross } tuplet 3/2 bare { a,8 fis8@cross c'8@cross } } { g,8 r8 d8 r8 } |
+    voice { tuplet 3/2 bare { b,8 d8 g8@cross } tuplet 3/2 bare { d8 g8@cross b8@cross } } { g,4 g,4 } |
+  }
+}
+
+section B {
+  rh {
+    r4 e''4 |
+    r8 d''8 c''4 |
+    r2 |
+    b'2 |
+  }
+  lh {
+    tuplet 3/2 bare { c8 gis8@cross b8@cross } tuplet 3/2 bare { c8 gis8@cross b8@cross } |
+    tuplet 3/2 bare { d8 ais8@cross c'8@cross } tuplet 3/2 bare { d8 a8@cross c'8@cross } |
+    tuplet 3/2 bare { e8 g8@cross cis'8@cross } tuplet 3/2 bare { d8 fis8@cross c'8@cross } |
+    tuplet 3/2 bare { g,8 d8 g8@cross } g,4 |
+  }
+}
+
+section C {
+  rh {
+    e''2 |
+    d''2 |
+  }
+  lh {
+    tuplet 3/2 bare { c8( g8@cross c'8@cross) } tuplet 3/2 bare { c8( g8@cross c'8@cross) } |
+    c8( g8@cross c'8@cross g8@cross) |
+  }
+}
+
+form { ~A ~B ~C }
+
+score {
+  grandStaff {
+    staff rh "Right"
+    staff lh "Left"
+  }
+}
