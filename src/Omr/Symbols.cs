@@ -726,6 +726,12 @@ static partial class Symbols
         else foreach (var h in ps.Heads.Where(h => h.Score > 0 && Math.Abs(h.Pos) is 7 or 8 && !HasLedgers(d, h, s)
                                                    && !(Math.Abs(h.Pos) == 8 && ps.Heads.Any(o => o != h && o.St == h.St && Math.Abs(o.X - h.X) < 0.6 * s && o.Pos * h.Pos > 0 && Math.Abs(o.Pos) is 6 or 7))).ToList())
             h.Pos = LedgerPos(d, h, s, onFirstOnly: true);
+        // (the other way about: a head rounded onto the first ledger's place with no ledger there, and standing
+        // on the staff's side of that place, is the note just outside the staff, printed hanging off it: an old
+        // print's d' under a treble staff, 0.2 space from the c' line and no line through it -- kinkel10's scans)
+        foreach (var h in ps.Heads.Where(h => h.Score > 0 && !h.Slash && !h.Cross && !h.Grace && Math.Abs(h.Pos) == 6 && h.St != null && !h.St.OneLine).ToList())
+            if (HangsOffStaff(d, h, s) && !ps.Heads.Any(o => o != h && o.St == h.St && Math.Abs(o.X - h.X) < 1.3 * s && Math.Abs(o.Y - h.Y) < 1.1 * s))
+                h.Pos = Math.Sign(h.Pos) * 5;
         var tabs = systems?.SelectMany(x => x.All).Where(x => x.Kind == "tab").ToList() ?? new List<Staff>();
         // (a piece holding a head is no loose symbol -- unless the detector sees a clef inside the staff on
         // it, past the staff's start: a G clef's loop read as a head, the piece then kept for Signatures.MidClefs)
@@ -791,6 +797,28 @@ static partial class Symbols
         double p = st.Pos(y);
         int k = (int)Math.Round(p / 2) * 2;
         return Math.Abs(y - (st.Mid - k * st.S / 2)) <= 0.15 * s;
+    }
+
+    /// <summary>
+    /// Whether a head on the first ledger's place by the grid has no ledger there: on neither side, in the
+    /// third of a space past its edges, does a thin line run at any row within 0.4 space of that place,
+    /// and its centre stands on the staff's side of the place.
+    /// </summary>
+    static bool HangsOffStaff(Img d, Head h, double s)
+    {
+        double half = h.St.S / 2, place = h.St.Mid - Math.Sign(h.Pos) * 6 * half;
+        // (on its place to within a line's thickness: a c' whose ledger the scan lost, kinkel19-1's scan, 0.04 space off)
+        if (Math.Abs(h.Y - h.St.Mid) > 6 * half - 0.12 * s) return false;
+        double l = h.R > h.L ? h.L : h.X - 0.65 * s, r = h.R > h.L ? h.R : h.X + 0.65 * s;
+        bool Line(int x0, int x1, int yy)
+        {
+            int c = 0, n = 0;
+            for (int x = Math.Max(0, x0); x <= x1 && x < d.W; x++, n++) if (d[x, yy]) c++;
+            return n > 0 && c >= 0.6 * n && LineThickness(d, x0, x1, yy) <= 0.35 * s;
+        }
+        for (int yy = Math.Max(1, (int)(place - 0.4 * s)); yy <= (int)(place + 0.4 * s) && yy < d.H - 1; yy++)
+            if (Line((int)(l - 0.35 * s), (int)(l - 0.1 * s), yy) || Line((int)(r + 0.1 * s), (int)(r + 0.35 * s), yy)) return false;
+        return true;
     }
 
     /// <param name="wider">the ledger lines must also run out past the head's edges, as engravers draw
