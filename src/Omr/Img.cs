@@ -566,14 +566,21 @@ sealed class Img
             foreach (int dir in new[] { -1, 1 })
             {
                 int last = r;
+                bool droppedSince = false;
                 for (int k = r + dir; k >= 0 && k < n; k += dir)
                 {
                     if (double.IsNaN(s[k])) continue;
                     int apart = Math.Abs(k - last);
                     double? adj = Shift(prof[last], prof[k]);
                     if (Trace) Console.WriteLine($"    strip {k} against {last}: {s[k]:F1} - {s[last]:F1} = {s[k] - s[last]:F1}, the two strips matched at {(adj.HasValue ? adj.Value.ToString("F1") : "nothing")}");
-                    if (Math.Abs(s[k] - s[last]) > maxStep * Math.Min(1.5, apart) || adj == null || Math.Abs(s[k] - s[last] - adj.Value) > 1.5 + (apart - 1)) s[k] = double.NaN;
-                    else last = k;
+                    // (past strips with no match the step is per strip, when the two strips themselves agree on it
+                    // closely: lang36-3's scan, the last staff's strips 7 rows apart each, 22.0 past two unmatched
+                    // and matched at 22.0, dropped and its left end left 25 rows off. Not past a strip dropped: the
+                    // lines match line on line a whole space off, and such a strip and the next agree -- tuplets004
+                    // printed and scanned, 28 rows at a space of 28, one strip dropped and the next taken)
+                    bool close = apart > 1 && !droppedSince && adj != null && Math.Abs(s[k] - s[last] - adj.Value) <= 1.0 && Math.Abs(s[k] - s[last]) <= maxStep * apart;
+                    if (!close && (Math.Abs(s[k] - s[last]) > maxStep * Math.Min(1.5, apart) || adj == null || Math.Abs(s[k] - s[last] - adj.Value) > 1.5 + (apart - 1))) { s[k] = double.NaN; droppedSince = true; }
+                    else { last = k; droppedSince = false; }
                 }
             }
             var known = Enumerable.Range(0, n).Where(k => !double.IsNaN(s[k])).ToList();
@@ -582,8 +589,14 @@ sealed class Img
             // strip alone shifted is a match on something else)
             for (int i = 0; i + 1 < known.Count; i++)
                 if (known[i + 1] == known[i] + 1 && Math.Abs(s[known[i]]) >= 2 && Math.Abs(s[known[i + 1]]) >= 2) bowed = true;
+            // (a strip with no shift: straight between the known strips either side, not the nearest one's, a staircase
+            // the lines do not follow -- lang36-3's first page; past the last known, that one's)
             for (int k = 0; k < n; k++)
-                if (double.IsNaN(s[k])) s[k] = s[known.OrderBy(j => Math.Abs(j - k)).First()];
+            {
+                if (!double.IsNaN(s[k])) continue;
+                int lo = known.LastOrDefault(j => j < k, -1), hi = known.FirstOrDefault(j => j > k, -1);
+                s[k] = lo < 0 ? s[hi] : hi < 0 ? s[lo] : s[lo] + (s[hi] - s[lo]) * (k - lo) / (double)(hi - lo);
+            }
             // the band's shift along the columns, straight between the strips' middles
             var shift = new double[w];
             for (int x = 0; x < w; x++)
