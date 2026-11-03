@@ -720,18 +720,25 @@ for (int si = 0; si < sections.Count; si++)
     {
         lys.AppendLine($"  {cfg.LysId(pi)} {{");
         int prevBar = prevBars[pi], sysPage = sysPages[pi];
+        bool opensSection = si > 0;
         foreach (var (bar, arr) in all.Where(kv => kv.Key >= secFrom && kv.Key <= secTo))
         {
             // (a multi-bar rest's bars after its first are written with it, R1*n: its line ends where its last bar does)
             if (arr[pi] is [{ MultiBars: -1 }]) { prevBar = bar; continue; }
+            // A section's boundary puts time, key and clef back to the file's (GRAMMAR): a section that goes on
+            // in what the last one left must say so again, which draws nothing. Unsaid, Bohemian's section B,
+            // in 4/4 after a section that opens in 9/8, was all bars of 9/8.
+            bool atOpening = opensSection;
+            opensSection = false;
             int endBar = arr[pi] is [{ MultiBars: > 1 } multi] ? bar + multi.MultiBars - 1 : bar;
             var pre = new List<string>();
             if (systemStarts.TryGetValue(bar, out int barPage)) sysPage = barPage;
             string post = nextBars.TryGetValue(endBar, out int nextBar) && systemStarts.TryGetValue(nextBar, out int nextPage)
                 ? (nextPage != sysPage ? " pageBreak" : " break") : "";
-            if (prevBar >= 0 && state.BarTime[bar] != state.BarTime[prevBar]) pre.Add("time " + state.BarTime[bar]);
-            if (prevBar >= 0 && state.BarKey[(bar, pi)] != state.BarKey[(prevBar, pi)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
-            if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && state.BarClef[(bar, pi)] != state.BarClef[(prevBar, pi)] && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(prevBar, pi)]))
+            if (prevBar >= 0 && (state.BarTime[bar] != state.BarTime[prevBar] || atOpening && state.BarTime[bar] != state.BarTime[firstBar])) pre.Add("time " + state.BarTime[bar]);
+            if (prevBar >= 0 && (state.BarKey[(bar, pi)] != state.BarKey[(prevBar, pi)] || atOpening && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)])) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
+            if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && (state.BarClef[(bar, pi)] != state.BarClef[(prevBar, pi)] && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(prevBar, pi)])
+                                                              || atOpening && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(firstBar, pi)])))
                 pre.Add("clef " + MidClef(state.BarClef[(bar, pi)]));
             if (pi == 0 && firstBar == bar && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
             if (pi != 0 && prevBar < 0 && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));

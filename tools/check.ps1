@@ -299,6 +299,20 @@ foreach ($k in $base.Keys) {
     if ($k -match '^sym[^.]*\.') { if ($base[$k] -gt 0) { $better += "  better  $k $($base[$k]) -> 0" } }
     else { $worse += "  MISSING $k (was $($base[$k]))" }
 }
+# The reading as text, drawn again: the numbers above score what is read, not the .lys it is written as.
+# A section's boundary puts time and key back to the file's, so a section that goes on in what the last
+# left must say them again (docs/repro/section-resets-time.lys): no bar may come out the wrong length.
+$sr = "$root\out\section-resets"
+Remove-Item $sr -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $sr | Out-Null
+Copy-Item "$root\docs\repro\section-resets-time.lys" "$sr\s.lys"
+$srLysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
+$srOmr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+cmd /d /s /c "`"$srLysc`" png --scale 5.6 `"$sr\s.lys`" < NUL > `"$sr\draw.log`" 2>&1"
+cmd /d /s /c "`"$srOmr`" read `"$sr\s.png`" --out `"$sr\out`" --name r < NUL > `"$sr\read.log`" 2>&1"
+$srDrawn = cmd /d /s /c "`"$srLysc`" png --scale 1 -d `"$sr\out`" `"$sr\out\r.lys`" < NUL 2>&1"
+if (-not (Test-Path "$sr\out\r.lys")) { $worse += "  section-resets: no reading (out\section-resets\read.log)" }
+elseif (($srDrawn | Select-String 'LYS2001|LYS2006').Count -gt 0) { $worse += "  section-resets: the reading, drawn again, has bars of the wrong length (out\section-resets\out\r.lys)" }
 $better
 $worse
 if ($worse.Count -eq 0) { "check: OK ($($better.Count) better, nothing worse)" }

@@ -1,0 +1,31 @@
+// A section's boundary puts time, key and clef back to the file's (GRAMMAR_FOR_LLM, "the boundary
+// resets them"), so the reader must say them again at a section that goes on in what the last one
+// left. tools/check.ps1 draws this, reads it and draws the reading: no bar may come out the wrong
+// length. (Bohemian Rhapsody: section A opens in 9/8 and turns to 4/4, section B was all 9/8.)
+title "Section Resets"
+octave absolute
+time 9/8
+key bes major
+
+part a { clef treble }
+
+section A {
+  a {
+    c'4. d'4. e'4. |
+    c'4. d'4. e'4. | break
+    time 4/4 key a major c'4 d'4 e'4 f'4 |
+    c'4 d'4 e'4 f'4 |
+  }
+}
+section B {
+  a {
+    time 4/4 key a major c'4 d'4 e'4 f'4 |
+    c'4 d'4 e'4 f'4 | break
+    c'4 d'4 e'4 f'4 |
+    c'4 d'4 e'4 f'4 |
+  }
+}
+
+form { A B }
+
+score { staff a }
