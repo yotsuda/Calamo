@@ -317,6 +317,49 @@ static class Ottavas
         return pooled;
     }
 
+    /// <summary>
+    /// An octave line printed with a bare "8" for its letters (kinkel7-1's MuseScore page, bar 21): the
+    /// detector has no class for it and sees a digit. A digit 8 off every staff with four spaces of dashes
+    /// running on from it and a hook ending them is the line, the hook telling its side. The dashes stand
+    /// at the digit's top, off its centre, so the row is searched. As a sign of the detector's: its middle
+    /// placed so that its letters' left edge is the digit's, its height the dashes', sure by its hook.
+    /// </summary>
+    static IEnumerable<Detection> BareEights(PageResult res, List<Detection> det)
+    {
+        double s = res.S;
+        var ink = res.Dark;
+        foreach (var t in det.Where(t => t.Class is "tab_8" or "digit_8"))
+        {
+            if (res.Systems.Any(q => q.Staves.Any(st => t.Y > st.Top - 0.5 * s && t.Y < st.Bottom + 0.5 * s && t.X > q.Bars[0] - 2 * s && t.X < q.Bars[^1] + 2 * s))) continue;
+            foreach (double dy in new[] { 0.0, -0.4, 0.4, -0.8, 0.8 })
+            {
+                double y = t.Y + dy * s, from = t.X + 0.6 * s;
+                double end = DashesEnd(ink, s, from, y, out bool hooked, out bool dashed);
+                if (Verbose) Console.WriteLine($"  digit 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): row {y:F0}, to {end:F0}, hooked {hooked}, dashed {dashed}");
+                if (!hooked || !dashed || end - from < 4 * s) continue;
+                // (the dashes' own row, in the last dash; the hook from it, shorter than HookDir asks: 0.6 of a space here)
+                int cx = (int)(end - 0.4 * s), top = -1, bottom = -1;
+                for (int yy = (int)(y - 0.4 * s); yy <= (int)(y + 0.4 * s); yy++) if (ink[cx, yy]) { if (top < 0) top = yy; bottom = yy; }
+                if (top < 0) continue;
+                int Rows(int dir, int from)
+                {
+                    int n = 0;
+                    for (int d = 1; d <= s; d++)
+                    {
+                        int yy = from + dir * d;
+                        if (yy >= 0 && yy < ink.H && (ink[(int)end, yy] || ink[(int)end - 1, yy])) n++;
+                    }
+                    return n;
+                }
+                int down = Rows(1, bottom), up = Rows(-1, top);
+                if (Math.Max(down, up) < 0.4 * s || Math.Min(down, up) > 0.1 * s) continue;
+                if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): dashes at {top} to {end:F0}, hook {(down > up ? "down" : "up")}");
+                yield return new Detection { Class = down > up ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = (top + bottom) / 2.0, Score = Math.Max(t.Score, Symbols.SureScore) };
+                break;
+            }
+        }
+    }
+
     public static List<Tempo.Mark> Find(PageResult res)
     {
         var marks = new List<Tempo.Mark>();
@@ -397,6 +440,7 @@ static class Ottavas
         if (Verbose) foreach (var t in weak) Console.WriteLine($"  weak octave sign {t.Class} {t.Score:F2} at {t.X:F0},{t.Y:F0}");
         // (or a wave runs on from them, which is no word's letters: kinkel7-1's scan, an "8va~~~" read as an 8vb at 0.36)
         var signs = det.Where(IsSign).Concat(weak.Where(t => t.Score > Detector.WeakOttava && (DashesOn(t) || Wavy(t))))
+            .Concat(BareEights(res, det))
             .OrderByDescending(t => t.Score).ToList();
         signs = signs.Where((t, i) => !signs.Take(i).Any(o => Math.Abs(o.X - t.X) < 1.5 * s && Math.Abs(o.Y - t.Y) < 1.0 * s))
             .Where(t => Wavy(t) || !InWords(t))

@@ -556,8 +556,12 @@ static class Signatures
             .Concat(ps.WeakClefs.Where(t => IsClef(t) && t.Score >= Detector.WeakClef).Select(t => (t, Sure: false)))
             // (past the staff's opening signatures, and past where DetectedClef looks for the opening clef: a
             // staff found to start too far left, at an instrument's name, has its opening clef well in)
-            .Where(p => p.t.X > after + 3 * s && p.t.X > st.Left + 11 * s && p.t.X < st.Right - 0.5 * s && Math.Abs(p.t.Y - st.Mid) < 2 * s)
+            // (a note the detector is sure of before it says the opening is over, however near the staff's start:
+            // kinkel7-1's left hand, a chord and a G clef 10.9 spaces in, after a flat)
+            .Where(p => p.t.X > after + 3 * s && (p.t.X > st.Left + 11 * s || NoteBefore(p.t.X)) && p.t.X < st.Right - 0.5 * s && Math.Abs(p.t.Y - st.Mid) < 2 * s)
             .OrderBy(p => p.t.X).ToList();
+        bool NoteBefore(double x) => ps.Detections.Any(d => d.Class is "head_black" or "head_half" or "head_whole" && d.Score >= Symbols.SureScore
+                                                            && d.X > after && d.X < x - 0.5 * s && d.Y > st.Top - 3 * s && d.Y < st.Bottom + 3 * s);
         double lastX = double.NegativeInfinity;
         // a dot in the ink right of x at a staff position, whatever piece holds it: a fifth of a space of
         // columns and more in a row, each with ink there in a run no taller than a dot and about the place
@@ -773,6 +777,10 @@ static class Signatures
                 (bx0, bx1, by0, by1) = (body.C.MinX, body.C.MaxX, body.C.MinY, body.C.MaxY);
                 if (!sure) why = Shape(kind, bx0, bx1, by0, by1);
             }
+            // (a sure one with no tall piece, printed small and cut by the lines: its extent from the ink about it,
+            // or its dots stay unnamed and read as rests -- kinkel7-1's F clefs back from the treble, each an r16)
+            else if (sure)
+                (bx0, bx1, by0, by1) = Local(t, kind) ?? ((int)(t.X - 1.3 * s), (int)(t.X + 1.3 * s), (int)(t.Y - 2 * s), (int)(t.Y + 2 * s));
             if (!sure && (body == null || why != null))
             {
                 // (a change of clef is printed smaller than the staff's opening clef -- MuseScore's at about three
