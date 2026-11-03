@@ -253,6 +253,14 @@ Form.Verbose |= opt.ContainsKey("marks") || opt.ContainsKey("form");    // (|=: 
 var carried = new List<Continuation.Open>();   // the lines run out past a page's last system, for the next page's readers (Continuation)
 var readings = new Dictionary<(int Bar, int Part), List<Fixes.Reading>>();   // per doubted part-bar: its other readings weighed (Fixes), for its length todo
 readCmd?.Stage("read");
+// (--evidence: raw material for tools/evidence.py; off, the reading is the same to the byte. A value is the score floor)
+StringBuilder evidenceDets = null, evidenceBars = null;
+if (opt.TryGetValue("evidence", out var evidenceOpt))
+{
+    Detector.RawFloor = evidenceOpt == "true" ? 0.1 : double.Parse(evidenceOpt, CultureInfo.InvariantCulture);
+    evidenceDets = new StringBuilder("page\tclass\tx\ty\tscore\n");
+    evidenceBars = new StringBuilder("page\tsystem\tbar\tpart\tx0\tx1\ttop\tbottom\ts\tclef\tkey\n");
+}
 for (int page = from; page <= to; page++)
 {
     string path = Path.Combine(opt["pages"], $"p{page:D2}.png");
@@ -261,6 +269,17 @@ for (int page = from; page <= to; page++)
     var res = Reader.Read(path, page, first, cfg, state);
     next = res.LastBar + 1;
     res.Before = carried;
+    // (--evidence: what the detector saw on the page and where the reader put each bar, in the levelled page's pixels)
+    if (evidenceDets != null)
+    {
+        foreach (var t in Detector.Raw)
+            evidenceDets.Append(FormattableString.Invariant($"{page}\t{t.Class}\t{t.X:F1}\t{t.Y:F1}\t{t.Score:F3}\n"));
+        foreach (var sys in res.Systems)
+            for (int m = 0; m < sys.Measures; m++)
+                foreach (var st in sys.Staves)
+                    for (int bar = sys.BarOf(m); bar < sys.BarOf(m) + sys.Span(m); bar++)
+                        evidenceBars.Append(FormattableString.Invariant($"{page}\t{sys.Index}\t{bar}\t{cfg.Parts[st.Part].Id}\t{sys.Bars[m]:F1}\t{sys.Bars[m + 1]:F1}\t{st.Top:F1}\t{st.Bottom:F1}\t{res.S:F2}\t{state.BarClef.GetValueOrDefault((bar, st.Part), "")}\t{state.BarKey.GetValueOrDefault((bar, st.Part))}\n"));
+    }
     // the doubted bars put right by their length and the detector's evidence (S33, stage 1): kept in x.omr.json as "fixed";
     // the other readings of the bars left doubted go with their length todos (x.omr.json "readings")
     foreach (var fx in Fixes.Apply(res, state, readings, (x, y) => { var p = res.Dark.ToSource(x, y); return ((int)Math.Round(p.X), (int)Math.Round(p.Y)); }))
@@ -933,6 +952,7 @@ if (truth != null)
     lostBars = lost;
     sc.Truth = truth;
     sc.Lost = lost.ToHashSet();
+    if (evidenceDets != null) sc.Evidence = new StringBuilder("bar\tpart\trow\ttRest\ttD\ttAlter\ttTicks\ttX\toRest\toD\toAlter\toTicks\toX\toStem\toStemX\toStemLo\toStemHi\toTuplet\n");
     // a part the truth says nothing of (a band's drums: no .notes) is not scored
     var scored = cfg.Parts.Select(q => truth.Bars.Keys.Any(k => k.Part == q.Id)).ToArray();
     // (a rhythm slash is no note: the truth has none)
@@ -1023,6 +1043,13 @@ if (truth != null)
     }
     Console.WriteLine(sc.CauseSummary());
     File.WriteAllText(Path.Combine(outDir, "causes.txt"), string.Join("\n", sc.CauseDiffs));
+    if (evidenceDets != null)
+    {
+        File.WriteAllText(Path.Combine(outDir, "evidence-dets.tsv"), evidenceDets.ToString());
+        File.WriteAllText(Path.Combine(outDir, "evidence-bars.tsv"), evidenceBars.ToString());
+        File.WriteAllText(Path.Combine(outDir, "evidence-notes.tsv"), sc.Evidence.ToString());
+        File.WriteAllText(Path.Combine(outDir, "evidence-map.tsv"), "read\tscored\n" + string.Concat(readBars.Select((b, j) => $"{b}\t{scoredAs[j]}\n")));
+    }
     // the note todos against the truth: of each reading offered, does the bar read the other way
     // match more of the truth's notes (pitch and length; "other"), fewer ("as read"), or as many
     // (todos.txt is written every time, empty too: no old one is left to count)

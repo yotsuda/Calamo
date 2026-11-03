@@ -203,9 +203,15 @@ static class Detector
             }
     }
 
+    // (--evidence: every peak down to this score, whatever the reading keeps, for measuring what the
+    // detector saw of a note read wrong. The reading itself does not look at it)
+    public static double RawFloor = 0;
+    public static List<Detection> Raw = new();
+
     public static List<Detection> Detect(byte[] gray, int w, int h, double s)
     {
         var found = new List<Detection>();
+        Raw = new List<Detection>();
         if (session == null || s <= 0) return found;
         double scale = Space / s;
         int rw = Math.Max(1, (int)Math.Round(w * scale)), rh = Math.Max(1, (int)Math.Round(h * scale));
@@ -232,6 +238,10 @@ static class Detector
             // peak a row past the band's own rows is kept apart, taken below when the other band found
             // nothing of its class there (gen-lied-all's lied009, a head on the seam lost with detector47)
             int lo = k == 0 ? 0 : Step / 2, hi = k == tops.Count - 1 ? Height : Step / 2 + Step;
+            if (RawFloor > 0)
+                foreach (var (c, fx, fy, score, gy) in Peaks(heat, RawFloor))
+                    if (gy >= lo - Stride && gy < hi + Stride)
+                        Raw.Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score });
             foreach (var (c, fx, fy, score, gy) in Peaks(heat))
             {
                 bool own = gy >= lo && gy < hi;
@@ -276,7 +286,7 @@ static class Detector
     /// placed at the centre of mass of its 3x3 neighbourhood (the grid, a quarter of a space, is
     /// too coarse to tell a line from a space).
     /// </summary>
-    static IEnumerable<(int C, double X, double Y, double Score, int GridY)> Peaks(Tensor<float> heat)
+    static IEnumerable<(int C, double X, double Y, double Score, int GridY)> Peaks(Tensor<float> heat, double floor = 0)
     {
         int kk = heat.Dimensions[1], ph = heat.Dimensions[2], pw = heat.Dimensions[3];
         int crossClass = Array.IndexOf(Classes, "head_x"), percentClass = Array.IndexOf(Classes, "percent_1"), percent2Class = Array.IndexOf(Classes, "percent_2");
@@ -315,6 +325,7 @@ static class Detector
                         : c == clefG || c == clefF || c == clefC ? Math.Min(Threshold, WeakClef)
                         : TupletClass[c] ? Math.Min(Threshold, Symbols.WeakTupletNumber)
                         : IsTab(c) ? Math.Min(Threshold, WeakTab) : Threshold;
+            if (floor > 0) th = floor;
             // (a little under the threshold's logit, then the threshold itself on the sigmoid, as before)
             double zth = Math.Log(th / (1 - th)) - 1e-3;
             for (int y = 0; y < ph; y++)

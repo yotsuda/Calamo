@@ -535,18 +535,27 @@ static class Texts
             gr.ResetTransform();
         }
         if (Dump != null) bmp.Save(Path.Combine(Dump, $"cut{dumped++:D3}-{n}-{shear:F2}.png"));
-        var lines = Header.Recognize(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height), k, false);
-        if (n == 1) return lines.Count == 0 ? [] : [string.Join(" ", lines.OrderBy(l => l.Box.Left).Select(l => l.Text))];
-        if (lines.Count == 1)
+        // (each engine's reading in turn, unmixed: the Japanese engine reads "rall." where the English reads
+        // "roll.", and "r観↓." where the English reads "rall.". Read tries them against its list of words)
+        var others = new List<List<(string Text, RectangleF Box)>>();
+        var read = Words(Header.Recognize(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height), k, false, others));
+        foreach (var other in others) read.AddRange(Words(other));
+        return read;
+
+        List<string> Words(List<(string Text, RectangleF Box)> lines)
         {
-            // (the three read as one line: its words in three groups)
-            var words = lines[0].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length % 3 == 0 && words.Length > 0)
-                return Enumerable.Range(0, 3).Select(t => string.Join(" ", words.Skip(t * words.Length / 3).Take(words.Length / 3))).ToList();
+            if (n == 1) return lines.Count == 0 ? [] : [string.Join(" ", lines.OrderBy(l => l.Box.Left).Select(l => l.Text))];
+            if (lines.Count == 1)
+            {
+                // (the three read as one line: its words in three groups)
+                var words = lines[0].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (words.Length % 3 == 0 && words.Length > 0)
+                    return Enumerable.Range(0, 3).Select(t => string.Join(" ", words.Skip(t * words.Length / 3).Take(words.Length / 3))).ToList();
+            }
+            // (each tile's lines joined: the engine breaks a word now and then, "dol" and "e" for "dolce")
+            return lines.GroupBy(l => (int)((l.Box.Left + l.Box.Right) / 2 / tw)).OrderBy(g => g.Key)
+                        .Select(g => string.Join(" ", g.OrderBy(l => l.Box.Left).Select(l => l.Text))).ToList();
         }
-        // (each tile's lines joined: the engine breaks a word now and then, "dol" and "e" for "dolce")
-        return lines.GroupBy(l => (int)((l.Box.Left + l.Box.Right) / 2 / tw)).OrderBy(g => g.Key)
-                    .Select(g => string.Join(" ", g.OrderBy(l => l.Box.Left).Select(l => l.Text))).ToList();
     }
 
     // the cut as a bitmap of its own, a line through it from top to bottom, a barline or a stem the

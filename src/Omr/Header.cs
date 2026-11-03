@@ -205,7 +205,8 @@ sealed class Header
     }
 
     /// <param name="again">Whether a Japanese engine's line with its script in a Latin word is read again alone (not for a cut read alone already: Tempo.Alone).</param>
-    public static List<(string Text, RectangleF Box)> Recognize(Bitmap page, Rectangle crop, double scale, bool again)
+    /// <param name="others">If given, also gets each other language's whole reading, unmixed: for a caller with a list of words to match them against (Texts).</param>
+    public static List<(string Text, RectangleF Box)> Recognize(Bitmap page, Rectangle crop, double scale, bool again, List<List<(string Text, RectangleF Box)>> others = null)
     {
         var engine = OcrEngine.TryCreateFromUserProfileLanguages() ?? throw new InvalidOperationException("no OCR language installed");
         crop.Intersect(new Rectangle(0, 0, page.Width, page.Height));
@@ -303,6 +304,9 @@ sealed class Header
         {
             if (OcrEngine.TryCreateFromLanguage(lang) is not OcrEngine other) continue;
             var theirs = Lines(other);
+            others?.Add(theirs);
+            // (before the mixing below: a caller that matches words wants the Japanese engine's own reading too)
+            if (others != null) return read;
             for (int i = 0; i < read.Count; i++)
             {
                 int cjk = Regex.Matches(read[i].Text, $"[{Cjk}]").Count, letters = Regex.Matches(read[i].Text, @"\p{L}").Count;
@@ -354,6 +358,8 @@ sealed class Header
     static string Tidy(string text)
     {
         text = string.Concat(text.Select(c => Roman.TryGetValue(c, out var r) ? r : c.ToString()));
+        // (the first dash of a line of words run into its last word: the English engine's "rit.-", "rall._")
+        text = Regex.Replace(text, @"(?<=[\p{L}.])\s*[-_–—]+\s*$", "");
         text = Regex.Replace(text, @"(?<=\s|^)\s+|\s+(?=[、。，．」』）])", "");
         text = Regex.Replace(text, @"(?<=[「『（])\s+", "");
         text = Regex.Replace(text, @"(?<=\p{L})0(?=\p{L})", "o");

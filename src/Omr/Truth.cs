@@ -553,9 +553,21 @@ sealed class Scorer
     public HashSet<int> Lost = new();
     public Truth Truth;   // (its keys: a sign of the key missed or too many)
 
+    // (--evidence: each wrong part-bar's notes, one row each, with the cause it was counted under)
+    public System.Text.StringBuilder Evidence;
+    void EvidenceRow(int bar, string part, string row, Ev t, Ev o)
+    {
+        if (Evidence == null) return;
+        string T = t == null ? "\t\t\t\t" : FormattableString.Invariant($"{(t.IsRest ? 1 : 0)}\t{(t.IsRest ? 0 : t.P.Diatonic)}\t{(t.IsRest ? 0 : t.P.Alter)}\t{t.Ticks}\t{t.X:F6}");
+        string O = o == null ? "\t\t\t\t\t\t\t\t\t" : FormattableString.Invariant($"{(o.IsRest ? 1 : 0)}\t{(o.IsRest ? 0 : o.P.Diatonic)}\t{(o.IsRest ? 0 : o.P.Alter)}\t{o.Ticks}\t{o.X:F1}\t{o.Stem}\t{o.StemX:F1}\t{o.StemLo:F1}\t{o.StemHi:F1}\t{o.Tuplet}");
+        Evidence.Append($"{bar}\t{part}\t{row}\t{T}\t{O}\n");
+    }
+
     void Classify(int bar, string part, List<Ev> truth, List<Ev> omr)
     {
         var here = CauseNames.ToDictionary(c => c, _ => 0);
+        foreach (var e in truth) EvidenceRow(bar, part, "=truth", e, null);
+        foreach (var e in omr) EvidenceRow(bar, part, "=read", null, e);
         if (Lost.Contains(bar)) here["lost"] = truth.Count;
         else
         {
@@ -584,7 +596,7 @@ sealed class Scorer
             {
                 bool octave = shifts.S % (spelled ? 7 : 12) == 0;
                 here[octave ? "octave" : "clef"] += shifts.Pairs.Count;
-                foreach (var (x, y) in shifts.Pairs) { t.Remove(x); o.Remove(y); }
+                foreach (var (x, y) in shifts.Pairs) { t.Remove(x); o.Remove(y); EvidenceRow(bar, part, octave ? "octave" : "clef", x, y); }
             }
             // the rest paired off: the exact ones in any order, as the multiset score finds them, then in order by what they share
             foreach (var e in t.ToList())
@@ -605,6 +617,11 @@ sealed class Scorer
             }
             here["missed"] = n - pairs.Count;
             here["extra"] = m - pairs.Count;
+            if (Evidence != null)
+            {
+                foreach (var e in t.Where(e => !pairs.Any(p => ReferenceEquals(p.T, e)))) EvidenceRow(bar, part, "missed", e, null);
+                foreach (var e in o.Where(e => !pairs.Any(p => ReferenceEquals(p.O, e)))) EvidenceRow(bar, part, "extra", null, e);
+            }
             int fifths = Truth?.Fifths.GetValueOrDefault((bar, part)) ?? 0;
             foreach (var p in pairs)
             {
@@ -620,6 +637,7 @@ sealed class Scorer
                     else cause = "pitch";
                 }
                 here[cause]++;
+                EvidenceRow(bar, part, cause, p.T, p.O);
             }
         }
         foreach (var (c, k) in here) Causes[c] += k;
@@ -721,7 +739,11 @@ sealed class Scorer
         Bars++;
         int exact = Common(truth, omr, true), pitch = Common(truth, omr, false);
         MsTruth += truth.Count; MsOmr += omr.Count; MsExact += exact; MsPitch += pitch;
-        if (exact == truth.Count && omr.Count == truth.Count) BarsExact++;
+        if (exact == truth.Count && omr.Count == truth.Count)
+        {
+            BarsExact++;
+            foreach (var e in omr) EvidenceRow(bar, part, "=read", null, e);
+        }
         else { Wrong.Add((bar, part)); Classify(bar, part, truth, omr); Diffs.Add($"{bar,4} {part,-5} T: {string.Join(" ", truth.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}\n           O: {string.Join(" ", omr.OrderBy(e => e.IsRest).ThenBy(e => e.IsRest ? 0 : e.P.Midi()).Select(e => e.Show()))}"); }
     }
 
