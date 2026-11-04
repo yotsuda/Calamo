@@ -74,6 +74,8 @@ static class Program
         // --beams3: runs of plain eighths or sixteenths beamed by hand in threes, not by the beat
         // (three of one value under a beam that are no triplet: the test of Reader.UnprintedTriplets)
         Writer.Beams3 = opt.ContainsKey("beams3");
+        // --cross: the threes suite's left hand climbing to the right hand's staff in mid group (@cross)
+        Gen.CrossStaff = opt.ContainsKey("cross");
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
         bool figures = opt.ContainsKey("figures");
         // --leapslurs: two-note slurs over a wide leap from an eighth or sixteenth (an old print's hooked slur)
@@ -183,7 +185,8 @@ sealed class GEv
     public int Ticks;                      // written value (whole = 1920); a tuplet's is scaled at output
     public int TupletN, TupletD;           // part of an N:D group (3:2 a triplet; 5:4, 6:4, 7:4 with --tuplets); 0: none
     public bool Triplet => TupletN > 0;    // in a tuplet group of any kind
-    public bool Tie;                       // held into the next event (same pitches)
+    public bool Bare;                      // a tuplet group's, written bare: no number or bracket printed
+    public bool Tie;                     // held into the next event (same pitches)
     public bool Measure;                   // a full-measure rest (R)
     public bool SlurStart, SlurEnd;        // a slur starts at it / ends at it
     public string Marks = "";              // annotations as .lys writes them after the value (@p@cresc)
@@ -489,8 +492,9 @@ static class Writer
             // same kind starts its own
             int n = evs[i].TupletN, dd = evs[i].TupletD;
             int group = evs[i].Ticks * n;
+            string bare = evs[i].Bare ? "bare " : "";
             while (i < evs.Count && evs[i].TupletN == n && evs[i].TupletD == dd && sum < group) { run.Add(Ev(evs[i])); sum += evs[i].Ticks; i++; }
-            parts.Add($"tuplet {n}/{dd} {{ " + string.Join(" ", run) + " }");
+            parts.Add($"tuplet {n}/{dd} {bare}{{ " + string.Join(" ", run) + " }");
         }
         // (a cue's voice: the whole of it in cue { }, drawn small)
         return evs.Count > 0 && evs.All(e => e.Cue) ? "cue { " + string.Join(" ", parts) + " }" : string.Join(" ", parts);

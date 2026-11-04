@@ -165,15 +165,21 @@ static class Gen
     {
         p.Fifths = rng.Next(-5, 6);
         p.Time = Pick(rng, ThreesTimes);
+        // (--cross: a beam to join the two staves, so no 2/2's quarters; a group's first note is its hand's)
+        if (CrossStaff) while (p.Time == "2/2") p.Time = Pick(rng, ThreesTimes);
         // (every draw of the piece's shape made whether used or not: the draws stay in step)
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
         // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three
-        int mode = shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        int mode = CrossStaff ? 1 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
         int value = p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
-        bool restOpens = rests < 0.2;
+        bool restOpens = rests < 0.2 && !CrossStaff;
         // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first
-        int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
+        int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 || CrossStaff ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
+        // (--cross: how many of a group's notes climb to the right hand's staff, and whether a number
+        // stands over the first bar's groups or none at all; the groups left whole now and then)
+        int climb = CrossStaff && rng.NextDouble() < 0.3 ? 1 : 2;
+        bool numbered = CrossStaff && rng.NextDouble() < 0.5;
         var keyAlt = KeyAlterations(p.Fifths);
         GPitch At(int dia) => new(dia, keyAlt[((dia % 7) + 7) % 7]);
         int beats = int.Parse(p.Time.Split('/')[0]), beat = 1920 / int.Parse(p.Time.Split('/')[1]);
@@ -257,7 +263,11 @@ static class Gen
             {
                 double r = rng.NextDouble();
                 int[] vals = r < 0.25 && k + 2 <= beats ? new[] { 2 * beat } : r < 0.35 && k + 3 <= beats ? new[] { 3 * beat }
-                    : r < 0.6 ? new[] { beat } : r < 0.7 ? new[] { -beat } : r < 0.85 ? new[] { beat / 2, beat / 2 } : new[] { beat * 3 / 4, beat / 4 };
+                    : r < 0.6 ? new[] { beat } : r < 0.7 ? new[] { -beat }
+                    // (--cross: no beams in the melody, its stems down would lay them over the climbing groups' beams,
+                    // one voice on the staff as this suite writes it, which no engraver prints)
+                    : CrossStaff ? new[] { beat }
+                    : r < 0.85 ? new[] { beat / 2, beat / 2 } : new[] { beat * 3 / 4, beat / 4 };
                 foreach (int v in vals)
                 {
                     var e = new GEv { Ticks = Math.Abs(v) };
@@ -345,7 +355,18 @@ static class Gen
             {
                 rh.Bars.Add(new() { Melody(b, 33, 40) });
                 // (Op.15-1's left hand in some pieces: the triplets over a bass a beat on the same staff)
-                lh.Bars.Add(low < 0.5 ? new() { Triplets(b, 21), BassBeats(b) } : new() { Triplets(b, 17) });
+                var left = Triplets(b, low < 0.5 || CrossStaff ? 21 : 17);
+                if (CrossStaff)
+                    for (int g = 0; g + 3 <= left.Count; g += 3)
+                    {
+                        bool whole = rng.NextDouble() < 0.15;
+                        for (int i = 0; i < 3; i++)
+                        {
+                            left[g + i].Bare = !(numbered && b == 0);
+                            if (!whole && i >= 3 - climb) left[g + i].Marks += "@cross";
+                        }
+                    }
+                lh.Bars.Add(low < 0.5 ? new() { left, BassBeats(b) } : new() { left });
             }
         }
         p.Parts.Add(rh);
@@ -353,6 +374,9 @@ static class Gen
     }
 
     static readonly string[] ThreesTimes = { "4/4", "4/4", "3/4", "2/4", "2/2" };
+
+    // OmrGen --cross: threes' left hand climbing to the right hand's staff in mid group
+    public static bool CrossStaff;
 
     // OmrGen --texts: a tempo marking and words of expression in lied
     public static bool Texts;

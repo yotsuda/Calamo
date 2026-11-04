@@ -964,13 +964,18 @@ if (truth != null)
     var scored = cfg.Parts.Select(q => truth.Bars.Keys.Any(k => k.Part == q.Id)).ToArray();
     // (a rhythm slash is no note: the truth has none)
     static List<Ev> Notes(IEnumerable<Ev> evs) => evs?.Where(e => !e.Slash).ToList() ?? new List<Ev>();
+    // (a MusicXML truth has a note on the staff it is drawn on: a note written back to its beam's part,
+    // Reader.CrossBeams, is scored there, against what that truth says. The generator's .notes have it in its part)
+    bool byDrawn = opt.TryGetValue("truth", out var tp0) && (tp0.EndsWith(".xml") || tp0.EndsWith(".musicxml"));
+    List<Ev> Scored(List<Ev>[] arr, int pi) => !byDrawn ? Notes(arr[pi])
+        : Notes((arr[pi] ?? new()).Where(e => !e.CrossStaff).Concat(arr.Where(a => a != null).SelectMany(a => a).Where(e => e.DrawnOn == pi)).OrderBy(e => e.X));
     foreach (var (bar, arr) in all)
         for (int pi = 0; pi < cfg.Parts.Count; pi++)
         {
             if (!scored[pi]) continue;
             var tev = truth.Bars.GetValueOrDefault((bar, cfg.Parts[pi].Id)) ?? new List<Ev>();
-            if (state.Poly) sc.AddMultiset(bar, cfg.Parts[pi].Id, tev, Notes(arr[pi]));
-            else if (truth.Bars.ContainsKey((bar, cfg.Parts[pi].Id))) sc.Add(bar, cfg.Parts[pi].Id, tev, Notes(arr[pi]));
+            if (state.Poly) sc.AddMultiset(bar, cfg.Parts[pi].Id, tev, Scored(arr, pi));
+            else if (truth.Bars.ContainsKey((bar, cfg.Parts[pi].Id))) sc.Add(bar, cfg.Parts[pi].Id, tev, Scored(arr, pi));
         }
     Console.WriteLine(state.Poly ? sc.MultisetSummary() : sc.Summary());
     // (a truth that marks no arpeggio, and a reading that finds none: nothing to say)
@@ -1250,6 +1255,7 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
 
 static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
     // (a rhythm slash takes its articulations, /4@accent; no dynamics or pedal are given it)
+    + (e.CrossStaff ? "@cross" : "")
     + (e.FullBar ? "" : string.Concat((e.Articulations ?? new()).Select(a => "@" + a)))
     + (e.FullBar || e.Slash ? "" : (e.Dynamic != null ? "@" + e.Dynamic : "") + (e.HairpinEnd != null ? "@!" + e.HairpinEnd : "")
         + (e.HairpinStart != null ? "@" + e.HairpinStart : "") + (e.PedalUp ? "@!sustain" : "") + (e.PedalDown ? "@sustain" : ""))
