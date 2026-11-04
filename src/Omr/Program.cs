@@ -331,6 +331,9 @@ for (int page = from; page <= to; page++)
     var tt = sw.Elapsed;
     if (words) Texts.Apply(path, res, pageMarks);
     if (Texts.Verbose) Console.WriteLine($"  texts: {(sw.Elapsed - tt).TotalSeconds:F2} s, {Texts.Cuts} cuts, cleaning {Texts.CleanTicks / (double)System.Diagnostics.Stopwatch.Frequency:F2} s");
+    // and a song's words under its staves (S54)
+    Lyrics.Verbose |= opt.ContainsKey("lyrics");
+    if (words || opt.ContainsKey("read-lyrics")) Lyrics.Apply(path, res);
     // (the lines the page before ran out past its last system that this page's readers found no
     // continuation of: read as they were without a next page; this page's own go on to the next)
     foreach (var o in res.Before) o.Close(null, null);
@@ -711,6 +714,39 @@ string formLine = Form.Line(sections, formSigns, all.Keys.DefaultIfEmpty(firstBa
         }
     }
 }
+// a song's words, per part and verse: the voices of a bar, the verses it has, and each bar's syllables in
+// the track's order: a note a slur or a tie holds takes none (Lily#'s melisma, LilyPond's), a note under
+// no syllable takes "~" (one note, nothing drawn). The state goes on from one section to the next.
+var lyricState = new Dictionary<(int, int), (bool Held, bool Slur)>();
+List<List<Ev>> LyricVoices(int bar, int pi) => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() };
+// (a track of four syllables or more: a page's credit under a piano staff, "OpenScore (CCO)", sings no part)
+List<int> LyricVerses(int pi) => all.Keys.SelectMany(bar => LyricVoices(bar, pi)).SelectMany(v => v).Where(e => e.Words != null)
+    .SelectMany(e => e.Words).GroupBy(w => w.Verse).Where(g => g.Count() >= 4).Select(g => g.Key).OrderBy(v => v).ToList();
+string LyricBars(int pi, int verse, int from, int to)
+{
+    var text = new System.Text.StringBuilder();
+    var (held, slur) = lyricState.GetValueOrDefault((pi, verse));
+    foreach (int bar in all.Keys.Where(b => b >= from && b <= to))
+    {
+        var line = LyricVoices(bar, pi).MaxBy(v => v.Count(e => e.Words?.Any(w => w.Verse == verse) == true)) ?? new List<Ev>();
+        var said = new List<string>();
+        foreach (var e in line)
+        {
+            if (e.IsRest) { held = false; continue; }
+            var word = e.Words?.FirstOrDefault(w => w.Verse == verse);
+            bool has = e.Words?.Any(w => w.Verse == verse) == true;
+            // (a syllable on a note the reading holds is still written: the words go on, a note late)
+            if (has) said.Add(Lyrics.Lys(word.Value)); else if (!held) said.Add("~");
+            if (e.SlurEnd) slur = false;
+            if (e.SlurStart) slur = true;
+            held = e.Tie || slur;
+        }
+        while (said.Count > 0 && said[^1] == "~") said.RemoveAt(said.Count - 1);
+        text.Append(string.Join(" ", said)).Append(said.Count > 0 ? " | " : "| ");
+    }
+    lyricState[(pi, verse)] = (held, slur);
+    return text.ToString();
+}
 for (int si = 0; si < sections.Count; si++)
 {
     int secFrom = sections[si].From, secTo = si + 1 < sections.Count ? sections[si + 1].From - 1 : int.MaxValue;
@@ -824,6 +860,9 @@ for (int si = 0; si < sections.Count; si++)
         }
         prevBars[pi] = prevBar; sysPages[pi] = sysPage;
         lys.AppendLine("  }");
+        // (a song's words beside the part: a track a verse, a bar's syllables on its line's notes)
+        foreach (int verse in LyricVerses(pi))
+            lys.AppendLine($"  lyrics {cfg.LysId(pi)}words{verse + 1} sings {cfg.LysId(pi)} {{ {LyricBars(pi, verse, secFrom, secTo)}}}");
     }
     lys.AppendLine("}");
 }
@@ -853,6 +892,7 @@ lys.AppendLine("score {");
                 open.Add((last, depth++));
             }
         lys.AppendLine($"{new string(' ', 2 * depth)}staff {cfg.LysId(pi)} \"{cfg.Parts[pi].Name}\"{(cfg.Parts[pi].Lines == 1 ? " as lines 1" : "")}");
+        foreach (int verse in LyricVerses(pi)) lys.AppendLine($"{new string(' ', 2 * depth)}lyrics {cfg.LysId(pi)}words{verse + 1}");
         while (open.Count > 0 && open[^1].Last <= pi)
         {
             depth = open[^1].Depth;

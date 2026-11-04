@@ -41,6 +41,10 @@ $liedArgs = @('--lyrics', '--dynamics', '--texts', '--piano', '--changes', '--gr
 $liedOmr = @($omrArgs) + @('--header')
 if ($Fresh -or -not (Test-Path "$genA\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genA -Suite lied -Count 10 -Seed 7 -GenArgs $liedArgs -OmrArgs $liedOmr | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genA -Reuse -OmrArgs $liedOmr | Out-Null }
+# (and printed and scanned: the words read through the same OCR, lyrAS below)
+$genAS = "$root\out\gen-lied-all-scan"
+if ($Fresh -or -not (Test-Path "$genAS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genAS -Suite lied -Count 10 -Seed 7 -GenArgs $liedArgs -Degrade -OmrArgs $liedOmr | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genAS -Reuse -OmrArgs $liedOmr | Out-Null }
 # the same suites with stretches where every part rests, written as multi-bar rests (R1*N): church
 # rests and the count over the staff, the bars counted on past them
 $genR = "$root\out\gen-mmrests"
@@ -298,6 +302,13 @@ foreach ($set in @(@{ Dir = $genP; Tag = 'formP'; Kinds = 'repeat|volta|nav' }, 
         if ($line -match "^($($set.Kinds))\s+truth\s+\d+\s+read\s+\d+\s+found\s+\d+\s+recall\s+([\d.]+)%\s+precision\s+([\d.]+)%") {
             $m["$($set.Tag).$($Matches[1]).recall"] = [double]$Matches[2]; $m["$($set.Tag).$($Matches[1]).precision"] = [double]$Matches[3]
         }
+    }
+}
+# the songs' words (S54; higher is better), by part, verse and bar: as spelt, and with the hyphen
+foreach ($set in @(@{ Dir = $genA; Tag = 'lyrA' }, @{ Dir = $genAS; Tag = 'lyrAS' })) {
+    $line = & "$PSScriptRoot\score-lyrics.ps1" -Out $set.Dir
+    if ($line -match 'recall ([\d.]+)\s+precision ([\d.]+)\s+hyphen ([\d.]+)') {
+        $m["$($set.Tag).recall"] = [double]$Matches[1]; $m["$($set.Tag).precision"] = [double]$Matches[2]; $m["$($set.Tag).hyphen"] = [double]$Matches[3]
     }
 }
 # real scores (higher is better)

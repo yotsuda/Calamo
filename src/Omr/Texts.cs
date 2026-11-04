@@ -360,7 +360,7 @@ static class Texts
     /// twentieth, that stands its strokes upright, the columns of the sheared ink most heaped (the sum
     /// of their squared counts). Lily#'s italic leans about 0.2; upright print 0.
     /// </summary>
-    static double Slant(Img dark, RectangleF row)
+    internal static double Slant(Img dark, RectangleF row)
     {
         int x0 = (int)row.Left, x1 = (int)row.Right, y0 = (int)row.Top, y1 = (int)row.Bottom;
         int h = y1 - y0 + 1, w = x1 - x0 + 1;
