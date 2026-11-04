@@ -166,13 +166,15 @@ static class Gen
         p.Fifths = rng.Next(-5, 6);
         p.Time = Pick(rng, ThreesTimes);
         // (--cross: a beam to join the two staves, so no 2/2's quarters; a group's first note is its hand's)
-        if (CrossStaff) while (p.Time == "2/2") p.Time = Pick(rng, ThreesTimes);
+        // (--knee: 2/2's six eighths to a half under one beam are Op.27-2's own, below)
+        if (CrossStaff && !KneeBeams) while (p.Time == "2/2") p.Time = Pick(rng, ThreesTimes);
         // (every draw of the piece's shape made whether used or not: the draws stay in step)
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
         // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three
         int mode = CrossStaff ? 1 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
-        int value = p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
+        // (--knee: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
+        int value = KneeBeams ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
         bool restOpens = rests < 0.2 && !CrossStaff;
         // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first
         int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 || CrossStaff ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
@@ -353,7 +355,16 @@ static class Gen
             }
             else
             {
-                rh.Bars.Add(new() { Melody(b, 33, 40) });
+                // (--knee: the bar's rest, or a whole note high over the heads that climb: a stem down from a
+                // melody over them would run through the group, which no engraver prints. Op.27-2 writes its melody
+                // there stems up, a second voice on the staff, which @cross notes from another part do not make)
+                if (KneeBeams)
+                {
+                    var bar = new GEv { Ticks = p.BarTicks };
+                    if (Representable(p.BarTicks) && rng.NextDouble() < 0.3) bar.Pitches.Add(At(38 + rng.Next(5)));
+                    rh.Bars.Add(new() { new() { bar } });
+                }
+                else rh.Bars.Add(new() { Melody(b, 33, 40) });
                 // (Op.15-1's left hand in some pieces: the triplets over a bass a beat on the same staff)
                 var left = Triplets(b, low < 0.5 || CrossStaff ? 21 : 17);
                 if (CrossStaff)
@@ -363,10 +374,20 @@ static class Gen
                         for (int i = 0; i < 3; i++)
                         {
                             left[g + i].Bare = !(numbered && b == 0);
-                            if (!whole && i >= 3 - climb) left[g + i].Marks += "@cross";
+                            if (whole || i < 3 - climb) continue;
+                            left[g + i].Marks += "@cross";
+                            // (--knee: heads over the beam, in the staff: their stems come down to it as the others'
+                            // go up, Op.27-2's bars 23 and 30. F4 is as low as lysc and LilyPond draw it so here)
+                            if (KneeBeams)
+                            {
+                                int dia = left[g + i].Pitches[0].Dia;
+                                while (dia < 31) dia += 7;
+                                left[g + i].Pitches[0] = At(dia);
+                            }
                         }
                     }
-                lh.Bars.Add(low < 0.5 ? new() { left, BassBeats(b) } : new() { left });
+                // (--knee: one voice, a second forces the stems its way and no beam knees, in LilyPond as in lysc)
+                lh.Bars.Add(low < 0.5 && !KneeBeams ? new() { left, BassBeats(b) } : new() { left });
             }
         }
         p.Parts.Add(rh);
@@ -377,6 +398,8 @@ static class Gen
 
     // OmrGen --cross: threes' left hand climbing to the right hand's staff in mid group
     public static bool CrossStaff;
+    // OmrGen --knee: the same with the climbing heads over the beam, a kneed beam between the staves
+    public static bool KneeBeams;
 
     // OmrGen --texts: a tempo marking and words of expression in lied
     public static bool Texts;

@@ -966,7 +966,8 @@ if (truth != null)
     static List<Ev> Notes(IEnumerable<Ev> evs) => evs?.Where(e => !e.Slash).ToList() ?? new List<Ev>();
     // (a MusicXML truth has a note on the staff it is drawn on: a note written back to its beam's part,
     // Reader.CrossBeams, is scored there, against what that truth says. The generator's .notes have it in its part)
-    bool byDrawn = opt.TryGetValue("truth", out var tp0) && (tp0.EndsWith(".xml") || tp0.EndsWith(".musicxml"));
+    // (--truth-by-staff: so has a .notes truth listened from a score's staves: BWV 610's tenor, its "c'16 d'16" up on the upper manual)
+    bool byDrawn = opt.ContainsKey("truth-by-staff") || opt.TryGetValue("truth", out var tp0) && (tp0.EndsWith(".xml") || tp0.EndsWith(".musicxml"));
     List<Ev> Scored(List<Ev>[] arr, int pi) => !byDrawn ? Notes(arr[pi])
         : Notes((arr[pi] ?? new()).Where(e => !e.CrossStaff).Concat(arr.Where(a => a != null).SelectMany(a => a).Where(e => e.DrawnOn == pi)).OrderBy(e => e.X));
     foreach (var (bar, arr) in all)

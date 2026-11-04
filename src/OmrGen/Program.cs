@@ -75,7 +75,9 @@ static class Program
         // (three of one value under a beam that are no triplet: the test of Reader.UnprintedTriplets)
         Writer.Beams3 = opt.ContainsKey("beams3");
         // --cross: the threes suite's left hand climbing to the right hand's staff in mid group (@cross)
-        Gen.CrossStaff = opt.ContainsKey("cross");
+        // --knee: the same with the climbing heads over the beam, a kneed beam between the staves
+        Gen.KneeBeams = opt.ContainsKey("knee");
+        Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
         bool figures = opt.ContainsKey("figures");
         // --leapslurs: two-note slurs over a wide leap from an eighth or sixteenth (an old print's hooked slur)

@@ -1,0 +1,20 @@
+title "knee"
+octave absolute
+time 2/2
+key e major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  rh {
+    r1 | r1 | r1 | r1 |
+  }
+  lh {
+    tuplet 3/2 bare { b,8 e8 gis8@cross } tuplet 3/2 bare { b,8 e8 gis8@cross } tuplet 3/2 bare { b,8 e8 gis8@cross } tuplet 3/2 bare { b,8 e8 gis8@cross } |
+    tuplet 3/2 bare { b,8 gis'8@cross b'8@cross } tuplet 3/2 bare { b,8 gis'8@cross b'8@cross } tuplet 3/2 bare { b,8 gis'8@cross b'8@cross } tuplet 3/2 bare { b,8 gis'8@cross b'8@cross } |
+    tuplet 3/2 bare { gis'8@cross e8 b,8 } tuplet 3/2 bare { gis'8@cross e8 b,8 } tuplet 3/2 bare { gis'8@cross e8 b,8 } tuplet 3/2 bare { gis'8@cross e8 b,8 } |
+    tuplet 3/2 bare { e,8 b,8 e'8@cross } tuplet 3/2 bare { e,8 b,8 e'8@cross } tuplet 3/2 bare { e,8 b,8 e'8@cross } tuplet 3/2 bare { e,8 b,8 e'8@cross } |
+  }
+}
+score { grandStaff { staff rh  staff lh } }

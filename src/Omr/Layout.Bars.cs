@@ -95,6 +95,17 @@ static partial class Layout
                     if (Signatures.Verbose) Console.WriteLine($"    barline at x {x:F0} (system {sys.Index + 1}): seen at {group.Max(t => t.Score):F2} on a dot's column, not dark: dropped");
                     continue;
                 }
+                // (a stem from a head on the staff above, down through this one to a beam under it, is seen as a barline
+                // on this one however surely: threes011's --knee, a bar cut in two with its group. A barline stops at the
+                // system's outer lines and covers the staff it was not seen on; this one runs on past them and does not)
+                bool PastSystem(int cx) => Enumerable.Range(0, (int)(0.5 * s)).All(k => d[cx, (int)(sys.Staves[^1].Bottom + 0.2 * s) + k])
+                                           || Enumerable.Range(0, (int)(0.5 * s)).All(k => d[cx, (int)(sys.Staves[0].Top - 0.2 * s) - k]);
+                if (onStaves.Count < sys.Staves.Count && sys.Staves.Where(st => !onStaves.Contains(st)).Any(st => !Dark(st))
+                    && Enumerable.Range((int)(x - 0.3 * s), (int)(0.6 * s) + 1).Any(PastSystem))
+                {
+                    if (Signatures.Verbose) Console.WriteLine($"    barline at x {x:F0} (system {sys.Index + 1}): seen on {onStaves.Count} of {sys.Staves.Count} staves, runs past the system and does not cover the other: dropped");
+                    continue;
+                }
                 if (onStaves.Count < sys.Staves.Count && group.Max(t => t.Score) < Symbols.SureScore)
                 {
                     // seen on some staves only, and not surely: it fills in what the rules read nothing

@@ -172,13 +172,21 @@ $genE2 = "$root\out\gen-threes2"
 if ($Fresh -or -not (Test-Path "$genE2\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genE2 -Suite threes -Count 40 -Seed 11 -NoNumbers -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genE2 -Reuse -OmrArgs $omrArgs | Out-Null }
 # the left hand's triplets climbing to the right hand's staff in mid group, one beam over both (OmrGen --cross: @cross and
-# bare, the number over the first bar or none; Op.27-2's bars 37-42, Reader.CrossBeams), and the same as printed and scanned
+# bare, the number over the first bar or none; Reader.CrossBeams), and the same as printed and scanned
 $genCr = "$root\out\gen-cross"
 if ($Fresh -or -not (Test-Path "$genCr\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genCr -Suite threes -Count 10 -Seed 7 -GenArgs @('--cross') -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genCr -Reuse -OmrArgs $omrArgs | Out-Null }
 $genCrS = "$root\out\gen-cross-scan"
 if ($Fresh -or -not (Test-Path "$genCrS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genCrS -Suite threes -Count 10 -Seed 7 -GenArgs @('--cross') -Degrade -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genCrS -Reuse -OmrArgs $omrArgs | Out-Null }
+# the same with the climbing heads over the beam, a kneed beam between the staves (OmrGen --knee; Op.27-2's bars 23 and 30,
+# Reader.KneeBeam), and as printed and scanned
+$genKn = "$root\out\gen-knee"
+if ($Fresh -or -not (Test-Path "$genKn\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genKn -Suite threes -Count 10 -Seed 7 -GenArgs @('--knee') -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genKn -Reuse -OmrArgs $omrArgs | Out-Null }
+$genKnS = "$root\out\gen-knee-scan"
+if ($Fresh -or -not (Test-Path "$genKnS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genKnS -Suite threes -Count 10 -Seed 7 -GenArgs @('--knee') -Degrade -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genKnS -Reuse -OmrArgs $omrArgs | Out-Null }
 # pages photographed off square (OmrDegrade --keystone, --shear, --bend), which Lean stands up and Bow levels so that the truth
 # fits. A corner moved 2 percent of the width, more than the Nutcracker's photo (0.8), for a grand staff's barlines to part as a
 # score's twenty staves do: Lean acts only then (without it, on piano, 34 barlines off and 594 heads, with it 10 and 273).
@@ -208,7 +216,7 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genY; Tag = 'genY'; Sym = 'symY' }, @{ Dir = $genYS; Tag = 'genYS'; Sym = 'symYS' },
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
-           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
+           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it

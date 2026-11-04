@@ -1,0 +1,18 @@
+title "k2"
+octave absolute
+key e major
+time 4/4
+
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  rh { r1 | r1 | r1 | r1 | }
+  lh {
+    tuplet 3/2 bare { e8 b8 gis'8@cross } tuplet 3/2 bare { e8 b8 gis'8@cross } tuplet 3/2 bare { e8 b8 gis'8@cross } tuplet 3/2 bare { e8 b8 gis'8@cross } |
+    tuplet 3/2 bare { e,8 b,8 gis'8@cross } tuplet 3/2 bare { e,8 b,8 gis'8@cross } tuplet 3/2 bare { e,8 b,8 gis'8@cross } tuplet 3/2 bare { e,8 b,8 gis'8@cross } |
+    tuplet 3/2 bare { e8 gis'8@cross b'8@cross } tuplet 3/2 bare { e8 gis'8@cross b'8@cross } tuplet 3/2 bare { e8 gis'8@cross b'8@cross } tuplet 3/2 bare { e8 gis'8@cross b'8@cross } |
+    tuplet 3/2 bare { e8 b8 gis''8@cross } tuplet 3/2 bare { e8 b8 gis''8@cross } tuplet 3/2 bare { e8 b8 gis''8@cross } tuplet 3/2 bare { e8 b8 gis''8@cross } |
+  }
+}
+score { grandStaff { staff rh  staff lh } }

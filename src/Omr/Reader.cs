@@ -605,7 +605,7 @@ static class Reader
             (ms.Evs[p], ms.Single[p]) = StaffEvents(sym, st, x0, x1, s, Clefs.MiddleLine(clefName), Keys.Alterations(fifths), ms.BarTicks, midClefs, clefName.EndsWith("_8"));
             if (midClefs.Count > 0 && state.Auto) state.Clefs[p] = midClefs[^1].Clef;
         }
-        CrossBeams(ms.Evs, ms.Single, s);
+        CrossBeams(ms.Evs, ms.Single, s, ms.BarTicks);
         for (int p = 0; p < n; p++)
         {
             var st = sys.Staves.FirstOrDefault(x => x.Part == p);
@@ -620,20 +620,25 @@ static class Reader
 
     /// <summary>
     /// A beam group drawn on two staves: a left hand's broken chord climbing to the right hand's
-    /// staff in mid group, one beam over both (Op.27-2's bars 37-42). Its notes are read staff by
+    /// staff in mid group, one beam over both. Its notes are read staff by
     /// staff, each by its own staff's clef and signs, which is right for their pitches and wrong for
     /// the part: each hand is short of the bar. A group of one ink piece with notes on two
     /// neighbouring parts' staves, stems the same way and tips along one beam, is the part's whose
     /// staff its first note stands on; the others are written there with @cross. So are the
     /// number's scale and group, read over the notes under it alone.
     /// </summary>
-    static void CrossBeams(List<Ev>[] parts, List<Ev>[] singles, double s)
+    /// <param name="barTicks">the bar's length (0: not known yet, the time being checked)</param>
+    static void CrossBeams(List<Ev>[] parts, List<Ev>[] singles, double s, int barTicks = 0)
     {
         for (int p = 0; p + 1 < parts.Length; p++)
         {
             int q = p + 1;
             if (parts[p] == null || parts[q] == null) continue;
+            // (both staves' bars full as read: nothing is on the wrong one, whatever the ink joins)
+            if (barTicks > 0 && Fills(parts[p], barTicks) && Fills(parts[q], barTicks)) continue;
             foreach (int beam in parts[p].Where(e => e.Beam != 0).Select(e => e.Beam).Intersect(parts[q].Where(e => e.Beam != 0).Select(e => e.Beam)).ToList())
+            {
+                if (KneeBeam(parts, singles, p, q, beam, s, barTicks)) continue;
                 // (stems one way: the ink may hold another voice's note, its stem the other way against this one's head)
                 foreach (int side in new[] { 1, -1 })
                 {
@@ -641,11 +646,11 @@ static class Reader
                     var lower = parts[q].Where(e => e.Beam == beam && e.Stem == side).ToList();
                     var all = upper.Concat(lower).OrderBy(e => e.X).ToList();
                     if (upper.Count == 0 || lower.Count == 0) continue;
-                    // (a group climbing from the lower staff, stems up, only. A first note on the upper staff is as a
+                    // (a group climbing from the lower staff only, stems up or, the beam under it, down. A first note on the upper staff is as a
                     // rule a chord there whose stem touches the lower staff's beam: lang36-3's MuseScore page, "<bes f'>4"
                     // over the left hand's sixteenths, taken for their first. A group falling to the lower staff has
                     // nothing to test it on yet)
-                    if (side < 0 || upper.Contains(all[0])) continue;
+                    if (upper.Contains(all[0])) continue;
                     // (and single notes climb: a chord on the upper staff is that hand's, its stem on the beam's ink --
                     // lang36-3's bars 54-55, "<ees' g'>16" among the left hand's sixteenths)
                     if (upper.Any(e => e.Chord != null)) continue;
@@ -686,8 +691,85 @@ static class Reader
                     }
                     MoveHome(parts, home, away, beam, side, value);
                     MoveHome(singles, home, away, beam, side, value);
+                    if (all.Count % 3 == 0)
+                    {
+                        ThreesBesideKnee(parts, p, q, barTicks);
+                        ThreesBesideKnee(singles, p, q, barTicks);
+                    }
                 }
+            }
         }
+    }
+
+    /// <summary>
+    /// A kneed beam between two staves: the lower staff's notes with stems up to it, the upper's
+    /// with stems down to it (Op.27-2's bars 23 and 30). A melody's stem down onto the beam looks the
+    /// same, and stands in a column the group already has a note in, or between two of its columns;
+    /// the group's own heads make even columns with the lower staff's. Only from the lower staff, as
+    /// <see cref="CrossBeams"/>'s groups.
+    /// </summary>
+    static bool KneeBeam(List<Ev>[] parts, List<Ev>[] singles, int p, int q, int beam, double s, int barTicks)
+    {
+        var lower = parts[q].Where(e => e.Beam == beam && e.Stem > 0 && !e.IsRest).ToList();
+        if (lower.Count == 0 || lower.Any(e => e.Chord != null)) return false;
+        if (parts[p].Any(e => e.Beam == beam && e.Stem > 0)) return false;
+        bool Head(Ev e) => e.Beam == beam && e.Stem < 0 && !e.IsRest && e.Chord == null && !lower.Any(l => Math.Abs(l.X - e.X) < 0.7 * s);
+        var upper = parts[p].Where(Head).ToList();
+        var all = lower.Concat(upper).OrderBy(e => e.X).ToList();
+        if (upper.Count == 0 || all.Count < 3 || upper.Contains(all[0])) return false;
+        // (the tips along one line, a beam's thickness apart at most)
+        static double Tip(Ev e) => e.Stem > 0 ? e.StemLo : e.StemHi;
+        double slope = (Tip(all[^1]) - Tip(all[0])) / Math.Max(1, all[^1].X - all[0].X);
+        if (all.Any(e => Math.Abs(Tip(all[0]) + slope * (e.X - all[0].X) - Tip(e)) > 1.2 * s)) return false;
+        // (columns not much under the usual gap: a stem down and the next one up close in, to 0.41 of it in threes011's
+        // --knee, but a melody's stem right beside one of the group's comes closer)
+        var gaps = all.Zip(all.Skip(1), (a, b) => b.X - a.X).OrderBy(g => g).ToList();
+        if (gaps[0] < 0.3 * gaps[gaps.Count / 2]) return false;
+        static int Written(Ev e) => e.Ticks * e.Scale.Den / e.Scale.Num;
+        int value = all.GroupBy(Written).OrderByDescending(g => g.Count()).First().Key;
+        if (3 * all.Count(e => Written(e) != value) > all.Count) return false;
+        foreach (var list in new[] { parts[p], singles[p] })
+        {
+            foreach (var e in list.Where(Head).ToList()) e.Stem = 1;
+            // (what else the ink holds on that staff is a melody's, its stem ending on the beam)
+            foreach (var e in list.Where(e => e.Beam == beam && e.Stem < 0)) { e.Beam = 0; e.Ticks = Dur.Of(4, 0) * e.Scale.Num / e.Scale.Den; }
+            list.RemoveAll(e => e.Slash && e.X > all[0].X - s && e.X < all[^1].X + s);
+        }
+        MoveHome(parts, q, p, beam, 1, value);
+        MoveHome(singles, q, p, beam, 1, value);
+        // (a group that itself runs in threes: BWV 610's tenor climbs four to a beam among plain sixteenths)
+        if (all.Count % 3 == 0)
+        {
+            ThreesBesideKnee(parts, p, q, barTicks);
+            ThreesBesideKnee(singles, p, q, barTicks);
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// The groups of a bar with a kneed beam: moved, each staff's beam may fill the bar as plain notes or fall short
+    /// of it with nothing past it, and <see cref="UnprintedTriplets"/>, which goes by a bar too long, leaves them
+    /// plain. Op.27-2's bar 23: the left hand's six under the knee and the right hand's six after it, "r4" and six
+    /// eighths filling 2/2 by chance. Three, six, nine or twelve eighths or sixteenths under one beam there are triplets,
+    /// unless that beam alone is the bar: six eighths in 3/4. Not while the time is being checked (no bar length yet).
+    /// </summary>
+    static void ThreesBesideKnee(List<Ev>[] parts, int p, int q, int barTicks)
+    {
+        if (barTicks <= 0) return;
+        foreach (int r in new[] { p, q })
+            foreach (var g in parts[r].Where(e => e.Beam != 0 && !e.IsRest && e.Scale == (1, 1)).GroupBy(e => (e.Beam, e.Stem)).ToList())
+            {
+                var run = g.OrderBy(e => e.X).ToList();
+                int ticks = run[0].Ticks;
+                if (run.Count % 3 != 0 || run.Any(e => e.Ticks != ticks) || ticks != Dur.Of(8, 0) && ticks != Dur.Of(16, 0) || run.Count * ticks == barTicks) continue;
+                foreach (var (three, k) in run.Chunk(3).Select((c, k) => (c, k)))
+                    foreach (var e in three)
+                    {
+                        e.Ticks = ticks * 2 / 3;
+                        e.Scale = (2, 3);
+                        e.Tuplet = -(2 * g.Key.Beam + (g.Key.Stem > 0 ? 1 : 0)) - 1_000_000 * k;
+                    }
+            }
     }
 
     /// <summary>The events of the beam group on the staff away go to the part home, marked; the group's tuplet is one for all of it.</summary>
@@ -1591,8 +1673,11 @@ static class Reader
             // "r16 b'16 d''16" eight times a bar taken for 6/4. Not 6/8 read as 2/4, its one voice's eighths filling 3/4)
             var inThrees = contents.Where(evs => FillsInThrees(evs, read * unit, den)).ToList();
             static bool TwoVoices(List<Ev> evs, double s) => evs.Any(a => !a.IsRest && evs.Any(b => b != a && !b.IsRest && Math.Abs(a.X - b.X) < 0.3 * s));
+            // (under a C or a cut C half of them will do: a bar's beams one stems up and one down, six eighths each, are
+            // two voices to this count and not in threes -- --knee's threes011, a cut C taken for 3/2)
             if (best != read && (inThrees.Count > Filled(best * unit)
-                                 || inThrees.Count == Filled(best * unit) && (inThrees.All(evs => TwoVoices(evs, s)) || group.All(g => g.Sign)))) best = read;
+                                 || inThrees.Count == Filled(best * unit) && (inThrees.All(evs => TwoVoices(evs, s)) || group.All(g => g.Sign))
+                                 || group.All(g => g.Sign) && 2 * inThrees.Count >= Filled(best * unit))) best = read;
             if (Signatures.Verbose)
                 Console.WriteLine($"    time {string.Join(" ", group.Select(g => g.Time).Distinct())} at x {x:F0}, system {sys.Index + 1}: of {contents.Count} staff-measures {Filled(best * unit)} fill {best}/{den}"
                                   + string.Concat(readings.Select(r => (r.Num, r.Den)).Distinct().Select(r => $", {Filled(Dur.Whole * r.Num / r.Den)} fill {r.Num}/{r.Den}")));
