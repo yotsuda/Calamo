@@ -530,17 +530,22 @@ sealed class Verify
         string svgPath = Path.Combine(dir, Path.GetFileNameWithoutExtension(lysPath) + ".svg");
         if (File.Exists(svgPath)) File.Delete(svgPath);
         var sw = Stopwatch.StartNew();
-        var psi = new ProcessStartInfo(LyscPath) { RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
+        // (a console of its own: with the one it would share gone, a run stopped by force, lysc fails to start, 0xc0000142,
+        // and the dialog, open till someone closes it, holds lysc.exe against Lily#'s build)
+        var psi = new ProcessStartInfo(LyscPath) { RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
         psi.ArgumentList.Add("svg"); psi.ArgumentList.Add("-d"); psi.ArgumentList.Add(dir); psi.ArgumentList.Add(Path.GetFullPath(lysPath));
         string log;
-        using (var p = Process.Start(psi))
+        try
         {
+            using var p = Process.Start(psi);
             p.StandardInput.Close();
             var outTask = p.StandardOutput.ReadToEndAsync();
             var errTask = p.StandardError.ReadToEndAsync();
             p.WaitForExit();
             log = outTask.Result + errTask.Result;
         }
+        // (lysc not started, the paging file full on a busy machine: the reading stands, unchecked)
+        catch (System.ComponentModel.Win32Exception e) { log = $"lysc did not start: {e.Message}"; }
         File.WriteAllText(Path.Combine(dir, "verify-lysc.log"), log);
         // (lysc draws what parsed of a file with errors too: after a parser's or a declaration's error
         // such a drawing is no reading to compare. A bar's error (LYS2xxx: a bar line missed, LYS2017)
