@@ -51,6 +51,10 @@ static partial class Symbols
             bool black = t.Class is "head_black" or "slash_black" or "grace_head" || cross;
             if (!black && !whole && !grace && t.Class != "head_half" && t.Class != "slash_hollow") continue;
             if (det.Any(u => Rivals(u, t) && Beats(u, t))) continue;
+            // (a cross beside a head seen more surely, at its height, is that head's tie leaving it: two notes of
+            // one pitch do not stand touching. Op.27-2's bars 15, 35 and 36, a whole note on ledger lines, its tie
+            // starting low: seen as a cross 0.52 and read as a quarter)
+            if (cross && det.Any(u => u.Class is "head_whole" or "head_half" or "head_black" && u.Score > t.Score && Math.Abs(u.Y - t.Y) < 0.3 * s && Math.Abs(u.X - t.X) < 1.4 * s)) continue;
             // (a note on seven ledger lines and more stands past Nearest's reach: piano-collide's
             // fis''' and dis'''' under an 8va, on 7 and 9. Taken only on ledger lines all the way out)
             var st = Nearest(staves, t.Y, s);

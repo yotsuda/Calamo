@@ -78,6 +78,9 @@ static class Program
         // --knee: the same with the climbing heads over the beam, a kneed beam between the staves
         // --handover: the same with a melody stems up over them, and bars the left hand starts and the right hand ends
         Gen.HandOver = opt.ContainsKey("handover");
+        // --flip: the right hand's line of triplets with its stems turning in mid bar, a note or a melody beside it,
+        // the clef changing within it, and bars the right hand starts and the left hand ends
+        Gen.FlipLine = opt.ContainsKey("flip");
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)

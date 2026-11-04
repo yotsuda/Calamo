@@ -212,8 +212,10 @@ static partial class Symbols
                     // beam, between the staves, nearer the staff below -- a grand staff's right hand;
                     // and the staff below's, a group beamed above its staff sets it nearer the staff
                     // above -- lied006's right hand under the voice; or the next system's, a number between
-                    // two systems a little nearer the upper -- slurs004)
-                    if (!hd.HasStem || hd.St != o.St && !(hd.St.System == o.St.System && hd.St.Bottom < o.St.Top && o.St.Top - hd.St.Bottom < 8 * s && !hd.Up)
+                    // two systems a little nearer the upper -- slurs004. A number the detector saw, in a system however far
+                    // apart its staves: its own distance to the beam decides, below -- gen-flip's threes004, sixteen spaces.
+                    // Not a piece the rules took for one: a fingering's 2 under a voice's far staff, kinkel19-6's bar 20)
+                    if (!hd.HasStem || hd.St != o.St && !(hd.St.System == o.St.System && hd.St.Bottom < o.St.Top && (det || o.St.Top - hd.St.Bottom < 8 * s) && !hd.Up)
                                                      && !(hd.St.Top > o.St.Bottom && hd.St.Top - o.St.Bottom < 12 * s && hd.Up)) continue;
                     // the number stands by the beam (stem tips) or on the heads' side (where a
                     // bracket usually goes with it: by the tips first)

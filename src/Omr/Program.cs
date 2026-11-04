@@ -1169,7 +1169,7 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
         }
     // (and the voice that opens a line the other hand ends: from its start, and at the first note after it its whole
     // length, the time there being no matter of x: Op.27-2's bar 5, "s4 s16" by the distance to the rest beyond)
-    var (leaders, whole) = Handed(bar, barTicks);
+    var (leaders, whole, times) = Handed(bar, barTicks);
     foreach (var v in leaders)
     {
         int t = 0;
@@ -1177,11 +1177,13 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
         double next = whole.Where(w => !leaders.Contains(w)).SelectMany(w => w).Where(e => !e.IsRest && e.X > v[^1].X).Select(e => e.X).DefaultIfEmpty(v[^1].X + 9).Min();
         list.Add((next, t));
     }
+    // (a staff's line split by its stems: each voice rests while the other has it, Voices.TurningLine)
+    foreach (var (e, t) in times) list.Add((e.X, t));
     list.Sort((a, b) => a.Item1.CompareTo(b.Item1));
     return list;
 }
 
-(List<List<Ev>> Leaders, HashSet<List<Ev>> Whole) Handed(int bar, int barTicks) =>
+(List<List<Ev>> Leaders, HashSet<List<Ev>> Whole, Dictionary<Ev, int> Times) Handed(int bar, int barTicks) =>
     Voices.HandedOver(Enumerable.Range(0, cfg.Parts.Count).Select(pi => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).ToList(), barTicks);
 
 static string F(double v) => v.ToString("F1", CultureInfo.InvariantCulture);

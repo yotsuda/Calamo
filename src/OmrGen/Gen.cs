@@ -172,10 +172,10 @@ static class Gen
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
         // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three
-        int mode = CrossStaff ? 1 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        int mode = CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
         // (--knee: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
-        int value = KneeBeams ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
-        bool restOpens = rests < 0.2 && !CrossStaff;
+        int value = KneeBeams || FlipLine ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
+        bool restOpens = rests < 0.2 && !CrossStaff && !FlipLine;
         // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first
         int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 || CrossStaff ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
         // (--cross: how many of a group's notes climb to the right hand's staff, and whether a number
@@ -338,6 +338,66 @@ static class Gen
                 // (Op.27-2's first bars: the triplets alone; in some pieces half the bars' groups
                 // from the G below middle C, on the ledger lines over the left hand's staff)
                 var tri = Triplets(b, low < 0.4 && rng.NextDouble() < 0.5 ? 25 : 29);
+                if (FlipLine && tri.Count >= 6 && rng.NextDouble() < 0.7)
+                {
+                    int n = tri.Count / 3, span = 2 * value;
+                    GEv Rest() => new() { Ticks = span, Space = true };
+                    List<GEv> Group(int g) => tri.GetRange(3 * g, 3);
+                    if (rng.NextDouble() < 0.3)
+                    {
+                        // (Op.27-2's bar 12: the right hand starts the line, the left hand ends it over its own bass, every stem up)
+                        int k = rng.Next(1, n);
+                        var on = Triplets(b, 17);
+                        var upper = new List<GEv>();
+                        var lower = new List<GEv>();
+                        for (int g = 0; g < n; g++)
+                        {
+                            upper.AddRange(g < k ? Group(g) : new() { Rest() });
+                            lower.AddRange(g < k ? new() { Rest() } : on.GetRange(3 * g, 3));
+                        }
+                        rh.Bars.Add(new() { upper });
+                        var bass = Bass(b);
+                        foreach (var e in bass) e.Pitches = e.Pitches.Select(q => new GPitch(q.Dia - 7, q.Alter)).ToList();
+                        lh.Bars.Add(new() { lower, bass });
+                        continue;
+                    }
+                    // (Op.27-2's bars 37, 40 and 42: one line, its groups' stems up or down as the notes lie, which two voices
+                    // on the staff write as here, each resting while the other has the line)
+                    bool[] up;
+                    do { up = Enumerable.Range(0, n).Select(_ => rng.NextDouble() < 0.5).ToArray(); } while (up.All(u => u) || up.All(u => !u));
+                    var hi = new List<GEv>[n];
+                    var lo = new List<GEv>[n];
+                    // (the clef going down for a group on the lower voice and back after it: bars 37 and 42)
+                    int clefAt = n >= 3 && rng.NextDouble() < 0.4 ? rng.Next(1, n - 1) : -1;
+                    if (clefAt >= 0)
+                    {
+                        up[clefAt] = false;
+                        if (up.All(u => !u)) up[0] = true;
+                        var drop = Group(clefAt);
+                        foreach (var e in drop) e.Pitches = e.Pitches.Select(q => new GPitch(q.Dia - 7, q.Alter)).ToList();
+                        drop[0].Grace = "clef bass ";
+                        tri[3 * (clefAt + 1)].Grace = "clef treble ";
+                    }
+                    for (int g = 0; g < n; g++)
+                    {
+                        hi[g] = up[g] ? Group(g) : new() { Rest() };
+                        lo[g] = up[g] ? new() { Rest() } : Group(g);
+                    }
+                    // a note on the line's head stems the other way (bars 37, 40), or a melody over a group with its stems down (bar 42)
+                    int at = rng.Next(n);
+                    if (at != clefAt && at != clefAt + 1 || clefAt < 0)
+                    {
+                        if (up[at]) lo[at] = new() { new GEv { Ticks = span, Pitches = new() { tri[3 * at].Pitches[0] } } };
+                        else if (span % 4 == 0)
+                        {
+                            cur = Math.Clamp(cur + rng.Next(-2, 3), 36, 41);
+                            hi[at] = new() { new GEv { Ticks = span * 3 / 4, Pitches = new() { At(cur) } }, new GEv { Ticks = span / 4, Pitches = new() { At(cur) } } };
+                        }
+                    }
+                    rh.Bars.Add(new() { hi.SelectMany(x => x).ToList(), lo.SelectMany(x => x).ToList() });
+                    lh.Bars.Add(new() { Bass(b) });
+                    continue;
+                }
                 if (b < 2 || rng.NextDouble() < 0.2) rh.Bars.Add(new() { tri });
                 else
                 {
@@ -429,6 +489,8 @@ static class Gen
     public static bool KneeBeams;
     // OmrGen --handover: the same with a melody stems up, and bars the left hand starts and the right hand ends
     public static bool HandOver;
+    // OmrGen --flip: the right hand's line of triplets with its stems turning in mid bar (Op.27-2's bars 37, 40 and 42)
+    public static bool FlipLine;
 
     // OmrGen --texts: a tempo marking and words of expression in lied
     public static bool Texts;

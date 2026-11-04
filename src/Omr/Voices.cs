@@ -87,7 +87,7 @@ static class Voices
     /// them on a staff is part of that picture (the bar's rest the engraver stopped printing).
     /// </summary>
     /// <returns>the voices that open such a line, and every voice of such a bar not to be measured against the bar alone</returns>
-    public static (List<List<Ev>> Leaders, HashSet<List<Ev>> Whole) HandedOver(List<List<List<Ev>>> staves, int barTicks)
+    public static (List<List<Ev>> Leaders, HashSet<List<Ev>> Whole, Dictionary<Ev, int> Times) HandedOver(List<List<List<Ev>>> staves, int barTicks)
     {
         var leaders = new List<List<Ev>>();
         var whole = new HashSet<List<Ev>>(ReferenceEqualityComparer.Instance);
@@ -107,7 +107,66 @@ static class Voices
             }
         foreach (var vs in staves.Where(vs => vs.Any(whole.Contains)))
             foreach (var v in vs.Where(v => v.Count > 0 && v.All(e => e.IsRest))) whole.Add(v);
-        return (leaders, whole);
+        var times = new Dictionary<Ev, int>(ReferenceEqualityComparer.Instance);
+        foreach (var vs in staves)
+            if (TurningLine(vs, barTicks) is { } line)
+            {
+                foreach (var (e, t) in line) times[e] = t;
+                whole.UnionWith(vs);
+            }
+        return (leaders, whole, times);
+    }
+
+    /// <summary>
+    /// One line split by its stems: the voices of a staff, one at least short of the bar, whose beamed groups of one
+    /// value, from more than one voice and none under another, add up to the bar (Op.27-2's bars 37, 40 and 42, the
+    /// triplets' stems turning with the notes, or a clef, beside a note or a melody of their own). Stems made them
+    /// voices; the bar's length says each voice rests while the other has the line. The line's notes have their time
+    /// from it; the voices' other notes from a line note in their column, or after the voice's last. A voice's first
+    /// note with neither takes the nearest line note's: a head beside the one it shares a column with (bar 40's whole).
+    /// </summary>
+    /// <returns>every event's time in the bar, or null: no such line</returns>
+    static Dictionary<Ev, int> TurningLine(List<List<Ev>> voices, int barTicks)
+    {
+        var real = voices.Where(v => v.Count > 0).ToList();
+        if (real.Count < 2 || !real.Any(v => v.Sum(e => e.Ticks) < barTicks) || real.Any(v => v.Sum(e => e.Ticks) > barTicks)) return null;
+        var groups = real.SelectMany(v => v.Where(e => !e.IsRest && e.Beam != 0).GroupBy(e => e.Beam).Select(g => (Voice: v, Evs: g.ToList()))).ToList();
+        foreach (var kind in groups.Where(g => g.Evs.All(e => e.Ticks == g.Evs[0].Ticks && e.Scale == g.Evs[0].Scale)).GroupBy(g => (g.Evs[0].Ticks, g.Evs[0].Scale)))
+        {
+            var run = kind.Where(g => g.Evs.All(e => e.Ticks == kind.Key.Ticks && e.Scale == kind.Key.Scale)).OrderBy(g => g.Evs[0].X).ToList();
+            if (run.Sum(g => g.Evs.Count) * kind.Key.Ticks != barTicks || run.Select(g => g.Voice).Distinct().Count() < 2) continue;
+            // (none under another: two voices' triplets at once are two lines, whatever they add up to)
+            if (run.Zip(run.Skip(1)).Any(p => p.First.Evs[^1].X >= p.Second.Evs[0].X)) continue;
+            var line = run.SelectMany(g => g.Evs).OrderBy(e => e.X).ToList();
+            double near = line.Zip(line.Skip(1)).Min(p => p.Second.X - p.First.X) / 2;
+            var times = new Dictionary<Ev, int>(ReferenceEqualityComparer.Instance);
+            for (int i = 0; i < line.Count; i++) times[line[i]] = i * kind.Key.Ticks;
+            bool fits = true;
+            foreach (var v in real)
+            {
+                int end = 0;
+                bool started = false;
+                foreach (var e in v)
+                {
+                    if (!times.TryGetValue(e, out int t))
+                    {
+                        var column = line.FirstOrDefault(n => Math.Abs(n.X - e.X) <= near);
+                        // (a voice's note its last one's length still covers has that length's time: a melody's sixteenth after a
+                        // dotted eighth, over a triplet's third note and an inch from it)
+                        if (column != null && times[column] >= end) t = times[column];
+                        else if (started) t = end;
+                        else t = times[line.MinBy(n => Math.Abs(n.X - e.X))];
+                        times[e] = t;
+                    }
+                    if (t < end) { fits = false; break; }
+                    end = t + e.Ticks;
+                    started = true;
+                }
+                if (!fits || end > barTicks) { fits = false; break; }
+            }
+            if (fits) return times;
+        }
+        return null;
     }
 
     // A rest at a note's x, off its head on the side away from its stem: the two sound at once, so they

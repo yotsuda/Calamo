@@ -955,7 +955,9 @@ static partial class Symbols
         return deal;
     }
 
-    /// <summary>A dark run longer than two spaces through the rows just above and below the head.</summary>
+    /// <summary>A dark run longer than two spaces and of a beam's thickness through the rows just above and below
+    /// the head. (A ledger line is one of that length but thin: the lower of a whole note's two ledger lines on a
+    /// scan, Op.27-2's low G sharp and B, dropped in six bars.)</summary>
     static bool BeamAround(Img ink, Head h, double s)
     {
         foreach (double dy in new[] { -0.5 * s, 0.5 * s })
@@ -963,9 +965,20 @@ static partial class Symbols
             int y = (int)(h.Y + dy), x = (int)h.X;
             if (!ink[x, y]) continue;
             int a = x, b = x;
+            // (a ledger line stands outside the staff only: there a thin run is one)
+            bool ledger = Math.Abs(h.Pos) >= 5;
             while (ink[a - 1, y] && x - a < 3 * s) a--;
             while (ink[b + 1, y] && b - x < 3 * s) b++;
-            if (b - a > 2.4 * s) return true;
+            if (b - a <= 2.4 * s) continue;
+            // (beside the head, where the ink is the run's alone)
+            int cx = b - x >= x - a ? (b + x) / 2 + (int)(0.5 * s) : (a + x) / 2 - (int)(0.5 * s);
+            cx = Math.Clamp(cx, a, b);
+            int up = y, down = y;
+            while (up > 0 && ink[cx, up - 1] && y - up < s) up--;
+            while (down < ink.H - 1 && ink[cx, down + 1] && down - y < s) down++;
+            if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 2 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
+                Console.WriteLine($"beam around {h.X:F0},{h.Y:F0}: dy {dy / s:F2} run {(b - a) / s:F2} thick {(down - up + 1) / s:F2} s {s:F1}");
+            if (!ledger || down - up + 1 >= 0.45 * s) return true;
         }
         return false;
     }
