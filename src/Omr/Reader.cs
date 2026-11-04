@@ -615,6 +615,7 @@ static class Reader
             sym.Unprinted.Remove((b, p));
             RestsBeforeSixteenths(ms.Evs[p], ms.Single[p], ms.BarTicks);
             if (UnprintedTriplets(ms.Evs[p], ms.Single[p], ms.BarTicks, time) is { } changed) sym.Unprinted[(b, p)] = (st, changed);
+            else MixedThrees(ms.Evs[p], ms.Single[p], ms.BarTicks, time);
         }
         return ms;
     }
@@ -1088,6 +1089,41 @@ static class Reader
             }
         }
         return changed;
+    }
+
+    /// <summary>
+    /// A triplet of unlike values with no number, beside a printed one in the bar: kinkel19-1's bar 8,
+    /// "tuplet { f'8 e'8 d'8 } e'8 bes'8. e'16", the second group a pair on a beam and a flagged note.
+    /// One line a third of a triplet too long, and only one run of notes on a beat that makes three
+    /// eighths: no beam cut by it, and not a beam's or flags' equal notes (<see cref="UnprintedTriplets"/>'s).
+    /// </summary>
+    static void MixedThrees(List<Ev> evs, List<Ev> single, int barTicks, string time)
+    {
+        int den = int.Parse(time.Split('/')[1]), beat = Dur.Whole / den, third = Dur.Of(8, 0);
+        if (NoUnprinted || den != 4 || barTicks <= 0 || evs.Count < 3 || !OneLine(evs)) return;
+        if (evs.Sum(e => e.Ticks) != barTicks + third || evs.All(e => e.Scale == (1, 1))) return;
+        var line = evs.OrderBy(e => e.X).ToList();
+        var runs = new List<List<Ev>>();
+        int at = 0;
+        for (int i = 0; i < line.Count; at += line[i].Ticks, i++)
+        {
+            if (at % beat != 0) continue;
+            var run = new List<Ev>();
+            for (int j = i; j < line.Count && line[j].Scale == (1, 1) && !line[j].FullBar && run.Sum(e => e.Ticks) < 3 * third; j++) run.Add(line[j]);
+            if (run.Count < 2 || run.Sum(e => e.Ticks) != 3 * third || run.All(e => e.IsRest)) continue;
+            if (run.Any(e => e.Beam != 0 && line.Any(o => o.Beam == e.Beam && o.Stem == e.Stem && !run.Contains(o)))) continue;
+            if (run.Select(e => e.Ticks).Distinct().Count() == 1 && run.Select(e => e.Beam).Distinct().Count() == 1) continue;
+            runs.Add(run);
+        }
+        if (runs.Count != 1) return;
+        var mine = runs[0];
+        int id = -1_500_000_000 - (int)mine[0].X;
+        foreach (var e in mine.Concat(single.Where(e => mine.Contains(line.MinBy(o => Math.Abs(o.X - e.X)))).ToList()))
+        {
+            e.Ticks = e.Ticks * 2 / 3;
+            e.Scale = (2, 3);
+            e.Tuplet = id;
+        }
     }
 
     /// <summary>

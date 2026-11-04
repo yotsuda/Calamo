@@ -120,6 +120,8 @@ static class Program
                 // (--tuplets: which kind a tuplet group is, from a stream of its own likewise: the
                 // same seed writes the same music, its triplets turned into the other kinds)
                 Gen.TupletRng = tuplets ? new Random(seed * 7919 + n * 104729 + suiteKey + 7) : null;
+                // (--mixthrees: triplets of unlike values, some with no number after a numbered one)
+                Gen.MixRng = opt.ContainsKey("mixthrees") ? new Random(seed * 7919 + n * 104729 + suiteKey + 22) : null;
                 // (--figures: which runs open on a rest, likewise)
                 Gen.FigureRng = figures ? new Random(seed * 7919 + n * 104729 + suiteKey + 16) : null;
                 // (the band suite has its own parts and writer: B3)
@@ -500,7 +502,7 @@ static class Writer
             // one tuplet group: N of the written value (or its equivalent); the next group of the
             // same kind starts its own
             int n = evs[i].TupletN, dd = evs[i].TupletD;
-            int group = evs[i].Ticks * n;
+            int group = Gen.MixRng != null && n == 3 ? 720 : evs[i].Ticks * n;
             string bare = evs[i].Bare ? "bare " : "";
             while (i < evs.Count && evs[i].TupletN == n && evs[i].TupletD == dd && sum < group) { run.Add(Ev(evs[i])); sum += evs[i].Ticks; i++; }
             parts.Add($"tuplet {n}/{dd} {bare}{{ " + string.Join(" ", run) + " }");

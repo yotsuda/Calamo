@@ -1294,10 +1294,19 @@ static class Gen
         var evs = new List<GEv>();
         var rhythm = Rhythm(p, rng, triplets);
         var figure = Figures(rhythm);
+        int mixAt = 0;
+        bool numbered = false, bare = false;
         for (int i = 0; i < rhythm.Count; i++)
         {
             var (ticks, tn, td) = rhythm[i];
             var e = new GEv { Ticks = ticks, TupletN = tn, TupletD = td };
+            if (MixRng != null && tn == 3)
+            {
+                // (a group with no number only after a numbered one in the bar: kinkel19-1's bar 8)
+                if (mixAt % 720 == 0) { bare = numbered && MixRng.NextDouble() < 0.5; numbered |= !bare; }
+                e.Bare = bare;
+                mixAt += ticks;
+            }
             // (the rest drawn whether used or not: the draws stay in step)
             bool rest = tn == 0 && rng.NextDouble() < restP;
             if (figure[i] != 0 ? figure[i] < 0 : rest) { evs.Add(e); continue; }
@@ -1357,6 +1366,8 @@ static class Gen
 
     // OmrGen --tuplets: the stream that picks a tuplet group's kind (null: triplets only)
     public static Random TupletRng;
+    // OmrGen --mixthrees: the stream that picks triplets of unlike values, and which groups after a numbered one go bare
+    public static Random MixRng;
 
     /// <summary>Values that fill one bar, beat by beat, in patterns natural to the meter. A tuplet's
     /// values carry the group's ratio N:D (0:0 for none).</summary>
@@ -1384,6 +1395,13 @@ static class Gen
                 var two = rng.NextDouble() < 0.6 ? new[] { 960 } : new[] { 720, 240 };
                 foreach (var t in two) outp.Add((t, 0, 0));
                 b += 2;
+                continue;
+            }
+            if (MixRng != null && den == 4 && !compound && MixRng.NextDouble() < 0.2)
+            {
+                int[][] mixed = { new[] { 240, 480 }, new[] { 480, 240 }, new[] { 360, 120, 240 }, new[] { 240, 360, 120 }, new[] { 120, 120, 240, 240 }, new[] { 240, 240, 240 } };
+                foreach (var t in mixed[MixRng.Next(mixed.Length)]) outp.Add((t, 3, 2));
+                b++;
                 continue;
             }
             if (!compound && den == 4 && rng.NextDouble() < triplets)

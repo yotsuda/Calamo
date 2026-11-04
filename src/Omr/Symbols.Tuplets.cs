@@ -184,20 +184,26 @@ static partial class Symbols
             var (left, right) = BracketHalves(ps, d, o, s);
             double x0, x1;
             bool? up = null;    // a number by a beam group: its voice's stems (another voice under it keeps its time)
-            if (left != null && right != null)
+            // (one half, long and hooked, the other run into a mark: the number stands at the bracket's middle.
+            // kinkel10-1's bar 6, the left hook on the accent under it, the number too far over the heads for a group)
+            var lone = left ?? right;
+            bool oneHalf = (left == null) != (right == null) && lone.C.W >= 2 * s && lone.C.H >= 0.5 * s;
+            if (left != null && right != null || oneHalf)
             {
                 // (a hook stands at a note's edge -- the first's left or its stem, the last's right, or, as
                 // MuseScore sets it, the last head's left edge, Bohemian Rhapsody's bar 124 with its g''8's
                 // centre 0.3 space past the hook: a head whose centre is within four fifths of a space of a
                 // hook, a head's width, is under the bracket)
-                x0 = left.C.MinX - 0.8 * s; x1 = right.C.MaxX + 0.8 * s;
+                double reach = oneHalf ? (left != null ? c.Cx - left.C.MinX : right.C.MaxX - c.Cx) : 0;
+                x0 = (oneHalf ? c.Cx - reach : left.C.MinX) - 0.8 * s; x1 = (oneHalf ? c.Cx + reach : right.C.MaxX) + 0.8 * s;
                 // a bracket over nothing near it (a metronome mark's tuplet) spans no notes here
                 double lo = x0, hi = x1;
                 // (a bracket may sit on the heads' side or the stems', or just off the staff)
                 bool near = Math.Abs(pos) <= 11 || ps.Heads.Any(hd => hd.St == o.St && hd.X > lo && hd.X < hi
                     && Math.Min(Math.Abs(hd.Y - c.Cy), hd.HasStem ? Math.Abs(hd.Tip - c.Cy) : double.MaxValue) < 2.5 * s);
                 if (!near) { o.Class = "?"; continue; }
-                left.Class = right.Class = "bracket";
+                if (left != null) left.Class = "bracket";
+                if (right != null) right.Class = "bracket";
             }
             else
             {
