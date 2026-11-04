@@ -76,7 +76,9 @@ static class Program
         Writer.Beams3 = opt.ContainsKey("beams3");
         // --cross: the threes suite's left hand climbing to the right hand's staff in mid group (@cross)
         // --knee: the same with the climbing heads over the beam, a kneed beam between the staves
-        Gen.KneeBeams = opt.ContainsKey("knee");
+        // --handover: the same with a melody stems up over them, and bars the left hand starts and the right hand ends
+        Gen.HandOver = opt.ContainsKey("handover");
+        Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
         bool figures = opt.ContainsKey("figures");
@@ -188,6 +190,7 @@ sealed class GEv
     public int TupletN, TupletD;           // part of an N:D group (3:2 a triplet; 5:4, 6:4, 7:4 with --tuplets); 0: none
     public bool Triplet => TupletN > 0;    // in a tuplet group of any kind
     public bool Bare;                      // a tuplet group's, written bare: no number or bracket printed
+    public bool Space;                     // a spacer rest: takes time, prints nothing, no truth
     public bool Tie;                     // held into the next event (same pitches)
     public bool Measure;                   // a full-measure rest (R)
     public bool SlurStart, SlurEnd;        // a slur starts at it / ends at it
@@ -434,6 +437,7 @@ static class Writer
                     double t = start;
                     foreach (var e in part.Bars[b][v])
                     {
+                        if (e.Space) { t += e.Sounding; continue; }
                         string at = (t / 1920.0).ToString("F8", CultureInfo.InvariantCulture);
                         string len = (e.Sounding / 1920.0).ToString("F8", CultureInfo.InvariantCulture);
                         if (e.IsRest) sb.Append(at).Append("\trest\t").Append(TryDur(e.Ticks) ?? $"1*{e.Ticks}/1920").Append('\t').Append(len).Append('\n');
@@ -503,7 +507,7 @@ static class Writer
     }
 
     internal static string Ev(GEv e) => e.Grace +
-        (e.IsRest ? (e.Measure ? "R" : "r") : e.Pitches.Count == 1 ? e.Pitches[0].Lys() : "<" + string.Join(" ", e.Pitches.Select(q => q.Lys())) + ">") + DurText(e.Ticks) + e.Marks + (e.Tie ? "~" : "")
+        (e.Space ? "s" : e.IsRest ? (e.Measure ? "R" : "r") : e.Pitches.Count == 1 ? e.Pitches[0].Lys() : "<" + string.Join(" ", e.Pitches.Select(q => q.Lys())) + ">") + DurText(e.Ticks) + e.Marks + (e.Tie ? "~" : "")
         + (e.SlurEnd ? ")" : "") + (e.SlurStart ? "(" : "");
 
     public static string DurText(int ticks)

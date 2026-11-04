@@ -323,7 +323,8 @@ static partial class Symbols
             ps.Tuplets.Add(o);
             // (a grace note's scale is no matter -- it takes no time -- but a cue's small notes play theirs)
             foreach (var hd in ps.Heads.Concat(ps.Graces))
-                if (hd.St == o.St && hd.X > x0 && hd.X < x1 && (up == null || !hd.HasStem || hd.Up == up)) { hd.Scale = (num, den); hd.Tuplet = tupletId; }
+                // (not a whole note under a group of stems, another voice's at the group's first column: Op.27-2's bars 32 and 33)
+                if (hd.St == o.St && hd.X > x0 && hd.X < x1 && (up == null || !hd.HasStem && !hd.WholeShape || hd.Up == up && hd.HasStem)) { hd.Scale = (num, den); hd.Tuplet = tupletId; }
             // (and a rest of its voice: where the other voice's stems stand in the span too, the rests
             // on that voice's side of the staff are its -- the upper voice's 16th rest over a lower
             // voice's triplet, voices2003)

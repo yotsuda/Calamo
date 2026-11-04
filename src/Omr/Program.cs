@@ -755,15 +755,18 @@ for (int si = 0; si < sections.Count; si++)
             double offBy = 0;   // (by how much of the bar its worst voice is off: the check's confidence)
             bool overfull;      // a bar the events cannot fill as written (the redraw check flags it whatever the drawings show)
             var marks = new List<(Ev Ev, int At)>();
+            // (a line one hand starts and the other ends: each voice of it short of the bar, by design)
+            var handed = Handed(bar, barTicks).Whole;
             if (voices.Count == 1)
             {
                 int sum = voices[0].Sum(e => e.Ticks);
+                bool wait = shortBar && sum < barTicks || handed.Contains(voices[0]);
                 // (the comment on the bar's own line: it says what, not which bar, as the @todo memos do)
                 // (a staff short of the pickup or the last bar: spacer rests where the page shows the others' notes)
-                if (sum == barTicks || shortBar && sum < barTicks) valid++; else note = $"  // {Memo.BarLength(new[] { sum }, barTicks, state.BarTime[bar])}";
+                if (sum == barTicks || wait) valid++; else note = $"  // {Memo.BarLength(new[] { sum }, barTicks, state.BarTime[bar])}";
                 overfull = note != "";
                 offBy = overfull ? Math.Abs(sum - barTicks) / (double)barTicks : 0;
-                music = shortBar && sum < barTicks ? LineText(voices[0], barTicks, pad: true, Anchors(bar, barTicks), marks) : LineText(voices[0], barTicks, pad: false, marks: marks);
+                music = wait ? LineText(voices[0], barTicks, pad: true, Anchors(bar, barTicks), marks) : LineText(voices[0], barTicks, pad: false, marks: marks);
             }
             else
             {
@@ -771,8 +774,8 @@ for (int si = 0; si < sections.Count; si++)
                 // (a voice that enters late is short by design, beside a full one: a voice over the bar's
                 // length, or no voice filling it, is wrong for sure)
                 var sums = voices.Select(v => v.Sum(e => e.Ticks)).ToList();
-                if (sums.All(x => x == barTicks || shortBar && x < barTicks)) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar])}";
-                overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks);
+                if (voices.All(v => v.Sum(e => e.Ticks) is var x && (x == barTicks || shortBar && x < barTicks || handed.Contains(v)))) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar])}";
+                overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks) && !voices.Any(handed.Contains);
                 offBy = sums.Max(x => Math.Abs(x - barTicks)) / (double)barTicks;
                 music = "voice";
                 foreach (var v in voices)
@@ -1164,9 +1167,22 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
             int t = 0;
             foreach (var e in v) { list.Add((e.X, t)); t += e.Ticks; }
         }
+    // (and the voice that opens a line the other hand ends: from its start, and at the first note after it its whole
+    // length, the time there being no matter of x: Op.27-2's bar 5, "s4 s16" by the distance to the rest beyond)
+    var (leaders, whole) = Handed(bar, barTicks);
+    foreach (var v in leaders)
+    {
+        int t = 0;
+        foreach (var e in v) { list.Add((e.X, t)); t += e.Ticks; }
+        double next = whole.Where(w => !leaders.Contains(w)).SelectMany(w => w).Where(e => !e.IsRest && e.X > v[^1].X).Select(e => e.X).DefaultIfEmpty(v[^1].X + 9).Min();
+        list.Add((next, t));
+    }
     list.Sort((a, b) => a.Item1.CompareTo(b.Item1));
     return list;
 }
+
+(List<List<Ev>> Leaders, HashSet<List<Ev>> Whole) Handed(int bar, int barTicks) =>
+    Voices.HandedOver(Enumerable.Range(0, cfg.Parts.Count).Select(pi => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).ToList(), barTicks);
 
 static string F(double v) => v.ToString("F1", CultureInfo.InvariantCulture);
 

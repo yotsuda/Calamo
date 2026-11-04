@@ -358,7 +358,14 @@ static class Gen
                 // (--knee: the bar's rest, or a whole note high over the heads that climb: a stem down from a
                 // melody over them would run through the group, which no engraver prints. Op.27-2 writes its melody
                 // there stems up, a second voice on the staff, which @cross notes from another part do not make)
-                if (KneeBeams)
+                // (--handover: Op.27-2's own, the melody forced stems up, over the climbing heads and clear of the group)
+                if (HandOver)
+                {
+                    var melody = Melody(b, 36, 42);
+                    foreach (var e in melody) if (!e.IsRest) e.Marks += "@stemUp";
+                    rh.Bars.Add(new() { melody });
+                }
+                else if (KneeBeams)
                 {
                     var bar = new GEv { Ticks = p.BarTicks };
                     if (Representable(p.BarTicks) && rng.NextDouble() < 0.3) bar.Pitches.Add(At(38 + rng.Next(5)));
@@ -386,6 +393,26 @@ static class Gen
                             }
                         }
                     }
+                // (--handover: now and then the left hand's groups stop after a beat or more, and the right hand's
+                // lower voice takes the triplets on under a melody that enters with it: Op.27-2's bars 23 and 30)
+                if (HandOver && beats > 1 && rng.NextDouble() < 0.5)
+                {
+                    int k = rng.Next(1, beats);
+                    left = left.Take(k * 3 * (beat / (2 * value))).ToList();
+                    left.Add(new GEv { Ticks = (beats - k) * beat, Space = true });
+                    var on = Triplets(b, 29).Skip(k * 3 * (beat / (2 * value))).ToList();
+                    foreach (var e in on) e.Bare = true;
+                    on.Insert(0, new GEv { Ticks = k * beat, Space = true });
+                    var over = new List<GEv> { new() { Ticks = k * beat, Space = true } };
+                    for (int j = k; j < beats; j++)
+                    {
+                        cur = Math.Clamp(cur + rng.Next(-2, 3), 36, 42);
+                        var e = new GEv { Ticks = beat, Marks = "@stemUp" };
+                        e.Pitches.Add(At(cur));
+                        over.Add(e);
+                    }
+                    rh.Bars[^1] = new() { over, on };
+                }
                 // (--knee: one voice, a second forces the stems its way and no beam knees, in LilyPond as in lysc)
                 lh.Bars.Add(low < 0.5 && !KneeBeams ? new() { left, BassBeats(b) } : new() { left });
             }
@@ -400,6 +427,8 @@ static class Gen
     public static bool CrossStaff;
     // OmrGen --knee: the same with the climbing heads over the beam, a kneed beam between the staves
     public static bool KneeBeams;
+    // OmrGen --handover: the same with a melody stems up, and bars the left hand starts and the right hand ends
+    public static bool HandOver;
 
     // OmrGen --texts: a tempo marking and words of expression in lied
     public static bool Texts;

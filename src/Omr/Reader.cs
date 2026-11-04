@@ -324,7 +324,8 @@ static class Reader
                 var both = Enumerable.Range(0, cfg.Parts.Count).Where(p => !Hidden(tail.Evs[p]) && head.Evs[p].Count > 0).ToList();
                 bool split = head.BarTicks == tail.BarTicks && both.Count > 0
                              && both.All(p => tail.Evs[p].Sum(e => e.Ticks) < tail.BarTicks && head.Evs[p].Sum(e => e.Ticks) < head.BarTicks)
-                             && both.Any(p => Fills(tail.Evs[p].Concat(head.Evs[p]).ToList(), tail.BarTicks));
+                             && both.Any(p => Fills(tail.Evs[p].Concat(head.Evs[p]).ToList(), tail.BarTicks))
+                             && !HandsOver(tail) && !HandsOver(head);
                 static bool Hidden(List<Ev> evs) => evs.Count == 0 || evs.Count == 1 && evs[0].Blank;
                 if (split)
                 {
@@ -413,7 +414,7 @@ static class Reader
             // not overflow: then the overflow says nothing -- the rules alone on a colour scan)
             // (the second half of a bar split at a closed break, short by design, puts no doubt on the count)
             int weighed = 0;
-            void Weigh(Measure ms) { doubt |= Unfilled(ms) && !(splitHead && weighed == 0); weighed++; over = Short(ms) ? null : over + Overflow(ms); }
+            void Weigh(Measure ms) { doubt |= Unfilled(ms) && !HandsOver(ms) && !(splitHead && weighed == 0); weighed++; over = Short(ms) ? null : over + Overflow(ms); }
             // the fret numbers on the system's TABs check their parts' pitches (B5)
             var tabs = NoTab ? new() : Tab.Read(sys, sym.Detections, weakTabs, s, p => cfg.Parts[p].Clef);
             void CheckTab(Measure ms, int m, int b)
@@ -1199,6 +1200,42 @@ static class Reader
                 res.Voices[(b, p)] = Voices.Separate(played.Evs, barTicks, st.Mid, st.S);
                 res.Notes.Add($"page {res.Page}: bar {b} part {p}: read in threes as the part's other bars, a note of a triplet unseen");
             }
+        HandedThrees(res, state);
+    }
+
+    /// <summary>
+    /// A line of triplets one hand starts and the other ends, in music that runs in threes, no number over it
+    /// and nothing to join the two on the page (the groups do not cross): each hand is short of the bar, or
+    /// long, as plain notes, and neither hand alone says more. As triplets the two make the bar together
+    /// (<see cref="Voices.HandedOver"/>), and that decides. The bar's length, no threshold.
+    /// </summary>
+    static void HandedThrees(PageResult res, ReaderState state)
+    {
+        foreach (var b in res.Voices.Keys.Select(k => k.Bar).Distinct().ToList())
+        {
+            var sys = res.Systems.FirstOrDefault(x => x.Measures > 0 && b >= x.FirstBar && b < x.BarOf(x.Measures));
+            if (sys == null || !state.BarTime.TryGetValue(b, out var time)) continue;
+            int barTicks = Dur.OfTime(time);
+            foreach (var p in res.Voices.Keys.Where(k => k.Bar == b).Select(k => k.Part).Order().ToList())
+            {
+                int q = p + 1;
+                if (!state.InThrees.Contains(p) && !state.InThrees.Contains(q)) continue;
+                if (!res.Voices.ContainsKey((b, q)) || !state.Played.TryGetValue((b, p), out var up) || !state.Played.TryGetValue((b, q), out var down)) continue;
+                if (sys.Staves.FirstOrDefault(x => x.Part == p) is not { } sp || sys.Staves.FirstOrDefault(x => x.Part == q) is not { } sq) continue;
+                if (res.Voices[(b, p)].Concat(res.Voices[(b, q)]).All(v => v.Sum(e => e.Ticks) == barTicks)) continue;
+                var trial = new[] { up.Evs.Select(e => e.Copy()).ToList(), down.Evs.Select(e => e.Copy()).ToList() };
+                ThreesBesideKnee(trial, 0, 1, barTicks);
+                var voices = new List<List<List<Ev>>> { Voices.Separate(trial[0], barTicks, sp.Mid, sp.S), Voices.Separate(trial[1], barTicks, sq.Mid, sq.S) };
+                var whole = Voices.HandedOver(voices, barTicks).Whole;
+                if (whole.Count == 0 || !voices.SelectMany(vs => vs).All(v => v.Sum(e => e.Ticks) == barTicks || whole.Contains(v))) continue;
+                var (evs, singles) = (new[] { up.Evs, down.Evs }, new[] { up.Single, down.Single });
+                ThreesBesideKnee(evs, 0, 1, barTicks);
+                ThreesBesideKnee(singles, 0, 1, barTicks);
+                res.Voices[(b, p)] = Voices.Separate(up.Evs, barTicks, sp.Mid, sp.S);
+                res.Voices[(b, q)] = Voices.Separate(down.Evs, barTicks, sq.Mid, sq.S);
+                res.Notes.Add($"page {res.Page}: bar {b} parts {p} and {q}: triplets one hand starts and the other ends");
+            }
+        }
     }
 
     sealed record GraceMark(Head Head);
@@ -1993,6 +2030,25 @@ static class Reader
             }
         }
         return true;
+    }
+
+    /// <summary>
+    /// Each staff short because one hand ends the line the other starts, all the notes of the one before the
+    /// other's: the measure is whole in itself, no sign of a lost note, a split bar or a count gone astray.
+    /// (Two in a row looked split at the system break, and every bar after was one on; a 15 misread as a 13
+    /// on a scan was believed after one, the count being in doubt)
+    /// </summary>
+    static bool HandsOver(Measure m)
+    {
+        var notes = m.Evs.Select(evs => evs.Where(e => !e.IsRest).ToList()).Where(n => n.Count > 0).ToList();
+        // (two hands alone with notes in the measure: a band's bars run together on a page photographed askew pair up too, band002)
+        if (notes.Count != 2) return false;
+        // (a line's length as read, or with its beamed notes triplets: those with no number are not yet read so here)
+        static int[] Lengths(IEnumerable<Ev> v) => new[] { v.Sum(e => e.Ticks), v.Sum(e => e.Beam != 0 && e.Scale == (1, 1) ? e.Ticks * 2 / 3 : e.Ticks) };
+        // (the first hand's a running figure, three beamed notes at least: kinkel7-1's bar split at its repeat, "a8 r8 r8 r8 :|", is no such
+        // line. And the two hands' lines make the bar: a page photographed askew, a barline missed, reads as staves one after the other too, band002)
+        return notes.Any(a => a.Count(e => e.Beam != 0) >= 3 && notes.Any(b => a != b && a.Where(e => e.Beam != 0).Max(e => e.X) < b.Min(e => e.X)
+            && Lengths(a).Any(la => b.GroupBy(e => e.Stem).Any(g => Lengths(g).Contains(m.BarTicks - la)))));
     }
 
     /// <summary>A measure with a staff that has something on it and does not fill the time.</summary>

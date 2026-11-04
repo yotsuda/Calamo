@@ -187,6 +187,14 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genKn -Reuse -OmrArgs $omrArgs | Out-
 $genKnS = "$root\out\gen-knee-scan"
 if ($Fresh -or -not (Test-Path "$genKnS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genKnS -Suite threes -Count 10 -Seed 7 -GenArgs @('--knee') -Degrade -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genKnS -Reuse -OmrArgs $omrArgs | Out-Null }
+# the same with a melody stems up over them, and bars the left hand starts and the right hand ends (OmrGen --handover;
+# Op.27-2's bars 23 and 30, Voices.HandedOver), and as printed and scanned
+$genHd = "$root\out\gen-hand"
+if ($Fresh -or -not (Test-Path "$genHd\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genHd -Suite threes -Count 10 -Seed 7 -GenArgs @('--handover') -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genHd -Reuse -OmrArgs $omrArgs | Out-Null }
+$genHdS = "$root\out\gen-hand-scan"
+if ($Fresh -or -not (Test-Path "$genHdS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genHdS -Suite threes -Count 10 -Seed 7 -GenArgs @('--handover') -Degrade -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genHdS -Reuse -OmrArgs $omrArgs | Out-Null }
 # pages photographed off square (OmrDegrade --keystone, --shear, --bend), which Lean stands up and Bow levels so that the truth
 # fits. A corner moved 2 percent of the width, more than the Nutcracker's photo (0.8), for a grand staff's barlines to part as a
 # score's twenty staves do: Lean acts only then (without it, on piano, 34 barlines off and 594 heads, with it 10 and 273).
@@ -216,7 +224,7 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genY; Tag = 'genY'; Sym = 'symY' }, @{ Dir = $genYS; Tag = 'genYS'; Sym = 'symYS' },
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
-           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
+           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it

@@ -39,6 +39,9 @@ static class Voices
                     // a rest above the middle line belongs up, one below belongs down
                     bool high = free[i].Y < staffMid;
                     if (toA != high) lean += 0.1;
+                    // (a rest in a note's column is not that note's voice: Op.27-2's bar 23, the melody's quarter rest over
+                    // the first note of the triplets. As the time would have it either way, this decides)
+                    if (Clash(free[i], toA ? a : b, s)) lean += 1;
                 }
                 double cost = Math.Abs(ta - barTicks) + Math.Abs(tb - barTicks) + lean * Dur.Whole / 64;
                 if (cost < bestCost) { bestCost = cost; bestMask = mask; }
@@ -63,18 +66,58 @@ static class Voices
                                || v.Any(o => o != e && o.Beam == e.Beam && !o.IsRest && Math.Abs(o.X - e.X) < (s > 0 ? 0.5 * s : 8) && o.Ticks < e.Ticks);
             var lone = v.Where(e => !e.IsRest && Lone(e)).ToList();
             var beamed = v.Where(e => !e.IsRest && !Lone(e)).ToList();
-            if (v.Sum(e => e.Ticks) > barTicks && lone.Count > 0 && beamed.Count == v.Count - lone.Count
-                && lone.Sum(e => e.Ticks) == barTicks && beamed.Sum(e => e.Ticks) == barTicks)
+            // (or a beamed group short of the bar, the other hand ending or starting its line: Op.27-2's bar 12, the
+            // left hand's last triplet over its chords, every stem up)
+            if (v.Sum(e => e.Ticks) > barTicks && lone.Count > 0 && beamed.Count > 0 && beamed.Count == v.Count - lone.Count
+                && lone.Sum(e => e.Ticks) == barTicks && beamed.Sum(e => e.Ticks) <= barTicks)
                 voices.AddRange(new[] { beamed, lone }.OrderBy(w => w.Average(e => e.Y)));
             else voices.Add(v);
         }
         return voices.Where(v => v.Count > 0).ToList();
     }
 
+    static bool Clash(Ev r, List<Ev> voice, double s) =>
+        s > 0 && r.IsRest && !r.FullBar && voice.Any(n => !n.IsRest && Math.Abs(n.X - r.X) <= 0.6 * s);
+
+    /// <summary>
+    /// A line a hand starts and the other hand ends: a voice short of the bar, and voices on another staff
+    /// short by just its length, all of them after its last note (Op.27-2's bars 23, 30, 32 and 33, the
+    /// triplets climbing from the left hand's staff and running on in the right hand's). The first
+    /// tells the others' time; the time is whole, so no length is missing. A voice of rests alone beside
+    /// them on a staff is part of that picture (the bar's rest the engraver stopped printing).
+    /// </summary>
+    /// <returns>the voices that open such a line, and every voice of such a bar not to be measured against the bar alone</returns>
+    public static (List<List<Ev>> Leaders, HashSet<List<Ev>> Whole) HandedOver(List<List<List<Ev>>> staves, int barTicks)
+    {
+        var leaders = new List<List<Ev>>();
+        var whole = new HashSet<List<Ev>>(ReferenceEqualityComparer.Instance);
+        bool Short(List<Ev> v) => v.Count > 0 && v.Any(e => !e.IsRest) && v.Sum(e => e.Ticks) < barTicks;
+        for (int p = 0; p < staves.Count; p++)
+            foreach (var a in staves[p].Where(Short))
+            {
+                double end = a.Max(e => e.X);
+                int left = barTicks - a.Sum(e => e.Ticks);
+                // (a neighbouring staff: a hand's)
+                var rest = staves.Where((_, q) => Math.Abs(q - p) == 1).SelectMany(vs => vs)
+                    .Where(v => Short(v) && v.Sum(e => e.Ticks) == left && v.Where(e => !e.IsRest).Min(e => e.X) > end).ToList();
+                if (rest.Count == 0) continue;
+                leaders.Add(a);
+                whole.Add(a);
+                whole.UnionWith(rest);
+            }
+        foreach (var vs in staves.Where(vs => vs.Any(whole.Contains)))
+            foreach (var v in vs.Where(v => v.Count > 0 && v.All(e => e.IsRest))) whole.Add(v);
+        return (leaders, whole);
+    }
+
     // A rest at a note's x, off its head on the side away from its stem: the two sound at once, so they
     // are two voices, though the line they would make is no longer than the bar (a song's pickup, the
     // voice's eighth over the second voice's eighth rest: read as "r8 d8", a quarter -- kinkel19-6)
+    // (and two notes in one column, the upper with its stem up and the lower with its stem down: a melody's quarter
+    // over the first of three eighths, in a bar the two lines fill together by chance -- 2/4's "b''4 tuplet { d' g' b' }")
     static bool Stacked(List<Ev> evs, double s) =>
         s > 0 && evs.Any(r => r.IsRest && !r.FullBar && r.Stem == 0
-                              && evs.Any(n => !n.IsRest && n.Stem != 0 && Math.Abs(n.X - r.X) <= 0.6 * s && (r.Y - n.Y) * n.Stem >= 1.5 * s));
+                              && evs.Any(n => !n.IsRest && n.Stem != 0 && Math.Abs(n.X - r.X) <= 0.6 * s && (r.Y - n.Y) * n.Stem >= 1.5 * s)
+                              || !r.IsRest && r.Stem > 0
+                                 && evs.Any(n => !n.IsRest && n.Stem < 0 && Math.Abs(n.X - r.X) <= 0.6 * s && n.Y > r.Y));
 }
