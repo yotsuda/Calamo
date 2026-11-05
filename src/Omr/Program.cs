@@ -714,6 +714,33 @@ string formLine = Form.Line(sections, formSigns, all.Keys.DefaultIfEmpty(firstBa
         }
     }
 }
+// a slur over notes that have syllables of their own is a phrase mark: a Lily# slur would hold them, and
+// every syllable after would fall a note later, past the bar and undrawn. Written as a phrasing slur, which
+// holds none (lysc import does the same). One whose end was not read (a page's turn hides it) would hold all
+// the notes up to the next slur: it ends before the next syllable, where a melisma must, or, none between, is dropped
+for (int pi = 0; pi < cfg.Parts.Count; pi++)
+{
+    Ev open = null, last = null, before = null;
+    bool sung = false;
+    void Unended()
+    {
+        if (open == null || !sung) return;
+        if (before == open) open.SlurStart = false; else before.SlurEnd = true;
+    }
+    foreach (int bar in all.Keys)
+        foreach (var e in (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() }).SelectMany(v => v).Where(e => !e.FullBar && !e.Slash && !e.IsRest).OrderBy(e => e.X))
+        {
+            if (open != null && !sung && e.Words?.Count > 0) { sung = true; before = last; }
+            if (e.SlurEnd && open != null)
+            {
+                if (sung) { open.PhraseStart = true; e.PhraseEnd = true; }
+                open = null;
+            }
+            if (e.SlurStart) { Unended(); open = e; sung = false; }
+            last = e;
+        }
+    Unended();
+}
 // a song's words, per part and verse: the voices of a bar, the verses it has, and each bar's syllables in
 // the track's order: a note a slur or a tie holds takes none (Lily#'s melisma, LilyPond's), a note under
 // no syllable takes "~" (one note, nothing drawn). The state goes on from one section to the next.
@@ -737,8 +764,8 @@ string LyricBars(int pi, int verse, int from, int to)
             bool has = e.Words?.Any(w => w.Verse == verse) == true;
             // (a syllable on a note the reading holds is still written: the words go on, a note late)
             if (has) said.Add(Lyrics.Lys(word.Value)); else if (!held) said.Add("~");
-            if (e.SlurEnd) slur = false;
-            if (e.SlurStart) slur = true;
+            if (e.SlurEnd && !e.PhraseEnd) slur = false;
+            if (e.SlurStart && !e.PhraseStart) slur = true;
             held = e.Tie || slur;
         }
         while (said.Count > 0 && said[^1] == "~") said.RemoveAt(said.Count - 1);
@@ -1319,7 +1346,8 @@ static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
     + (e.FullBar || e.Slash ? "" : (e.Dynamic != null ? "@" + e.Dynamic : "") + (e.HairpinEnd != null ? "@!" + e.HairpinEnd : "")
         + (e.HairpinStart != null ? "@" + e.HairpinStart : "") + (e.PedalUp ? "@!sustain" : "") + (e.PedalDown ? "@sustain" : ""))
     + (e.OttavaStart != 0 ? "@" + OttavaName(e.OttavaStart) : "") + (e.OttavaEnd != 0 ? "@!" + OttavaName(e.OttavaEnd) : "")
-    + (e.FullBar || e.Slash || e.IsRest ? "" : (e.Tie && !MemberTies(e) ? "~" : "") + (e.SlurEnd ? ")" : "") + (e.SlurStart ? "(" : ""));
+    + (e.FullBar || e.Slash || e.IsRest ? "" : (e.PhraseEnd ? "@!phrasingSlur" : "") + (e.PhraseStart ? "@phrasingSlur" : "")
+        + (e.Tie && !MemberTies(e) ? "~" : "") + (e.SlurEnd && !e.PhraseEnd ? ")" : "") + (e.SlurStart && !e.PhraseStart ? "(" : ""));
 
 // a chord tied at some of its notes, not all: each tied note's own "~" in the chord, <c'' f'' d'''~>8. (Lily#
 // 8a3780d5e, REQUESTS 16); a chord tied at all of them, or a note, takes the one "~" after it

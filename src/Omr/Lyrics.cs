@@ -29,9 +29,11 @@ static class Lyrics
         public int L, R;
         public bool Hyphen;
         public string Text;
-        public List<(int L, int R)> Ink = new();     // its pieces of ink, left to right
+        public List<(int L, int R, int T, int B)> Ink = new();     // its pieces of ink, left to right
+        public List<(int L, int R, int T, int B)> Foreign = new(); // the next or last syllable's, reaching into its box
         public int FirstH;                           // the height of its first letter (0: not known)
         public double Small;                         // the row's small letters' height
+        public Cut Before;                           // the syllable it was parted from (Parted), set against it with no hyphen drawn
         public double Cx => (L + R) / 2.0;
     }
 
@@ -157,7 +159,7 @@ static class Lyrics
                 // (too small to be a letter, away from any: a speck, a dot of the paper's)
                 else if (!letter) continue;
                 else cuts.Add(new Cut { L = x0 + c.MinX, R = x0 + c.MaxX + 1, FirstH = c.H, Small = small });
-                cuts[^1].Ink.Add((x0 + c.MinX, x0 + c.MaxX + 1));
+                cuts[^1].Ink.Add((x0 + c.MinX, x0 + c.MaxX + 1, y0 + c.MinY, y0 + c.MaxY + 1));
             }
             if (cuts.Count > 0 && Slant(res, cuts, y0 + top, y0 + foot) < Texts.MinSlant) rows.Add((y0 + top, y0 + foot, cuts));
         }
@@ -168,56 +170,116 @@ static class Lyrics
     /// <summary>
     /// A cut over the heads of two notes or more may be as many syllables: where the notes stand close
     /// the engraver sets a word's syllables touching, no hyphen drawn, the gap between them no wider than
-    /// between letters ("spran" and "gen", 9 pixels at a space of 56). Each syllable is centred on its
-    /// note, so the first one's right end is as far past its head as its left end is before it, and so on
-    /// to the last, which must come out at the cut's right end: then the cut is parted at the gaps
-    /// nearest those ends. Set so close, they are one word's: a hyphen goes on.
+    /// between letters ("spran" and "gen", 9 pixels at a space of 56). A syllable stands on its note in
+    /// one of two ways: centred on it, or, on a melisma, left-aligned, its left end 0.6 spaces before the
+    /// head ("Knos", "nat"), the notes it holds then taking no syllable. Pushed apart in a tight bar a
+    /// centred one may lie off its head ("Seuf", 0.6 spaces). So the partition is searched, not walked
+    /// from the left: the one where every syllable stands on a note in one of those ways, nearest them.
+    /// Set so close, they are one word's: a hyphen goes on.
     /// </summary>
     static List<Cut> Parted(PageResult res, Staff st, List<Cut> cuts)
     {
         double s = res.S;
-        var xs = res.Sym.Heads.Where(h => h.St == st && !h.Grace).Select(h => h.X).OrderBy(x => x).ToList();
+        // (the staff's heads, and whether a slur or a tie the reader saw holds each: it takes no syllable)
+        var xs = new List<(double X, bool Held)>();
+        bool slur = false, tie = false;
+        foreach (var h in res.Sym.Heads.Where(h => h.St == st && !h.Grace).OrderBy(h => h.X))
+        {
+            xs.Add((h.X, slur || tie));
+            if (h.SlurEnd) slur = false;
+            if (h.SlurStart) slur = true;
+            tie = h.Tie;
+        }
         var parted = new List<Cut>();
         foreach (var c in cuts)
         {
             var within = new List<double>();
-            foreach (double x in xs.Where(x => x > c.L && x < c.R))
-                if (within.Count == 0 || x - within[^1] > s) within.Add(x);
+            var held = new List<bool>();
+            foreach (var (x, h) in xs.Where(q => q.X > c.L && q.X < c.R))
+                if (within.Count == 0 || x - within[^1] > s) { within.Add(x); held.Add(h); }
             var ink = c.Ink.OrderBy(i => i.L).ToList();
-            // (the gaps between pieces of ink, not over one another: an umlaut's dots stand over their letter)
-            var gaps = new List<(int At, double Mid)>();
-            int reach = ink.Count > 0 ? ink[0].R : 0;
-            for (int i = 1; i < ink.Count; i++)
-            {
-                if (ink[i].L > reach) gaps.Add((i, (ink[i].L + reach) / 2.0));
-                reach = Math.Max(reach, ink[i].R);
-            }
-            var at = new List<int>();
-            double end = c.L;
-            bool fits = within.Count >= 2;
-            for (int i = 0; fits && i < within.Count; i++)
-            {
-                end = 2 * within[i] - end;
-                if (i == within.Count - 1) { fits = Math.Abs(end - c.R) <= 0.8 * s; break; }
-                double wanted = end;
-                var near = gaps.Where(g => at.Count == 0 || g.At > at[^1]).OrderBy(g => Math.Abs(g.Mid - wanted)).Cast<(int At, double Mid)?>().FirstOrDefault();
-                if (near == null || Math.Abs(near.Value.Mid - wanted) > 0.5 * s) { fits = false; break; }
-                at.Add(near.Value.At);
-                end = near.Value.Mid;
-            }
-            // (no syllable of one piece: "T" and "rä" fit two heads under one syllable, by chance)
-            int was = 0;
-            foreach (int to in at.Append(ink.Count)) { if (to - was < 2) fits = false; was = to; }
-            if (!fits) { parted.Add(c); continue; }
+            var at = held.Count(h => !h) >= 2 ? Partition(within, held, Bounds(ink, s), c.L, c.R, ink.Count, s) : null;
+            if (Verbose && at == null && within.Count >= 2)
+                res.Notes.Add($"lyrics unparted s{st.System + 1} part {st.Part} cut {c.L}-{c.R} ({(c.R - c.L) / s:F1} sp): heads {string.Join(" ", within.Select(x => $"{(x - c.L) / s:F2}"))}; bounds {string.Join(" ", Bounds(ink, s).Select(g => $"{(g.Mid - c.L) / s:F2}"))}");
+            if (at == null) { parted.Add(c); continue; }
             int from = 0;
             foreach (int to in at.Append(ink.Count))
             {
                 var some = ink.GetRange(from, to - from);
-                parted.Add(new Cut { L = some[0].L, R = some.Max(i => i.R), Ink = some, Hyphen = to == ink.Count ? c.Hyphen : true, FirstH = from == 0 ? c.FirstH : 0, Small = c.Small });
+                int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
+                // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
+                var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
                 from = to;
             }
         }
         return parted;
+    }
+
+    /// <summary>
+    /// Where a cut's ink may part: between pieces that stand apart, or that overlap by a little (an f's
+    /// hook over the next letter, "auf|ge"), not within a letter (an umlaut's dots stand over theirs).
+    /// </summary>
+    static List<(int At, double Mid)> Bounds(List<(int L, int R, int T, int B)> ink, double s)
+    {
+        var bounds = new List<(int At, double Mid)>();
+        if (ink.Count == 0) return bounds;
+        int reach = ink[0].R;
+        for (int i = 1; i < ink.Count; i++)
+        {
+            if (ink[i].R > reach && ink[i].L > reach - 0.5 * s) bounds.Add((i, (ink[i].L + reach) / 2.0));
+            reach = Math.Max(reach, ink[i].R);
+        }
+        return bounds;
+    }
+
+    /// <summary>
+    /// The pieces of ink each syllable after the first starts at, for the best way the cut's syllables
+    /// stand on the heads within it, two syllables or more; null if none does. No syllable stands on a
+    /// held head. A centred syllable's next is on the next head not held; a left-aligned one holds a
+    /// head after it (held, or, a slur not read, the next), and the last may hold heads to the cut's end.
+    /// No syllable of one piece ("T" and "rä").
+    /// </summary>
+    static List<int> Partition(List<double> heads, List<bool> held, List<(int At, double Mid)> bounds, double left, double right, int pieces, double s)
+    {
+        const double Off = 0.7, LeftSet = 0.6, LeftOff = 0.3;
+        List<int> best = null;
+        double bestCost = double.MaxValue;
+        var path = new List<int>();
+        int Free(int from) { while (from < heads.Count && held[from]) from++; return from; }
+        void Go(int head, int piece, double l, double cost)
+        {
+            int after = Free(head + 1);
+            for (int b = -1; b < bounds.Count; b++)
+            {
+                bool last = b < 0;
+                if (!last && bounds[b].At <= piece) continue;
+                int to = last ? pieces : bounds[b].At;
+                if (to - piece < 2) continue;
+                double r = last ? right : bounds[b].Mid;
+                double h = heads[head];
+                double centred = Math.Abs((l + r) / 2 - h) / s;
+                double leftSet = Math.Abs(l - (h - LeftSet * s)) / s;
+                // (centred: every head to the cut's end has a syllable; left-aligned: wide enough to be told from a centred one)
+                bool isCentred = centred <= Off && (last ? after >= heads.Count : after < heads.Count);
+                // (held heads after it, or the next taken as held: the note after that takes the next syllable)
+                int leftNext = after > head + 1 ? after : Free(after + 1);
+                bool isLeft = leftSet <= LeftOff && r - l >= 2 * s && (last || leftNext < heads.Count);
+                if (last)
+                {
+                    if (path.Count == 0) continue;   // (one syllable: nothing to part)
+                    double end = cost + Math.Min(isCentred ? centred : double.MaxValue, isLeft ? leftSet : double.MaxValue);
+                    if ((isCentred || isLeft) && end < bestCost) { bestCost = end; best = new List<int>(path); }
+                    continue;
+                }
+                path.Add(to);
+                if (isCentred) Go(after, to, r, cost + centred);
+                if (isLeft) for (int next = leftNext; next < heads.Count; next = Free(next + 1)) Go(next, to, r, cost + leftSet);
+                path.RemoveAt(path.Count - 1);
+            }
+        }
+        Go(Free(0), 0, left, 0);
+        return best;
     }
 
     // (the row's lean, from its longest cut: a text script's italic is not the words')
@@ -239,10 +301,13 @@ static class Lyrics
         var best = new Dictionary<double, (Cut Cut, Head Head)>();
         foreach (var c in cuts)
         {
-            var h = heads.OrderBy(q => Math.Abs(q.X - c.Cx)).FirstOrDefault();
-            if (h == null || Math.Abs(h.X - c.Cx) > Math.Max(1.5 * s, (c.R - c.L) / 2.0 + s)) continue;
+            // (a melisma's syllable, left-aligned on the note a slur or a tie starts at: its middle may stand nearer the note it holds)
+            var melisma = c.R - c.L >= 2 * s ? heads.Where(q => (q.SlurStart || q.Tie) && Math.Abs(c.L - (q.X - 0.6 * s)) <= 0.3 * s).OrderBy(q => Math.Abs(c.L - (q.X - 0.6 * s))).FirstOrDefault() : null;
+            var h = melisma ?? heads.OrderBy(q => Math.Abs(q.X - c.Cx)).FirstOrDefault();
+            if (h == null || melisma == null && Math.Abs(h.X - c.Cx) > Math.Max(1.5 * s, (c.R - c.L) / 2.0 + s)) continue;
             double key = Math.Round(h.X / s);
-            if (!best.TryGetValue(key, out var had) || Math.Abs(h.X - c.Cx) < Math.Abs(had.Head.X - had.Cut.Cx)) best[key] = (c, h);
+            double Off((Cut Cut, Head Head) v) => v.Head.SlurStart || v.Head.Tie ? Math.Min(Math.Abs(v.Head.X - v.Cut.Cx), Math.Abs(v.Cut.L - (v.Head.X - 0.6 * s))) : Math.Abs(v.Head.X - v.Cut.Cx);
+            if (!best.TryGetValue(key, out var had) || Off((c, h)) < Off(had)) best[key] = (c, h);
         }
         return best.Values.OrderBy(v => v.Cut.L).ToList();
     }
@@ -252,9 +317,14 @@ static class Lyrics
     {
         foreach (var (cut, text) in Strip(page, res, cuts, top, foot, 1)) cut.Text = text;
         // (the Japanese engine passes over one short word alone: three in a row, as Texts does)
-        foreach (var c in cuts.Where(c => c.Text == null).ToList())
-            foreach (var (cut, text) in Strip(page, res, [c], top, foot, 3)) cut.Text = text;
+        // (and, those it still passes over, "al", at other sizes)
+        foreach (double zoom in new[] { 1.0, 1.5, 0.7 })
+            foreach (var c in cuts.Where(c => c.Text == null).ToList())
+                foreach (var (cut, text) in Strip(page, res, [c], top, foot, 3, zoom)) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
+        // (two words set close, parted as syllables: a capital starts a word, a stop ends one)
+        foreach (var c in cuts.Where(c => c.Before?.Text != null && c.Text != null))
+            if (char.IsUpper(c.Text[0]) || char.IsPunctuation(c.Before.Text[^1])) c.Before.Hyphen = false;
     }
 
     /// <summary>
@@ -273,7 +343,7 @@ static class Lyrics
         return Plain(other) ? other : Plain(native) ? native : other ?? native;
     }
 
-    static List<(Cut, string)> Strip(Bitmap page, PageResult res, List<Cut> cuts, int top, int foot, int times)
+    static List<(Cut, string)> Strip(Bitmap page, PageResult res, List<Cut> cuts, int top, int foot, int times, double zoom = 1)
     {
         double s = res.S;
         var dark = res.Dark;
@@ -288,7 +358,7 @@ static class Lyrics
         var boxes = cuts.Select(Source).ToList();
         float height = boxes.Max(b => b.Box.Height);
         // (the letters about 48 pixels tall, as the OCR reads best; the strip within its widest)
-        double k = 48.0 / Math.Max(1, height * 0.6);
+        double k = zoom * 48.0 / Math.Max(1, height * 0.6);
         float gap = 2.2f * height;
         var spans = new List<(float L, float R, Cut Cut)>();
         float at = gap;
@@ -308,6 +378,14 @@ static class Lyrics
             {
                 var box = boxes.First(b => b.Cut == cut).Box;
                 g.DrawImage(page, new RectangleF(l, pad, box.Width, box.Height), box, GraphicsUnit.Pixel);
+                foreach (var f in cut.Foreign)
+                {
+                    var a = dark.ToSource(f.L, f.T);
+                    var b = dark.ToSource(f.R, f.B);
+                    float fl = Math.Max(box.Left, (float)Math.Min(a.X, b.X)), fr = Math.Min(box.Right, (float)Math.Max(a.X, b.X));
+                    float ft = Math.Max(box.Top, (float)Math.Min(a.Y, b.Y)), fb = Math.Min(box.Bottom, (float)Math.Max(a.Y, b.Y));
+                    if (fr > fl && fb > ft) g.FillRectangle(Brushes.White, l + fl - box.Left, pad + ft - box.Top, fr - fl, fb - ft);
+                }
             }
         }
         var others = new List<List<(string Text, RectangleF Box)>>();

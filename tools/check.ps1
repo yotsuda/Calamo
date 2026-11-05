@@ -310,6 +310,11 @@ foreach ($set in @(@{ Dir = $genA; Tag = 'lyrA' }, @{ Dir = $genAS; Tag = 'lyrAS
     if ($line -match 'recall ([\d.]+)\s+precision ([\d.]+)\s+hyphen ([\d.]+)') {
         $m["$($set.Tag).recall"] = [double]$Matches[1]; $m["$($set.Tag).precision"] = [double]$Matches[2]; $m["$($set.Tag).hyphen"] = [double]$Matches[3]
     }
+    # (and on the right note, drawn: through lysc xml, the truth's and the reading's)
+    $line = (& python "$PSScriptRoot\score-lyrics-notes.py" $set.Dir 2>$null) | Select-Object -Last 1
+    if ($line -match 'recall ([\d.]+)\s+precision ([\d.]+)') {
+        $m["$($set.Tag).noteRecall"] = [double]$Matches[1]; $m["$($set.Tag).notePrecision"] = [double]$Matches[2]
+    }
 }
 # real scores (higher is better)
 function Grab($name, $pattern, $key) {
