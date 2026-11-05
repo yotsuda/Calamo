@@ -214,6 +214,10 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genMx -Reuse -OmrArgs $omrArgs | Out-
 $genMxS = "$root\out\gen-mix-scan"
 if ($Fresh -or -not (Test-Path "$genMxS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genMxS -Suite lied -Count 10 -Seed 7 -GenArgs @('--mixthrees') -Degrade -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genMxS -Reuse -OmrArgs $omrArgs | Out-Null }
+# songs whose tune is printed with a second stem on its first notes, two voices of one line (kinkel19-6): the words stay on it (lyrD below)
+$genD = "$root\out\gen-doubled"
+if ($Fresh -or -not (Test-Path "$genD\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genD -Suite lied -Count 10 -Seed 7 -GenArgs @('--lyrics', '--doubled') -OmrArgs $liedOmr | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genD -Reuse -OmrArgs $liedOmr | Out-Null }
 # pages photographed off square (OmrDegrade --keystone, --shear, --bend), which Lean stands up and Bow levels so that the truth
 # fits. A corner moved 2 percent of the width, more than the Nutcracker's photo (0.8), for a grand staff's barlines to part as a
 # score's twenty staves do: Lean acts only then (without it, on piano, 34 barlines off and 594 heads, with it 10 and 273).
@@ -305,7 +309,7 @@ foreach ($set in @(@{ Dir = $genP; Tag = 'formP'; Kinds = 'repeat|volta|nav' }, 
     }
 }
 # the songs' words (S54; higher is better), by part, verse and bar: as spelt, and with the hyphen
-foreach ($set in @(@{ Dir = $genA; Tag = 'lyrA' }, @{ Dir = $genAS; Tag = 'lyrAS' })) {
+foreach ($set in @(@{ Dir = $genA; Tag = 'lyrA' }, @{ Dir = $genAS; Tag = 'lyrAS' }, @{ Dir = $genD; Tag = 'lyrD' })) {
     $line = & "$PSScriptRoot\score-lyrics.ps1" -Out $set.Dir
     if ($line -match 'recall ([\d.]+)\s+precision ([\d.]+)\s+hyphen ([\d.]+)') {
         $m["$($set.Tag).recall"] = [double]$Matches[1]; $m["$($set.Tag).precision"] = [double]$Matches[2]; $m["$($set.Tag).hyphen"] = [double]$Matches[3]

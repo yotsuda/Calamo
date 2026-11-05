@@ -757,6 +757,16 @@ List<int> LyricVerses(int pi)
     if (tracks.Select(g => g.Count()).DefaultIfEmpty(0).Max() < Lyrics.MinSinging * mostSyllables) return new();
     return tracks.Where(g => g.Count() >= 4).Select(g => g.Key).OrderBy(v => v).ToList();
 }
+// the voice of a bar its words go on: the one with a note of its own for the most of them (a note a syllable is
+// nearest; one tune printed with a second stem, or one note read as an upper voice, leaves the words' notes in
+// the lower). A tie stays with the voice written first, which is the voice Lily# sets a track on.
+List<Ev> SungLine(int bar, int pi)
+{
+    var voices = LyricVoices(bar, pi);
+    var owners = voices.SelectMany(v => v).Where(e => e.Words?.Count > 0).ToList();
+    return voices.MaxBy(v => v.Any(e => !e.IsRest)
+        ? owners.Select(o => v.Where(e => !e.IsRest).MinBy(e => Math.Abs(e.X - o.X))).Distinct().Count() : 0) ?? new List<Ev>();
+}
 string LyricBars(int pi, int verse, int from, int to)
 {
     var text = new System.Text.StringBuilder();
@@ -765,7 +775,7 @@ string LyricBars(int pi, int verse, int from, int to)
     {
         bool Sung(Ev e) => e.Words?.Any(w => w.Verse == verse) == true;
         var voices = LyricVoices(bar, pi);
-        var line = voices.MaxBy(v => v.Count(Sung)) ?? new List<Ev>();
+        var line = SungLine(bar, pi);
         // (one tune read as two voices leaves a syllable on the other's note: it goes on this line's note nearest it)
         var astray = voices.Where(v => v != line).SelectMany(v => v).Where(Sung).OrderBy(e => e.X).ToList();
         var notes = line.Where(e => !e.IsRest).ToList();
@@ -859,7 +869,16 @@ for (int si = 0; si < sections.Count; si++)
                 overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks) && !voices.Any(handed.Contains);
                 offBy = sums.Max(x => Math.Abs(x - barTicks)) / (double)barTicks;
                 music = "voice";
-                foreach (var v in voices)
+                // (Lily# sets a track on the voice written first, and turns the first voice's stems up: a lower voice
+                // that sings is written first, each voice's stems kept by hand, so the page does not change)
+                var written = voices;
+                if (voices.Count == 2 && LyricVerses(pi).Count > 0 && SungLine(bar, pi) == voices[1] && !voices.Any(handed.Contains))
+                {
+                    written = new List<List<Ev>> { voices[1], voices[0] };
+                    foreach (var e in voices[0]) e.StemForced = 1;
+                    foreach (var e in voices[1]) e.StemForced = -1;
+                }
+                foreach (var v in written)
                 {
                     var vm = new List<(Ev Ev, int At)>();
                     // (a cue's voice, its notes small over the part's rest: cue { }. A tie out of it is
@@ -867,7 +886,7 @@ for (int si = 0; si < sections.Count; si++)
                     // one into the next -- the Eroica part's tied "Vln. 1" cues over 10 bars)
                     bool cue = v.Count > 0 && v.All(e => e.Cue) && v.Any(e => !e.IsRest);
                     if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tied = null;
-                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm);
+                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm, clip: v != written[0] && LyricVerses(pi).Count > 0);
                     string open = cue ? " { cue { " : " { ";
                     marks.AddRange(vm.Select(m => (m.Ev, music.Length + open.Length + m.At)));
                     music += open + line + (open.Length > 3 ? " } }" : " }");
@@ -1274,7 +1293,8 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
 static string F(double v) => v.ToString("F1", CultureInfo.InvariantCulture);
 
 // (marks: where each event with other readings ends in the text, before any tie or slur: its @todo's place)
-static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int At)> anchors = null, List<(Ev Ev, int At)> marks = null)
+// (clip: nothing past the bar line. An under-voice over the bar pushes the rest of the part on, and every syllable with it)
+static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int At)> anchors = null, List<(Ev Ev, int At)> marks = null, bool clip = false)
 {
     var parts = new List<string>();
     int now = 0, length = 0;
@@ -1323,9 +1343,16 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
                     if (snapped > at && snapped < aAt) { at = snapped; break; }
                 }
             }
+            if (clip && at + evs[i].Ticks > barTicks) break;
             if (at > now) { Spacer(at - now); now = at; }
         }
         var sc = evs[i].Scale;
+        if (clip)
+        {
+            int run = evs[i].Ticks;
+            if (sc != (1, 1)) { var (s0, t0) = (sc, evs[i].Tuplet); run = evs.Skip(i).TakeWhile(e => e.Scale == s0 && e.Tuplet == t0).Sum(e => e.Ticks); }
+            if (now + run > barTicks) break;
+        }
         // a two-note tremolo: the two alternate in notes of the strokes' value (one an eighth, two a sixteenth)
         // for the time of the two, repeat tremolo 6 { c''16 fis'16 } for two dotted halves in 6/8
         if (sc == (1, 1) && evs[i].TremoloFirst && i + 1 < evs.Count && evs[i + 1].Tremolo == evs[i].Tremolo && !evs[i + 1].TremoloFirst
@@ -1360,6 +1387,7 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
 static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
     // (a rhythm slash takes its articulations, /4@accent; no dynamics or pedal are given it)
     + (e.CrossStaff ? "@cross" : "")
+    + (e.StemForced == 0 || e.IsRest || e.FullBar || e.Slash ? "" : e.StemForced > 0 ? "@stemUp" : "@stemDown")
     + (e.FullBar ? "" : string.Concat((e.Articulations ?? new()).Select(a => "@" + a)))
     + (e.FullBar || e.Slash ? "" : (e.Dynamic != null ? "@" + e.Dynamic : "") + (e.HairpinEnd != null ? "@!" + e.HairpinEnd : "")
         + (e.HairpinStart != null ? "@" + e.HairpinStart : "") + (e.PedalUp ? "@!sustain" : "") + (e.PedalDown ? "@sustain" : ""))

@@ -125,6 +125,7 @@ static class Gen
         p.Parts.Add(lh);
         // (drawn after the music, so that the words leave the notes as they were)
         if (Lyrics && rng.NextDouble() < 0.8) vo.Lyrics = Words(vo, rng);
+        if (Doubled) DoubledStems(vo, rng);
         if (Dynamics)
         {
             // (the voice's above its staff, as songs print them, clear of the words)
@@ -1170,6 +1171,34 @@ static class Gen
     // staff's rests on the staff below, far worse with a lyrics row under it, which it also sets
     // under the wrong staff: docs/repro/lilysharp-feedback-2026-10-04.md #19)
     public static bool Lyrics;
+    public static bool Doubled;
+
+    /// <summary>
+    /// One tune printed as two voices: the whole line stems down, its first notes again stems up, in unison. The words
+    /// follow the whole line, written first (Lily# sets a track on the first voice) with each voice's stems kept by hand.
+    /// </summary>
+    static void DoubledStems(GPart vo, Random rng)
+    {
+        foreach (var bar in vo.Bars)
+        {
+            if (bar.Count != 1 || rng.NextDouble() >= 0.35) continue;
+            var line = bar[0];
+            int run = line.TakeWhile(e => !e.IsRest && e.Pitches.Count == 1).Count();
+            if (run < 2 || line.Count < 3 || line.Any(e => e.Triplet)) continue;
+            int k = rng.Next(1, Math.Min(run, line.Count - 1) + 1);
+            var upper = line.Take(k).Select(e =>
+            {
+                var c = e.Copy();
+                c.Tie = c.SlurStart = c.SlurEnd = false;
+                c.Marks = "@stemUp";
+                c.Grace = "";
+                return c;
+            }).ToList();
+            upper.AddRange(line.Skip(k).Select(e => new GEv { Space = true, Ticks = e.Ticks }));
+            foreach (var e in line.Where(e => !e.IsRest)) e.Marks += "@stemDown";
+            bar.Add(upper);
+        }
+    }
 
     // a song's words, split into syllables ("-" ends a syllable a word goes on from)
     static readonly string[] LiedWords =

@@ -105,6 +105,7 @@ sealed class Ev
     public bool SlurStart, SlurEnd;             // OMR: a slur starts / ends at it
     public bool PhraseStart, PhraseEnd;         // OMR: that slur is written as a phrasing slur: it runs over notes with syllables of their own, which a slur would hold
     public int Stem;                            // OMR: +1 stem up, -1 stem down, 0 none (rest, whole note)
+    public int StemForced;                      // OMR: +1 @stemUp, -1 @stemDown: its voice is written out of order, for the words on it
     public double Y;                            // OMR: page y (a rest's height hints at its voice)
     public double StemX;
     public double StemLo, StemHi;               // OMR: the page rows its heads and stem run over (a chord's, all of them)

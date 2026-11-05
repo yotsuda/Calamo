@@ -24,6 +24,8 @@ static class Program
         int seed = int.Parse(opt.GetValueOrDefault("seed", "1"));
         int bars = int.Parse(opt.GetValueOrDefault("bars", "16"));
         Gen.Lyrics = opt.ContainsKey("lyrics");
+        // --doubled: some of the voice's bars printed with a second stem on their first notes (kinkel19-6's): one tune, two voices
+        Gen.Doubled = opt.ContainsKey("doubled");
         Gen.Dynamics = opt.ContainsKey("dynamics");
         Gen.Texts = opt.ContainsKey("texts");
         Gen.Piano = opt.ContainsKey("piano");
