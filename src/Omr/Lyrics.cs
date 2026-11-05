@@ -21,6 +21,9 @@ static class Lyrics
 {
     public static bool Verbose;
 
+    /// <summary>A part sings if its longest track has this share of the longest of any part (else its rows are other text under a staff).</summary>
+    public const double MinSinging = 0.2;
+
     /// <summary>A syllable: which line of words under the staff, what it says, whether a hyphen goes on to the next.</summary>
     public readonly record struct Syllable(int Verse, string Text, bool Hyphen);
 
@@ -72,7 +75,7 @@ static class Lyrics
                     {
                         if (c.Text == null) continue;
                         // (a verse's number before the first note)
-                        if (Regex.IsMatch(c.Text, @"^\d+[.)]?$")) continue;
+                        if (Regex.IsMatch(c.Text, @"^\d+[.)・]?$")) continue;
                         foreach (var e in Articulations.Events(res, head, res.S))
                         {
                             e.Words ??= new List<Syllable>();
@@ -316,12 +319,23 @@ static class Lyrics
     static void Read(Bitmap page, PageResult res, List<Cut> cuts, int top, int foot)
     {
         foreach (var (cut, text) in Strip(page, res, cuts, top, foot, 1)) cut.Text = text;
+        // (the row's language from the whole row: one syllable alone, "Re" read "せ", cannot say)
+        bool japanese = cuts.Count(c => c.Text != null && Regex.IsMatch(c.Text, $"[{Header.Cjk}]")) * 2 > cuts.Count;
         // (the Japanese engine passes over one short word alone: three in a row, as Texts does)
         // (and, those it still passes over, "al", at other sizes)
         foreach (double zoom in new[] { 1.0, 1.5, 0.7 })
             foreach (var c in cuts.Where(c => c.Text == null).ToList())
-                foreach (var (cut, text) in Strip(page, res, [c], top, foot, 3, zoom)) cut.Text = text;
+                foreach (var (cut, text) in Strip(page, res, [c], top, foot, 3, zoom, null, japanese)) cut.Text = text;
+        // (a letter and a comma, "a,", the engines pass over at any size: after a word of the row, as a line, they read it)
+        var anchor = cuts.Where(c => c.Text != null && Regex.IsMatch(c.Text, @"^\p{L}{2,}$")).MaxBy(c => c.R - c.L);
+        if (anchor != null)
+            foreach (var c in cuts.Where(c => c.Text == null).ToList())
+                // (taken only if it has a word's form or a verse number's: a slur over the letters comes back "len--=t====")
+                foreach (var (cut, text) in Strip(page, res, [c], top, foot, 1, 1, anchor, japanese))
+                    if (Regex.IsMatch(text, @"^([\p{L}'’]+\p{P}{0,3}|\d+[.)・]?)$")) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
+        // (a capital I after a letter of a word is its small l: "AI", "Al")
+        foreach (var c in cuts.Where(c => c.Text != null)) c.Text = Regex.Replace(c.Text, @"(?<=^\p{Lu}|\p{Ll})I(?=\p{Ll}|\p{P}|$)", "l");
         // (two words set close, parted as syllables: a capital starts a word, a stop ends one)
         foreach (var c in cuts.Where(c => c.Before?.Text != null && c.Text != null))
             if (char.IsUpper(c.Text[0]) || char.IsPunctuation(c.Before.Text[^1])) c.Before.Hyphen = false;
@@ -338,12 +352,14 @@ static class Lyrics
         if (japanese) return native ?? other;
         static bool Plain(string t) => t != null && !Regex.IsMatch(t, $"[{Header.Cjk}]") && Header.Oddities(t) == 0;
         static string Fold(string t) => new string(t.Normalize(System.Text.NormalizationForm.FormD).Where(ch => char.GetUnicodeCategory(ch) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray());
+        // (an engine without umlauts reads the ü's two dots and bowl as two strokes: "blii", "sLI", "sII")
+        static string Strokes(string t) => Regex.Replace(t, "ii|II|LI|Li|lI|Il|li", "u");
         if (Plain(native) && Plain(other))
-            return string.Equals(Fold(native), Fold(other), StringComparison.Ordinal) && native != Fold(native) ? native : other;
+            return (string.Equals(Fold(native), Fold(other), StringComparison.Ordinal) || native.Contains('ü') && string.Equals(Fold(native), Strokes(other), StringComparison.Ordinal)) && native != Fold(native) ? native : other;
         return Plain(other) ? other : Plain(native) ? native : other ?? native;
     }
 
-    static List<(Cut, string)> Strip(Bitmap page, PageResult res, List<Cut> cuts, int top, int foot, int times, double zoom = 1)
+    static List<(Cut, string)> Strip(Bitmap page, PageResult res, List<Cut> cuts, int top, int foot, int times, double zoom = 1, Cut anchor = null, bool? rowJapanese = null)
     {
         double s = res.S;
         var dark = res.Dark;
@@ -361,12 +377,23 @@ static class Lyrics
         double k = zoom * 48.0 / Math.Max(1, height * 0.6);
         float gap = 2.2f * height;
         var spans = new List<(float L, float R, Cut Cut)>();
+        var pastes = new List<(float L, RectangleF Box, Cut Cut)>();
         float at = gap;
         foreach (var (box, cut) in boxes)
             for (int t = 0; t < times; t++)
             {
-                spans.Add((at, at + box.Width, cut));
-                at += box.Width + gap;
+                float from = at;
+                if (anchor != null)
+                {
+                    // (the row's word just before it, a word's gap off: the same line to the OCR)
+                    var before = Source(anchor).Box;
+                    pastes.Add((at, before, anchor));
+                    at += before.Width + 0.35f * height;
+                }
+                pastes.Add((at, box, cut));
+                at += box.Width;
+                spans.Add((from, at, cut));
+                at += gap;
             }
         int W = (int)Math.Ceiling(at), H = (int)Math.Ceiling(height + 2 * pad);
         using var strip = new Bitmap(Math.Max(1, W), Math.Max(1, H), PixelFormat.Format24bppRgb);
@@ -374,9 +401,8 @@ static class Lyrics
         {
             g.Clear(Color.White);
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            foreach (var (l, r, cut) in spans)
+            foreach (var (l, box, cut) in pastes)
             {
-                var box = boxes.First(b => b.Cut == cut).Box;
                 g.DrawImage(page, new RectangleF(l, pad, box.Width, box.Height), box, GraphicsUnit.Pixel);
                 foreach (var f in cut.Foreign)
                 {
@@ -398,14 +424,19 @@ static class Lyrics
             {
                 var its = from.Where(q => (q.Box.Left + q.Box.Right) / 2 >= l - 0.5 * gap && (q.Box.Left + q.Box.Right) / 2 <= r + 0.5 * gap).OrderBy(q => q.Box.Left).ToList();
                 if (its.Count == 0) continue;
-                // (several places read as one line: the first word)
-                string text = Clean(its[0].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "");
+                var words = string.Join(" ", its.Select(q => q.Text)).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                // (read after a word: what follows it, and nothing if the two were read as one)
+                if (anchor != null && words.Length < 2) continue;
+                // (several places read as one line: the first word; a few letters within this place alone
+                // are pieces of one syllable, "be n", a syllable having no space)
+                bool pieces = words.Sum(w => w.Length) <= 6 && Regex.IsMatch(string.Concat(words), @"^\p{L}+\p{P}?$") && its.All(q => q.Box.Right - q.Box.Left <= r - l + 0.5 * gap);
+                string text = Clean((anchor != null ? words[^1] : pieces ? string.Concat(words) : words.FirstOrDefault()) ?? "");
                 if (text.Length > 0) return text;
             }
             return null;
         }
         var read = spans.GroupBy(q => q.Cut).Select(g => (Cut: g.Key, Native: Reading(lines, g), Other: Reading(theirs, g))).ToList();
-        bool japanese = read.Count(q => q.Native != null && Regex.IsMatch(q.Native, $"[{Header.Cjk}]")) * 2 > read.Count;
+        bool japanese = rowJapanese ?? read.Count(q => q.Native != null && Regex.IsMatch(q.Native, $"[{Header.Cjk}]")) * 2 > read.Count;
         return read.Select(q => (q.Cut, Choose(q.Native, q.Other, japanese))).Where(q => q.Item2 != null).ToList();
     }
 

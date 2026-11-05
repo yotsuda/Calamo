@@ -746,22 +746,40 @@ for (int pi = 0; pi < cfg.Parts.Count; pi++)
 // no syllable takes "~" (one note, nothing drawn). The state goes on from one section to the next.
 var lyricState = new Dictionary<(int, int), (bool Held, bool Slur)>();
 List<List<Ev>> LyricVoices(int bar, int pi) => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() };
-// (a track of four syllables or more: a page's credit under a piano staff, "OpenScore (CCO)", sings no part)
-List<int> LyricVerses(int pi) => all.Keys.SelectMany(bar => LyricVoices(bar, pi)).SelectMany(v => v).Where(e => e.Words != null)
-    .SelectMany(e => e.Words).GroupBy(w => w.Verse).Where(g => g.Count() >= 4).Select(g => g.Key).OrderBy(v => v).ToList();
+// (a track of four syllables or more, of a part that sings: a page's credit under a piano staff,
+// "OpenScore (CCO)", a "rallent", a footnote come to a fifth of what the song's singer has at most)
+List<IGrouping<int, Lyrics.Syllable>> LyricTracks(int pi) => all.Keys.SelectMany(bar => LyricVoices(bar, pi)).SelectMany(v => v).Where(e => e.Words != null)
+    .SelectMany(e => e.Words).GroupBy(w => w.Verse).ToList();
+int mostSyllables = Enumerable.Range(0, cfg.Parts.Count).SelectMany(LyricTracks).Select(g => g.Count()).DefaultIfEmpty(0).Max();
+List<int> LyricVerses(int pi)
+{
+    var tracks = LyricTracks(pi);
+    if (tracks.Select(g => g.Count()).DefaultIfEmpty(0).Max() < Lyrics.MinSinging * mostSyllables) return new();
+    return tracks.Where(g => g.Count() >= 4).Select(g => g.Key).OrderBy(v => v).ToList();
+}
 string LyricBars(int pi, int verse, int from, int to)
 {
     var text = new System.Text.StringBuilder();
     var (held, slur) = lyricState.GetValueOrDefault((pi, verse));
     foreach (int bar in all.Keys.Where(b => b >= from && b <= to))
     {
-        var line = LyricVoices(bar, pi).MaxBy(v => v.Count(e => e.Words?.Any(w => w.Verse == verse) == true)) ?? new List<Ev>();
+        bool Sung(Ev e) => e.Words?.Any(w => w.Verse == verse) == true;
+        var voices = LyricVoices(bar, pi);
+        var line = voices.MaxBy(v => v.Count(Sung)) ?? new List<Ev>();
+        // (one tune read as two voices leaves a syllable on the other's note: it goes on this line's note nearest it)
+        var astray = voices.Where(v => v != line).SelectMany(v => v).Where(Sung).OrderBy(e => e.X).ToList();
+        var notes = line.Where(e => !e.IsRest).ToList();
         var said = new List<string>();
         foreach (var e in line)
         {
             if (e.IsRest) { held = false; continue; }
+            int at = notes.IndexOf(e);
+            double reach = at + 1 < notes.Count ? (e.X + notes[at + 1].X) / 2 : double.MaxValue;
+            var near = astray.Where(o => o.X <= reach).ToList();
+            astray.RemoveAll(o => o.X <= reach);
             var word = e.Words?.FirstOrDefault(w => w.Verse == verse);
-            bool has = e.Words?.Any(w => w.Verse == verse) == true;
+            bool has = Sung(e);
+            if (!has && near.Count > 0) { word = near[0].Words.First(w => w.Verse == verse); has = true; }
             // (a syllable on a note the reading holds is still written: the words go on, a note late)
             if (has) said.Add(Lyrics.Lys(word.Value)); else if (!held) said.Add("~");
             if (e.SlurEnd && !e.PhraseEnd) slur = false;
