@@ -37,6 +37,8 @@ static class Lyrics
         public int FirstH;                           // the height of its first letter (0: not known)
         public double Small;                         // the row's small letters' height
         public Cut Before;                           // the syllable it was parted from (Parted), set against it with no hyphen drawn
+        public int Tail;                             // the right end of a stop set a space after it (read with it, not placed by it; 0: none)
+        public char Stop;                            // the comma or full stop its last piece of ink has the shape of (0: none), for an OCR that drops it
         public double Cx => (L + R) / 2.0;
     }
 
@@ -158,7 +160,23 @@ static class Lyrics
                     continue;
                 }
                 bool letter = inRows.Contains(c);
-                if (cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R < 0.5 * s) cuts[^1].R = Math.Max(cuts[^1].R, x0 + c.MaxX + 1);
+                // (a comma or a full stop: small, low, standing on the foot or hanging under it; a comma well under
+                // it, a full stop round, not a piece of a letter's leg broken off in a scan)
+                char stop = c.W <= 0.75 * small && c.H <= 0.9 * small && c.MinY >= foot - 0.75 * small && c.MaxY >= foot - 0.2 * small
+                    ? c.MaxY >= foot + 0.25 * small ? ',' : c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
+                // (one an old print sets a space after its syllable, "schieht .": the syllable's, read with it, not placed by it)
+                if (stop != 0 && cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R >= 0.5 * s && x0 + c.MinX - Math.Max(cuts[^1].R, cuts[^1].Tail) < 1.2 * s)
+                {
+                    cuts[^1].Tail = Math.Max(cuts[^1].Tail, x0 + c.MaxX + 1);
+                    cuts[^1].Stop = stop;
+                    continue;
+                }
+                if (cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R < 0.5 * s)
+                {
+                    // (the last piece of a syllable of two or more, past all its letters)
+                    if (cuts[^1].Tail == 0) cuts[^1].Stop = stop != 0 && x0 + c.MinX >= cuts[^1].R - 1 ? stop : '\0';
+                    cuts[^1].R = Math.Max(cuts[^1].R, x0 + c.MaxX + 1);
+                }
                 // (too small to be a letter, away from any: a speck, a dot of the paper's)
                 else if (!letter) continue;
                 else cuts.Add(new Cut { L = x0 + c.MinX, R = x0 + c.MaxX + 1, FirstH = c.H, Small = small });
@@ -212,7 +230,7 @@ static class Lyrics
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : '\0', FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
                 from = to;
             }
         }
@@ -334,6 +352,9 @@ static class Lyrics
                 foreach (var (cut, text) in Strip(page, res, [c], top, foot, 1, 1, anchor, japanese))
                     if (Regex.IsMatch(text, @"^([\p{L}'’]+\p{P}{0,3}|\d+[.)・]?)$")) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
+        // (a comma the ink shows that the OCR, reading a syllable alone, dropped; not a full stop: a speck
+        // after a letter has its shape, "mich." 42 times to 18 stops found on the development set's scans)
+        foreach (var c in cuts.Where(c => c.Stop == ',' && c.Text != null && char.IsLetter(c.Text[^1]))) c.Text += c.Stop;
         // (a capital I after a letter of a word is its small l: "AI", "Al")
         foreach (var c in cuts.Where(c => c.Text != null)) c.Text = Regex.Replace(c.Text, @"(?<=^\p{Lu}|\p{Ll})I(?=\p{Ll}|\p{P}|$)", "l");
         // (two words set close, parted as syllables: a capital starts a word, a stop ends one)
@@ -368,7 +389,7 @@ static class Lyrics
         (RectangleF Box, Cut Cut) Source(Cut c)
         {
             var a = dark.ToSource(c.L - 0.1 * s, rowTop);
-            var b = dark.ToSource(c.R + 0.1 * s, rowBottom);
+            var b = dark.ToSource(Math.Max(c.R, c.Tail) + 0.1 * s, rowBottom);
             return (RectangleF.FromLTRB((float)Math.Min(a.X, b.X), (float)Math.Min(a.Y, b.Y), (float)Math.Max(a.X, b.X), (float)Math.Max(a.Y, b.Y)), c);
         }
         var boxes = cuts.Select(Source).ToList();
