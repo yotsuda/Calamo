@@ -886,7 +886,9 @@ for (int si = 0; si < sections.Count; si++)
                     // one into the next -- the Eroica part's tied "Vln. 1" cues over 10 bars)
                     bool cue = v.Count > 0 && v.All(e => e.Cue) && v.Any(e => !e.IsRest);
                     if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tied = null;
-                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm, clip: v != written[0] && LyricVerses(pi).Count > 0);
+                    // (a voice written after the first, in every part: Lily# cuts the first voice at the bar line,
+                    // but a later one over it is drawn on, pushing the part's later bars past the others')
+                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm, clip: v != written[0]);
                     string open = cue ? " { cue { " : " { ";
                     marks.AddRange(vm.Select(m => (m.Ev, music.Length + open.Length + m.At)));
                     music += open + line + (open.Length > 3 ? " } }" : " }");
@@ -1293,15 +1295,17 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
 static string F(double v) => v.ToString("F1", CultureInfo.InvariantCulture);
 
 // (marks: where each event with other readings ends in the text, before any tie or slur: its @todo's place)
-// (clip: nothing past the bar line. An under-voice over the bar pushes the rest of the part on, and every syllable with it)
+// (clip: nothing past the bar line. A later voice over the bar pushes the rest of the part on, and every syllable with it)
 static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int At)> anchors = null, List<(Ev Ev, int At)> marks = null, bool clip = false)
 {
     var parts = new List<string>();
+    var partOf = new Dictionary<Ev, int>();
     int now = 0, length = 0;
     void Add(string text, Ev e = null, int inner = 0)
     {
         if (parts.Count > 0) length++;
         if (e?.Alts != null) marks?.Add((e, length + inner));
+        if (e != null) partOf[e] = parts.Count;
         parts.Add(text);
         length += text.Length;
     }
@@ -1379,9 +1383,94 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
         while (i < evs.Count && evs[i].Scale == sc && evs[i].Tuplet == tid) { Clef(evs[i]); Graces(evs[i]); Add(EvText(evs[i], barTicks), evs[i], EvCore(evs[i], barTicks).Length); now += evs[i].Ticks; i++; }
         Add("}");
     }
+    // (a clipped voice: a slur or a phrasing slur that ends in the notes cut is not opened, and the last note kept
+    // ties into none of them -- an open one would run on into the part's next bar, or be left unclosed. The
+    // other spans' marks on them are moved, below)
+    if (clip && partOf.Count < evs.Count)
+    {
+        var kept = evs.Where(partOf.ContainsKey).ToList();
+        var cut = evs.Where(e => !partOf.ContainsKey(e)).ToList();
+        Ev Opened(Func<Ev, bool> start, Func<Ev, bool> end, Func<Ev, bool> endsIn)
+        {
+            Ev open = null;
+            foreach (var e in kept) { if (end(e)) open = null; if (start(e)) open = e; }
+            return open != null && cut.TakeWhile(e => !start(e)).Any(endsIn) ? open : null;
+        }
+        var slur = Opened(e => e.SlurStart && !e.PhraseStart, e => e.SlurEnd && !e.PhraseEnd, e => e.SlurEnd && !e.PhraseEnd);
+        var phrase = Opened(e => e.PhraseStart, e => e.PhraseEnd, e => e.PhraseEnd);
+        var tied = kept.LastOrDefault(e => !e.IsRest && !e.FullBar) is { Tie: true } t && cut.Count > 0 ? t : null;
+        // (the other spans -- hairpins, pedal, octave lines, rit. and trill lines -- pair across the staff's voices
+        // by x: one's end or start on a note cut goes to the last event kept, in the bar still; one opened and
+        // closed within the notes cut, nowhere. And a dynamic, where that event has none)
+        var host = kept.LastOrDefault(e => !e.FullBar && !e.Slash);
+        var spans = new[] { ("hairpin", "!hairpin"), ("pedal", "!pedal"), ("ottava", "!ottava"), ("rit", "!rit"), ("accel", "!accel"),
+            ("rall", "!rall"), ("textSpan", "!textSpan"), ("trillSpan", "!trillSpan") };
+        var moved = new List<(string Name, Ev From)>();
+        if (host != null)
+            foreach (var (open, close) in spans)
+            {
+                (string, Ev)? pending = null;
+                foreach (var e in cut)
+                {
+                    var names = SpanMarks(e);
+                    if (names.Contains(close)) { if (pending != null) pending = null; else moved.Add((close, e)); }
+                    if (names.Contains(open)) pending = (open, e);
+                }
+                if (pending is { } p) moved.Add(p);
+            }
+        var dyn = host != null && host.Dynamic == null ? cut.LastOrDefault(e => e.Dynamic != null && !e.FullBar && !e.Slash) : null;
+        // (an event written as itself: not one of a tremolo's pair, whose text has the strokes' value)
+        foreach (var e in new[] { slur, phrase, tied, moved.Count > 0 || dyn != null ? host : null }.Where(e => e != null && parts[partOf[e]] == EvText(e, barTicks)).Distinct())
+        {
+            var c = e.Copy();
+            if (e == slur) c.SlurStart = false;
+            if (e == phrase) c.PhraseStart = false;
+            if (e == tied) c.Tied = null;
+            if (e == host)
+            {
+                if (dyn != null) c.Dynamic = dyn.Dynamic;
+                if (c.Articulations != null) c.Articulations = new List<string>(c.Articulations);
+                foreach (var (name, src) in moved)
+                    switch (name)
+                    {
+                        case "hairpin": c.HairpinStart = src.HairpinStart; break;
+                        case "!hairpin": c.HairpinEnd = src.HairpinEnd; break;
+                        case "pedal": c.PedalDown = true; break;
+                        case "!pedal": c.PedalUp = true; break;
+                        case "ottava": c.OttavaStart = src.OttavaStart; break;
+                        case "!ottava": c.OttavaEnd = src.OttavaEnd; break;
+                        default: (c.Articulations ??= new List<string>()).Add(src.Articulations.First(x => x.Split('(')[0] == name)); break;
+                    }
+            }
+            int p = partOf[e], from = parts.Take(p + 1).Sum(x => x.Length) + p;
+            string text = EvText(c, barTicks);
+            int delta = text.Length - parts[p].Length;
+            parts[p] = text;
+            if (marks != null)
+                for (int m = 0; m < marks.Count; m++)
+                    if (marks[m].At >= from) marks[m] = (marks[m].Ev, marks[m].At + delta);
+        }
+    }
     // spacer rests fill a voice that stops short (a voice that only enters, or a misread value)
     if (pad && barTicks > now) Spacer(barTicks - now);
     return string.Join(" ", parts);
+}
+
+// the spans an event opens or closes, by a name each ("hairpin", "!hairpin", ... "rit", "!rit", "textSpan")
+static HashSet<string> SpanMarks(Ev e)
+{
+    var s = new HashSet<string>();
+    if (e.FullBar || e.Slash) return s;
+    if (e.HairpinStart != null) s.Add("hairpin");
+    if (e.HairpinEnd != null) s.Add("!hairpin");
+    if (e.PedalDown) s.Add("pedal");
+    if (e.PedalUp) s.Add("!pedal");
+    if (e.OttavaStart != 0) s.Add("ottava");
+    if (e.OttavaEnd != 0) s.Add("!ottava");
+    foreach (var a in e.Articulations ?? new())
+        if (a.Split('(')[0] is "rit" or "!rit" or "accel" or "!accel" or "rall" or "!rall" or "textSpan" or "!textSpan" or "trillSpan" or "!trillSpan")
+            s.Add(a.Split('(')[0]);
+    return s;
 }
 
 static string EvText(Ev e, int barTicks) => EvCore(e, barTicks)
