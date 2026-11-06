@@ -232,11 +232,11 @@ static class Lyrics
                 }
                 bool letter = inRows.Contains(c);
                 // (a comma or a full stop: small, low, standing on the foot or hanging under it; a comma well under
-                // it (or under it and tall, 0.23 of a small letter in one old print), a full stop round, not a piece
+                // it (or under it and tall, 0.13 to 0.23 of a small letter in old prints), a full stop round, not a piece
                 // of a letter's leg broken off in a scan)
                 // (or, an old print's short thick comma, "che ,", taller than a full stop and a little under the foot)
                 char stop = c.W <= 0.75 * small && c.H <= 0.9 * small && c.MinY >= foot - 0.75 * small && c.MaxY >= foot - 0.2 * small
-                    ? c.MaxY >= foot + 0.25 * small || c.MaxY >= foot + 0.15 * small && c.H >= 1.5 * c.W || c.MaxY >= foot + 0.12 * small && c.H >= 0.65 * small && c.H >= 1.2 * c.W ? ','
+                    ? c.MaxY >= foot + 0.25 * small || c.MaxY >= foot + 0.12 * small && c.H >= 1.5 * c.W || c.MaxY >= foot + 0.12 * small && c.H >= 0.65 * small && c.H >= 1.2 * c.W ? ','
                     : c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
                 // (the dots of a dotted extender after a stop, "Mund, . . . .": the stop stays, the dots are no stops)
                 // (after a full stop's shape the next may still be the stop: the first a speck of the paper's, "Fluss . !")
@@ -354,9 +354,23 @@ static class Lyrics
                 if (within.Count == 0 || x - within[^1] > s) { within.Add(x); held.Add(h); }
             var ink = c.Ink.OrderBy(i => i.L).ToList();
             // (no syllable starts with a comma: "ten,um" set tight is "ten," and "um", not "ten" and ",um")
-            bool Comma((int L, int R, int T, int B) i) => i.T >= c.Foot - 0.75 * c.Small && i.B - 1 >= c.Foot + 0.15 * c.Small && i.B - i.T <= 0.9 * c.Small && i.R - i.L <= 0.75 * c.Small;
+            // (or a little under the foot and tall, "ren ,", 0.13 under and 1.8 times as tall as wide in one old print)
+            bool Comma((int L, int R, int T, int B) i) => i.T >= c.Foot - 0.75 * c.Small && i.B - i.T <= 0.9 * c.Small && i.R - i.L <= 0.75 * c.Small
+                && (i.B - 1 >= c.Foot + 0.15 * c.Small || i.B - 1 >= c.Foot + 0.12 * c.Small && i.B - i.T >= 1.5 * (i.R - i.L));
             var bounds = Bounds(ink, s).Where(b => !Comma(ink[b.At])).ToList();
-            var at = held.Count(h => !h) >= 2 ? Partition(within, held, bounds, c.L, c.R, ink.Count, s) : null;
+            // (and a syllable has a letter: not a comma and a speck of the paper's over it, "Ruh ˙," -- "Ruh" and "˙,")
+            var letter = ink.Select(i => !Comma(i) && Math.Max(i.R - i.L, i.B - i.T) >= 0.3 * c.Small).ToList();
+            var at = held.Count(h => !h) >= 2 ? Partition(within, held, bounds, letter, c.L, c.R, ink.Count, s) : null;
+            // (and a comma ends its syllable: "sche,Fluss" set tight, parted after the F where the syllables
+            // stand on their notes best, parts after the comma -- set so tight, neither stands on its note)
+            // (a comma, not a speck of the paper's under a word: 0.64 to 0.9 of a small letter tall, the speck under
+            // "heiss" 0.21)
+            if (at != null)
+                foreach (var m in bounds.Where(b => Comma(ink[b.At - 1]) && ink[b.At - 1].B - ink[b.At - 1].T >= 0.4 * c.Small).Select(b => b.At))
+                {
+                    int k = at.FindIndex(a => a >= m);
+                    if (k >= 0 && at[k] > m && (k == 0 ? 0 : at[k - 1]) < m) at[k] = m;
+                }
             if (Verbose && at == null && within.Count >= 2)
                 res.Notes.Add($"lyrics unparted s{st.System + 1} part {st.Part} cut {c.L}-{c.R} ({(c.R - c.L) / s:F1} sp): heads {string.Join(" ", within.Select(x => $"{(x - c.L) / s:F2}"))}; bounds {string.Join(" ", Bounds(ink, s).Select(g => $"{(g.Mid - c.L) / s:F2}"))}");
             if (at == null) { parted.Add(c); continue; }
@@ -396,9 +410,9 @@ static class Lyrics
     /// stand on the heads within it, two syllables or more; null if none does. No syllable stands on a
     /// held head. A centred syllable's next is on the next head not held; a left-aligned one holds a
     /// head after it (held, or, a slur not read, the next), and the last may hold heads to the cut's end.
-    /// No syllable of one piece ("T" and "rä").
+    /// No syllable of one piece ("T" and "rä") or without a <paramref name="letter"/>.
     /// </summary>
-    static List<int> Partition(List<double> heads, List<bool> held, List<(int At, double Mid)> bounds, double left, double right, int pieces, double s)
+    static List<int> Partition(List<double> heads, List<bool> held, List<(int At, double Mid)> bounds, List<bool> letter, double left, double right, int pieces, double s)
     {
         const double Off = 0.7, LeftSet = 0.6, LeftOff = 0.3;
         List<int> best = null;
@@ -413,7 +427,7 @@ static class Lyrics
                 bool last = b < 0;
                 if (!last && bounds[b].At <= piece) continue;
                 int to = last ? pieces : bounds[b].At;
-                if (to - piece < 2) continue;
+                if (to - piece < 2 || !letter.Skip(piece).Take(to - piece).Any(q => q)) continue;
                 double r = last ? right : bounds[b].Mid;
                 double h = heads[head];
                 double centred = Math.Abs((l + r) / 2 - h) / s;
