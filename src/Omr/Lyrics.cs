@@ -36,6 +36,7 @@ static class Lyrics
         public List<(int L, int R, int T, int B)> Foreign = new(); // the next or last syllable's, reaching into its box
         public int FirstH;                           // the height of its first letter (0: not known)
         public double Small;                         // the row's small letters' height
+        public int Foot;                             // the row's foot line
         public Cut Before;                           // the syllable it was parted from (Parted), set against it with no hyphen drawn
         public int Tail;                             // the right end of a stop set a space after it (read with it, not placed by it; 0: none)
         public char Stop;                            // the comma, full stop, "!" or "?" its last ink has the shape of (0: none), for an OCR that drops it
@@ -87,7 +88,7 @@ static class Lyrics
                             e.Words.Add(new Syllable(verse, c.Text, c.Hyphen));
                         }
                     }
-                    if (Verbose) res.Notes.Add($"lyrics s{st.System + 1} part {st.Part} verse {verse + 1}: " + string.Join(" ", cuts.Select(c => (c.Text ?? "?") + (c.Hyphen ? "-" : ""))));
+                    if (Verbose) res.Notes.Add($"lyrics s{st.System + 1} part {st.Part} verse {verse + 1}: " + string.Join(" ", cuts.Select(c => (c.Text ?? "?") + (c.Hyphen ? "-" : "") + $"@{c.L}" + (c.Stop != 0 ? $"[{c.Stop}]" : ""))));
                     verse++;
                 }
             }
@@ -203,8 +204,15 @@ static class Lyrics
                 // (a comma or a full stop: small, low, standing on the foot or hanging under it; a comma well under
                 // it (or under it and tall, 0.23 of a small letter in one old print), a full stop round, not a piece
                 // of a letter's leg broken off in a scan)
+                // (or, an old print's short thick comma, "che ,", taller than a full stop and a little under the foot)
                 char stop = c.W <= 0.75 * small && c.H <= 0.9 * small && c.MinY >= foot - 0.75 * small && c.MaxY >= foot - 0.2 * small
-                    ? c.MaxY >= foot + 0.25 * small || c.MaxY >= foot + 0.15 * small && c.H >= 1.5 * c.W ? ',' :c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
+                    ? c.MaxY >= foot + 0.25 * small || c.MaxY >= foot + 0.15 * small && c.H >= 1.5 * c.W || c.MaxY >= foot + 0.12 * small && c.H >= 0.65 * small && c.H >= 1.2 * c.W ? ','
+                    : c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
+                // (the dots of a dotted extender after a stop, "Mund, . . . .": the stop stays, the dots are no stops)
+                // (after a full stop's shape the next may still be the stop: the first a speck of the paper's, "Fluss . !")
+                if (stop != 0 && apart && last.Stop is ',' or '!' or '?') continue;
+                if (Verbose && cuts.Count > 0 && c.W <= small && c.H <= 1.2 * small && c.MaxY >= foot - 0.3 * small)
+                    res.Notes.Add($"lyrics speck at {x0 + c.MinX},{y0 + c.MinY} after {cuts[^1].L}-{cuts[^1].R}: gap {(x0 + c.MinX - cuts[^1].R) / s:F2} sp, w {c.W / small:F2} h {c.H / small:F2} top {(c.MinY - foot) / small:F2} bottom {(c.MaxY - foot) / small:F2} small, letter {letter}, stop '{stop}', apart {apart}, after a line {afterLine}");
                 if (stop != 0 && (apart || afterLine))
                 {
                     if (apart) last.Tail = Math.Max(last.Tail, x0 + c.MaxX + 1);
@@ -222,7 +230,7 @@ static class Lyrics
                 }
                 // (too small to be a letter, away from any: a speck, a dot of the paper's)
                 else if (!letter) continue;
-                else cuts.Add(new Cut { L = x0 + c.MinX, R = x0 + c.MaxX + 1, FirstH = c.H, Small = small });
+                else cuts.Add(new Cut { L = x0 + c.MinX, R = x0 + c.MaxX + 1, FirstH = c.H, Small = small, Foot = y0 + foot });
                 cuts[^1].Ink.Add((x0 + c.MinX, x0 + c.MaxX + 1, y0 + c.MinY, y0 + c.MaxY + 1));
             }
             if (cuts.Count > 0 && Slant(res, cuts, y0 + top, y0 + foot) < Texts.MinSlant) rows.Add((y0 + top, y0 + foot, cuts));
@@ -310,7 +318,10 @@ static class Lyrics
             foreach (var (x, h) in xs.Where(q => q.X > c.L && q.X < c.R))
                 if (within.Count == 0 || x - within[^1] > s) { within.Add(x); held.Add(h); }
             var ink = c.Ink.OrderBy(i => i.L).ToList();
-            var at = held.Count(h => !h) >= 2 ? Partition(within, held, Bounds(ink, s), c.L, c.R, ink.Count, s) : null;
+            // (no syllable starts with a comma: "ten,um" set tight is "ten," and "um", not "ten" and ",um")
+            bool Comma((int L, int R, int T, int B) i) => i.T >= c.Foot - 0.75 * c.Small && i.B - 1 >= c.Foot + 0.15 * c.Small && i.B - i.T <= 0.9 * c.Small && i.R - i.L <= 0.75 * c.Small;
+            var bounds = Bounds(ink, s).Where(b => !Comma(ink[b.At])).ToList();
+            var at = held.Count(h => !h) >= 2 ? Partition(within, held, bounds, c.L, c.R, ink.Count, s) : null;
             if (Verbose && at == null && within.Count >= 2)
                 res.Notes.Add($"lyrics unparted s{st.System + 1} part {st.Part} cut {c.L}-{c.R} ({(c.R - c.L) / s:F1} sp): heads {string.Join(" ", within.Select(x => $"{(x - c.L) / s:F2}"))}; bounds {string.Join(" ", Bounds(ink, s).Select(g => $"{(g.Mid - c.L) / s:F2}"))}");
             if (at == null) { parted.Add(c); continue; }
@@ -321,7 +332,7 @@ static class Lyrics
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null });
                 from = to;
             }
         }
