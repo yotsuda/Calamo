@@ -45,6 +45,7 @@ static class Lyrics
         public bool StopAfterDashes;                 // the stop set after dashes from it: an extender's if a sentence starts after it, else a hyphen's last bit
         public bool StopBig;                         // the full stop set apart as big as a printed one, a third of a small letter wide and tall and more: no speck of the paper's
         public int Clear;                            // the row set close under the staff: over this line the staff's ink, painted white for the OCR (0: none)
+        public List<double> Apostrophes = new();     // the middles of the ink over its letters with an apostrophe's shape, for an OCR that drops it
         public double Cx => (L + R) / 2.0;
     }
 
@@ -179,6 +180,17 @@ static class Lyrics
             var taken = new HashSet<Comp>();
             (Cut Of, int End) line = (null, 0);   // the extender's line drawn from a syllable, and where it ends
             (Cut Of, int Count, int End) dashes = (null, 0, 0);   // the hyphens' dashes after a syllable, and where the last ends
+            // (an apostrophe over the letters, "schenk’", "an’s": wholly over the small letters, half a small letter
+            // tall and more, and not round and full as an i's dot is (0.72 to 0.87 of its box inked on the development
+            // set's scans, the apostrophes 0.53 to 0.60))
+            var apostrophes = new List<double>();
+            foreach (var c in ink)
+                if (!inRows.Contains(c) && c.MaxY <= foot - 0.6 * small && c.MinY >= foot - 2.4 * small && c.H >= 0.5 * small && c.H <= 0.95 * small
+                    && c.W >= 0.25 * small && c.W <= 0.7 * small && c.H >= c.W && c.N <= 0.68 * c.W * c.H
+                    // (not a capital's arm broken off in a scan, "E u", "W o": over a letter risen as high as it; an
+                    // apostrophe over a k's arm, "schenk’", rises a third of a small letter over its stem)
+                    && !row.Any(o => o.MaxX >= c.MinX && o.MinX <= c.MaxX && o.MinY <= c.MinY + 0.15 * small))
+                    apostrophes.Add(x0 + (c.MinX + c.MaxX + 1) / 2.0);
             foreach (var c in ink)
             {
                 if (taken.Contains(c)) continue;
@@ -268,6 +280,8 @@ static class Lyrics
             // (a row whose letters reach up to where the region starts: the OCR's cut, half a space over them,
             // would take in the staff's lowest line, the heads on it and the flags' tips)
             if (top < 0.5 * s) foreach (var c in cuts) c.Clear = y0;
+            foreach (double a in apostrophes)
+                if (cuts.LastOrDefault(c => c.L <= a) is { } of && a <= of.R + 0.1 * s) of.Apostrophes.Add(a);
             if (cuts.Count > 0 && Slant(res, cuts, y0 + top, y0 + foot) < Texts.MinSlant) rows.Add((y0 + top, y0 + foot, cuts));
         }
         rows.Sort((a, b) => a.Item2.CompareTo(b.Item2));
@@ -381,7 +395,7 @@ static class Lyrics
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Stems = c.Stems, Clear = c.Clear, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Stems = c.Stems, Clear = c.Clear, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null, Apostrophes = c.Apostrophes.Where(a => a >= l && a <= r).ToList() });
                 from = to;
             }
         }
@@ -528,6 +542,18 @@ static class Lyrics
         {
             if (Verbose) res.Notes.Add($"lyrics mark '{c.Stop}' read \"{c.Text}\"");
             if (char.IsLetter(c.Text[^1])) c.Text += c.Stop;
+        }
+        // (an apostrophe the ink shows that the OCR dropped, both engines, "schenk", "Freud", "ans": after the last
+        // letter, or before it, "an’s", "Reih’n")
+        foreach (var c in cuts.Where(c => c.Text != null && c.Apostrophes.Count > 0 && !Regex.IsMatch(c.Text, "['’‘`ʼ]")))
+        {
+            double a = c.Apostrophes[^1];
+            int after = c.Ink.Count(i => (i.L + i.R) / 2.0 > a + 1 && i.B - i.T >= 0.5 * c.Small && i.B - 1 >= c.Foot - 0.3 * c.Small);
+            var m = Regex.Match(c.Text, @"^(.*\p{L})(\p{L})(\p{P}*)$");
+            // (a "!" or a "?" read: its stroke is no apostrophe)
+            if (!m.Success || after > 1 || Regex.IsMatch(m.Groups[3].Value, "[!?]")) continue;
+            if (Verbose) res.Notes.Add($"lyrics apostrophe at {a:F0} in \"{c.Text}\", {after} letters after it");
+            c.Text = after == 0 ? m.Groups[1].Value + m.Groups[2].Value + "'" + m.Groups[3].Value : m.Groups[1].Value + "'" + m.Groups[2].Value + m.Groups[3].Value;
         }
         // (a capital I after a letter of a word is its small l: "AI", "Al")
         foreach (var c in cuts.Where(c => c.Text != null)) c.Text = Regex.Replace(c.Text, @"(?<=^\p{Lu}|\p{Ll})I(?=\p{Ll}|\p{P}|$)", "l");
