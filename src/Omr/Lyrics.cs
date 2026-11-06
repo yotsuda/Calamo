@@ -34,6 +34,7 @@ static class Lyrics
         public string Text;
         public List<(int L, int R, int T, int B)> Ink = new();     // its pieces of ink, left to right
         public List<(int L, int R, int T, int B)> Foreign = new(); // the next or last syllable's, reaching into its box
+        public List<(int L, int R, int T, int B)> Stems = new();   // the stems over its letters that touched them, cut off (painted white for the OCR)
         public int FirstH;                           // the height of its first letter (0: not known)
         public double Small;                         // the row's small letters' height
         public int Foot;                             // the row's foot line
@@ -43,6 +44,7 @@ static class Lyrics
         public bool StopAfterLine;                   // the stop set after the extender's line drawn from it: no speck of the paper's
         public bool StopAfterDashes;                 // the stop set after dashes from it: an extender's if a sentence starts after it, else a hyphen's last bit
         public bool StopBig;                         // the full stop set apart as big as a printed one, a third of a small letter wide and tall and more: no speck of the paper's
+        public int Clear;                            // the row set close under the staff: over this line the staff's ink, painted white for the OCR (0: none)
         public double Cx => (L + R) / 2.0;
     }
 
@@ -114,7 +116,7 @@ static class Lyrics
         int x0 = Math.Max(0, st.Left), x1 = Math.Min(dark.W - 1, st.Right + (int)s), y0 = (int)(st.Bottom + 0.5 * s), y1 = (int)Math.Min(Math.Min(dark.H - 1, next - 0.5 * s), st.Bottom + 20 * s);
         int w = x1 - x0 + 1, h = y1 - y0 + 1;
         if (w < 10 * s || h < 2 * s) return rows;
-        var (_, comps) = Components.Label(w, h, i => dark[x0 + i % w, y0 + i / w], eight: true);
+        var (labels, comps) = Components.Label(w, h, i => dark[x0 + i % w, y0 + i / w], eight: true);
         // (the heads of the notes low under the staff and high over the next one, and their stems)
         var heads = res.Sym.Heads.Where(q => q.X >= x0 && q.X <= x1 && q.Y >= y0 && q.Y <= y1).Select(q => (q.X, q.Y)).ToList();
         bool HasHead(Comp c) => heads.Any(p => p.X >= x0 + c.MinX - 1 && p.X <= x0 + c.MaxX + 1 && p.Y >= y0 + c.MinY - 1 && p.Y <= y0 + c.MaxY + 1);
@@ -147,6 +149,28 @@ static class Lyrics
             int foot = group.Key;
             var row = group.ToList();
             int top = row.Min(c => c.MinY);
+            // (a letter a stem coming down from the staff touches, "la" under a run of flagged notes, or a row set
+            // so close under the staff that the region's top edge cuts its tall letters: one piece with the stem,
+            // or touching the region's edge, so no letter. Its part under the row's top is labelled again, the
+            // stem over it painted white for the OCR; a piece too big for a letter, a slur through the letters, not)
+            var clipped = new Dictionary<Comp, (int L, int R, int T, int B)>();
+            foreach (var c in comps.Skip(1).Where(c => c.MaxY >= foot - 0.4 * s && c.MaxY <= foot + 0.35 * s && !inRows.Contains(c)
+                && (c.MinY == 0 || c.H > 2.5 * s && c.MinY < top - 0.2 * small)).ToList())
+            {
+                int sw = c.W, sh = c.MaxY - top + 1;
+                var (_, subs) = Components.Label(sw, sh, i => labels[(top + i / sw) * w + c.MinX + i % sw] == c.Id, eight: true);
+                foreach (var p in subs.Skip(1).Where(p => p.H >= 0.5 * s && p.H <= 2.5 * s && p.W >= 0.25 * small && p.W <= 3.5 * s))
+                {
+                    var piece = new Comp { Id = -1, N = p.N, MinX = c.MinX + p.MinX, MaxX = c.MinX + p.MaxX, MinY = top + p.MinY, MaxY = top + p.MaxY, Sx = p.Sx + (long)c.MinX * p.N, Sy = p.Sy + (long)top * p.N };
+                    if (piece.MaxY < foot - 0.4 * s) continue;
+                    row.Add(piece);
+                    all.Add(piece);
+                    inRows.Add(piece);
+                    // (over the region's edge, the stem goes on up to the staff: the OCR's cut reaches half a space over the row)
+                    if (c.MinY < top || c.MinY == 0) clipped[piece] = (x0 + c.MinX, x0 + c.MaxX + 1, y0 + c.MinY - (c.MinY == 0 ? (int)s : 0), y0 + top);
+                    if (Verbose) res.Notes.Add($"lyrics letter cut from a stem at {x0 + piece.MinX},{y0 + piece.MinY}: {piece.W}x{piece.H}");
+                }
+            }
             // (with the ink too small for letters that stands in the row: an umlaut's dots, a full stop, a hyphen)
             var ink = row.Concat(all.Where(c => !inRows.Contains(c) && (c.MinY + c.MaxY) / 2.0 >= top - 0.4 * s && (c.MinY + c.MaxY) / 2.0 <= foot + 0.35 * s)).OrderBy(c => c.MinX).ToList();
             var cuts = new List<Cut>();
@@ -234,7 +258,11 @@ static class Lyrics
                 else if (!letter) continue;
                 else cuts.Add(new Cut { L = x0 + c.MinX, R = x0 + c.MaxX + 1, FirstH = c.H, Small = small, Foot = y0 + foot });
                 cuts[^1].Ink.Add((x0 + c.MinX, x0 + c.MaxX + 1, y0 + c.MinY, y0 + c.MaxY + 1));
+                if (clipped.TryGetValue(c, out var stem)) cuts[^1].Stems.Add(stem);
             }
+            // (a row whose letters reach up to where the region starts: the OCR's cut, half a space over them,
+            // would take in the staff's lowest line, the heads on it and the flags' tips)
+            if (top < 0.5 * s) foreach (var c in cuts) c.Clear = y0;
             if (cuts.Count > 0 && Slant(res, cuts, y0 + top, y0 + foot) < Texts.MinSlant) rows.Add((y0 + top, y0 + foot, cuts));
         }
         rows.Sort((a, b) => a.Item2.CompareTo(b.Item2));
@@ -334,7 +362,7 @@ static class Lyrics
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Stems = c.Stems, Clear = c.Clear, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null });
                 from = to;
             }
         }
@@ -552,7 +580,8 @@ static class Lyrics
             foreach (var (l, box, cut) in pastes)
             {
                 g.DrawImage(page, new RectangleF(l, pad, box.Width, box.Height), box, GraphicsUnit.Pixel);
-                foreach (var f in cut.Foreign)
+                var clear = cut.Clear > 0 ? new[] { (L: (int)(cut.L - s), R: (int)(Math.Max(cut.R, cut.Tail) + s), T: (int)(rowTop - s), B: cut.Clear) } : [];
+                foreach (var f in cut.Foreign.Concat(cut.Stems).Concat(clear))
                 {
                     var a = dark.ToSource(f.L, f.T);
                     var b = dark.ToSource(f.R, f.B);
