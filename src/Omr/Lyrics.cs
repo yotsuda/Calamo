@@ -42,6 +42,7 @@ static class Lyrics
         public char Stop;                            // the comma, full stop, "!" or "?" its last ink has the shape of (0: none), for an OCR that drops it
         public bool StopAfterLine;                   // the stop set after the extender's line drawn from it: no speck of the paper's
         public bool StopAfterDashes;                 // the stop set after dashes from it: an extender's if a sentence starts after it, else a hyphen's last bit
+        public bool StopBig;                         // the full stop set apart as big as a printed one, a third of a small letter wide and tall and more: no speck of the paper's
         public double Cx => (L + R) / 2.0;
     }
 
@@ -216,6 +217,7 @@ static class Lyrics
                 if (stop != 0 && (apart || afterLine))
                 {
                     if (apart) last.Tail = Math.Max(last.Tail, x0 + c.MaxX + 1);
+                    last.StopBig = apart && stop == '.' && c.W >= 0.35 * small && c.H >= 0.35 * small;
                     last.Stop = stop;
                     last.StopAfterLine = afterLine && !afterDashes;
                     last.StopAfterDashes = afterDashes;
@@ -455,8 +457,10 @@ static class Lyrics
                     if (Regex.IsMatch(text, @"^([\p{L}'’]+\p{P}{0,3}|\d+[.)・]?)$")) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
         // (a comma the ink shows that the OCR, reading a syllable alone, dropped; a full stop only after the
-        // extender's line: elsewhere a speck after a letter has its shape, "mich." 42 times to 18 stops found
-        // on the development set's scans, and on a row's last syllable it came to +6 there but -2 held out)
+        // extender's line or set apart as big as a printed one: elsewhere a speck after a letter has its shape,
+        // "mich." 42 times to 18 stops found on the development set's scans, and on a row's last syllable it
+        // came to +6 there but -2 held out. The old prints' stops set apart, "ruht .", are 0.37 to 0.57 of a
+        // small letter wide and tall on the development set's scans, the specks taken for them 0.25 and less)
 
         for (int i = 0; i < cuts.Count; i++)
         {
@@ -470,7 +474,7 @@ static class Lyrics
                 else c.Stop = '\0';
             }
             if (c.Text == null || !char.IsLetter(c.Text[^1])) continue;
-            if (c.Stop == ',' || c.Stop == '.' && c.StopAfterLine) c.Text += c.Stop;
+            if (c.Stop == ',' || c.Stop == '.' && (c.StopAfterLine || c.StopBig)) c.Text += c.Stop;
         }
         // (a "!" or a "?" set apart, which the OCR reads as nothing or as a letter of its own, "Traum l")
         foreach (var c in cuts.Where(c => c.Stop is '!' or '?' && c.Text != null))
