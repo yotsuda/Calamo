@@ -62,7 +62,10 @@ too, with more marks to check.
 
 ## Not yet (Beta)
 
-- Lyrics and chord names are passed over (not misread as notes, but not written).
+- Lyrics are read verse by verse and written as `lyrics` lines under the music. On clean pages
+  about 95 syllables in a hundred come out right; on old prints scanned small about a quarter are
+  wrong or missing, so check them against the page. Chord names are passed over (not
+  misread as notes, but not written).
 - The form is read (repeat barlines, the endings with their numbers, segno and coda, "To Coda",
   "Fine", "D.C. al Fine", "D.S. al Coda" and the like) and written as a `form` line; "D.S." or
   "D.C." standing alone, and a "Fine" among other words, are not.
@@ -77,9 +80,12 @@ too, with more marks to check.
   the one-line rhythm staff under the melody is written as slashes (`staff gtr as lines 1`); the
   chord names and diagrams are passed over. Parts laid out in columns are read poorly.
 - Handwritten music is not read. Colour or low-contrast scans read worse than black and white.
-- Words (title, tempo, rehearsal marks) are read with the OCR built into Windows, in the
+- Words (title, tempo, rehearsal marks, lyrics) are read with the OCR built into Windows, in the
   languages installed for it (Settings › Language), so a Latin title on a Japanese-only PC may
-  come out with a wrong letter or two.
+  come out with a wrong letter or two. For lyrics in German, French and other languages written
+  in Latin letters, add German to Windows' languages (its text recognition is enough): the reader
+  then reads them with the German OCR, which keeps the umlauts, and old scans read
+  better (about three syllables in a hundred more on our scanned songs than with English alone).
 
 Check what it reads: a mark says where it was unsure, but a bar with no mark can still be wrong.
 

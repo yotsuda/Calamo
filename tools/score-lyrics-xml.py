@@ -6,7 +6,7 @@ tracks of the reader's omr.lys, for a run of run-audiveris.ps1 (-Dev or -Eval).
 
 Dichterliebe (dl-ms, dl-scan) counts with --prefix lied-. The syllables are compared in the order sung, verse by verse (the truth's lyric number against the n-th
 track, summed over the parts): a longest common subsequence, so that a bar read wrong loses its bar and
-no more. Exact as spelt ("found"), and with case and marks and punctuation folded away ("loose": what a
+no more. Exact as spelt ("found", the apostrophes ' and ’ one), and with case and marks and punctuation folded away ("loose": what a
 German or French word comes to with an English and a Japanese OCR). The stanza number some truths have
 inside the first syllable ("1. Wenn") is left out. Standard library only.
 """
@@ -27,7 +27,7 @@ def truth_verses(path):
         for note in part.iter('note'):
             for ly in note.findall('lyric'):
                 text = ''.join(t.text or '' for t in ly.findall('text')).strip()
-                text = re.sub(r'^\d+[.)]\s*', '', text)
+                text = apostrophe(re.sub(r'^\d+[.)]\s*', '', text))
                 if not text:
                     continue
                 verses[ly.get('number', '1')].append(text)
@@ -46,8 +46,14 @@ def read_tracks(path):
             for tok in re.findall(r'"[^"]*"-?|[^\s|]+', m.group(3)):
                 if tok in ('~', '_', '__'):
                     continue
-                tracks[int(m.group(2))].append(tok.rstrip('-').strip('"'))
+                tracks[int(m.group(2))].append(apostrophe(tok.rstrip('-').strip('"')))
     return tracks
+
+
+def apostrophe(s):
+    """one apostrophe: the truths mix the typewriter's and the printer's (hab' and glaubt’ in one song),
+    and the paper does not tell them apart"""
+    return re.sub('[’‘ʼ`]', "'", s)
 
 
 def fold(s):

@@ -35,8 +35,9 @@ What it reads, in short: staves and groups of staves, clefs, key and time signat
 rests, dots, accidentals, beams, tuplets, ties and slurs, grace notes, several voices on a staff,
 multi-bar rests and percent repeats, tremolos, octave lines, guitar and bass TAB, drums, dynamics,
 hairpins, pedal marks, articulations and ornaments, trills, arpeggios, glissandi, repeats and
-endings, common words of expression, the tempo, the title, composer and poet, and rehearsal marks.
-Not yet: lyrics, chord names, handwritten music.
+endings, common words of expression, the tempo, the title, composer and poet, rehearsal marks, and
+the lyrics of songs, verse by verse (better on clean pages than on old scans).
+Not yet: chord names, handwritten music.
 
 ## What it is built for
 
@@ -106,7 +107,7 @@ not all of them.
 The same design keeps the reader from leaning towards a kind of music. The detector learns what
 symbols look like, not how music goes: it sees a few staff spaces around each symbol, and the pieces
 it learnt from are mostly music the project makes up. What it reads depends on the symbols it has
-been taught (TAB and drums, not yet lyrics or chord names), not on the style of the music; a reader
+been taught (TAB and drums, not yet chord names), not on the style of the music; a reader
 that learns how music goes reads best the kind of music it learnt from.
 
 ## What it writes

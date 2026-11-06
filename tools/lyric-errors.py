@@ -19,7 +19,7 @@ def truth_verses(path):
         for note in part.iter('note'):
             for ly in note.findall('lyric'):
                 t = ''.join(x.text or '' for x in ly.findall('text')).strip()
-                t = re.sub(r'^\d+[.)]\s*', '', t)
+                t = apostrophe(re.sub(r'^\d+[.)]\s*', '', t))
                 if t:
                     verses[ly.get('number', '1')].append(t)
     return verses
@@ -35,8 +35,13 @@ def read_tracks(path):
             for tok in re.findall(r'"[^"]*"-?|[^\s|]+', m.group(3)):
                 if tok in ('~', '_', '__'):
                     continue
-                tracks[int(m.group(2))].append(tok.rstrip('-').strip('"'))
+                tracks[int(m.group(2))].append(apostrophe(tok.rstrip('-').strip('"')))
     return tracks
+
+
+def apostrophe(s):
+    """one apostrophe, as score-lyrics-xml.py counts it"""
+    return re.sub('[’‘ʼ`]', "'", s)
 
 
 def fold(s):

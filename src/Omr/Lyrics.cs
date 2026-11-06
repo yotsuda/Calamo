@@ -137,7 +137,9 @@ static class Lyrics
             }
             else bands.Add((c.MinY, c.MaxY, new List<Comp> { c }));
         }
-        var feet = bands.Where(b => b.Bodies.Count >= 2).Select(b => b.Bodies.Select(c => c.MaxY).OrderBy(y => y).ElementAt(b.Bodies.Count / 2)).ToList();
+        // (a band of small letters' height: apostrophes over a row, "träumt’ … in’s", half a small letter tall and
+        // just letter-sized, made a band of their own, a row of no words that took them from their syllables)
+        var feet = bands.Where(b => b.Bodies.Count >= 2 && b.Bodies.Select(c => c.H).OrderBy(v => v).ElementAt(b.Bodies.Count / 2) >= 0.7 * small).Select(b => b.Bodies.Select(c => c.MaxY).OrderBy(y => y).ElementAt(b.Bodies.Count / 2)).ToList();
         if (feet.Count == 0) return rows;
         // (each letter its row: the foot nearest its own, a p's or a y's tail hanging under it)
         var byRow = letters.Where(c => feet.Any(f => c.MaxY >= f - 0.4 * s && c.MaxY <= f + 1.2 * s && c.MinY > f - 2.6 * s))
@@ -204,6 +206,9 @@ static class Lyrics
                     if (Verbose) res.Notes.Add($"lyrics mark '{mark}' at {x0 + c.MinX},{y0 + c.MinY}{(afterLine ? " after a line" : "")}");
                     continue;
                 }
+                // (a speck wholly under the foot, a little ink of the paper's between two rows: a comma hangs from the
+                // foot, a letter's tail is one piece with it)
+                if (c.MinY >= foot + 0.3 * small && c.H <= 0.8 * small) continue;
                 bool thin = c.H <= 0.35 * s && c.W >= 1.5 * c.H;
                 // (an extender's line stands on the foot, long: no syllable's, and no hyphen)
                 if (thin && (c.W >= 2.5 * s || c.W >= 1.5 * s && c.MaxY >= foot - 0.1 * s))

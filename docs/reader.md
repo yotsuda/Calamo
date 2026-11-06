@@ -61,6 +61,26 @@ OCR misses a letter or two ("Andant、00" → "Andantino", "Piü" → "Più", "A
 prints every line read. Measured on generated pieces with words drawn at random (`tools/run-header.ps1`,
 OmrGen `--headers`, 40 pieces): title 34/40, subtitle 14/18, composer 35/36, poet 17/17, tempo 34/36.
 
+## Lyrics
+
+`omr read` (or `--read-lyrics`) reads the words under each staff, up to the next staff. The letters'
+ink is grouped into rows by their small letters' band (not their feet: a bowed page splits one row
+in two by those), and an upright row whose letters stand mostly over note heads is a verse (an
+italic one is a text, a row over no heads a bar number or a note). The syllables are cut where the
+ink shows a gap, a hyphen or an extender's line; syllables set touching, with no hyphen, where the
+notes stand close ("spran|gen") are parted by the heads they stand on, centred or left-aligned on a
+melisma. Each syllable is read by itself with Windows' OCR, cut out on white with the staff's ink
+and stems painted over; commas, full stops, "!" and "?" set apart from it are found in the ink.
+Of the Latin languages installed, German is read first, then English (the order is fixed; with
+German, umlauts and old prints read best). The verses become `lyrics` tracks under the staff they
+sing on: a syllable to a note, notes under a slur or a tie taking none.
+
+Measured on fifteen OpenScore Lieder songs and Dichterliebe never tuned on (2026-11-06,
+`tools/score-lyrics-xml.py`, 3,757 syllables, exactly as spelt): MuseScore's drawings 95.4% of the
+syllables read right, and 96.3% of the syllables written right; the old prints' scans 74.8% and
+77.2%. On the scans most of what is
+lost is the OCR misreading a worn letter (`w` as `v•`, `h` as `ln`).
+
 With no score file (`omr read`), the parts a brace joins on the page are written in a `grandStaff`
 (a piano's two staves), a bracket's in a `staffGroup` (a quartet's four), a brace within a bracket
 nested (`Layout.Joiner`; the score file's `grandStaff rh lh` and `staffGroup vn1 vn2 va vc` lines
