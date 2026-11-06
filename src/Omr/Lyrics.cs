@@ -443,9 +443,10 @@ static class Lyrics
                 foreach (var (cut, text) in Strip(page, res, [c], top, foot, 1, 1, anchor, japanese))
                     if (Regex.IsMatch(text, @"^([\p{L}'’]+\p{P}{0,3}|\d+[.)・]?)$")) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
-        // (a comma the ink shows that the OCR, reading a syllable alone, dropped; a full stop only where a
-        // sentence ends: after the extender's line, or the row's last syllable; elsewhere a speck after a
-        // letter has its shape, "mich." 42 times to 18 stops found on the development set's scans)
+        // (a comma the ink shows that the OCR, reading a syllable alone, dropped; a full stop only after the
+        // extender's line: elsewhere a speck after a letter has its shape, "mich." 42 times to 18 stops found
+        // on the development set's scans, and on a row's last syllable it came to +6 there but -2 held out)
+
         for (int i = 0; i < cuts.Count; i++)
         {
             var c = cuts[i];
@@ -458,7 +459,7 @@ static class Lyrics
                 else c.Stop = '\0';
             }
             if (c.Text == null || !char.IsLetter(c.Text[^1])) continue;
-            if (c.Stop == ',' || c.Stop == '.' && (c.StopAfterLine || i == cuts.Count - 1)) c.Text += c.Stop;
+            if (c.Stop == ',' || c.Stop == '.' && c.StopAfterLine) c.Text += c.Stop;
         }
         // (a "!" or a "?" set apart, which the OCR reads as nothing or as a letter of its own, "Traum l")
         foreach (var c in cuts.Where(c => c.Stop is '!' or '?' && c.Text != null))
