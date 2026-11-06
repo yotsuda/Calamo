@@ -4,8 +4,29 @@ Notable changes to Lily# Scan Import are recorded here, newest first. Release no
 taken from this file: the topmost section is the version being tagged, and the release
 workflow (`.github/workflows/release.yml`) attaches that section to the GitHub Release.
 
-## Unreleased
+## 0.5.0
 
+- **Lyrics.** A song's words are read verse by verse and written as `lyrics` lines under the
+  music: each syllable on its note, its hyphen or extender, syllables set touching in a tight bar
+  parted onto their notes, and the punctuation an old print sets apart ("Traum ?", "ruht .") or
+  the OCR drops (commas, apostrophes). On songs we measure on but never tune on (OpenScore
+  Lieder), about 95 syllables in 100 come out right from the MuseScore drawings and 75 from the
+  nineteenth-century scans they were typed from. Words are read with the OCR built into Windows:
+  adding German to Windows' languages helps any lyrics in Latin letters (see the readme).
+- **Ties and slurs** are told apart better: an arc from a note to the next at its pitch is a tie
+  even where the detector sees one end weakly, a tie belongs to the notes of a chord it starts at
+  (not the whole chord), and a slur's weak end pairs with a sure one.
+- **Small (cue) notes**: another instrument's line printed small over a part's rest is read, with
+  its short stems, small beams, ledger lines and tuplets.
+- **Octave lines** as Lily# writes them now (`@8va … @!8va`), and an old print's wave
+  ("8va~~~~" ended by "loco.").
+- **Triplets** a left hand starts and the right hand ends, across the staves; a beam kneed between
+  the staves; a 3 over four notes that is a verse's number, not a triplet.
+- **Photos of a page**: the keystone of a page photographed at an angle is stood up, and a system
+  no longer falls in two.
+- A worn G clef, a head on a ledger's place with no ledger drawn, a tuplet bracket's short halves,
+  and Sibelius parts' systems are read; a fingering over the first system is no longer taken for
+  the composer; a later voice running over the bar line is cut at it, as Lily# draws it.
 - **Open source.** The reader and this extension are now under the Apache License 2.0, and the
   source is public: <https://github.com/yotsuda/LilySharp-Omr>. Reports of misread pages are
   welcome there as issues. The extension's own terms of use are gone.

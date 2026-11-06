@@ -18,7 +18,7 @@ namespace Omr;
 /// </summary>
 sealed class ReadCommand
 {
-    public const string Version = "0.4.0";
+    public const string Version = "0.5.0";
     /// <summary>The contract's version (arguments, stdout, .omr.json): raised when it changes incompatibly.</summary>
     public const int Protocol = 1;
     static readonly string[] Inputs = { "png", "jpg", "jpeg", "tif", "tiff", "bmp", "pdf" };
