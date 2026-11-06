@@ -38,7 +38,7 @@ static class Lyrics
         public double Small;                         // the row's small letters' height
         public Cut Before;                           // the syllable it was parted from (Parted), set against it with no hyphen drawn
         public int Tail;                             // the right end of a stop set a space after it (read with it, not placed by it; 0: none)
-        public char Stop;                            // the comma or full stop its last piece of ink has the shape of (0: none), for an OCR that drops it
+        public char Stop;                            // the comma, full stop, "!" or "?" its last ink has the shape of (0: none), for an OCR that drops it
         public double Cx => (L + R) / 2.0;
     }
 
@@ -146,11 +146,38 @@ static class Lyrics
             // (with the ink too small for letters that stands in the row: an umlaut's dots, a full stop, a hyphen)
             var ink = row.Concat(all.Where(c => !inRows.Contains(c) && (c.MinY + c.MaxY) / 2.0 >= top - 0.4 * s && (c.MinY + c.MaxY) / 2.0 <= foot + 0.35 * s)).OrderBy(c => c.MinX).ToList();
             var cuts = new List<Cut>();
+            var taken = new HashSet<Comp>();
+            (Cut Of, int End) line = (null, 0);   // the extender's line drawn from a syllable, and where it ends
             foreach (var c in ink)
             {
+                if (taken.Contains(c)) continue;
+                var last = cuts.Count > 0 && !cuts[^1].Hyphen ? cuts[^1] : null;
+                // (a stop, a "!" or a "?" past a syllable's letters is the syllable's: set after the extender's line
+                // drawn from it, "Drohn ____ ?", "Thurm ____ , weit", or, in an old print, a space after it,
+                // "schieht .", "du !", "Traum ?": then read with it, not placed by it)
+                // (after the line by up to 1.7 spaces in one old print; nothing of the next word's within half a space after it)
+                bool afterLine = last != null && line.Of == last && x0 + c.MinX >= line.End && x0 + c.MinX - line.End < 2 * s
+                    && !ink.Any(o => o != c && o.H >= 0.5 * small && o.MinX > c.MaxX && o.MinX - c.MaxX < 0.5 * s);
+                bool apart = !afterLine && last != null && x0 + c.MinX - last.R >= 0.5 * s && x0 + c.MinX - Math.Max(last.R, last.Tail) < 1.2 * s;
+                if ((apart || afterLine) && Mark(c, all, foot, small, (x, y) => dark[x0 + x, y0 + y]) is var (mark, dot) && mark != '\0'
+                    // (and ending the word: a word's first letter set after the last has no letter after it)
+                    && !ink.Any(o => o != c && o != dot && o.H >= 0.5 * small && o.MinX > c.MinX && o.MinX - Math.Max(c.MaxX, dot.MaxX) < 0.5 * s))
+                {
+                    taken.Add(dot);
+                    if (apart) last.Tail = Math.Max(last.Tail, x0 + Math.Max(c.MaxX, dot.MaxX) + 1);
+                    last.Stop = mark;
+                    if (Verbose) res.Notes.Add($"lyrics mark '{mark}' at {x0 + c.MinX},{y0 + c.MinY}{(afterLine ? " after a line" : "")}");
+                    continue;
+                }
                 bool thin = c.H <= 0.35 * s && c.W >= 1.5 * c.H;
                 // (an extender's line stands on the foot, long: no syllable's, and no hyphen)
-                if (thin && (c.W >= 2.5 * s || c.W >= 1.5 * s && c.MaxY >= foot - 0.1 * s)) continue;
+                if (thin && (c.W >= 2.5 * s || c.W >= 1.5 * s && c.MaxY >= foot - 0.1 * s))
+                {
+                    // (set off from its syllable by a space and more, "Haupt ______ , und": 1.3 to 2.9 spaces in one old print)
+                    if (last != null && (x0 + c.MinX - Math.Max(last.R, last.Tail) < 4 * s || line.Of == last && x0 + c.MinX - line.End < 1.2 * s))
+                        line = (last, x0 + c.MaxX + 1);
+                    continue;
+                }
                 // (a hyphen, at the letters' middle or, in old prints, low, a short rule on the foot)
                 // (a third of the way down and more, a third of a space wide and more, past the letters: not an
                 // umlaut's dots or an i's over them, nor a bit of a serif broken off in a scan)
@@ -161,14 +188,14 @@ static class Lyrics
                 }
                 bool letter = inRows.Contains(c);
                 // (a comma or a full stop: small, low, standing on the foot or hanging under it; a comma well under
-                // it, a full stop round, not a piece of a letter's leg broken off in a scan)
+                // it (or under it and tall, 0.23 of a small letter in one old print), a full stop round, not a piece
+                // of a letter's leg broken off in a scan)
                 char stop = c.W <= 0.75 * small && c.H <= 0.9 * small && c.MinY >= foot - 0.75 * small && c.MaxY >= foot - 0.2 * small
-                    ? c.MaxY >= foot + 0.25 * small ? ',' : c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
-                // (one an old print sets a space after its syllable, "schieht .": the syllable's, read with it, not placed by it)
-                if (stop != 0 && cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R >= 0.5 * s && x0 + c.MinX - Math.Max(cuts[^1].R, cuts[^1].Tail) < 1.2 * s)
+                    ? c.MaxY >= foot + 0.25 * small || c.MaxY >= foot + 0.15 * small && c.H >= 1.5 * c.W ? ',' :c.H <= 0.6 * small && c.W <= 1.5 * c.H && c.H <= 1.5 * c.W ? '.' : '\0' : '\0';
+                if (stop != 0 && (apart || afterLine))
                 {
-                    cuts[^1].Tail = Math.Max(cuts[^1].Tail, x0 + c.MaxX + 1);
-                    cuts[^1].Stop = stop;
+                    if (apart) last.Tail = Math.Max(last.Tail, x0 + c.MaxX + 1);
+                    last.Stop = stop;
                     continue;
                 }
                 if (cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R < 0.5 * s)
@@ -186,6 +213,54 @@ static class Lyrics
         }
         rows.Sort((a, b) => a.Item2.CompareTo(b.Item2));
         return rows;
+    }
+
+    /// <summary>
+    /// A "!" or a "?" (and its dot), or '\0': a stroke risen over the small letters as a capital is, ending
+    /// over the foot, a dot under it standing on the foot; or, the ink run together in a scan, one piece
+    /// down to the foot, narrowed to a neck over its dot. A "!" is a wedge; a "?" a hook, its curl crossed twice.
+    /// </summary>
+    static (char Mark, Comp Dot) Mark(Comp c, List<Comp> all, int foot, double small, Func<int, int, bool> ink)
+    {
+        if (c.MinY > foot - 1.2 * small || c.W > 1.1 * small) return ('\0', null);
+        int Width(int y)
+        {
+            int l = -1, r = -1;
+            for (int x = c.MinX; x <= c.MaxX; x++) if (ink(x, y)) { if (l < 0) l = x; r = x; }
+            return l < 0 ? 0 : r - l + 1;
+        }
+        Comp dot;
+        int stroke = c.MaxY;   // (the last row of the stroke, over its dot)
+        if (c.MaxY <= foot - 0.15 * small && c.MaxY >= foot - 0.8 * small && c.W <= 0.9 * small)
+        {
+            dot = all.Where(d => d != c && d.H <= 0.6 * small && d.W <= 0.75 * small && d.MinY > c.MaxY - 1 && d.MaxY >= foot - 0.2 * small && d.MaxY <= foot + 0.3 * small
+                    && d.Cx >= c.MinX - 0.15 * small && d.Cx <= c.MaxX + 0.15 * small)
+                .MinBy(d => d.MinY - c.MaxY);
+            if (dot == null) return ('\0', null);
+        }
+        else if (c.MaxY >= foot - 0.2 * small && c.MaxY <= foot + 0.3 * small && c.MinY <= foot - 1.4 * small)
+        {
+            // (the neck: a row 0.4 of the width or less, the dot under it no taller than a full stop, and wider)
+            int neck = -1;
+            for (int y = c.MaxY - (int)(0.15 * small); y >= c.MaxY - 0.6 * small; y--)
+                if (Width(y) <= Math.Max(2, 0.4 * c.W)) { neck = y; break; }
+            if (neck < 0) return ('\0', null);
+            int dotW = Enumerable.Range(neck + 1, c.MaxY - neck).Max(Width);
+            if (dotW < 1.3 * Math.Max(1, Width(neck)) || dotW > 0.75 * small) return ('\0', null);
+            dot = c;
+            stroke = neck - 1;
+        }
+        else return ('\0', null);
+        // (a row of the hook's crossed twice: its curl)
+        int twice = 0;
+        for (int y = c.MinY; y <= stroke; y++)
+        {
+            int runs = 0;
+            bool was = false;
+            for (int x = c.MinX; x <= c.MaxX; x++) { bool on = ink(x, y); if (on && !was) runs++; was = on; }
+            if (runs >= 2) twice++;
+        }
+        return (twice >= 0.15 * (stroke - c.MinY + 1) ? '?' : '!', dot);
     }
 
     /// <summary>
@@ -355,6 +430,12 @@ static class Lyrics
         // (a comma the ink shows that the OCR, reading a syllable alone, dropped; not a full stop: a speck
         // after a letter has its shape, "mich." 42 times to 18 stops found on the development set's scans)
         foreach (var c in cuts.Where(c => c.Stop == ',' && c.Text != null && char.IsLetter(c.Text[^1]))) c.Text += c.Stop;
+        // (a "!" or a "?" set apart, which the OCR reads as nothing or as a letter of its own, "Traum l")
+        foreach (var c in cuts.Where(c => c.Stop is '!' or '?' && c.Text != null))
+        {
+            if (Verbose) res.Notes.Add($"lyrics mark '{c.Stop}' read \"{c.Text}\"");
+            if (char.IsLetter(c.Text[^1])) c.Text += c.Stop;
+        }
         // (a capital I after a letter of a word is its small l: "AI", "Al")
         foreach (var c in cuts.Where(c => c.Text != null)) c.Text = Regex.Replace(c.Text, @"(?<=^\p{Lu}|\p{Ll})I(?=\p{Ll}|\p{P}|$)", "l");
         // (two words set close, parted as syllables: a capital starts a word, a stop ends one)
