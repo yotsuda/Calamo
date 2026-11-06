@@ -39,6 +39,8 @@ static class Lyrics
         public Cut Before;                           // the syllable it was parted from (Parted), set against it with no hyphen drawn
         public int Tail;                             // the right end of a stop set a space after it (read with it, not placed by it; 0: none)
         public char Stop;                            // the comma, full stop, "!" or "?" its last ink has the shape of (0: none), for an OCR that drops it
+        public bool StopAfterLine;                   // the stop set after the extender's line drawn from it: no speck of the paper's
+        public bool StopAfterDashes;                 // the stop set after dashes from it: an extender's if a sentence starts after it, else a hyphen's last bit
         public double Cx => (L + R) / 2.0;
     }
 
@@ -148,15 +150,19 @@ static class Lyrics
             var cuts = new List<Cut>();
             var taken = new HashSet<Comp>();
             (Cut Of, int End) line = (null, 0);   // the extender's line drawn from a syllable, and where it ends
+            (Cut Of, int Count, int End) dashes = (null, 0, 0);   // the hyphens' dashes after a syllable, and where the last ends
             foreach (var c in ink)
             {
                 if (taken.Contains(c)) continue;
-                var last = cuts.Count > 0 && !cuts[^1].Hyphen ? cuts[^1] : null;
+                // (an old print's extender drawn as dashes, "Meer _ _ _ _ .": two dashes and more from a syllable
+                // with a stop after them, the syllable's, not a hyphen to the next)
+                bool afterDashes = cuts.Count > 0 && dashes.Of == cuts[^1] && dashes.Count >= 2 && x0 + c.MinX >= dashes.End && x0 + c.MinX - dashes.End < 2 * s;
+                var last = cuts.Count > 0 && (!cuts[^1].Hyphen || afterDashes) ? cuts[^1] : null;
                 // (a stop, a "!" or a "?" past a syllable's letters is the syllable's: set after the extender's line
                 // drawn from it, "Drohn ____ ?", "Thurm ____ , weit", or, in an old print, a space after it,
                 // "schieht .", "du !", "Traum ?": then read with it, not placed by it)
                 // (after the line by up to 1.7 spaces in one old print; nothing of the next word's within half a space after it)
-                bool afterLine = last != null && line.Of == last && x0 + c.MinX >= line.End && x0 + c.MinX - line.End < 2 * s
+                bool afterLine = last != null && (afterDashes || line.Of == last && x0 + c.MinX >= line.End && x0 + c.MinX - line.End < 2 * s)
                     && !ink.Any(o => o != c && o.H >= 0.5 * small && o.MinX > c.MaxX && o.MinX - c.MaxX < 0.5 * s);
                 bool apart = !afterLine && last != null && x0 + c.MinX - last.R >= 0.5 * s && x0 + c.MinX - Math.Max(last.R, last.Tail) < 1.2 * s;
                 if ((apart || afterLine) && Mark(c, all, foot, small, (x, y) => dark[x0 + x, y0 + y]) is var (mark, dot) && mark != '\0'
@@ -166,6 +172,9 @@ static class Lyrics
                     taken.Add(dot);
                     if (apart) last.Tail = Math.Max(last.Tail, x0 + Math.Max(c.MaxX, dot.MaxX) + 1);
                     last.Stop = mark;
+                    last.StopAfterLine = afterLine && !afterDashes;
+                    last.StopAfterDashes = afterDashes;
+
                     if (Verbose) res.Notes.Add($"lyrics mark '{mark}' at {x0 + c.MinX},{y0 + c.MinY}{(afterLine ? " after a line" : "")}");
                     continue;
                 }
@@ -183,7 +192,11 @@ static class Lyrics
                 // umlaut's dots or an i's over them, nor a bit of a serif broken off in a scan)
                 if (thin && c.W >= 0.3 * s && c.MinY > top + 0.3 * (foot - top) && (cuts.Count == 0 || x0 + c.MinX >= cuts[^1].R - 1))
                 {
-                    if (cuts.Count > 0) cuts[^1].Hyphen = true;   // (as far as it may be: set midway to a syllable far off)
+                    if (cuts.Count > 0)
+                    {
+                        cuts[^1].Hyphen = true;   // (as far as it may be: set midway to a syllable far off)
+                        dashes = (cuts[^1], dashes.Of == cuts[^1] ? dashes.Count + 1 : 1, x0 + c.MaxX + 1);
+                    }
                     continue;
                 }
                 bool letter = inRows.Contains(c);
@@ -196,6 +209,9 @@ static class Lyrics
                 {
                     if (apart) last.Tail = Math.Max(last.Tail, x0 + c.MaxX + 1);
                     last.Stop = stop;
+                    last.StopAfterLine = afterLine && !afterDashes;
+                    last.StopAfterDashes = afterDashes;
+
                     continue;
                 }
                 if (cuts.Count > 0 && !cuts[^1].Hyphen && x0 + c.MinX - cuts[^1].R < 0.5 * s)
@@ -305,7 +321,7 @@ static class Lyrics
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : '\0', FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Before = from > 0 ? parted[^1] : null });
                 from = to;
             }
         }
@@ -427,9 +443,23 @@ static class Lyrics
                 foreach (var (cut, text) in Strip(page, res, [c], top, foot, 1, 1, anchor, japanese))
                     if (Regex.IsMatch(text, @"^([\p{L}'’]+\p{P}{0,3}|\d+[.)・]?)$")) cut.Text = text;
         foreach (var c in cuts) c.Text = Cased(c, c.Text);
-        // (a comma the ink shows that the OCR, reading a syllable alone, dropped; not a full stop: a speck
-        // after a letter has its shape, "mich." 42 times to 18 stops found on the development set's scans)
-        foreach (var c in cuts.Where(c => c.Stop == ',' && c.Text != null && char.IsLetter(c.Text[^1]))) c.Text += c.Stop;
+        // (a comma the ink shows that the OCR, reading a syllable alone, dropped; a full stop only where a
+        // sentence ends: after the extender's line, or the row's last syllable; elsewhere a speck after a
+        // letter has its shape, "mich." 42 times to 18 stops found on the development set's scans)
+        for (int i = 0; i < cuts.Count; i++)
+        {
+            var c = cuts[i];
+            // (after dashes, "Meer _ _ _ _ . Die": an extender's if the next syllable starts a sentence, its
+            // stop the syllable's and no hyphen; else the dashes a hyphen's, "hau _ _ _ sen", the stop a bit of one)
+            if (c.StopAfterDashes)
+            {
+                var next = i + 1 < cuts.Count ? cuts[i + 1].Text : null;
+                if (next != null && char.IsUpper(next[0])) { c.Hyphen = false; c.StopAfterLine = true; }
+                else c.Stop = '\0';
+            }
+            if (c.Text == null || !char.IsLetter(c.Text[^1])) continue;
+            if (c.Stop == ',' || c.Stop == '.' && (c.StopAfterLine || i == cuts.Count - 1)) c.Text += c.Stop;
+        }
         // (a "!" or a "?" set apart, which the OCR reads as nothing or as a letter of its own, "Traum l")
         foreach (var c in cuts.Where(c => c.Stop is '!' or '?' && c.Text != null))
         {
