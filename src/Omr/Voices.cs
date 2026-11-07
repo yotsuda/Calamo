@@ -9,9 +9,13 @@ namespace Omr;
 /// nothing: the note may be alone at its time, in either voice. Events in one column sound together,
 /// so they are different voices'; the notes of one beam are one voice's. Of the ways to lay the events
 /// into lines that fit the bar, the one with the fewest lines is taken; then the fewest holes inside a
-/// line; then the fewest beamed figures broken between lines; then the first voice filling the bar
-/// (engraving programs keep it full, and the lower voices may stop); then the fewest leaps inside a
-/// line; then the fewest stems against their voice's way; then rests on their voice's side. The lines
+/// line; then the fewest beamed figures broken between lines; then the fewest lines that turn (stems
+/// their own way, then a stem forced the other way, while the other voice's note at that time lies as
+/// near the line's last note: the forced stem is the voice entering, not this one's -- the bass's half
+/// note, down by its height, that the forced-up eighths would go on from over the quarter at its pitch in
+/// kinkel19-2's bar 21; Search.Turned); then the first voice filling the bar (engraving programs
+/// keep it full, and the lower voices may stop); then the fewest leaps inside a line; then the fewest
+/// stems against their voice's way; then rests on their voice's side. The lines
 /// come out in Lily#'s order (the first voice's stems up, the second's down, the third's up ...), and
 /// an event whose stem goes the other way is marked (Ev.StemForced), so that the .lys draws the page:
 /// the chords a melody goes on with after the lower voice stopped, kinkel7-1's bar 13.
@@ -48,7 +52,7 @@ static class Voices
             Console.WriteLine($"voices of the bar at x {evs.Min(e => e.X):F0}-{evs.Max(e => e.X):F0} ({barTicks} ticks, {units.Count} units, space {s:F1}, {search.Nodes} tries{(search.Best == null ? ", none fit: by the stems" : "")}):");
             foreach (var u in units)
                 Console.WriteLine($"  x {u.X:F0} {u.Ev.Show()}: stem {u.Stem}{(u.Forced ? " forced" : "")}, pos {u.Pos:F1}{(u.Figure != null ? $", beamed ({u.Figure.Notes.Count})" : "")} -> voice {lines.FindIndex(l => l.Contains(u)) + 1} at {u.T}");
-            if (search.Best != null) Console.WriteLine($"  cost: beam holes {search.Best[0]}, lines {search.Best[1]}, short {search.Best[2]}, holes {search.Best[3]}, broken figures {search.Best[4]}, first voice short {search.Best[5]}, leaps {search.Best[6]}, stems against {search.Best[7]}, rests against {search.Best[8]}");
+            if (search.Best != null) Console.WriteLine($"  cost: beam holes {search.Best[0]}, lines {search.Best[1]}, short {search.Best[2]}, holes {search.Best[3]}, broken figures {search.Best[4]}, turned {search.Best[5]}, first voice short {search.Best[6]}, leaps {search.Best[7]}, stems against {search.Best[8]}, rests against {search.Best[9]}");
         }
         return Marked(lines);
     }
@@ -333,7 +337,7 @@ static class Voices
         void Evaluate()
         {
             var order = Order();
-            var cost = new long[9];
+            var cost = new long[10];
             cost[0] = lines.Sum(l => l.BeamHoles);
             cost[1] = lines.Count;
             // (two voices that both fill the bar before one that stops: the reader's other steps ask whether every voice fills)
@@ -352,18 +356,19 @@ static class Voices
                 var next = figures.Where(g => g.Value == f.Value && Math.Abs(g.Pitch - f.Pitch) <= 2 && f.End == g.T).ToList();
                 if (next.Count > 0 && !next.Any(g => g.Line == f.Line) && next.Any(g => g.Forced || g.Line.Forced == 0)) cost[4]++;
             }
-            cost[5] = order[0].Full(bar) ? 0 : 1;
+            cost[5] = Turned();
+            cost[6] = order[0].Full(bar) ? 0 : 1;
             // a voice keeps to its register: its leaps past a fourth, from each note to the one before it in its line, in all
             // (a bass's half note and the quarter on its pitch, over the eighths a sixth up: kinkel19-2's bar 21. Steps cost
             // nothing: a melody laid in two lines has fewer of them, not a better voice. Nor a figure's own leaps)
             foreach (var l in lines)
                 foreach (var (a, b) in l.Units.Where(u => !u.Rest).Zip(l.Units.Where(u => !u.Rest).Skip(1)))
-                    if (a.Figure == null || a.Figure != b.Figure) cost[6] += (long)(10 * Math.Max(0, Math.Abs(b.Pitch - a.Pitch) - 3));
+                    if (a.Figure == null || a.Figure != b.Figure) cost[7] += (long)(10 * Math.Max(0, Math.Abs(b.Pitch - a.Pitch) - 3));
             for (int k = 0; k < order.Count; k++)
                 foreach (var u in order[k].Units)
                 {
-                    if (u.Stem != 0 && u.Stem != Default(k)) cost[7]++;
-                    if (u.Rest && !u.FullBar && (u.Pos > 0.5 && Default(k) < 0 || u.Pos < -0.5 && Default(k) > 0)) cost[8]++;
+                    if (u.Stem != 0 && u.Stem != Default(k)) cost[8]++;
+                    if (u.Rest && !u.FullBar && (u.Pos > 0.5 && Default(k) < 0 || u.Pos < -0.5 && Default(k) > 0)) cost[9]++;
                 }
             if (bestCost != null)
                 for (int i = 0; i < cost.Length; i++)
@@ -375,6 +380,41 @@ static class Voices
             bestCost = cost;
             bestSlot = new int[units.Count]; bestT = new int[units.Count];
             for (int i = 0; i < units.Count; i++) { bestSlot[i] = order.IndexOf(units[i].Line); bestT[i] = units[i].T; }
+        }
+
+        // The lines that turn: stems their own way (a voice alone), then a stem forced the other way -- forced because
+        // another voice sounds from there, its note at that time in another line. Which of the two goes on with the
+        // line, the forced note or the other voice's, its register tells: the one nearer the line's last note, the
+        // other voice's when as near. The bass's half note, down by its height, goes on with the quarter at its pitch
+        // under the forced-up eighths, which are the voice entering (kinkel19-2's bar 21; Schumann 25-15's bar 4, the
+        // descending eighths that go on down under the second forced-up f'); it goes on with the forced note when that
+        // is the nearer (Schumann 96-2's bar 45, fisis16 on fis16's line over the e4). Not at a unison -- the two
+        // voices meet on one note, the song's fis'' doubled under (Schumann 25-9's bar 3) -- nor when the other voice
+        // has a rest there (kinkel7-1's bar 13, the song's d''8 over the second voice's eighth rest): the forced stem is
+        // then the line's own. Before the first voice's filling: the turned line would be the one full line in each
+        // (the melody that goes on, forced up, with chords down by their height after the lower voice stopped turns
+        // nothing -- natural after forced is the stems relaxing: kinkel7-1's bars 10, 14, 17 and 22)
+        long Turned()
+        {
+            long n = 0;
+            foreach (var l in lines)
+            {
+                int sum = 0;
+                Unit last = null;
+                foreach (var u in l.Units)
+                {
+                    if (u.Rest) continue;
+                    if (!u.Forced) { sum += u.Stem; last = u; continue; }
+                    if (sum * u.Stem < 0 && last != null)
+                    {
+                        var others = units.Where(o => o.Line != l && !o.Rest && o.T == u.T).ToList();
+                        if (others.Count > 0 && !others.Any(o => Math.Abs(o.Pos - u.Pos) < 0.5)
+                            && others.Min(o => Math.Abs(o.Pos - last.Pos)) <= Math.Abs(u.Pos - last.Pos)) n++;
+                    }
+                    break;
+                }
+            }
+            return n;
         }
     }
 
