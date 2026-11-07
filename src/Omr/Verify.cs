@@ -670,8 +670,9 @@ sealed class Verify
             // (what kind of difference: a note, rest, sign or stem is the music read wrong; a slur or tie
             // the reading missed or added changes no note; a dot only the scan shows is as often a staccato)
             int serious = ra.Count(t => t.Class is not ("slur_l" or "tie_l")) + rb.Count(t => t.Class is not ("slur_l" or "tie_l" or "dot"));
-            // (a bar the scan shows nothing in, the text a whole-bar rest for it: nothing to correct)
-            bool blank = rb.Count == 0 && ra.Count > 0 && ra.All(t => t.Class == "rest_1") && (!input.TryGetValue(key, out var shown) || shown.Count == 0);
+            // (a bar the scan shows nothing in, the text a whole-bar rest for it: nothing to correct -- drawn as a
+            // half rest when the bar is a partial one of a half or less, kinkel7-1's hidden voice at the bar its intro splits)
+            bool blank = rb.Count == 0 && ra.Count > 0 && ra.All(t => t.Class is "rest_1" or "rest_2") && (!input.TryGetValue(key, out var shown) || shown.Count == 0);
             string kind = blank ? "blank" : serious > 0 ? "diff" : ra.Concat(rb).Any(t => t.Class == "tie_l") ? "tie" : rb.Any(t => t.Class == "dot") ? "dot" : "slur";
             if (blank) serious = 0;
             // (and how much of the part-bar does match: one symbol wrong among twenty is surer to be a slip than three among four;

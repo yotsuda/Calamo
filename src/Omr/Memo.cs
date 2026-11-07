@@ -60,25 +60,28 @@ static class Memo
     static int Gcd(int a, int b) => b == 0 ? a : Gcd(b, a % b);
 
     /// <summary>A bar whose voices do not fill its time (each voice's length in ticks).</summary>
-    public static string BarLength(IReadOnlyList<int> sums, int barTicks, string time)
+    /// <param name="partial">a bar shorter than the time (a pickup, or one half of a bar split in two): its length as the .lys names it, "8*5"</param>
+    public static string BarLength(IReadOnlyList<int> sums, int barTicks, string time, string partial = null)
     {
+        // ("short of 6/8" / "short of the partial bar of 8*5"; "(bar of 6/8)" / "(partial bar of 8*5 in 6/8)")
+        string of = partial == null ? time : $"the partial bar of {partial}", bar = partial == null ? $"bar of {time}" : $"partial bar of {partial} in {time}";
         if (sums.Count == 1)
         {
             int sum = sums[0];
             if (sum == 0) return "nothing read in this bar";
             return sum < barTicks
-                ? $"{Length(barTicks - sum, time)} short of {time}: a note or rest missed, or a duration misread?"
-                : $"{Length(sum - barTicks, time)} too long for {time}: an extra note, or a duration misread?";
+                ? $"{Length(barTicks - sum, time)} short of {of}: a note or rest missed, or a duration misread?"
+                : $"{Length(sum - barTicks, time)} too long for {of}: an extra note, or a duration misread?";
         }
         // (every voice off by the same: said once, as of one voice)
-        if (sums.Distinct().Count() == 1) return BarLength(new[] { sums[0] }, barTicks, time);
+        if (sums.Distinct().Count() == 1) return BarLength(new[] { sums[0] }, barTicks, time, partial);
         string Voice(int v) => sums.Count == 2 ? (v == 0 ? "upper" : "lower") : $"voice {v + 1}";
         // only the voices that are off: a full one is not news
         var off = Enumerable.Range(0, sums.Count).Where(v => sums[v] != barTicks).Select(v =>
             sums[v] == 0 ? $"the {Voice(v)} voice has nothing"
             : sums[v] > barTicks ? $"the {Voice(v)} voice is {Length(sums[v] - barTicks, time)} too long"
             : $"the {Voice(v)} voice is {Length(barTicks - sums[v], time)} short");
-        return string.Join(", ", off) + $" (bar of {time})";
+        return string.Join(", ", off) + $" ({bar})";
     }
 
     /// <summary>A bar that holds <paramref name="bars"/> bars of its time and is as many times as wide as its neighbours (Sidecar.BarsInOne).</summary>

@@ -38,7 +38,10 @@ static partial class Layout
             // a barline stands clear: in the staff's spaces, nothing touches it on either side
             // (a C clef's thin bar has the clef's curves right beside it)
             if (!Clear(d, sys.Staves[0], a - 2, x + 1, s)) { if (Signatures.Verbose) Console.WriteLine($"    barline? x {a}-{x - 1} (system {sys.Index + 1}): not clear"); continue; }
-            if (centers.Count > 0 && c - centers[^1] < 1.0 * s) centers[^1] = c; // double barline
+            // a double barline, or a repeat's thin line and its thick one: a space and a half apart at most, centre to
+            // centre (MuseScore sets a ":|" thick line 1.05 spaces from its thin one -- kinkel10-4's bar 22, the two
+            // a sliver of 1.0 spaces apart that held an empty measure; no measure is as narrow)
+            if (centers.Count > 0 && c - centers[^1] < 1.5 * s) centers[^1] = c;
             else centers.Add(c);
         }
         // The barlines the learnt detector found (one per staff it crosses) that the rules did not:
@@ -134,7 +137,7 @@ static partial class Layout
                     // set right after it on the voice's and the right hand's)
                     if (sys.Staves.Count >= 3 && onStaves.Count < 2 && !sys.Staves.Where(st => !onStaves.Contains(st)).All(Dark)) continue;
                 }
-                if (centers.Any(c => Math.Abs(c - x) < 1.0 * s)) continue;
+                if (centers.Any(c => Math.Abs(c - x) < 1.5 * s)) continue;   // (the rules' line, or the other line of its double)
                 centers.Add(x);
             }
             centers.Sort();
@@ -152,6 +155,7 @@ static partial class Layout
         // a courtesy time or key signature after the last barline is not a measure: that
         // barline ends the system's last measure
         if (!(sys.Bars.Count > 1 && right - sys.Bars[^1] < 3.5 * s)) sys.Bars.Add(right);
+        if (Signatures.Verbose) Console.WriteLine($"    barlines (system {sys.Index + 1}, s {s:F1}): {string.Join(" ", sys.Bars.Select(b => b.ToString("F0")))}");
     }
 
     /// <summary>

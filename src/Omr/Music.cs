@@ -26,6 +26,16 @@ static class Dur
         return null;
     }
 
+    /// <summary>A partial bar's length as Lily# takes it: one note value ("4."), or a count of one
+    /// ("8*5", five eighths) when no single value spells it; null when none does.</summary>
+    public static string PartialText(int ticks)
+    {
+        if (Text(ticks) is string one) return one;
+        foreach (int b in new[] { 2, 4, 8, 16, 32, 64 })
+            if (ticks > 0 && ticks % Of(b, 0) == 0) return $"{b}*{ticks / Of(b, 0)}";
+        return null;
+    }
+
     public static int OfTime(string time)
     {
         var p = time.Split('/');

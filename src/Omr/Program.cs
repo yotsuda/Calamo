@@ -595,7 +595,7 @@ if (firstBar == 1 && all.ContainsKey(firstBar))
 {
     int full = Dur.OfTime(state.BarTime[firstBar]);
     var sums = VoiceSums(firstBar);
-    if (sums.Count > 0 && sums.All(x => x > 0 && x < full) && (sums.Distinct().Count() == 1 || state.PickupOffset == 1) && Dur.Text(sums.Max()) != null)
+    if (sums.Count > 0 && sums.All(x => x > 0 && x < full) && (sums.Distinct().Count() == 1 || state.PickupOffset == 1) && Dur.PartialText(sums.Max()) != null)
     {
         pickupTicks = sums.Max();
         RestsFor(firstBar, pickupTicks);
@@ -615,6 +615,36 @@ if (pickupTicks > 0 && all.Count > 1)
         closingTicks = full - pickupTicks;
         RestsFor(last, closingTicks);
     }
+}
+// A bar split in two, at a section's cut or at a system's end: a repeat sign inside a bar, the next system
+// opening with it (kinkel7-1's bar 6, "a8 r8 r8 r8 :|" and "|: r8 r8 c4.", which Reader counts as two
+// measures), or a verse of a strophic song ending short before its ":|", the next verse's pickup making up
+// the bar (kinkel10-4's bars 22 and 24, and 10 and 11 where the repeat sign went unread). The bar before and
+// the bar that opens the section or the system are each short of the time on every staff with anything in
+// it, and on one staff at least the two together are exactly the bar (as Reader joins a bar split at an
+// open break). Each is written as long as it is: the first with partial in every part, the second as the
+// section's pickup, or with partial too; no todo on either (a reading's length is wrong when it fills
+// neither half).
+var cutPartials = new Dictionary<int, int>();   // the bar -> how long it is, in ticks
+// (a part's longest voice in the bar, 0 when nothing is read on its staff)
+int PartTicks(int bar, int pi)
+{
+    var vs = allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() };
+    return vs.All(v => v.Count == 0 || v.All(e => e.Blank || e.FullBar)) ? 0 : vs.Where(v => v.Count > 0).Max(v => v.Sum(e => e.Ticks));
+}
+foreach (int b in sections.Skip(1).Select(x => x.From).Concat(systemStarts.Keys).Distinct().OrderBy(x => x))
+{
+    int before = all.Keys.Where(k => k < b).DefaultIfEmpty(-1).Last();
+    if (before < 0 || !all.ContainsKey(b) || before == firstBar && pickupTicks > 0 || cutPartials.ContainsKey(before) || state.BarTime[before] != state.BarTime[b]) continue;
+    int full = Dur.OfTime(state.BarTime[b]);
+    var sumsA = VoiceSums(before); var sumsB = VoiceSums(b);
+    if (sumsA.Count == 0 || sumsB.Count == 0 || !sumsA.All(x => x > 0 && x < full) || !sumsB.All(x => x > 0 && x < full)) continue;
+    int a = Enumerable.Range(0, cfg.Parts.Count).Select(pi => (A: PartTicks(before, pi), B: PartTicks(b, pi))).Where(p => p.A > 0 && p.B > 0 && p.A + p.B == full).Select(p => p.A).FirstOrDefault();
+    if (a == 0 || Dur.PartialText(a) == null || Dur.PartialText(full - a) == null) continue;
+    cutPartials[before] = a;
+    cutPartials[b] = full - a;
+    RestsFor(before, a);
+    RestsFor(b, full - a);
 }
 int valid = 0, total = 0;
 var spans = new Dictionary<(int Bar, int Part), (int Start, int End)>();   // where each part-bar's music is in the text (Verify)
@@ -806,7 +836,8 @@ for (int si = 0; si < sections.Count; si++)
 {
     int secFrom = sections[si].From, secTo = si + 1 < sections.Count ? sections[si + 1].From - 1 : int.MaxValue;
     lys.AppendLine($"section {sections[si].Name}{sections[si].Label} {{");
-    if (si == 0 && pickupTicks > 0) lys.AppendLine($"  partial {Dur.Text(pickupTicks)}");
+    if (si == 0 && pickupTicks > 0) lys.AppendLine($"  partial {Dur.PartialText(pickupTicks)}");
+    else if (cutPartials.TryGetValue(secFrom, out int secTicks)) lys.AppendLine($"  partial {Dur.PartialText(secTicks)}");
     for (int pi = 0; pi < cfg.Parts.Count; pi++)
     {
         lys.AppendLine($"  {cfg.LysId(pi)} {{");
@@ -840,9 +871,12 @@ for (int si = 0; si < sections.Count; si++)
             if (pi == 0 && textMarks.FirstOrDefault(m => m.Bar == bar && m.IsTempo && m != firstTempo) is { } tm)
                 pre.Add("tempo " + Tempo.Lys(tm.Words, tm.Bpm, state.BarTime[bar]));
             prevBar = bar;
-            // (the pickup, and the last bar that completes it: each as long as it is)
-            bool shortBar = bar == firstBar && pickupTicks > 0 || bar == closingBar;
-            int barTicks = bar == closingBar ? closingTicks : shortBar ? pickupTicks : Dur.OfTime(state.BarTime[bar]);
+            // (the pickup, and the last bar that completes it: each as long as it is; so the two halves of a
+            // bar split at a section's cut, the first said so in every part, the second the section's pickup)
+            bool shortBar = bar == firstBar && pickupTicks > 0 || bar == closingBar || cutPartials.ContainsKey(bar);
+            int barTicks = bar == closingBar ? closingTicks : cutPartials.TryGetValue(bar, out int cutTicks) ? cutTicks : shortBar ? pickupTicks : Dur.OfTime(state.BarTime[bar]);
+            string partial = shortBar ? Dur.PartialText(barTicks) : null;   // (the length a note on the bar names it by)
+            if (cutPartials.ContainsKey(bar) && bar != secFrom) pre.Add("partial " + partial);
             var voices = allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { arr[pi] ?? new List<Ev>() };
             if (voices.Count == 0) voices.Add(new List<Ev>());
             total++;
@@ -858,7 +892,7 @@ for (int si = 0; si < sections.Count; si++)
                 bool wait = shortBar && sum < barTicks || handed.Contains(voices[0]);
                 // (the comment on the bar's own line: it says what, not which bar, as the @todo memos do)
                 // (a staff short of the pickup or the last bar: spacer rests where the page shows the others' notes)
-                if (sum == barTicks || wait) valid++; else note = $"  // {Memo.BarLength(new[] { sum }, barTicks, state.BarTime[bar])}";
+                if (sum == barTicks || wait) valid++; else note = $"  // {Memo.BarLength(new[] { sum }, barTicks, state.BarTime[bar], partial)}";
                 overfull = note != "";
                 offBy = overfull ? Math.Abs(sum - barTicks) / (double)barTicks : 0;
                 music = wait ? LineText(voices[0], barTicks, pad: true, Anchors(bar, barTicks), marks) : LineText(voices[0], barTicks, pad: false, marks: marks);
@@ -869,7 +903,7 @@ for (int si = 0; si < sections.Count; si++)
                 // (a voice that enters late is short by design, beside a full one: a voice over the bar's
                 // length, or no voice filling it, is wrong for sure)
                 var sums = voices.Select(v => v.Sum(e => e.Ticks)).ToList();
-                if (voices.All(v => v.Sum(e => e.Ticks) is var x && (x == barTicks || shortBar && x < barTicks || handed.Contains(v)))) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar])}";
+                if (voices.All(v => v.Sum(e => e.Ticks) is var x && (x == barTicks || shortBar && x < barTicks || handed.Contains(v)))) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar], partial)}";
                 overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks) && !voices.Any(handed.Contains);
                 offBy = sums.Max(x => Math.Abs(x - barTicks)) / (double)barTicks;
                 music = "voice";
@@ -1234,7 +1268,7 @@ var differing = verify?.Places.Where(p => p.Diff).Select(p => p.Bar).ToHashSet()
 if (verify != null)
     foreach (var p in verify.Places.Where(p => differing.Contains(p.Bar))) sidecar.AddTodo(p.Bar, p.Part, "verify", p.Notes, p.Confidence);
 foreach (var (bar, off) in lengthIssues.Where(kv => !differing.Contains(kv.Key)))
-    sidecar.AddLengthTodo(bar, off, Dur.OfTime(state.BarTime[bar]), state.BarTime[bar], bar == firstBar, quiet: verify?.Drawn == true, readings);
+    sidecar.AddLengthTodo(bar, off, bar == closingBar ? closingTicks : cutPartials.TryGetValue(bar, out int ct) ? ct : Dur.OfTime(state.BarTime[bar]), state.BarTime[bar], bar == firstBar, quiet: verify?.Drawn == true, readings);
 // --todo-threshold x: a todo this sure is kept in x.omr.json only (0.8; 1: every todo goes into the .lys)
 if (opt.TryGetValue("todo-threshold", out var tth)) sidecar.Threshold = double.Parse(tth, CultureInfo.InvariantCulture);
 // the todos as @todo(key "memo") on each bar's first note or rest (Lily# warns, and draws them red)

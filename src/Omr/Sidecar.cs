@@ -102,7 +102,7 @@ sealed class Sidecar
         }
         foreach (var (p, i) in parts.Select((p, i) => (p, i)))
             todos.Add(new Todo(bar, p.Part, "length",
-                BarsInOne(bar, p.Part, sums[i], barTicks) is int k and > 1 ? Memo.MissedBarLine(k, time) : Memo.BarLength(sums[i], barTicks, time),
+                BarsInOne(bar, p.Part, sums[i], barTicks) is int k and > 1 ? Memo.MissedBarLine(k, time) : Memo.BarLength(sums[i], barTicks, time, barTicks < Dur.OfTime(time) ? Dur.PartialText(barTicks) : null),
                 Confidence: LengthConfidence(p.Voices, barTicks), Quiet: quiet, Lengths: new() { deltas[i] },
                 Readings: readings != null && readings.TryGetValue((bar, p.Part), out var r) ? r : null));
     }
