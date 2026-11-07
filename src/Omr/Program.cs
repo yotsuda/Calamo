@@ -181,7 +181,7 @@ static string XmlOf(string path)
 }
 // --det-threshold x: the detector's threshold (0.5; lower to see what it is unsure of with --detections)
 if (opt.TryGetValue("det-threshold", out var dth)) Detector.Threshold = double.Parse(dth, CultureInfo.InvariantCulture);
-if (opt.TryGetValue("at", out var at)){ var xy = at.Split(','); Symbols.DebugAt = (double.Parse(xy[0]), double.Parse(xy[1])); }
+if (opt.TryGetValue("at", out var at)){ var xy = at.Split(','); Symbols.DebugAt = (double.Parse(xy[0]), double.Parse(xy[1])); if (xy.Length > 2) Symbols.DebugPage = int.Parse(xy[2]); }
 
 var all = new SortedDictionary<int, List<Ev>[]>();
 var allVoices = new Dictionary<(int Bar, int Part), List<List<Ev>>>();
@@ -875,8 +875,7 @@ for (int si = 0; si < sections.Count; si++)
                 if (voices.Count == 2 && LyricVerses(pi).Count > 0 && SungLine(bar, pi) == voices[1] && !voices.Any(handed.Contains))
                 {
                     written = new List<List<Ev>> { voices[1], voices[0] };
-                    foreach (var e in voices[0]) e.StemForced = 1;
-                    foreach (var e in voices[1]) e.StemForced = -1;
+                    foreach (var e in voices[0].Concat(voices[1])) e.StemForced = e.Stem;
                 }
                 foreach (var v in written)
                 {

@@ -7,12 +7,28 @@ Notes on parts of the reading that the [README](../README.md) only names. The si
 `--poly` scores each staff-bar as a multiset of (pitch, duration), since with several voices on
 a staff the order of events is not what is being measured.
 
-Voices: a staff-bar whose events overfill the bar is split, stem-up events to voice 1 and
-stem-down to voice 2, rests and stemless notes to whichever voice they complete; `.lys` gets
-`voice { } { }`, with spacer rests placed in time by the x positions of complete lines on any
-staff of the system. `--voices 'dir/voices-{part}-v*.notes'` (event listener, one file per
-staff and voice) scores it: BWV 610 has the right number of voices in 39/39 staff-bars and
-98.0% of the notes in the right voice and order (the same as the heads found at all).
+Voices: a staff-bar whose events overfill the bar (or stack a rest on a note) is laid into
+lines of events that follow one another in time (`Voices.Separate`). A stem against the way
+its heads would have it alone (up for a head on or over the middle line, down for one under
+it) marks a voice -- up the first, down the second, as engravers force them where two voices
+share a staff; a stem its heads would have anyway says nothing, the note may be alone at its
+time in either voice. Events in one column sound together and are different voices'; the
+notes of one beam are one voice's. Of the layings that fit the bar (a column no earlier than
+the columns before it, nothing past the bar line), the reader takes the one with the fewest
+notes of a beam waiting for another line, then the fewest lines, the fewest lines that stop
+short, the fewest holes inside a line, the fewest beamed figures broken between lines, the
+first voice filling the bar (engraving programs keep it full; the lower voices may stop), the
+fewest leaps inside a line, the fewest stems against their voice's way, and rests on their
+voice's side. The lines come out in Lily#'s order (the first voice's stems up, the second's
+down, the third's up ...), and a stem that goes the other way is written `@stemUp` /
+`@stemDown`, so that the page is drawn again: the chords a melody goes on with under natural
+stems after the lower voice stopped stay the melody's. A bar no laying fits (a value misread,
+a triplet with no number) is split by the stems alone, as before, and stays too long for the
+reader's other steps to see. `.lys` gets `voice { } { }`, with spacer rests placed in time by
+the x positions of complete lines on any staff of the system. `--voices
+'dir/voices-{part}-v*.notes'` (event listener, one file per staff and voice) scores it: BWV
+610 has the right number of voices in 39/39 staff-bars and 98.0% of the notes in the right
+voice and order (the same as the heads found at all). `--at x,y[,page]` prints a bar's laying.
 
 ## Title, composer, poet
 

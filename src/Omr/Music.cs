@@ -107,6 +107,7 @@ sealed class Ev
     public int Stem;                            // OMR: +1 stem up, -1 stem down, 0 none (rest, whole note)
     public int StemForced;                      // OMR: +1 @stemUp, -1 @stemDown: its voice is written out of order, for the words on it
     public double Y;                            // OMR: page y (a rest's height hints at its voice)
+    public int PosLo, PosHi;                    // OMR: its lowest and highest head's place in steps from the staff's middle line (up positive): the way a stem of its own would go
     public double StemX;
     public double StemLo, StemHi;               // OMR: the page rows its heads and stem run over (a chord's, all of them)
     public List<EvAlt> Alts;                   // OMR: other readings of its heads (a todo's candidates); shared by its copies

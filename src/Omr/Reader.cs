@@ -182,6 +182,7 @@ static class Reader
             sym.Heads.RemoveAll(h => Aside(h.Y));
             sym.Rests.RemoveAll(r => Aside(r.Y));
         }
+        Symbols.DebugPageNow = page;
         var res = new PageResult { Page = page, Dark = d, Ink = ink, S = s, Systems = systems, Sym = sym, FirstBar = firstBar, Frames = sym.Frames };
         if (sym.Note != null) res.Notes.Add($"page {page}: {sym.Note}");
         foreach (var n in groupNotes) res.Notes.Add($"page {page} {n}");
@@ -1417,7 +1418,7 @@ static class Reader
                     P = pitch, Ticks = Dur.Of(basis, h.Dots) * h.Scale.Num / h.Scale.Den / (h.Tremolo > 0 ? 2 : 1), X = x, Scale = h.Scale, Tuplet = h.Tuplet,
                     Tremolo = h.Tremolo, TremoloFirst = h.TremoloFirst,
                     Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 && !h.Held ? h.Cluster : 0, Held = h.Held,
-                    Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, Tied = h.Tie ? new List<Pitch> { pitch } : null,
+                    Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, PosLo = h.Pos, PosHi = h.Pos, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
                     SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
                     Bare = bare && !h.Slash ? new List<int> { dia } : null, OctaveClef = octaveClef,
@@ -1442,6 +1443,7 @@ static class Reader
                 {
                     if (ev.Tie) mate.TieAt(pitch);
                     mate.StemLo = Math.Min(mate.StemLo, ev.StemLo); mate.StemHi = Math.Max(mate.StemHi, ev.StemHi);
+                    mate.PosLo = Math.Min(mate.PosLo, h.Pos); mate.PosHi = Math.Max(mate.PosHi, h.Pos);
                     mate.SlurStart |= ev.SlurStart;
                     mate.SlurEnd |= ev.SlurEnd;
                     // (a new list: the first head's single copy shares the old one; a chord's dot is one)

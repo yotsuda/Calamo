@@ -110,6 +110,8 @@ sealed class PageSymbols
 static partial class Symbols
 {
     public static (double X, double Y)? DebugAt;
+    public static int? DebugPage;           // --at x,y,page: that page's only (pages share their coordinates)
+    public static int DebugPageNow;         // the page being read
     static readonly Dictionary<Other, List<Other>> pieceOf = new();
     public static bool TupletVerbose;
     public static bool KnnOnly;      // no hand-written rules for the shapes the classifier is unsure of
