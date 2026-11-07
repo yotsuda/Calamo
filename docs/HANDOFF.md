@@ -2,6 +2,34 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S57 第 3 歩: todo の空振りの「bar length」の型を 2 つ直した。(1) MuseScore の `:||`（細い線と太い線の中心が 1.05 間離れる）が 1.0 間の束ねの閾値を越えて 2 本の小節線になり、間の 14 px が「nothing read in this bar」の空の小節になっていた → 二重線の束ねを 1.5 間に。(2) **小節が 2 つに割れる形**（反復記号が小節の途中: kinkel7-1 の 6 小節、有節歌曲の節の終わりが短く次の節の弱起が補う: kinkel10-4 の 10/11・22/24）を **`partial` で書く**（前の小節は全パートに `partial N`、後ろは section の頭なら section の `partial`、段の頭なら同じく各パートに。Lily# の `partial 8*5` の数える形）。開発用の台の todo の精度 written **37.4 → 40.0%**（浄書 **20.0 → 25.0%**、marked 155 → 116）、再現率 71.0 → 69.6（浄書 60.8 → 58.0）。check 2 本とも 0・0、開発用の台 1 better（2026-11-07 夜、前の節の次の一手 1）
+
+**現在地**: 検出器は detector42 のまま。`data/eval/chopin28-4/src/*.lys` の 4 つの未追跡ファイルは前からのまま。頭の check は OK（0・0、規則）。終わりの check は **規則 0・0、検出器 0・0**（検出器の check は 32 分かかる）。開発用の台（`-Dev -Reuse -Verify -OmrArgs --read-lyrics`）は **1 better（kinkel10-4-ms 1233 → 1235）、29 同じ、印 0・0** → `docs/dev-sets.tsv` に写した。評価台（`-Eval -Reuse -Verify -OmrArgs --read-lyrics`、66 台、13 分）: **3 better（lied-lang36-2-ms 546 → 563、lied-kinkel7-4-ms・-scan +1 ずつ）、0 worse、63 同じ、印 3 better（lang36-2-ms のスラーの始まり 38 → 39・終わり 37 → 39、装飾 12 → 13）** → `docs/eval-sets.tsv` に写した（原因の内訳は voice 660 のまま）。**評価台の todo の精度**（`todo-quality.ps1 -Kinds eval`、この道具立てで初めて）: written 8952 part-bars、wrong 1345、marked 2077（load 23.2%）、recall 66.1%、**precision 42.8%**、clean 93.4%。スキャン 71.9 / 50.1、**浄書 54.2 / 30.6**（wrong 441、marked 780）。REQUESTS に `fixed` なし（23 は `open` のまま）、種は 6 つとも `omr-triage.json` あり。
+
+**一番大事なこと**:
+1. **空の小節の原因**は閾値の際: この MuseScore の PDF は 1 間 14.2 px（A4 300 dpi）で、`:|` の細い線（x 666）と太い線（678〜684、中心 681）の差 15 px が `Layout.FindBars` の束ね 1.0 間（14.2 px）をわずかに越えていた。kinkel7-1 の段 3 でも同じ 2 本を Reader が「1.1 間離れた opening の 2 本目」として別に消していた。束ね（規則の候補どうしと、検出器の線を規則の線に重ねないとき）を **1.5 間**に。`Signatures` が `:|` の 2 本目の線を探す幅（1.5 間）・Reader 259 行（1.5 間）と同じ値。1 間半より狭い小節は無い。
+2. **割れた小節の `partial`**（`Program.cs` の `cutPartials`、弱起 `pickupTicks`・終わりの `closingBar` の次）: 候補の切れ目 = section の頭 ∪ 段の頭（`systemStarts`）。前の小節と合わせて、**両方とも全ての声部が 0 < 長さ < 拍子で、どれかのパートの最長の声部どうしが足してちょうど拍子**（Reader が開いた段の切れ目で小節を結合する基準と同じ）、拍子が同じ、最初の小節の弱起と重ならないとき。書き方は Lily# の GRAMMAR（section の頭の弱起は section の `partial` だけ、途中の `partial` は小節を共有する全パートに）。`Dur.PartialText` = 1 つの音価で書けなければ `8*5` の数える形（2026-11-04 のオーナー決定）。最初の弱起（`pickupTicks`）も `PartialText` にしたので 5/8 の弱起も書ける（前は `a pickup bar?` の todo で小節は短いまま）。長さの todo の文言は「the lower voice is an eighth too long (partial bar of 2 in 9/8)」（`Memo.BarLength` の `partial`、Sidecar も同じ長さで）。
+3. **Verify の "blank"**（紙に何もなく読みは全小節休符 = 直すものなし、quiet）に `rest_2` を足した: `partial 2` の `R2` は 2 分休符で描かれ、7-1 の隠れた歌の譜表の 6 小節が written になっていた。
+4. **残った「written right | bar length」7 件は全部 lang36-3**（12 lh、16/25/45/49/52/54 rh）: 音の採点が right でも休符の欠けなどで小節は短い = `.lys` の実際の誤り（todo は正しい。物差しの問題 = 前の節の正直 2）。「written wrong | bar length」14 は本物。浄書の空振りの残りの型（タイ無し 13、♭ 余分 11 = REQUESTS 23、タイ/スラー 8、タイ余分 5）も音の採点に出ない本物の誤り。**todo を消す側の仕事はここまで**で、あとは読みを直す仕事か、物差しにタイ・スラー・描き直しの一致を入れるか。
+5. 開発用の台の型の数え方: `tools/todo-types.ps1 -Kind ms`（前の節）。精度は `tools/todo-quality.ps1 -Kinds dev`。
+
+**数字**: 開発用の台 written 2880 part-bars、wrong 358、marked 681 → 623（load 23.6 → 21.6%）、recall 71.0 → 69.6%、precision 37.4 → 40.0%、clean 95.3 → 95.2%。浄書 marked 155 → 116、recall 60.8 → 58.0%、precision 20.0 → 25.0%。スキャン 72.7 / 42.6 → 71.4 / 43.4。音は 30 台で +2（10-4）。
+
+**正直に書いておくこと**:
+1. kinkel10-4 の 10/11 小節は **反復記号 `:|` が form に読めていない**（1 ページ目の 2 段目の終わり。run.txt の「a repeat barline's dots … the repeat is not read」はページ 3 の別の箇所）。`partial` で小節の長さは合うが、`.lys` に反復は無い。別の小さな仕事。
+2. 再現率が 2 件（浄書 31 → 29 当たり）下がった。1 件は 7-1 の b6-voice_（隠れた譜表の全小節休符。前は `R8*9` → 描き直しの全休符で「written wrong」= まぐれ当たり）。もう 1 件は追っていない。
+3. 段の頭での `partial` の一般化は、閉じた段の切れ目で割れた小節（Reader の `splitHead`、2 小節に数える）を想定。開いた切れ目は Reader が結合するので来ない。隣り合う 2 小節が誤読で偶然ちょうど補い合えば誤って `partial` になる（check・開発用の台では出ていない。評価台は 3 better・0 worse で、音の数字には出ない）。
+4. `partial` は `clef`/`key` の後ろに置く（`clef bass partial 2 …`）。lysc は通った（7-1・10-4、LYS2001 の警告が消えた）。
+5. 評価台の `.lys` の変化（`partial` が入る台）は数字だけ見た。描き直しの絵は見ていない。
+
+**私の操作の誤り**: `Memo.cs` を読まずに Edit して失敗したのに気づかず、ビルドが落ちたまま 2 台を回して古いビルドの結果を見た。`s` を見ずに 1 間を 36 px と思い込み（part-bar の箱の高さから）、閾値の際だと気づくまで遠回りした。
+
+**次の一手**:
+1. **S57 続き（todo の精度）**: 評価台の浄書は written 30.6%（開発用の台の浄書 25.0%）。空振りの残りは `.lys` の本物の誤りなので、**精度 50% の目安は音の採点だけの物差しでは届かない**: 物差しにタイ・スラー（`mark-diffs.txt`）と描き直しの一致を入れて測り直すか、目安を見直すかを **オーナーに諮る**（前の節の正直 2）。(b) の ♭ 11 件は REQUESTS 23 待ち。
+2. **S57 続き（声部）**: 前の節のまま（「正直 1」の (i)〜(iii) はオーナーへ。Schumann の歌曲の MuseScore 版を開発用の台に足す。19-6 の 13）。
+3. **小さな残り**: kinkel10-4 の 1 ページ目の段末の `:|` が form に出ない（正直 1）。読めれば 10/11 は section の切れ目になり、`.lys` に反復が入る。
+4. **S58（背景）**: 学習の比べ方と実譜の教材。
+
 ## S57 第 2 歩: 検出器 check で下がった記号 3 つは「符幹のない線（全音符・休符だけ）を最後に並べる」ことで声部 1・2 が原譜と入れ替わり、装飾音の探す側（上の声部は上、下の声部は下）が逆になったもの。相手の線が 1 本なら反対の声部の席に置くようにして 3 つとも戻した。`@stemUp`/`@stemDown` の印が幾何なしの試し読み（`Reader.Fills`）で消えていたのを直した。**todo の精度の基準を測り**（開発用の台 written 37.4%、浄書だけ 20.0%）、浄書の空振りの最大の型は「小節の途中の音部記号の後、次の小節で元に戻るのを書かない」= **`.lys` の実際の誤り**（kinkel10-5 の lh 23〜29 小節が 12 度ずれて描かれる）で、書き手を直した（2026-11-07 午後〜夕、前の節の次の一手 2）
 
 **現在地**: 検出器は detector42 のまま。`data/eval/chopin28-4/src/*.lys` の 4 つの未追跡ファイルは前からのまま。頭の check は OK（0・0、規則）。声部の席の直し（e424a68）で **検出器の check は 7 better・WORSE なし**（`ver.slurs.spare` 13 → 12、`ornN`/`ornNS.ornament` recall 99.0 → 99.8・precision 99.5 → 100、`scrK`/`scrKS.scripts2` recall 99.8 → 99.9。`-Detector -Accept` で基準値に）、規則の check は OK。印を保つ直し（152b867）は check 2 本とも 0・0。**開発用の台 30 台・評価台 66 台とも `docs/*-sets.tsv` と同じ**（音・印・原因の内訳。`--read-lyrics` つき、開発用の台は `-Verify` つきで `tools/todo-quality.ps1` が読める状態）。音部記号の書き手の直し（下の 4）は **check 2 本とも 0・0**（描き直しの旗は gen の台では動かない。開発用の台・評価台は `.lys` の本文だけ変わるので数字は同じはずだが、評価台は回していない: 正直 3）。kinkel10-5-ms の「旗が立ったが right」は 17 → 8（lh の 22〜29 が全部消え、残りは全休符 5・符幹 1・タイ 2）、kinkel10-6-ms は 10 → 8（3 小節の頭の余分な `clef treble` が消え、残りは REQUESTS 23 の ♭ 4 つほか）、lang36-3-ms は 56 flagged / 22 both。**REQUESTS 23 を `open` で足した**（小節の途中の `clef` の後、調号の音に ♭ が描かれる Lily# の不具合。オーナーに「新しい項目がある」と伝える）。`fixed` なし、種は 6 つとも `omr-triage.json` あり。
