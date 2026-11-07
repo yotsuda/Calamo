@@ -2,6 +2,36 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S57 第 4 歩: (1) kinkel10-4 の偽の `|: ~A :|`（検出器が同じ点の対を `:|` 0.64 と `|:` 0.53 の両方に見て、段頭の小節の `|:` の例外が後者を通していた）を直し、form は `{ |: ~Intro :| ~A }` に。(2) **Schumann の歌曲 5 曲を開発用の台に足した**（OpenScore Lieder、ms のみ。Dichterliebe 以外の 56 曲の mscx でピアノの小節の声部数を数えて選んだ。3〜4 声部の小節は corpus のどの曲にもほとんど無く、評価台の声部の誤りは 2 声の織りに集中している）。Widmung は 90.7%、声部 53 が最大の原因。(3) 声部の探索の **枝刈りが評価の順と食い違っていた**（穴の数で先に刈り、「短い線の数」を見ていなかった）のを直して Widmung の 5・8 小節の左手が合い 53 → 49、既存 30 台は音・声部とも同じ（2026-11-07 深夜、前の節の次の一手 3 と 2）
+
+**現在地**: 検出器は detector42 のまま。`data/eval/chopin28-4/src/*.lys` の 4 つの未追跡ファイルは前からのまま。頭の check は OK（0・0、規則）。**開発用の台は 35 台**（30 + Schumann 5）: `-Dev -Reuse -Verify -OmrArgs --read-lyrics` で **30 台は音・印とも同じ、5 台は new** → `docs/dev-sets.tsv` に写した。終わりの check: **（この節の末尾「check の記録」）**。REQUESTS に `fixed` なし（23 は `open` のまま）、種は 6 つとも `omr-triage.json` あり。評価台は回していない（form の直しは kinkel10-4 だけに効く型、声部の枝刈りは開発用の台の 30 台で音・声部とも動かなかったので、次のセッションの頭で `-Eval -Reuse -Verify -OmrArgs --read-lyrics`（13 分）を回して `docs/eval-sets.tsv` と比べる）。
+
+**一番大事なこと**:
+1. **前の節の「正直 1」は見立て違い**: kinkel10-4 の 1 ページ目の 2 段目の終わりは `:|` ではなく **`||`（細＋太）と「To Vers 4.」**で、form に読むものは無い（10/11 の `partial` は正しい）。偽物は **3 ページ目の 21 小節の `:|`**（段 5 の最初の小節、5/8）: 検出器が x 654 の同じ点の対を `rep_close` 0.64 と `rep_open` 0.53 の両方に見る。`Form.Find` の `Dots` は `rep_open` を「その小節の左の線」に当てるが、段の最初の小節は `|:` の線が音部記号の小節と一緒に落ちるので距離を問わない例外があり、これが通って「21 小節を `|:` で開き `:|` で閉じる」1 小節の反復 = `|: ~A :|` と、その後ろの `~B` ができていた。直し: **同じ線（同じ段、x が 1 間以内）に反対の種類の印を先に（= 確信の高い方を）取っていれば、その点の対は印にしない**。21 小節は Intro の最後の `partial 8*5`、次の「Vers 4.」の弱起 `partial 8` が A の頭に。音は 1235 のまま、lysc は通る。
+2. **Schumann の歌曲の選び方**（`data/dev/lieder/songs.tsv` の末尾、`src/lc<id>.mscx` は GitHub の OpenScore/Lieder から。IMSLP の刷りは落としていないので `pages` は空、scan は無い）: corpus の Schumann 56 曲（Dichterliebe を除く）の mscx で、ピアノの各小節に `<Chord>` を持つ `<voice>` が 2・3・4 本ある小節を数えた。**3 本以上はどの曲も 0〜5 小節**（最大は Schneeglöckchen の 5）で、Dichterliebe 本体も 0〜5。評価台の浄書の `c_voice` 445 は dl-ms-01 73・08 69・10 83・12 45・lang36-1 43 に集中し、どれも 2 声の小節が多い曲（37・33・25・31）。つまり HANDOFF にあった「Dichterliebe 型の 3〜4 声部」は的外れで、**要るのは 2 声の織り（分散和音の上に保続音・旋律）**。2 声の小節が多い順に Lied der Suleika（Op.25-9、65 小節）、Auf einer Burg（Op.39-7、57）、Aus den hebräischen Gesängen（Op.25-15、57）、Widmung（Op.25-1、42）、Schneeglöckchen（Op.96-2、40 + 3 声 5）を取った。
+3. **声部の探索の枝刈り**（`Voices.Search.Dfs`）: 「同じ線の数で穴（gaps）が最良より多ければ捨てる」だったが、`Evaluate` の順は「連桁の穴 → 線の数 → **短い線の数** → 穴 → …」なので、穴の多い置き方が短い線の少ない置き方（= 勝つ方）でも刈られていた。Widmung の 5 小節の左手（8 分 4 つ、2 拍休んで 8 分 2 つ、の下で全音符＋2 分音符が小節を埋める）がこれ。直し: 刈るのは「確実に短い線」（穴のある線、遅れて始まった線）の数が最良より多いとき、同数で穴が多いとき。Widmung の 5・8 小節の左手が合い、53 → 49。既存 30 台は音・声部の数字が動かない。
+4. **Widmung に残る声部の誤り 49 の型**（`voice-diffs.txt`）: (a) **下の声部の長い音（2 分・全音符）が上の 8 分の線に取られる**（7・9・10・12・13 の左手。MuseScore の声部 1 は見えない休符で短く、長い音を 8 分の線に入れると線が「埋まる」ので、短い線の数（cost 2）が符幹の向き（cost 7）に勝つ）。(b) **中声部の 4 分が下の 8 分の符幹に乗って描かれる**（4 小節の右手: `<g' ees''>8` と読む。絵からは和音と区別がつかない）。(c) **声部 1 に見えない休符、音形は声部 2**（5 小節の右手: 1 本の線でちょうど埋まり、紙に 2 声の印は無い）。(b)(c) は絵に出ない正解の約束。(a) は **cost 7（符幹の向き）を cost 2（短い線）より前に置く**実験で測れる（30 台 + Schumann 5 台の A/B）。
+5. **19-6 の 13 小節**（前の節の次の一手 2）は 19-2 の 21 と同じ署名: 小節を埋める 16 分の線が符幹下、上に符幹上の旋律、MuseScore の声部 1 は 16 分。「埋まる線を声部 1 に」は 7-1 の 10・14・17・22 と両立しない（第 2 歩）ので触らない。**lang36-3 の左手の 3 声の小節**（11・14・15・19・51・52）は `ees,4.` の下の 16 分の符頭が 7 つ読めていない（todo の文言「on the scan, not in the text: 7 filled note heads」）= 符頭の検出の問題で、声部の置き方ではない。
+6. **検出器の check は他の重い仕事と同時に回さない**: form の直しだけの状態で回した検出器 check が `textA.text.recall 100 → 91.4`、`lyrA.recall 98.9 → 91.5` ほか 4 WORSE を出したが、原因は gen-lied-all の **lied006 の OCR が何も返さなかった**こと（40 音節 → 0、文字の印 0。MuseScore の描画と Schumann 5 台の読みを同時に走らせていた）。`run-gen.ps1 -Out out/gen-lied-all -Reuse -OmrArgs @('--detector','--header')` で読み直すと 98.9 / 99.1 / 98.3 = 基準値。
+
+**数字**: 開発用の台 35 台 28628 / 29553（96.9%）。Schumann: 25-1 1159/1278（90.7%、voice 49・tuplet 39・missed 34・accidental 24・value 19）、25-9 1319/1330（99.2%、voice 26）、25-15 1125/1142（98.5%、voice 28）、39-7 440/444（99.1%、voice 0）、96-2 1600/1625（98.5%、voice 20）。原因の内訳の voice は 30 台 43 のまま、35 台で 166。kinkel10-4-ms 1235（同じ）。
+
+**正直に書いておくこと**:
+1. 評価台は回していない（上の現在地）。
+2. Widmung の tuplet 39（20・21 小節）、accidental 24（22・26 小節、`key 3` = 転調の調号の読み違い）、missed 34 は見ていない。声部以外の型として次の候補。
+3. **todo の精度の基準は 35 台の数字に変わる**（`todo-quality.ps1 -Kinds dev`、Schumann 5 台が浄書に入った）: written 3867 part-bars、wrong 431、marked 808（load 20.9%）、recall 68.0%、precision 36.3%、clean 95.5%。浄書 2427 / 123 / 301、recall 59.3%、precision 24.3%。スキャン 71.4 / 43.4（30 台のときと同じ）。第 3 歩の 40.0% / 25.0% と比べるときは台が違うことに注意（30 台だけなら動いていないはず: 30 台は音・声部とも同じ）。
+4. 枝刈りの直しで探索の試行数は増えるはずだが、時間は測っていない（35 台の読みは 1 台 17〜45 秒で前と同じ程度）。
+
+**私の操作の誤り**: 時計を見ずに「検出器 check が 40 分止まっている」と思い込んだ（実際は 23 分目で正常に進んでいた）。`cmd /c pwsh -File run-gen.ps1 -OmrArgs --detector,--header` は配列にならず 1 つの文字列になって、gen-lied-all の 10 曲を検出器も OCR も無しで読んで上書きした（コンソールから `&` で配列を渡して読み直した）。検出器 check を MuseScore の描画・Schumann の読みと同時に走らせた（上の 6）。
+
+**次の一手**:
+1. **S57 続き（声部、Schumann の台で）**: 上の 4 (a) の実験 = `Voices.Evaluate` で符幹の向き（cost 7）を短い線の数（cost 2）より前に置く、または「符幹の向きが線の向きと逆の単位は、同じ向きで時間の合う線があればそちら」を置き方の制約にする。35 台で A/B（`scratchpad` の base/variant、第 2 歩のやり方）。Widmung の 7・9・10・12・13 の左手が合い、kinkel 30 台が落ちなければ採る。
+2. **S57 続き（todo の精度）**: オーナーに諮る件は前の節のまま（物差しにタイ・スラーと描き直しの一致を入れるか、目安 50% を見直すか）。
+3. **次のセッションの頭**: 評価台 `-Eval -Reuse -Verify -OmrArgs --read-lyrics` を回して `docs/eval-sets.tsv` と比べる（form と枝刈りの直しの影響。音は動かない見込み、`c_voice` は下がるかもしれない）。
+4. **S58（背景）**: 学習の比べ方と実譜の教材。Schumann 5 曲の ms は学習には使わない（開発用の台）。
+
+**check の記録**: 頭の規則 check OK（0・0）。終わりの規則 check（form + 枝刈り）: **5 better・WORSE なし**（`gen`/`gen3`/`genS`/`genR`/`genRS` の `slurs.inVoice` 98.65〜98.96 → 98.77〜99.08。`-Accept` で基準値に）。種 6 つ（`tools/seeds.ps1`）: **5 of 6 read right**、前と同じ（bar31-p3 は `new-symbol` のかっこ書きの臨時記号で 11-03 から wrong のまま）。終わりの検出器 check（他の仕事を止めて単独で、32 分）: **7 better・WORSE なし**（`gen`/`gen3`/`genS`/`genR`/`genRS`/`genF` の `slurs.inVoice` +0.11〜0.12、`ver.slurs.spare` 12 → 11。`lyrA`・`textA` は基準値どおり = 上の 6 の裏づけ。`-Detector -Accept` で基準値に）。
+
 ## S57 第 3 歩: todo の空振りの「bar length」の型を 2 つ直した。(1) MuseScore の `:||`（細い線と太い線の中心が 1.05 間離れる）が 1.0 間の束ねの閾値を越えて 2 本の小節線になり、間の 14 px が「nothing read in this bar」の空の小節になっていた → 二重線の束ねを 1.5 間に。(2) **小節が 2 つに割れる形**（反復記号が小節の途中: kinkel7-1 の 6 小節、有節歌曲の節の終わりが短く次の節の弱起が補う: kinkel10-4 の 10/11・22/24）を **`partial` で書く**（前の小節は全パートに `partial N`、後ろは section の頭なら section の `partial`、段の頭なら同じく各パートに。Lily# の `partial 8*5` の数える形）。開発用の台の todo の精度 written **37.4 → 40.0%**（浄書 **20.0 → 25.0%**、marked 155 → 116）、再現率 71.0 → 69.6（浄書 60.8 → 58.0）。check 2 本とも 0・0、開発用の台 1 better（2026-11-07 夜、前の節の次の一手 1）
 
 **現在地**: 検出器は detector42 のまま。`data/eval/chopin28-4/src/*.lys` の 4 つの未追跡ファイルは前からのまま。頭の check は OK（0・0、規則）。終わりの check は **規則 0・0、検出器 0・0**（検出器の check は 32 分かかる）。開発用の台（`-Dev -Reuse -Verify -OmrArgs --read-lyrics`）は **1 better（kinkel10-4-ms 1233 → 1235）、29 同じ、印 0・0** → `docs/dev-sets.tsv` に写した。評価台（`-Eval -Reuse -Verify -OmrArgs --read-lyrics`、66 台、13 分）: **3 better（lied-lang36-2-ms 546 → 563、lied-kinkel7-4-ms・-scan +1 ずつ）、0 worse、63 同じ、印 3 better（lang36-2-ms のスラーの始まり 38 → 39・終わり 37 → 39、装飾 12 → 13）** → `docs/eval-sets.tsv` に写した（原因の内訳は voice 660 のまま）。**評価台の todo の精度**（`todo-quality.ps1 -Kinds eval`、この道具立てで初めて）: written 8952 part-bars、wrong 1345、marked 2077（load 23.2%）、recall 66.1%、**precision 42.8%**、clean 93.4%。スキャン 71.9 / 50.1、**浄書 54.2 / 30.6**（wrong 441、marked 780）。REQUESTS に `fixed` なし（23 は `open` のまま）、種は 6 つとも `omr-triage.json` あり。
