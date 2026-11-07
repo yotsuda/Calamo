@@ -46,6 +46,7 @@ static class Lyrics
         public bool StopBig;                         // the full stop set apart as big as a printed one, a third of a small letter wide and tall and more: no speck of the paper's
         public int Clear;                            // the row set close under the staff: over this line the staff's ink, painted white for the OCR (0: none)
         public List<double> Apostrophes = new();     // the middles of the ink over its letters with an apostrophe's shape, for an OCR that drops it
+        public double On;                            // the x of the head Parted stood it on (0: not parted; Assign finds its note)
         public double Cx => (L + R) / 2.0;
     }
 
@@ -374,7 +375,8 @@ static class Lyrics
             var bounds = Bounds(ink, s).Where(b => !Comma(ink[b.At])).ToList();
             // (and a syllable has a letter: not a comma and a speck of the paper's over it, "Ruh ˙," -- "Ruh" and "˙,")
             var letter = ink.Select(i => !Comma(i) && Math.Max(i.R - i.L, i.B - i.T) >= 0.3 * c.Small).ToList();
-            var at = held.Count(h => !h) >= 2 ? Partition(within, held, bounds, letter, c.L, c.R, ink.Count, s) : null;
+            List<double> on = null;
+            var at = held.Count(h => !h) >= 2 ? Partition(within, held, bounds, letter, c.L, c.R, ink.Count, s, out on) : null;
             // (and a comma ends its syllable: "sche,Fluss" set tight, parted after the F where the syllables
             // stand on their notes best, parts after the comma -- set so tight, neither stands on its note)
             // (a comma, not a speck of the paper's under a word: 0.64 to 0.9 of a small letter tall, the speck under
@@ -388,14 +390,16 @@ static class Lyrics
             if (Verbose && at == null && within.Count >= 2)
                 res.Notes.Add($"lyrics unparted s{st.System + 1} part {st.Part} cut {c.L}-{c.R} ({(c.R - c.L) / s:F1} sp): heads {string.Join(" ", within.Select(x => $"{(x - c.L) / s:F2}"))}; bounds {string.Join(" ", Bounds(ink, s).Select(g => $"{(g.Mid - c.L) / s:F2}"))}");
             if (at == null) { parted.Add(c); continue; }
-            int from = 0;
+            if (Verbose)
+                res.Notes.Add($"lyrics parted s{st.System + 1} part {st.Part} cut {c.L}-{c.R} ({(c.R - c.L) / s:F1} sp): heads {string.Join(" ", within.Select(x => $"{(x - c.L) / s:F2}"))}; at {string.Join(" ", at.Select(a => $"{(ink[a].L - c.L) / s:F2}"))}; on {string.Join(" ", on.Select(x => $"{(x - c.L) / s:F2}"))}");
+            int from = 0, nth = 0;
             foreach (int to in at.Append(ink.Count))
             {
                 var some = ink.GetRange(from, to - from);
                 int l = some[0].L, r = some.Max(i => i.R), margin = (int)(0.1 * s) + 1;
                 // (the letters of the syllables beside it that its box takes in: the OCR reads an f with the next g's edge as "f}")
                 var foreign = ink.Where((i, k) => (k < from || k >= to) && i.R > l - margin && i.L < r + margin).ToList();
-                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Stems = c.Stems, Clear = c.Clear, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null, Apostrophes = c.Apostrophes.Where(a => a >= l && a <= r).ToList() });
+                parted.Add(new Cut { L = l, R = r, Ink = some, Foreign = foreign, Stems = c.Stems, Clear = c.Clear, Hyphen = to == ink.Count ? c.Hyphen : true, Tail = to == ink.Count ? c.Tail : 0, Stop = to == ink.Count ? c.Stop : Comma(some[^1]) ? ',' : '\0', StopAfterLine = to == ink.Count && c.StopAfterLine, StopAfterDashes = to == ink.Count && c.StopAfterDashes, FirstH = some[0].B - some[0].T, Small = c.Small, Foot = c.Foot, Before = from > 0 ? parted[^1] : null, Apostrophes = c.Apostrophes.Where(a => a >= l && a <= r).ToList(), On = on[nth++] });
                 from = to;
             }
         }
@@ -406,14 +410,14 @@ static class Lyrics
     /// Where a cut's ink may part: between pieces that stand apart, or that overlap by a little (an f's
     /// hook over the next letter, "auf|ge"), not within a letter (an umlaut's dots stand over theirs).
     /// </summary>
-    static List<(int At, double Mid)> Bounds(List<(int L, int R, int T, int B)> ink, double s)
+    static List<(int At, double Mid, double Gap)> Bounds(List<(int L, int R, int T, int B)> ink, double s)
     {
-        var bounds = new List<(int At, double Mid)>();
+        var bounds = new List<(int At, double Mid, double Gap)>();
         if (ink.Count == 0) return bounds;
         int reach = ink[0].R;
         for (int i = 1; i < ink.Count; i++)
         {
-            if (ink[i].R > reach && ink[i].L > reach - 0.5 * s) bounds.Add((i, (ink[i].L + reach) / 2.0));
+            if (ink[i].R > reach && ink[i].L > reach - 0.5 * s) bounds.Add((i, (ink[i].L + reach) / 2.0, (ink[i].L - reach) / s));
             reach = Math.Max(reach, ink[i].R);
         }
         return bounds;
@@ -424,17 +428,24 @@ static class Lyrics
     /// stand on the heads within it, two syllables or more; null if none does. No syllable stands on a
     /// held head. A centred syllable's next is on the next head not held; a left-aligned one holds a
     /// head after it (held, or, a slur not read, the next), and the last may hold heads to the cut's end.
-    /// No syllable of one piece ("T" and "rä") or without a <paramref name="letter"/>.
+    /// Or, in an old print's crowded bar, a word pushed right by the one before it, a narrow space between
+    /// (a quarter of a space and more: a letter's gap is less, and one word's syllables set tight, "ge schwind",
+    /// look as a melisma's syllable over two notes does, "träumt'"), its head within it nearer its left end
+    /// ("liegst warm", "send Lie", "nem gold'"): a dearer way, taken where neither other fits. No syllable
+    /// of one piece ("T" and "rä") or without a <paramref name="letter"/>.
     /// </summary>
-    static List<int> Partition(List<double> heads, List<bool> held, List<(int At, double Mid)> bounds, List<bool> letter, double left, double right, int pieces, double s)
+    static List<int> Partition(List<double> heads, List<bool> held, List<(int At, double Mid, double Gap)> bounds, List<bool> letter, double left, double right, int pieces, double s, out List<double> on)
     {
-        const double Off = 0.7, LeftSet = 0.6, LeftOff = 0.3;
+        const double Off = 0.7, LeftSet = 0.6, LeftOff = 0.3, PushBack = 1.2, PushCost = 1.0, WordGap = 0.25;
         List<int> best = null;
+        List<double> bestOn = null;   // (the head each syllable stands on, the last too)
         double bestCost = double.MaxValue;
         var path = new List<int>();
+        var stood = new List<double>();
         int Free(int from) { while (from < heads.Count && held[from]) from++; return from; }
-        void Go(int head, int piece, double l, double cost)
+        void Go(int head, int piece, double l, double gap, double cost)
         {
+            if (cost >= bestCost) return;   // (no cheaper way through here: the pushed way opens many)
             int after = Free(head + 1);
             for (int b = -1; b < bounds.Count; b++)
             {
@@ -451,20 +462,27 @@ static class Lyrics
                 // (held heads after it, or the next taken as held: the note after that takes the next syllable)
                 int leftNext = after > head + 1 ? after : Free(after + 1);
                 bool isLeft = leftSet <= LeftOff && r - l >= 2 * s && (last || leftNext < heads.Count);
+                // (pushed: after a word's space, the head from 1.2 spaces before its left end to its middle, and, as a centred one, every head after it taking a syllable)
+                double pushed = PushCost + Math.Abs(h - l) / s;
+                bool isPushed = path.Count > 0 && gap >= WordGap && h >= l - PushBack * s && h <= (l + r) / 2 && (last ? after >= heads.Count : after < heads.Count);
+                double onIt = Math.Min(isCentred ? centred : double.MaxValue, isPushed ? pushed : double.MaxValue);
                 if (last)
                 {
                     if (path.Count == 0) continue;   // (one syllable: nothing to part)
-                    double end = cost + Math.Min(isCentred ? centred : double.MaxValue, isLeft ? leftSet : double.MaxValue);
-                    if ((isCentred || isLeft) && end < bestCost) { bestCost = end; best = new List<int>(path); }
+                    double end = cost + Math.Min(onIt, isLeft ? leftSet : double.MaxValue);
+                    if ((isCentred || isLeft || isPushed) && end < bestCost) { bestCost = end; best = new List<int>(path); bestOn = stood.Append(h).ToList(); }
                     continue;
                 }
                 path.Add(to);
-                if (isCentred) Go(after, to, r, cost + centred);
-                if (isLeft) for (int next = leftNext; next < heads.Count; next = Free(next + 1)) Go(next, to, r, cost + leftSet);
+                stood.Add(h);
+                if (isCentred || isPushed) Go(after, to, r, bounds[b].Gap, cost + onIt);
+                if (isLeft) for (int next = leftNext; next < heads.Count; next = Free(next + 1)) Go(next, to, r, bounds[b].Gap, cost + leftSet);
                 path.RemoveAt(path.Count - 1);
+                stood.RemoveAt(stood.Count - 1);
             }
         }
-        Go(Free(0), 0, left, 0);
+        Go(Free(0), 0, left, 0, 0);
+        on = bestOn;
         return best;
     }
 
@@ -489,10 +507,11 @@ static class Lyrics
         {
             // (a melisma's syllable, left-aligned on the note a slur or a tie starts at: its middle may stand nearer the note it holds)
             var melisma = c.R - c.L >= 2 * s ? heads.Where(q => (q.SlurStart || q.Tie) && Math.Abs(c.L - (q.X - 0.6 * s)) <= 0.3 * s).OrderBy(q => Math.Abs(c.L - (q.X - 0.6 * s))).FirstOrDefault() : null;
-            var h = melisma ?? heads.OrderBy(q => Math.Abs(q.X - c.Cx)).FirstOrDefault();
-            if (h == null || melisma == null && Math.Abs(h.X - c.Cx) > Math.Max(1.5 * s, (c.R - c.L) / 2.0 + s)) continue;
+            // (a syllable parted from a cut stands on the head the partition stood it on: pushed by the one before it, its middle may lie nearer the next)
+            var h = c.On > 0 ? heads.MinBy(q => Math.Abs(q.X - c.On)) : melisma ?? heads.OrderBy(q => Math.Abs(q.X - c.Cx)).FirstOrDefault();
+            if (h == null || c.On == 0 && melisma == null && Math.Abs(h.X - c.Cx) > Math.Max(1.5 * s, (c.R - c.L) / 2.0 + s)) continue;
             double key = Math.Round(h.X / s);
-            double Off((Cut Cut, Head Head) v) => v.Head.SlurStart || v.Head.Tie ? Math.Min(Math.Abs(v.Head.X - v.Cut.Cx), Math.Abs(v.Cut.L - (v.Head.X - 0.6 * s))) : Math.Abs(v.Head.X - v.Cut.Cx);
+            double Off((Cut Cut, Head Head) v) => v.Cut.On > 0 ? 0 : v.Head.SlurStart || v.Head.Tie ? Math.Min(Math.Abs(v.Head.X - v.Cut.Cx), Math.Abs(v.Cut.L - (v.Head.X - 0.6 * s))) : Math.Abs(v.Head.X - v.Cut.Cx);
             if (!best.TryGetValue(key, out var had) || Off((c, h)) < Off(had)) best[key] = (c, h);
         }
         return best.Values.OrderBy(v => v.Cut.L).ToList();
