@@ -280,10 +280,23 @@ static class Voices
         }
 
         // Lily#'s order: the voices with stems up and those with stems down by turns, each kind the one that
-        // fills the bar first, then from the top down; the lines with no stems of their own last
+        // fills the bar first, then from the top down. A line with no stems of its own (whole notes, rests) takes
+        // the other voice's slot when one other line has stems -- the whole note over the moving lower voice is
+        // the first voice, whose ornament is looked for over it, the moving voice's under it (gen-orn piano006's
+        // bar 4, piano007's bar 6); the half rest over the lower voice's two quarters too (gen slurs007's bar 6) --
+        // and among more lines goes by where it lies: over them, an upper voice; under them, a lower. A lone such
+        // line, or one level with the others, last
         List<Line> Order()
         {
-            List<Line> Of(int dir) => lines.Where(l => l.Dir == dir).OrderBy(l => l.Full(bar) ? 0 : 1).ThenByDescending(l => l.Pos).ToList();
+            int DirOf(Line l)
+            {
+                if (l.Dir != 0 || lines.Count < 2) return l.Dir;
+                var others = lines.Where(o => o != l).ToList();
+                if (others.Count == 1 && others[0].Dir != 0) return -others[0].Dir;
+                double pos = others.Average(o => o.Pos);
+                return l.Pos > pos ? 1 : l.Pos < pos ? -1 : 0;
+            }
+            List<Line> Of(int dir) => lines.Where(l => DirOf(l) == dir).OrderBy(l => l.Full(bar) ? 0 : 1).ThenByDescending(l => l.Pos).ToList();
             var ups = Of(1);
             var downs = Of(-1);
             var none = Of(0);

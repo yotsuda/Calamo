@@ -20,7 +20,9 @@ short, the fewest holes inside a line, the fewest beamed figures broken between 
 first voice filling the bar (engraving programs keep it full; the lower voices may stop), the
 fewest leaps inside a line, the fewest stems against their voice's way, and rests on their
 voice's side. The lines come out in Lily#'s order (the first voice's stems up, the second's
-down, the third's up ...), and a stem that goes the other way is written `@stemUp` /
+down, the third's up ...; a line with no stems of its own, whole notes or rests, takes the
+other voice's slot beside one line with stems, and among more goes by its height), and a
+stem that goes the other way is written `@stemUp` /
 `@stemDown`, so that the page is drawn again: the chords a melody goes on with under natural
 stems after the lower voice stopped stay the melody's. A bar no laying fits (a value misread,
 a triplet with no number) is split by the stems alone, as before, and stays too long for the
