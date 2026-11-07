@@ -1,0 +1,6 @@
+# Schumann, Robert/Liederkreis, Op.39/07 Auf einer Burg (OpenScore Lieder, CC0; lc4987658.mscx; IMSLP #).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Auf einer Burg
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

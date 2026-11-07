@@ -1,0 +1,6 @@
+# Schumann, Robert/Myrthen, Op.25/15 Aus den hebräischen Gesängen (Mein Herz ist schwer) (OpenScore Lieder, CC0; lc6925763.mscx; IMSLP #270905).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Aus den hebräischen Gesängen (Mein Herz ist schwer)
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

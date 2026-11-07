@@ -213,11 +213,24 @@ static class Voices
         void Dfs(int ci)
         {
             if (++nodes > Budget) return;
-            // (no better than the best: more holes in beams, or as many and more lines, or as many lines and more holes)
+            // (no better than the best, in Evaluate's order: more holes in beams; as many and more lines; as many lines
+            // and more of them short for sure -- a line with a hole in it, or one that began late, stays short, the
+            // rest may yet fill; as many short for sure and more holes. Not more holes alone: the laying with the hole
+            // may be the one with a line less short -- Widmung's bar 5, the bass's eighths that stop for two beats
+            // and go on, under the whole note and the half that fill the bar)
             if (bestCost != null)
             {
                 long beamHoles = lines.Sum(l => l.BeamHoles);
-                if (beamHoles > bestCost[0] || beamHoles == bestCost[0] && (lines.Count > bestCost[1] || lines.Count == bestCost[1] && lines.Sum(l => l.Gaps) > bestCost[3])) return;
+                if (beamHoles > bestCost[0]) return;
+                if (beamHoles == bestCost[0])
+                {
+                    if (lines.Count > bestCost[1]) return;
+                    if (lines.Count == bestCost[1])
+                    {
+                        int shortSure = lines.Count(l => l.Gaps > 0 || l.Units[0].T > 0);
+                        if (shortSure > bestCost[2] || shortSure == bestCost[2] && lines.Sum(l => l.Gaps) > bestCost[3]) return;
+                    }
+                }
             }
             if (ci == columns.Count) { Evaluate(); return; }
             // (a column is no earlier than any column before it)

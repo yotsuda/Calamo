@@ -1,0 +1,6 @@
+# Schumann, Robert/Myrthen, Op.25/01 Widmung (OpenScore Lieder, CC0; lc6885211.mscx; IMSLP #270905).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Widmung
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

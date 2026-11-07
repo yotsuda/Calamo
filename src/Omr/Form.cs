@@ -77,6 +77,15 @@ static class Form
         {
             var st = Symbols.Nearest(staves, y, s, 3);
             if (st == null) return;
+            // (one pair of dots stands on one side of its line: where the detector sees both a |: and
+            // a :| in it, the surer kind, taken first, is the sign. kinkel10-4's :| closing bar 21 at
+            // a system's start was a |: too at 0.53, and the first measure's leave below let it in)
+            string other = kind == "rep_open" ? "rep_close" : "rep_open";
+            if (signs.Any(g => g.Kind == other && g.Page == res.Page && Math.Abs(g.X - x) < s && Symbols.Nearest(staves, g.Y, s, 3)?.System == st.System))
+            {
+                if (Verbose) Console.WriteLine($"  form: {kind} at {x:F0},{y:F0} ({score:F2}) is the {other} seen surer at the same line: not a sign");
+                return;
+            }
             var sys = res.Systems[st.System];
             int m = MeasureOf(sys, x);
             if (m < 0) return;
