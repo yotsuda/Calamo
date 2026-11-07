@@ -22,7 +22,9 @@ static class Voices
     /// events within 0.6 of it stand in one column (8 px with none)</param>
     public static List<List<Ev>> Separate(List<Ev> evs, int barTicks, double staffMid, double s = 0)
     {
-        foreach (var e in evs) e.StemForced = 0;
+        // (the marks are the real laying's, with the staff's geometry: a trial reading without it, on these same events --
+        // Reader.Fills on a bar laid already -- leaves them as they are)
+        if (s > 0) foreach (var e in evs) e.StemForced = 0;
         // one line that fills the bar is one voice; more than a bar's worth is several
         // (a stemless whole note over a stem-down line is two voices, too)
         int total = evs.Sum(e => e.Ticks);
@@ -33,7 +35,7 @@ static class Voices
         var units = Units(evs, staffMid, s);
         // (no staff geometry: a trial reading asking whether the stems' lines overfill the bar, Reader.UnprintedTriplets
         // and the like -- the stems alone answer, as before)
-        if (s <= 0) return Marked(ByStems(units, barTicks, staffMid, s));
+        if (s <= 0) return ByStems(units, barTicks, staffMid, s).Select(l => l.Select(u => u.Ev).ToList()).ToList();
         var search = new Search(units, barTicks, col);
         // (--debug-at x,y in the bar, on the staff: the units and the laying chosen, and every laying tried that did not fit)
         bool debug = Symbols.DebugAt.HasValue && evs.Count > 0 && (Symbols.DebugPage == null || Symbols.DebugPage == Symbols.DebugPageNow)
@@ -307,6 +309,11 @@ static class Voices
                 if (i < downs.Count) order.Add(downs[i]);
             }
             order.AddRange(none);
+            // (not the full line first whatever its stems, though MuseScore's first voice fills the bar: the bass's half
+            // note and quarter, their stems down by their height, under the forced-up eighths are the first voice in
+            // kinkel19-2's bar 21, but the lower voice's chords, down by their height, that go on under the forced-up
+            // melody's end are the second in kinkel7-1's bars 10, 14, 17 and 22 -- the same signature, and the melody,
+            // full with its low end, is found only by the first voice's filling: 2026-11-07)
             return order;
         }
 
