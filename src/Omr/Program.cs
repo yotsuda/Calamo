@@ -828,7 +828,11 @@ for (int si = 0; si < sections.Count; si++)
                 ? (nextPage != sysPage ? " pageBreak" : " break") : "";
             if (prevBar >= 0 && (state.BarTime[bar] != state.BarTime[prevBar] || atOpening && state.BarTime[bar] != state.BarTime[firstBar])) pre.Add("time " + state.BarTime[bar]);
             if (prevBar >= 0 && (state.BarKey[(bar, pi)] != state.BarKey[(prevBar, pi)] || atOpening && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)])) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
-            if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && (state.BarClef[(bar, pi)] != state.BarClef[(prevBar, pi)] && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(prevBar, pi)])
+            // (against the clef the text is in after the bar before: the last one printed inside it (Ev.ClefBefore), not the
+            // one that bar opened with -- kinkel10-5's left hand opens every bar in bass between changes to treble inside
+            // them, and a bar not said back to bass was drawn in treble, every head a twelfth off, from there to the end)
+            string textClef = prevBar >= 0 ? all[prevBar][pi].Where(e => e.ClefBefore != null).OrderBy(e => e.X).LastOrDefault()?.ClefBefore ?? state.BarClef[(prevBar, pi)] : null;
+            if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && (MidClef(state.BarClef[(bar, pi)]) != MidClef(textClef)
                                                               || atOpening && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(firstBar, pi)])))
                 pre.Add("clef " + MidClef(state.BarClef[(bar, pi)]));
             if (pi == 0 && firstBar == bar && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));

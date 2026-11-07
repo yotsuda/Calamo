@@ -1,0 +1,28 @@
+// OMR -> Lily# (REQUESTS 23, 2026-11-07): after a clef change inside a bar, notes of the key signature get
+// an accidental drawn (B flat major: the bes' right after "clef treble" in bar 2, and bes8 and ees'8 in
+// bar 3, <g' bes'> in bar 5, ees' after "clef bass" in bar 5). Bar 4, after a line break, is clean.
+// Read from kinkel10-6 (OpenScore Lieder, MuseScore's drawing, left hand): the page shows no accidentals
+// there, so the redraw check flags bars 2, 3, 5 and 6 as "in the text, not on the scan: a flat".
+octave absolute
+paper { breaksOnly }
+time 6/8
+key bes major
+
+part lh { clef bass }
+
+section Piece {
+  partial 8
+  lh {
+    r8 |
+    <g,, g,>8 clef treble <d' g' bes'>8 <d' g' bes'>8 g8 <d' g' bes'>8 <d' g' bes'>8 |
+    bes8 <d' g' bes'>8 <d' g' bes'>8 ees'8 <g' bes'>8 <g' bes'>8 | break
+    c'8 <ees' g' a'>8 <ees' g' a'>8 d'8 <fis' a' c''>8 <fis' a' c''>8 |
+    <g' bes'>8 r8 <d' c''>8 <g' bes'>8 r8 clef bass <f ees'>8 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff lh "Piano left"
+}
