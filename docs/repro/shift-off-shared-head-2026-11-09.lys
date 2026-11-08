@@ -1,0 +1,17 @@
+// REQUESTS 25: the third voice has no way to stay in the first column (LilyPond's \shiftOff).
+// Widmung bar 4, right hand: the eighths (up), the melody's quarters (down), the beamed figure (down).
+// Today the third voice's heads g', f', ees' stand a column aside.
+// Expected with a \shiftOff: g' stands under ees'' in one column, the quarter's stem through g' on the beam's stem.
+octave absolute
+time 3/2
+key aes major
+
+part rh { clef treble }
+
+section Piece {
+  rh {
+    voice { f'8 aes'8 des''8. f''16 f''8 f'8 ees''8 f'8 des''8 f'8 c''8 f'8 } { s2 s4 ees''4 des''4 c''4 } { s2 aes'8@stemDown aes8@stemDown g'8@stemDown aes8@stemDown f'8@stemDown aes8@stemDown ees'8@stemDown aes8@stemDown } |
+  }
+}
+
+score { staff rh }
