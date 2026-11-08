@@ -1116,6 +1116,19 @@ if (truth != null)
     bool byDrawn = opt.ContainsKey("truth-by-staff") || opt.TryGetValue("truth", out var tp0) && (tp0.EndsWith(".xml") || tp0.EndsWith(".musicxml"));
     List<Ev> Scored(List<Ev>[] arr, int pi) => !byDrawn ? Notes(arr[pi])
         : Notes((arr[pi] ?? new()).Where(e => !e.CrossStaff).Concat(arr.Where(a => a != null).SelectMany(a => a).Where(e => e.DrawnOn == pi)).OrderBy(e => e.X));
+    // (and its voices: such a note is a voice of its own on the staff it is drawn on. The notes written back to their
+    // line's part with @cross are scored there, each part's run of them one voice)
+    List<List<Ev>> ReadVoices(int bar, int pi)
+    {
+        var own = (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).Select(Notes).ToList();
+        if (!byDrawn) return own.Where(v => v.Count > 0).ToList();
+        var vs = own.Select(v => v.Where(e => !e.CrossStaff).ToList()).ToList();
+        for (int pj = 0; pj < cfg.Parts.Count; pj++)
+            if (pj != pi)
+                foreach (var v in allVoices.GetValueOrDefault((bar, pj)) ?? new List<List<Ev>>())
+                    if (Notes(v).Where(e => e.DrawnOn == pi).ToList() is { Count: > 0 } drawn) vs.Add(drawn);
+        return vs.Where(v => v.Count > 0).ToList();
+    }
     foreach (var (bar, arr) in all)
         for (int pi = 0; pi < cfg.Parts.Count; pi++)
         {
@@ -1178,7 +1191,7 @@ if (truth != null)
             {
                 if (!scored[pi]) continue;
                 var tv =truth.Voices.GetValueOrDefault((bar, cfg.Parts[pi].Id)) ?? new List<List<Ev>>();
-                var ov = (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).Select(Notes).Where(v => v.Count > 0).ToList();
+                var ov = ReadVoices(bar, pi);
                 sc.AddVoices(bar, cfg.Parts[pi].Id, tv, ov);
                 sc.AddTiesSlurs(bar, cfg.Parts[pi].Id, tv, ov);
             }

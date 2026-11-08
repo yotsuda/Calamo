@@ -83,8 +83,10 @@ static class Program
         // --flip: the right hand's line of triplets with its stems turning in mid bar, a note or a melody beside it,
         // the clef changing within it, and bars the right hand starts and the left hand ends
         Gen.FlipLine = opt.ContainsKey("flip");
+        // --fall: the right hand's triplets falling to the left hand's staff for a group's last notes, a kneed beam between the staves
+        Gen.FallStaff = opt.ContainsKey("fall");
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
-        Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams;
+        Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams || Gen.FallStaff;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
         bool figures = opt.ContainsKey("figures");
         // --leapslurs: two-note slurs over a wide leap from an eighth or sixteenth (an old print's hooked slur)

@@ -172,13 +172,15 @@ static class Gen
         // (every draw of the piece's shape made whether used or not: the draws stay in step)
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
-        // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three
-        int mode = CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
-        // (--knee: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
-        int value = KneeBeams || FlipLine ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
+        // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three,
+        // 4: the right hand's, falling to the left hand's staff (--fall)
+        int mode = FallStaff ? 4 : CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        // (--knee, --fall: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
+        int value = KneeBeams || FlipLine || FallStaff ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
         bool restOpens = rests < 0.2 && !CrossStaff && !FlipLine;
-        // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first
-        int[] order = turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 || CrossStaff ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
+        // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first (--fall: down, the
+        // notes that fall the group's lowest)
+        int[] order = FallStaff ? new[] { 2, 1, 0 } : turn < 0.6 ? new[] { 0, 1, 2 } : turn < 0.8 || CrossStaff ? new[] { 0, 2, 1 } : new[] { 1, 0, 2 };
         // (--cross: how many of a group's notes climb to the right hand's staff, and whether a number
         // stands over the first bar's groups or none at all; the groups left whole now and then)
         int climb = CrossStaff && rng.NextDouble() < 0.3 ? 1 : 2;
@@ -408,6 +410,28 @@ static class Gen
                 }
                 lh.Bars.Add(new() { Bass(b) });
             }
+            else if (mode == 4)
+            {
+                // (--fall: the right hand's triplets run down, each group's last note or two drawn on the left hand's staff
+                // an octave lower, the beam kneed between the staves. The left hand holds a low whole note or rests: a voice
+                // of its own there, as Op.25-9 has, would collide with the notes landing on its staff)
+                var tri = Triplets(b, 29);
+                for (int g = 0; g + 3 <= tri.Count; g += 3)
+                {
+                    bool whole = rng.NextDouble() < 0.15;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        tri[g + i].Bare = !(numbered && b == 0);
+                        if (whole || i < 3 - climb) continue;
+                        tri[g + i].Marks += "@cross";
+                        tri[g + i].Pitches[0] = new GPitch(tri[g + i].Pitches[0].Dia - 7, tri[g + i].Pitches[0].Alter);
+                    }
+                }
+                rh.Bars.Add(new() { tri });
+                var held = new GEv { Ticks = p.BarTicks };
+                if (Representable(p.BarTicks) && rng.NextDouble() < 0.5) held.Pitches.Add(At(14 + rng.Next(3)));
+                lh.Bars.Add(new() { new() { held } });
+            }
             else if (mode == 3)
             {
                 bool up = plainUp < 0.5;
@@ -488,6 +512,8 @@ static class Gen
     public static bool CrossStaff;
     // OmrGen --knee: the same with the climbing heads over the beam, a kneed beam between the staves
     public static bool KneeBeams;
+    // OmrGen --fall: threes' right hand falling to the left hand's staff for a group's last notes, a kneed beam between the staves (Schumann's Op.25-9)
+    public static bool FallStaff;
     // OmrGen --handover: the same with a melody stems up, and bars the left hand starts and the right hand ends
     public static bool HandOver;
     // OmrGen --flip: the right hand's line of triplets with its stems turning in mid bar (Op.27-2's bars 37, 40 and 42)

@@ -19,7 +19,8 @@ sealed class Head
     public bool Tie;             // a tie runs from this head to the next one at its pitch
     public bool TieByEnd;        // ...on the detector's tie_r at the next head alone (a glissando's line ends the same way: Glissandi)
     public bool SlurStart, SlurEnd;   // a slur starts at this head (its chord) / ends at it
-    public double Score;         // the learnt detector's confidence (0: the rules found it)
+    public bool SlurStartAcross, SlurEndAcross;   // a sure slur start / end at it that nothing on its staff pairs with: a slur to / from the neighbouring staff, its other end unseen there, or unseen on this one (Reader.HandedGroups)
+    public double Score;        // the learnt detector's confidence (0: the rules found it)
     public int Cluster;          // ink component id
     public (int Num, int Den) Scale = (1, 1);   // tuplet
     public int Tuplet;           // which tuplet number's span it is under (0: none): the .lys keeps the groups as written

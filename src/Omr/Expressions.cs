@@ -132,7 +132,9 @@ sealed class Expressions
                 // the nearest event of any list, then its copy in the bar's list and in one of its voices
                 // (a mark on two voices would be written twice). A copy is the same stem's (a chord's
                 // copy may stand at another of its heads, a second aside), or a rest at its x
-                var near = lists.SelectMany(l => l).Where(e => !e.FullBar && !e.Slash && (ok == null || ok(e)) && Math.Abs(e.X - x) < reach)
+                // (not one of the part's notes drawn on the other staff, @cross: a pedal mark under the left hand's staff is
+                // its last note's there, not the figure's note over it on the right hand's -- Widmung)
+                var near = lists.SelectMany(l => l).Where(e => !e.FullBar && !e.Slash && !e.CrossStaff && (ok == null || ok(e)) && Math.Abs(e.X - x) < reach)
                     .OrderBy(e => Math.Abs(e.X - x)).FirstOrDefault();
                 if (near == null) continue;
                 bool Same(Ev e) => e == near || e.IsRest == near.IsRest && !e.FullBar && !e.Slash

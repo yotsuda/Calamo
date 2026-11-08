@@ -849,6 +849,12 @@ static partial class Symbols
                 from.Tie = true;
                 if (Debug(t)) Console.WriteLine($"{t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}) by the head at {h.X:F0},{h.Y:F0} pos {h.Pos}, no {(start ? "end" : "start")} seen: the arc's ink runs {(start ? "on to" : "back from")} the {(start ? "next" : "last")} head at its pitch, {(to.X - from.X) / s:F1} spaces, over nothing near it: a tie");
             }
+            // (a sure end left over, no start on its staff pairing with it, or a sure start with no end: the slur's other
+            // end is on the neighbouring staff, where the detector mostly misses it -- MuseScore's arc from the right hand's
+            // line down to its last two notes drawn on the left hand's staff, Schumann's Op.25-15 -- or unseen on this one.
+            // Noted on the heads for the reader to weigh (Reader.HandedGroups); nothing is written for it)
+            foreach (var t in lefts.Concat(rights).Where(t => Sure(t) && !used.Contains(t) && !fromTie.Contains(t)))
+                foreach (var h in at[t].Chord) { if (t.Class == "slur_r") h.SlurEndAcross = true; else h.SlurStartAcross = true; }
             void Pair(Detection l, Detection r)
             {
                 var (a, above) = at[l];
