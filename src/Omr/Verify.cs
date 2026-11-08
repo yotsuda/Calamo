@@ -404,6 +404,19 @@ sealed class Verify
         return alter;
     }
 
+    /// <summary>Whether the note at a source position is written @cross (a chord's note: the chord is): the token runs on to the next space outside a memo's quotes.</summary>
+    static bool TokenCross(string text, int src)
+    {
+        if (src < 0 || src >= text.Length) return false;
+        int open = text.LastIndexOf('<', src), close = text.LastIndexOf('>', src);
+        int i = open > close && text.IndexOf('>', src) is var end && end >= 0 ? end : src;
+        int from = i;
+        bool quoted = false;
+        for (; i < text.Length && (quoted || !char.IsWhiteSpace(text[i])); i++)
+            if (text[i] == '"') quoted = !quoted;
+        return text.IndexOf("@cross", from, i - from, StringComparison.Ordinal) >= 0;
+    }
+
     static readonly System.Text.RegularExpressions.Regex stepToken = new(@"\G([a-g])(?:is|es)*([',]*)", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     /// <summary>The note token's step at a source position of an absolute-octave text, c' = 28 (null when no note starts there).</summary>
@@ -602,26 +615,29 @@ sealed class Verify
                 continue;
             }
             // the staff of that part nearest the symbol (staves come in systems of one staff per part)
+            // (a note written @cross is drawn on the neighbouring part's staff: it is that staff's symbol)
+            bool whole = staves.Count % parts == 0, cross = whole && TokenCross(text, src);
             DStaff st = null;
             double bd = double.MaxValue;
             foreach (var d in staves)
             {
-                if (staves.Count % parts == 0 && d.Index % parts != key.Value.Part) continue;
+                if (whole && (cross ? Math.Abs(d.Index % parts - key.Value.Part) != 1 : d.Index % parts != key.Value.Part)) continue;
                 double dd = Math.Abs(d.Mid - y);
                 if (dd < bd) { bd = dd; st = d; }
             }
             if (st == null) continue;
-            if (!reading.TryGetValue(key.Value, out var list)) reading[key.Value] = list = new();
+            var drawn = cross ? (key.Value.Bar, st.Index % parts) : key.Value;
+            if (!reading.TryGetValue(drawn, out var list)) reading[drawn] = list = new();
             int pos = (int)Math.Round(st.Pos(y));
             list.Add(Item(c, pos));
             if (c.StartsWith("head_") && TokenAlter(text, src) is { } alter)
             {
-                if (!alters.TryGetValue(key.Value, out var al)) alters[key.Value] = al = new();
+                if (!alters.TryGetValue(drawn, out var al)) alters[drawn] = al = new();
                 al.Add((pos, alter));
             }
             if (absolute && c.StartsWith("head_") && TokenStep(text, src) is { } step)
             {
-                if (!steps.TryGetValue(key.Value, out var sl)) steps[key.Value] = sl = new();
+                if (!steps.TryGetValue(drawn, out var sl)) steps[drawn] = sl = new();
                 sl.Add((pos, step));
             }
         }

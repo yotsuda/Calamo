@@ -817,8 +817,9 @@ static class Reader
     /// the last). Each staff read by itself, the line is short of the bar by just the group, which stands
     /// where the line has nothing (past its last note, or before its first); on its own staff the group
     /// fills what the other voices leave, as the engraver's hidden rest there does. A sure slur end on its
-    /// last note that no start on that staff pairs with (or such a start on its first) tells the two: the
-    /// group is the line's, written there with @cross. Not while the time is being checked (no bar length).
+    /// last note that no start on that staff pairs with (or such a start on its first), or the line's own last
+    /// notes running on into the group (<see cref="RunsOnInto"/>), tells the two: the group is the line's,
+    /// written there with @cross. Not while the time is being checked (no bar length).
     /// </summary>
     static void HandedGroups(List<Ev>[] parts, List<Ev>[] singles, double s, int barTicks)
     {
@@ -837,8 +838,11 @@ static class Reader
                     // (not a group moved here already: its staff, short now by just it, would take it back)
                     if (g.Count < 2 || g.Any(e => e.Chord != null || e.Stem != g[0].Stem || e.CrossStaff) || g.Sum(e => e.Ticks) != left) continue;
                     bool after = g[0].X > last + 0.5 * s, before = g[^1].X < first - 0.5 * s;
-                    // (the slur's end on the last note, from the line before the group; or its start on the first, to the line after it)
-                    if (!(after && g[^1].SlurEndAcross || before && g[0].SlurStartAcross)) continue;
+                    // (the slur's end on the last note, from the line before the group; or its start on the first, to the line after it;
+                    // or no slur to go by, the line itself running on into the group: Op.25-15's bar 11, its end unseen, bar 56, its end
+                    // taken by the left hand's own start, bar 75, no slur printed)
+                    var line = voices.Where(v => v.Count > 0 && v.Sum(e => e.Ticks) == barTicks - left).Select(v => v.OrderBy(e => e.X).ToList()).MaxBy(v => v[^1].X);
+                    if (!(after && (g[^1].SlurEndAcross || RunsOnInto(line, g)) || before && g[0].SlurStartAcross)) continue;
                     // (nothing else of its staff among them: a chord of that hand's under the beam is that hand's own group)
                     if (parts[away].Any(e => !g.Contains(e) && e.X > g[0].X - 0.5 * s && e.X < g[^1].X + 0.5 * s)) continue;
                     int beam = g[0].Beam;
@@ -852,6 +856,26 @@ static class Reader
                     break;
                 }
             }
+    }
+
+    /// <summary>
+    /// Whether a beamed line's last notes go straight on into a group on the other staff: single notes, its last step's way
+    /// all along, no step past an octave (the right hand's d'8 b8 going on as fis8 e8 under the left hand's chord).
+    /// </summary>
+    static bool RunsOnInto(List<Ev> line, List<Ev> g)
+    {
+        if (line == null || line.Count < 2) return false;
+        Ev a = line[^2], b = line[^1];
+        if (a.IsRest || b.IsRest || a.Chord != null || b.Chord != null || a.Beam == 0 || b.Beam == 0) return false;
+        int way = Math.Sign(b.P.Midi() - a.P.Midi());
+        if (way == 0) return false;
+        var run = g.Prepend(b).ToList();
+        for (int i = 0; i + 1 < run.Count; i++)
+        {
+            int step = run[i + 1].P.Midi() - run[i].P.Midi();
+            if (step * way <= 0 || Math.Abs(step) > 12) return false;
+        }
+        return true;
     }
 
     /// <summary>

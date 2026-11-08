@@ -862,7 +862,7 @@ for (int si = 0; si < sections.Count; si++)
             // (against the clef the text is in after the bar before: the last one printed inside it (Ev.ClefBefore), not the
             // one that bar opened with -- kinkel10-5's left hand opens every bar in bass between changes to treble inside
             // them, and a bar not said back to bass was drawn in treble, every head a twelfth off, from there to the end)
-            string textClef = prevBar >= 0 ? all[prevBar][pi].Where(e => e.ClefBefore != null).OrderBy(e => e.X).LastOrDefault()?.ClefBefore ?? state.BarClef[(prevBar, pi)] : null;
+            string textClef = prevBar >= 0 ? ClefsOn(all[prevBar], pi).LastOrDefault()?.ClefBefore ?? state.BarClef[(prevBar, pi)] : null;
             if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && (MidClef(state.BarClef[(bar, pi)]) != MidClef(textClef)
                                                               || atOpening && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(firstBar, pi)])))
                 pre.Add("clef " + MidClef(state.BarClef[(bar, pi)]));
@@ -886,16 +886,19 @@ for (int si = 0; si < sections.Count; si++)
             var marks = new List<(Ev Ev, int At)>();
             // (a line one hand starts and the other ends: each voice of it short of the bar, by design)
             var handed = Handed(bar, barTicks).Whole;
+            // (the other hands' notes drawn on this staff, @cross: what they take of the bar this staff's own voice leaves to them)
+            int drawnHere = Enumerable.Range(0, cfg.Parts.Count).Where(q => q != pi).Sum(q => (allVoices.GetValueOrDefault((bar, q)) ?? new List<List<Ev>>()).SelectMany(v => v).Where(e => e.DrawnOn == pi).Sum(e => e.Ticks));
+            bool FilledByDrawn(int ticks) => drawnHere > 0 && ticks + drawnHere == barTicks;
             if (voices.Count == 1)
             {
                 int sum = voices[0].Sum(e => e.Ticks);
-                bool wait = shortBar && sum < barTicks || handed.Contains(voices[0]);
+                bool wait = shortBar && sum < barTicks || handed.Contains(voices[0]) || FilledByDrawn(sum);
                 // (the comment on the bar's own line: it says what, not which bar, as the @todo memos do)
                 // (a staff short of the pickup or the last bar: spacer rests where the page shows the others' notes)
                 if (sum == barTicks || wait) valid++; else note = $"  // {Memo.BarLength(new[] { sum }, barTicks, state.BarTime[bar], partial)}";
                 overfull = note != "";
                 offBy = overfull ? Math.Abs(sum - barTicks) / (double)barTicks : 0;
-                music = wait ? LineText(voices[0], barTicks, pad: true, Anchors(bar, barTicks), marks) : LineText(voices[0], barTicks, pad: false, marks: marks);
+                music = wait ? LineText(voices[0], barTicks, pad: true, Anchors(bar, barTicks), marks, drawnClef: DrawnClefOn(arr, pi)) : LineText(voices[0], barTicks, pad: false, marks: marks, drawnClef: DrawnClefOn(arr, pi));
             }
             else
             {
@@ -903,8 +906,8 @@ for (int si = 0; si < sections.Count; si++)
                 // (a voice that enters late is short by design, beside a full one: a voice over the bar's
                 // length, or no voice filling it, is wrong for sure)
                 var sums = voices.Select(v => v.Sum(e => e.Ticks)).ToList();
-                if (voices.All(v => v.Sum(e => e.Ticks) is var x && (x == barTicks || shortBar && x < barTicks || handed.Contains(v)))) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar], partial)}";
-                overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks) && !voices.Any(handed.Contains);
+                if (voices.All(v => v.Sum(e => e.Ticks) is var x && (x == barTicks || shortBar && x < barTicks || handed.Contains(v) || FilledByDrawn(x)))) valid++; else note = $"  // {Memo.BarLength(sums, barTicks, state.BarTime[bar], partial)}";
+                overfull = sums.Any(x => x > barTicks) || !shortBar && !sums.Any(x => x == barTicks) && !voices.Any(handed.Contains) && !sums.Any(FilledByDrawn);
                 offBy = sums.Max(x => Math.Abs(x - barTicks)) / (double)barTicks;
                 music = "voice";
                 // (Lily# sets a track on the voice written first, and turns the first voice's stems up: a lower voice
@@ -925,7 +928,7 @@ for (int si = 0; si < sections.Count; si++)
                     if (cue && v.LastOrDefault(e => !e.IsRest) is { Tie: true } last) last.Tied = null;
                     // (a voice written after the first, in every part: Lily# cuts the first voice at the bar line,
                     // but a later one over it is drawn on, pushing the part's later bars past the others')
-                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm, clip: v != written[0]);
+                    string line = LineText(v, barTicks, pad: true, Anchors(bar, barTicks), vm, clip: v != written[0], drawnClef: v == written[0] ? DrawnClefOn(arr, pi) : null);
                     string open = cue ? " { cue { " : " { ";
                     marks.AddRange(vm.Select(m => (m.Ev, music.Length + open.Length + m.At)));
                     music += open + line + (open.Length > 3 ? " } }" : " }");
@@ -1342,11 +1345,17 @@ List<(double X, int At)> Anchors(int bar, int barTicks)
 (List<List<Ev>> Leaders, HashSet<List<Ev>> Whole, Dictionary<Ev, int> Times) Handed(int bar, int barTicks) =>
     Voices.HandedOver(Enumerable.Range(0, cfg.Parts.Count).Select(pi => allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>>()).ToList(), barTicks);
 
+// the events a clef printed inside a bar on a part's staff stands before, left to right: its own, and the other hands' drawn there (@cross)
+static IEnumerable<Ev> ClefsOn(List<Ev>[] bar, int pi) =>
+    bar.SelectMany((evs, q) => (evs ?? new List<Ev>()).Where(e => e.ClefBefore != null && (e.CrossStaff ? e.DrawnOn == pi : q == pi))).OrderBy(e => e.X);
+static Ev DrawnClefOn(List<Ev>[] bar, int pi) => ClefsOn(bar, pi).FirstOrDefault(e => e.CrossStaff);
+
 static string F(double v) => v.ToString("F1", CultureInfo.InvariantCulture);
 
 // (marks: where each event with other readings ends in the text, before any tie or slur: its @todo's place)
 // (clip: nothing past the bar line. A later voice over the bar pushes the rest of the part on, and every syllable with it)
-static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int At)> anchors = null, List<(Ev Ev, int At)> marks = null, bool clip = false)
+// (drawnClef: the other hand's note drawn on this staff, @cross, that a clef printed on this staff stands before: the clef is this staff's, written in this part at its place)
+static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int At)> anchors = null, List<(Ev Ev, int At)> marks = null, bool clip = false, Ev drawnClef = null)
 {
     var parts = new List<string>();
     var partOf = new Dictionary<Ev, int>();
@@ -1368,7 +1377,9 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
     // flags or beams give the value); with nothing read of that, one an eighth with a slash, as most
     // music prints a lone one, several sixteenths
     // a clef printed inside the measure, before the event (an old print's left hand changing clef within the bar)
-    void Clef(Ev e) { if (e.ClefBefore != null) Add("clef " + MidClef(e.ClefBefore)); }
+    // (not an event drawn on the other staff: that clef is that staff's, drawnClef in that part)
+    void Clef(Ev e) { if (e.ClefBefore != null && !e.CrossStaff) Add("clef " + MidClef(e.ClefBefore)); }
+    void DrawnClef() { if (drawnClef != null) { Add("clef " + MidClef(drawnClef.ClefBefore)); drawnClef = null; } }
     void Graces(Ev e)
     {
         if (e.Graces == null || e.Graces.Count == 0) return;
@@ -1378,6 +1389,7 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
     }
     for (int i = 0; i < evs.Count;)
     {
+        if (drawnClef != null && evs[i].X > drawnClef.X) DrawnClef();
         // a voice that enters late (or comes back from another staff) waits with spacer rests
         // (not a full-bar rest: it rests the bar from its start, wherever it stands)
         if (pad && anchors != null && anchors.Count > 0 && !evs[i].FullBar)
@@ -1502,6 +1514,7 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
         }
     }
     // spacer rests fill a voice that stops short (a voice that only enters, or a misread value)
+    DrawnClef();
     if (pad && barTicks > now) Spacer(barTicks - now);
     return string.Join(" ", parts);
 }
