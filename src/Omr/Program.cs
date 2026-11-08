@@ -1402,10 +1402,15 @@ static string LineText(List<Ev> evs, int barTicks, bool pad, List<(double X, int
             if (before.Count > 0 && anchors.FirstOrDefault(a => a.X > evs[i].X + 8) is var (ax, aAt) && ax > 0 && evs[i].X - before[^1].X > 8 && aAt > at)
             {
                 double t = at + (evs[i].X - before[^1].X) / (ax - before[^1].X) * (aAt - at);
+                bool own = true;
                 for (int g = Dur.Whole; g >= Dur.Whole / 32; g /= 2)
                 {
                     if (g > evs[i].Ticks) continue;
                     int snapped = (int)Math.Round(t / g) * g;
+                    // (on the grid of its own value it falls on the next column: that column's, its head drawn aside --
+                    // Widmung's bar 7, <ges aes>2 left of the other line's c'4, written a sixteenth early)
+                    if (own && snapped == aAt) { at = aAt; break; }
+                    own = false;
                     if (snapped > at && snapped < aAt) { at = snapped; break; }
                 }
             }

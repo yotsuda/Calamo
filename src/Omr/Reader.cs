@@ -48,6 +48,8 @@ sealed class ReaderState
     public HashSet<(int Bar, int Part)> TwoBarCarried = new();
     /// <summary>Per part p: how often the systems showing every staff had p and p+1 share their barlines, and not.</summary>
     public Dictionary<int, (int Yes, int No)> SharedBars = new();
+    /// <summary>Per part p: the last bar whose groups shared with part p+1 made one line filling it, and that line's home part (CrossBeams).</summary>
+    public Dictionary<int, (int Bar, int Home)> CrossLine = new();
     /// <summary>The parts whose music ran in threes on an earlier page (TripletsInThrees): a page turn does not stop it.</summary>
     public HashSet<int> InThrees = new();
 
@@ -607,7 +609,7 @@ static class Reader
             (ms.Evs[p], ms.Single[p]) = StaffEvents(sym, st, x0, x1, s, Clefs.MiddleLine(clefName), Keys.Alterations(fifths), ms.BarTicks, midClefs, clefName.EndsWith("_8"));
             if (midClefs.Count > 0 && state.Auto) state.Clefs[p] = midClefs[^1].Clef;
         }
-        CrossBeams(ms.Evs, ms.Single, s, ms.BarTicks);
+        CrossBeams(ms.Evs, ms.Single, s, ms.BarTicks, state, b);
         HandedGroups(ms.Evs, ms.Single, s, ms.BarTicks);
         for (int p = 0; p < n; p++)
         {
@@ -632,7 +634,9 @@ static class Reader
     /// number's scale and group, read over the notes under it alone.
     /// </summary>
     /// <param name="barTicks">the bar's length (0: not known yet, the time being checked)</param>
-    static void CrossBeams(List<Ev>[] parts, List<Ev>[] singles, double s, int barTicks = 0)
+    /// <param name="state">what carries from bar to bar: the home of the line the bar before made (ReaderState.CrossLine)</param>
+    /// <param name="bar">the bar's number</param>
+    static void CrossBeams(List<Ev>[] parts, List<Ev>[] singles, double s, int barTicks = 0, ReaderState state = null, int bar = 0)
     {
         for (int p = 0; p + 1 < parts.Length; p++)
         {
@@ -646,16 +650,23 @@ static class Reader
             // turns: Widmung's left hand, bes8 des'8 under the staff and fes'8. g'16 over it, g'8 fes'8 over and des'8 bes8
             // under, g8 bes8 and fes'8 g'8. Its home is its first note's staff, whichever staff a later group opens on)
             int chainHome = -1;
+            // (the line the bar before made, carried on: Widmung's bars 7 and 9, the left hand's figure opening over the staff
+            // and broken off for the other notes of a bar that it does not fill)
+            int heldHome = state != null && state.CrossLine.TryGetValue(p, out var held) && held.Bar == bar - 1 ? held.Home : -1;
             if (barTicks > 0 && shared.Count > 1)
             {
                 var chain = parts[p].Concat(parts[q]).Where(e => shared.Contains(e.Beam) && !e.IsRest).ToList();
-                if (chain.Sum(e => e.Ticks) == barTicks) chainHome = LineHome(parts, p, q, chain, barTicks, shared);
+                if (chain.Sum(e => e.Ticks) == barTicks)
+                {
+                    chainHome = LineHome(parts, p, q, chain, barTicks, shared, heldHome);
+                    state.CrossLine[p] = (bar, chainHome);
+                }
             }
             // (whether a group ran in threes: ThreesBesideKnee once the bar's groups have all moved -- weighed after the
             // first alone, the line is still short of its later groups' notes on the other staff, and "does not fill")
             foreach (int beam in shared)
             {
-                if (KneeBeam(parts, singles, p, q, beam, s, barTicks, chainHome, shared)) continue;
+                if (KneeBeam(parts, singles, p, q, beam, s, barTicks, chainHome, shared, heldHome)) continue;
                 // (stems one way: the ink may hold another voice's note, its stem the other way against this one's head)
                 foreach (int side in new[] { 1, -1 })
                 {
@@ -731,7 +742,8 @@ static class Reader
     /// </summary>
     /// <param name="chainHome">the home of a line the staves' shared groups make together (CrossBeams), or -1: the group's own (LineHome)</param>
     /// <param name="shared">the beams with notes on both staves (CrossBeams)</param>
-    static bool KneeBeam(List<Ev>[] parts, List<Ev>[] singles, int p, int q, int beam, double s, int barTicks, int chainHome, ICollection<int> shared)
+    /// <param name="heldHome">the home of the line the bar before made (CrossBeams), or -1</param>
+    static bool KneeBeam(List<Ev>[] parts, List<Ev>[] singles, int p, int q, int beam, double s, int barTicks, int chainHome, ICollection<int> shared, int heldHome)
     {
         bool Low(Ev e) => e.Beam == beam && e.Stem > 0 && !e.IsRest;
         var lower = parts[q].Where(Low).ToList();        if (lower.Count == 0) return false;
@@ -769,7 +781,7 @@ static class Reader
         bool debug = Symbols.DebugAt.HasValue && (Symbols.DebugPage == null || Symbols.DebugPage == Symbols.DebugPageNow)
                      && (Symbols.DebugAt.Value == (0, 0) || Symbols.DebugAt.Value.X >= all[0].X - 2 * s && Symbols.DebugAt.Value.X <= all[^1].X + 2 * s
                                                              && Math.Abs(Symbols.DebugAt.Value.Y - all.Average(e => e.Y)) < 12 * s);
-        int home = chainHome >= 0 ? chainHome : LineHome(parts, p, q, all, barTicks, shared, debug);
+        int home = chainHome >= 0 ? chainHome : LineHome(parts, p, q, all, barTicks, shared, heldHome, debug);
         bool lowerChord = lower.Any(e => e.Chord != null);
         if (debug) Console.WriteLine($"kneed beam at x {all[0].X:F0}-{all[^1].X:F0}: {upper.Count} over the upper staff, {lower.Count} under the lower{(lowerChord ? " (a chord among them)" : "")}, {(falling ? "falling" : "climbing")}, {(dotted ? "a dotted pair, " : "")}line of the shared groups' home {chainHome}, home part {home}");
         // (a chord under the lower staff is that hand's own: the group is the lower staff's line, its notes over the upper
@@ -912,13 +924,15 @@ static class Reader
     /// hand's (lang36-3's bar 40, the left hand's c'16 drawn on the right hand's staff by its ledger line, the right
     /// hand full with g'4 f'8 <aes' c''>8). Both full, it is a voice beside theirs, the hand's whose staff more of
     /// its notes are drawn on (that bar's six under the staff to two over it), the first note's when as many
-    /// (Widmung's six and six). While the time is being checked (no bar length): the first note's.
+    /// (Widmung's six and six). The first note's staff not full either way, a line the other hand made through the
+    /// bar before goes on (Widmung's bars 7 and 9). While the time is being checked (no bar length): the first note's.
     /// </summary>
     /// <param name="shared">the beams with notes on both staves: a staff's own is what stands on none of them, and what
     /// stands on one with its stem the staff's own way -- the right hand's f'8 beamed to its chord, stems up, in the ink
     /// piece of the left hand's beam under it (one head with the left hand's f'16 drawn there, its stem down to that
     /// beam: lang36-3's bar 40); not the f'16, a stray of a group the left hand's chord keeps whole</param>
-    static int LineHome(List<Ev>[] parts, int p, int q, List<Ev> line, int barTicks, ICollection<int> shared, bool debug = false)
+    /// <param name="heldHome">the home of the line the bar before made, or -1</param>
+    static int LineHome(List<Ev>[] parts, int p, int q, List<Ev> line, int barTicks, ICollection<int> shared, int heldHome, bool debug = false)
     {
         int first = parts[p].Contains(line.MinBy(e => e.X)) ? p : q, other = first == p ? q : p;
         if (barTicks <= 0) return first;
@@ -929,7 +943,7 @@ static class Reader
             if (debug) Console.WriteLine($"  part {r} without the line: {string.Join(" ", rest.Select(e => e.Show()))} -> {(full ? "fills the bar" : "does not fill the bar")}");
             return full;
         }
-        if (!Full(first)) return first;
+        if (!Full(first)) return heldHome == other ? other : first;
         if (!Full(other)) return other;
         int onFirst = line.Count(e => parts[first].Contains(e));
         if (debug) Console.WriteLine($"  both full: {onFirst} of the line's {line.Count} notes on the first note's staff");
