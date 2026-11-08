@@ -734,9 +734,13 @@ static class Reader
     static bool KneeBeam(List<Ev>[] parts, List<Ev>[] singles, int p, int q, int beam, double s, int barTicks, int chainHome, ICollection<int> shared)
     {
         bool Low(Ev e) => e.Beam == beam && e.Stem > 0 && !e.IsRest;
-        var lower = parts[q].Where(Low).ToList();
-        if (lower.Count == 0 || lower.Any(e => e.Chord != null)) return false;
-        if (parts[p].Any(e => e.Beam == beam && e.Stem > 0)) return false;
+        var lower = parts[q].Where(Low).ToList();        if (lower.Count == 0) return false;
+        // (the upper staff's own notes with stems up on the ink: another voice's, its beam one piece with the group's through
+        // a head both share -- lang36-3's bar 40, the right hand's f'8 <aes' c''>8 over the left hand's sixteenths, f'16
+        // drawn in the chord's column. Only notes longer than every one under the lower staff, and only for the lower
+        // staff's line: they keep a beam of their own)
+        var foreign = parts[p].Where(e => e.Beam == beam && e.Stem > 0).ToList();
+        if (foreign.Count > 0 && !foreign.All(e => !e.IsRest && Written(e) > lower.Max(Written))) return false;
         bool Head(Ev e) => e.Beam == beam && e.Stem < 0 && !e.IsRest && e.Chord == null && !lower.Any(l => Math.Abs(l.X - e.X) < 0.7 * s);
         var upper = parts[p].Where(Head).ToList();
         var all = lower.Concat(upper).OrderBy(e => e.X).ToList();
@@ -765,7 +769,18 @@ static class Reader
                      && (Symbols.DebugAt.Value == (0, 0) || Symbols.DebugAt.Value.X >= all[0].X - 2 * s && Symbols.DebugAt.Value.X <= all[^1].X + 2 * s
                                                              && Math.Abs(Symbols.DebugAt.Value.Y - all.Average(e => e.Y)) < 12 * s);
         int home = chainHome >= 0 ? chainHome : LineHome(parts, p, q, all, barTicks, shared, debug);
-        if (debug) Console.WriteLine($"kneed beam at x {all[0].X:F0}-{all[^1].X:F0}: {upper.Count} over the upper staff, {lower.Count} under the lower, {(falling ? "falling" : "climbing")}, {(dotted ? "a dotted pair, " : "")}line of the shared groups' home {chainHome}, home part {home}");
+        bool lowerChord = lower.Any(e => e.Chord != null);
+        if (debug) Console.WriteLine($"kneed beam at x {all[0].X:F0}-{all[^1].X:F0}: {upper.Count} over the upper staff, {lower.Count} under the lower{(lowerChord ? " (a chord among them)" : "")}, {(falling ? "falling" : "climbing")}, {(dotted ? "a dotted pair, " : "")}line of the shared groups' home {chainHome}, home part {home}");
+        // (a chord under the lower staff is that hand's own: the group is the lower staff's line, its notes over the upper
+        // staff come down -- lang36-3's bars 40, 42 and 65, the left hand's c'16 aes16 f'16 <aes c'>16, c' and f' drawn over
+        // the right hand's staff. Not the right hand's falling to a chord of the left hand's)
+        if ((lowerChord || foreign.Count > 0) && home != q) return false;
+        if (foreign.Count > 0)
+        {
+            int own = beam + 1_000_000;
+            foreach (var list in new[] { parts[p], singles[p] })
+                foreach (var e in list.Where(e => e.Beam == beam && e.Stem > 0)) e.Beam = own;
+        }
         int away = home == p ? q : p, side = home == p ? -1 : 1;
         foreach (var list in new[] { parts[away], singles[away] })
         {
