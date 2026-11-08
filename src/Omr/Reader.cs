@@ -753,8 +753,9 @@ static class Reader
         double slope = (Tip(all[^1]) - Tip(all[0])) / Math.Max(1, all[^1].X - all[0].X);
         if (all.Any(e => Math.Abs(Tip(all[0]) + slope * (e.X - all[0].X) - Tip(e)) > 1.2 * s)) return false;
         // (columns not much under the usual gap: a stem down and the next one up close in, to 0.41 of it in threes011's
-        // --knee, but a melody's stem right beside one of the group's comes closer)
-        var gaps = all.Zip(all.Skip(1), (a, b) => b.X - a.X).OrderBy(g => g).ToList();
+        // --knee, but a melody's stem right beside one of the group's comes closer. Stems, the beam's own columns: a head
+        // pushed aside by the other hand's chord stands next to the group's second -- lang36-3's bar 65, aes16 over the staff)
+        var gaps = all.Zip(all.Skip(1), (a, b) => b.StemX - a.StemX).OrderBy(g => g).ToList();
         if (gaps[0] < 0.3 * gaps[gaps.Count / 2]) return false;
         static int Written(Ev e) => e.Ticks * e.Scale.Den / e.Scale.Num;
         int value = all.GroupBy(Written).OrderByDescending(g => g.Count()).First().Key;
@@ -974,7 +975,7 @@ static class Reader
     /// such groups as triplets: the groups that make every voice fill the bar exactly, each group
     /// starting on its own length in its voice (a triplet of eighths on a quarter's beat). All the
     /// groups when they do; else the most of them that do, when only one choice of that many does.
-    /// No threshold: the bar's length decides (ROADMAP §2's structure before shapes).
+    /// No threshold: the bar's length decides (ROADMAP ??2's structure before shapes).
     /// </summary>
     /// <param name="inThrees">the part's music runs in threes on the page (<see cref="TripletsInThrees"/>): a pair
     /// alone under a beam is a group a note of which went unseen, and when no choice fills the bar, every group
@@ -2035,7 +2036,7 @@ static class Reader
             else if (m == 0 && state.TwoBarCarried.Contains((b, p))) back = 2;
             if (back == 0)
             {
-                // a band score leaves a part's tacet measures blank, no rest written (揺れる想い):
+                // a band score leaves a part's tacet measures blank, no rest written (???????????????):
                 // nothing read and no ink on the staff is a measure's rest
                 if (ms.Evs[p].Count == 0 && Blank(sym, st, x0, x1, s))
                 {
@@ -2175,7 +2176,7 @@ static class Reader
     /// </summary>
     /// (In a system of four staves or more, within 1.3 spaces of a stem or a head: notes stand a
     /// space or more clear of a true barline, and a column of them down a band score's system was
-    /// taken for one a space off its stems -- 揺れる想い p6 and p8. Not in a small system, where
+    /// taken for one a space off its stems -- ??????????????? p6 and p8. Not in a small system, where
     /// the bar length of a poor reading can fill by chance: the colour scan voices2006 read by the
     /// rules alone lost a true barline so.)
     static bool IsStem(SystemInfo sys, PageSymbols sym, double x, double s) =>
@@ -2190,7 +2191,7 @@ static class Reader
     /// its neighbour is whole, and the two together overflow. In a system of many staves (a band
     /// score's eleven) one staff read wrong is the rule, not the exception: there two thirds of
     /// the staves with something on them suffice, so long as no staff fills both measures apart
-    /// (揺れる想い p8, the stems of the second beat's off-beat in line down the system).
+    /// (??????????????? p8, the stems of the second beat's off-beat in line down the system).
     /// </summary>
     static bool IsSplitMeasure(Measure a, Measure b)
     {
