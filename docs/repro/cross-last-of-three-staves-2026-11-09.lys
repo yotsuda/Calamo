@@ -1,0 +1,23 @@
+// REQUESTS 24: the left hand's @cross, in a score of a voice and a piano, lands on the voice's staff.
+// Expected (as with the piano alone): the two notes stand on the right hand's staff.
+octave absolute
+time 4/4
+key c major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  voice_ { c''1 | c''1 | }
+  rh { c''2 c''2 | c''2 c''2 | }
+  lh { g'4@cross e'4@cross c4 e4 | c1 | }
+}
+
+score {
+  staff voice_
+  grandStaff {
+    staff rh
+    staff lh
+  }
+}
