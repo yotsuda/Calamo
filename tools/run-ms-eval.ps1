@@ -26,7 +26,7 @@ $pieces = Get-ChildItem $Out -Recurse -Filter *.xml | Where-Object { $_.Director
         [pscustomobject]@{ Xml = $_.FullName; Dir = $_.DirectoryName; Name = $_.BaseName; Font = $font; Suite = $suite; Score = "$root\out\$set\$suite\$($_.BaseName)\$($_.BaseName).score" }
     }
 }
-$texts = $pieces | ForEach-Object -ThrottleLimit ([Environment]::ProcessorCount) -Parallel {
+$texts = $pieces | ForEach-Object -ThrottleLimit ([Math]::Min(8, [Environment]::ProcessorCount)) -Parallel {   # (8 at most: a reader can peak at 3-5 GB, and one per core ran the machine out of memory, 2026-11-08)
     $pages = @(Get-ChildItem $_.Dir -Filter 'p??.png').Count
     $truth = @('--truth', $_.Xml)
     if ($using:Notes) {

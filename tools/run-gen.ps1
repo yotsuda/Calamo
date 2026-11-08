@@ -86,7 +86,7 @@ $engrave = $sw.Elapsed.TotalSeconds
 $sym = @{}
 
 # read every piece back, several at once
-$texts = Get-ChildItem $Out -Recurse -Filter *.lys | Where-Object { $_.Directory.Name -ne 'omr' } | ForEach-Object -ThrottleLimit ([Environment]::ProcessorCount) -Parallel {
+$texts = Get-ChildItem $Out -Recurse -Filter *.lys | Where-Object { $_.Directory.Name -ne 'omr' } | ForEach-Object -ThrottleLimit ([Math]::Min(8, [Environment]::ProcessorCount)) -Parallel {   # (8 at most: a reader with the detector peaks at 3-5 GB, and one per core ran the machine out of memory, 2026-11-08)
     $dir = $_.DirectoryName; $name = $_.BaseName
     $pages = @(Get-ChildItem $dir -Filter 'p??.png').Count
     $a = @('--config', "$dir\$name.score", '--pages', $dir, '--from', '1', '--to', "$pages", '--out', "$dir\omr",
@@ -95,7 +95,7 @@ $texts = Get-ChildItem $Out -Recurse -Filter *.lys | Where-Object { $_.Directory
     if ($using:Overlay) { $a += '--overlay' }
     if ($using:Verify) { $a += '--verify', $using:lysc }
     $a += '--export-boxes'
-    $a += '--threads', '1'    # (a reader per core: the detector's own threads would fight over them)
+    $a += '--threads', '1'    # (many readers at once: the detector's own threads would fight over the cores)
     $a += $using:OmrArgs
     # (no reading left from a run before: a reader that failed to start -- many at once on a busy machine --
     # left the last run's omr.lys to be scored, a check's false WORSE or better. Tried once more if none is written)
