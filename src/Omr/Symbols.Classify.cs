@@ -418,6 +418,9 @@ static partial class Symbols
                 // MuseScore fonts, clean and degraded: 50 of 50 such signs were none). No todo: sure.
                 // (any sign a little off its height: a chord's column of signs, a sign the detector placed loosely)
                 if (signs.Any(t => t.X < h.L && h.L - t.X < 3.6 * s && Math.Abs(At(t) - h.Y) < 0.8 * s)) continue;
+                // (or a sure sign over its head or just right of it: DetectedAccidentals' crowded column)
+                if (signs.Any(t => t.Score >= TrustScore && h.X - t.X >= -2.2 * s && h.X - t.X <= 1.0 * s && Math.Abs(At(t) - h.Y) <= 0.3 * s
+                                   && !ps.Heads.Any(o => o != h && o.St == h.St && o.L > t.X && o.L - t.X <= 3.0 * s && Math.Abs(o.Y - At(t)) <= 0.3 * s))) continue;
                 h.Acc = null;
             }
             // A sign the rules name otherwise than the detector does: the detector's, when it is

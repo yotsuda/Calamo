@@ -569,6 +569,15 @@ static partial class Symbols
                 best = ps.Heads.Concat(ps.Graces).Where(hd => hd.On(st) && hd.Acc == null && hd.L - right >= -0.15 * s && hd.L - right <= bd + 1.5 * s && Math.Abs(hd.Y - AtOf(hd)) <= 0.3 * s
                                                               && !ps.Graces.Any(g => g != hd && g.On(st) && g.L >= right - 0.15 * s && g.L < hd.L && Math.Abs(g.Y - at) <= 0.5 * s))
                                .OrderBy(hd => Math.Abs(hd.Y - AtOf(hd))).FirstOrDefault() ?? best;
+            // (no head right of it at its height: a sign drawn over its head or just right of it, in a column crowded with
+            // the other voices' heads and signs -- lang36-3's MuseScore page, bars 9, 17, 49 and 57, the left hand's
+            // <fis bes>16, the sharp past the head a second pushed aside, and the fis, under it, its sharp over the head)
+            // (not where a head right of it at its height, a sign already given, is the note it stands before: basic007's and
+            // piano010's naturals, 2.4 spaces before a head the rules gave a sign of its own, and a head of the same pitch left of them)
+            if (best == null && (owner == null || owner.Class == "?")
+                && !ps.Heads.Any(hd => hd.On(st) && hd.L - right >= -0.15 * s && hd.L - right <= 2.6 * s && Math.Abs(hd.Y - at) <= 0.3 * s))
+                best = ps.Heads.Where(hd => hd.On(st) && hd.Acc == null && hd.X - t.X >= -2.2 * s && hd.X - t.X <= 1.0 * s && Math.Abs(hd.Y - at) <= 0.3 * s)
+                               .OrderBy(hd => Math.Abs(hd.X - t.X)).FirstOrDefault();
             if (DebugAt.HasValue && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                 Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): owner {(owner == null ? "none" : owner.Class)}, head {(best == null ? "none" : $"{best.X:F0},{best.Y:F0}")}");
             if (best == null) continue;

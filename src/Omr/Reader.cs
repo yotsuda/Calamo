@@ -744,7 +744,46 @@ static class Reader
         for (int p = 0; p + 1 < parts.Length; p++)
         {
             int q = p + 1;
-            if (parts[p] == null || parts[q] == null || Fills(parts[q], barTicks)) continue;
+            if (parts[p] == null || parts[q] == null) continue;
+            // (a beam of the upper staff's alone, every note of it over a note of the lower staff on its stem's column: the
+            // lower staff doubles the figure, its stems short of the beam -- lang36-3's bars 9 and 17, the left hand's d8. ees16
+            // under the voice's d'8. ees'16. Two notes on two columns are no two quarters, however the bar adds up. A stem
+            // read as on a beam of the lower staff is only touching it, if that beam has a stem of its own beside it)
+            bool Doubling(Ev e, Ev o) => !e.IsRest && e.Stem > 0 && !e.Held && !e.Cue && e.Scale == (1, 1) && Math.Abs(e.StemX - o.StemX) < 0.2 * s
+                                         && (e.Beam == 0 || parts[q].Any(x => x != e && x.Beam == e.Beam && x.Stem > 0 && Math.Abs(x.StemX - e.StemX) < s));
+            foreach (var g in parts[p].Where(o => o.Beam != 0 && !o.IsRest).GroupBy(o => o.Beam).ToList())
+            {
+                var notes = g.OrderBy(o => o.X).ToList();
+                if (notes.Count < 2 || notes.Any(o => o.Stem <= 0 || o.Scale != (1, 1)) || parts[q].Any(x => x.Beam == g.Key)) continue;
+                if (!notes.All(o => parts[q].Any(e => Doubling(e, o)))) continue;
+                // (the doubling's heads are pushed aside by the lower staff's own figure, up to two spaces: each stands in the column
+                // of that figure at its own time, or the voices cannot be laid -- bar 17's ees16, 29 px right of the fourth sixteenth)
+                var doubled = notes.SelectMany(o => parts[q].Where(e => Doubling(e, o))).ToList();
+                var opening = parts[q].Where(x => !doubled.Contains(x) && x.Beam != 0 && x.Stem > 0 && !x.IsRest && doubled.Any(e => Doubling(e, notes[0]) && Math.Abs(x.X - e.X) < s)).OrderBy(x => x.X).FirstOrDefault();
+                var columnAt = new Dictionary<int, double>();
+                if (opening != null)
+                {
+                    int at = 0;
+                    foreach (var x in parts[q].Where(x => x.Beam == opening.Beam && x.Stem > 0 && !x.IsRest && !doubled.Contains(x)).OrderBy(x => x.X)) { columnAt.TryAdd(at, x.X); at += x.Ticks; }
+                }
+                int t = 0;
+                foreach (var o in notes)
+                {
+                    foreach (var list in new[] { parts[q], singles[q] })
+                        foreach (var e in list.Where(e => Doubling(e, o)).ToList())
+                        {
+                            e.Ticks = o.Ticks; e.Beam = 0;
+                            if (columnAt.TryGetValue(t, out double x)) e.X = x;
+                        }
+                    t += o.Ticks;
+                }
+                // (so is a note of the bass under them pushed left of the next figure's column, past the sign and the head a
+                // second away: bar 17's ees,4s, 35 and 18 px off)
+                foreach (var list in new[] { parts[q], singles[q] })
+                    foreach (var e in list.Where(e => !e.IsRest && e.Beam == 0 && e.Stem < 0).ToList())
+                        if (list.Where(x => x.Beam != 0 && x.X > e.X && x.X - e.X < 2.6 * s).OrderBy(x => x.X).FirstOrDefault() is { } next) e.X = next.X;
+            }
+            if (Fills(parts[q], barTicks)) continue;
             var over = parts[p].Where(o => !o.IsRest && o.Stem > 0 && o.Beam != 0 && o.Scale == (1, 1)
                                            && parts[q].Any(x => x.Beam == o.Beam && x.Stem > 0)).ToList();
             if (over.Count == 0) continue;
