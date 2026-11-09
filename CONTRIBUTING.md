@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for taking an interest in Copista.
+Thank you for taking an interest in Calamo.
 
 ## Reports are the most useful help
 

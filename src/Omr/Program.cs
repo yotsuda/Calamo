@@ -500,7 +500,7 @@ if (opt.ContainsKey("svg"))
 // .lys
 expressions.Finish(all, allVoices);
 var lys = new StringBuilder();
-lys.AppendLine($"// Read by Copista {ReadCommand.Version} from page images {from}-{to}.");
+lys.AppendLine($"// Read by Calamo {ReadCommand.Version} from page images {from}-{to}.");
 lys.AppendLine($"title {Header.Quote(header?.Title ?? cfg.Title)}");
 if (header?.Subtitle != null) lys.AppendLine($"subtitle {Header.Quote(header.Subtitle)}");
 if (header?.Composer != null) lys.AppendLine($"composer {Header.Quote(header.Composer)}");

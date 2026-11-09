@@ -1,4 +1,4 @@
-# Copista
+# Calamo
 
 Optical music recognition (OMR) for [Lily#](https://yotsuda.github.io/LilySharp/): reads a page
 image or a PDF of printed sheet music into editable Lily# text (`.lys`). The places it is unsure

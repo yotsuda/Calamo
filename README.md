@@ -1,4 +1,4 @@
-# Copista (LilySharp-Omr)
+# Calamo (LilySharp-Omr)
 
 Optical music recognition for [Lily#](https://yotsuda.github.io/LilySharp/): reads a page image or
 a PDF of printed sheet music and writes editable Lily# text (`.lys`), with the places it is unsure
@@ -24,7 +24,7 @@ model; it shows whether it compiles, fills its bar and matches the scan before A
 ## Use it
 
 The reader ships as the VS Code extension
-[**Copista**](https://marketplace.visualstudio.com/items?itemName=yotsuda.copista)
+[**Calamo**](https://marketplace.visualstudio.com/items?itemName=yotsuda.calamo)
 (Beta, Windows x64), which works with the
 [Lily#](https://marketplace.visualstudio.com/items?itemName=yotsuda.lilysharp) extension: right-click
 an image or a PDF and choose *Convert Image/PDF to Lily# (.lys)… (Beta)*. The extension's

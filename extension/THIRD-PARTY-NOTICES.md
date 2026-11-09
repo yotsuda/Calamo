@@ -1,6 +1,6 @@
 # Third-party notices
 
-Copista contains the following third-party components. Each is used under its own
+Calamo contains the following third-party components. Each is used under its own
 license, reproduced or referenced below.
 
 ## ONNX Runtime
