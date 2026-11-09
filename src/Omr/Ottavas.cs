@@ -138,11 +138,20 @@ static class Ottavas
             // where the dashes' pattern has a gap, seed 11's ledger007 bar 9. Short, as a hook is, not a stem
             // ending at the row. Its end within the dash's thickness of the row, a pixel off it: seed 11's
             // piano007, an 8va's hook from 3478 under dashes at 3475-3479, the line taken as going on)
-            if (runStart < 0 && dashSeen && !double.IsNaN(row) && w <= 0.3 * s
-                && Enumerable.Range((int)Math.Round(row - 0.1 * s), (int)Math.Round(0.2 * s) + 1).Where(rr => ink[xx, rr]).DefaultIfEmpty(-1).First() is var hr && hr >= 0)
+            // Any column of the upright will do: a scan's grain breaks its edge column into pieces (gen-ott-scan's
+            // piano002 bar 14, an upright three pixels wide, its first column cut four rows down: the 15ma, its letters
+            // read as a 15mb, hung under the staff above for want of the hook)
+            if (runStart < 0 && dashSeen && !double.IsNaN(row) && w <= 0.3 * s)
             {
-                double up = Reach(xx, hr, -1), down = Reach(xx, hr, 1);
-                if (Math.Max(up, down) >= 0.4 * s && Math.Max(up, down) <= 1.2 * s && Math.Min(up, down) <= 0.2 * s && !DashAhead(xx + w)) { hooked = true; return xx + w - 1; }
+                bool upright = false;
+                for (int k = 0; k < w && !upright; k++)
+                {
+                    int cx = xx + k, hr = Enumerable.Range((int)Math.Round(row - 0.1 * s), (int)Math.Round(0.2 * s) + 1).Where(rr => ink[cx, rr]).DefaultIfEmpty(-1).First();
+                    if (hr < 0) continue;
+                    double up = Reach(cx, hr, -1), down = Reach(cx, hr, 1);
+                    upright = Math.Max(up, down) >= 0.4 * s && Math.Max(up, down) <= 1.2 * s && Math.Min(up, down) <= 0.2 * s;
+                }
+                if (upright && !DashAhead(xx + w)) { hooked = true; return xx + w - 1; }
             }
             // (before any dash, only the letters' own tail moves the end: narrow ink reaching little
             // past the band, the closing paren of a "(15ma)" or a letter past the sign's usual width. A

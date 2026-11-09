@@ -544,6 +544,10 @@ static partial class Symbols
                         if (count++ == 0) { first = run; for (int yy = y - dir * (run + 1); ink[x, yy] && first <= 2 * s; yy -= dir) first++; }
                         else if (count == 2) gap12 = before;
                     }
+                    // (a run too thin to be a beam does not end the white after the beams: the ledger lines of a head
+                    // brought across from the other staff, touching a long stem, then that head's edge, a run as thick
+                    // as a beam and joined by its ledger, gen-cross's threes005)
+                    else if (run > 0 && run < 0.28 * s) gap = before + run;
                     run = 0;
                     // the beams lie close together: past a space of white after them the ink is
                     // another's (the next head of the group at the column, its stem the same piece)

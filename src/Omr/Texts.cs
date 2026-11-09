@@ -337,6 +337,10 @@ static class Texts
         var end = cut
             ? heads.Where(h => h.L > last.Left).MinBy(h => Math.Abs(h.L - (last.Right + 0.25 * s)))
             : heads.Where(h => h.L >= last.Right + 0.1 * s && h.L <= last.Left + 3.4 * s).MinBy(h => h.L);
+        // (the line may stop over the last note's head instead, the note after it far off: gen-span's basic008 bar 11
+        // and piano008 bar 6, the last dash ending inside the head of the bar's last note)
+        var under = heads.Where(h => h.L <= last.Right && h.R >= last.Right).MinBy(h => h.L);
+        if (under != null && (end == null || end.L > last.Right + 0.6 * s)) return under;
         return end ?? heads.Where(h => h.L > last.Right).MinBy(h => h.L);
     }
 
