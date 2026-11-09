@@ -2,6 +2,33 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S58 第 1 歩（途中）: 切り離された組とスラーの始まりの生成器 `--detach` を足した（2068fcb）。学習は 2 回ともメモリで止まり、**detector50・51 はまだできていない**。読み手は変えていない（2026-11-09 午後、前の節の次の一手 2）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、23・24・25 は open。種は 6 つとも triage 済み。頭の規則 check OK（0・0）、終わりの規則 check OK（新しい鍵 36 本だけ better、`-Accept` で基準に）。**検出器 check は回していない**（`genDe*`・`symDe*` の検出器の基準はまだない。次の `-Detector` で新しい鍵として出る）。評価台・開発用の台も回していない（読み手を変えていないので数字は前の節のまま）。
+
+**作ったもの**: `OmrGen --detach`（`threes` の中の型。4/4 と 3/4 の 8 分の線が和音を下り、最後の 1〜2 音が `@cross` で下の譜表に自分の連桁で描かれ、75% にスラーが上の譜表の高い音から最後の音まで掛かる。15% の小節は右手が休符で同じ形を左手が自分で弾く = `RunsOnInto` の誤爆を見る型）。手動の連桁 `[ ]` は `@cross` と併用できる（`fis8[@cross e8@cross])`）。`tools/train-model/gen-detach.ps1`（種 57〜59、各 80 曲 × きれい・scale 3・劣化版）→ `detach.npz`（`slur_l` 1855、展開して 0.51 GB。`out/train-detach*` と npz はディスクにある）。check に `gen-detach`・`gen-detach-scan`（第 9 歩の正直 3「`RunsOnInto` を守る生成譜がない」の穴）。
+
+**数字**（種 7 の 10 曲）: 規則 98.62 / 94.20%。**検出器 42 は音 100 / 95.6% だが、スラー 104 本の始まりは 23 / 22 本しか読めず、下の譜表の `@cross` で終わるスラーは 0 本**（`@cross` は 262 本とも読める）。学習の題材として妥当。
+
+**一番大事なこと**:
+1. **42 の作りの学習は python の私有メモリ 約 60 GB、マシンのコミット量の山 約 90 GB を要する**（S51 の「空きの記憶 42 GB で足りた」は足りない。npz の展開後の合計は 54.6 GB）。`images += im * n` は参照だけなので `*3` は増やさない。`detach.npz` の増分はほとんどない。
+2. **cantilena + neutrino_server（オーナーの歌声合成）が動いていると足りない**: 2 つで私有メモリ 約 19 GB。1 回目は読み込み中にコミット 99.2 / 100.2 GB まで上がり手で止めた。3 回目はエポック 28 / 45 の 16:34 にその 2 つが起動し直され、見張りが 95.9 GB で止めた。2 回目の見張りの停止は「空き 1 GB 未満」が厳しすぎた私の誤り（ページングするだけで機械は落ちない）。
+3. コミットの上限はページファイルの自動拡張で 69 → 100 GB まで伸びるのを見たが、どこまで伸びるかは確かめていない。
+
+**正直に書いておくこと**:
+1. `--detach` のスラーの終わりは譜表の間で止まり下の譜表の音に届かない（Op.25-15 の刷りは届く）。LilyPond 2.26.0 に同じ譜を描かせても同じ形なので lysc の不具合ではなく依頼はしない。`slur_r` の形は実譜と少し違うまま学習する。
+2. 2/4 は `--detach` から外した。線が 2 音だけの小節は検出器でも拍子を 1/4 と読み `@cross` が全部落ちた（10 曲中 2〜3 曲）。読み手の穴として残っている。
+3. `detector50.pt`（16:34 の途中のもの）が `tools/train-model/` にあるが、途中で切れたものなので使わない。上書きされる。
+
+**次の一手**:
+1. **S58 の学習（オーナーの時間と相談）**: cantilena と neutrino_server を閉じられるときに。セットは `rs-band4-scan.npz,v4-train12-l.npz*3,ms-band4-scan.npz,v4-band-scan-l.npz*3,m4-l.npz*4,m5-l.npz*2,grace-l.npz,ott-l.npz,rep-l.npz*2,orn-l.npz*2,s2.npz,tup-l.npz*2,rs-band4.npz,ms-band4.npz,v4-band-l.npz*3,rs.npz,pseudo-dev2n.npz*30,ls.npz*2,cues2.npz*2,detach.npz*2`、`train.py train <セット> detectorNN.pt 45 --degrade 0.5 --seed n --degrader <degrade_pencil.py>`（`git show 2929341:tools/train-model/degrade.py` が 42 の鉛筆つき）。detector50 = 種 3（対照 42）、51 = 種 4（対照 49）。1 本 45 エポックで約 35 分（読み込み含む）。`train.py onnx` → `evalmodel.ps1 -Model … -Tag d50`。**42 と 49 も今の読み手で同じ `evalmodel.ps1` で読み直して**比べる（`d42`、`d49`。49 の −182 は S53 の読み手の数字）。あわせて `gen-detach`・`gen-detach-scan` を 4 つのモデルで `run-gen -Reuse -OmrArgs --detector <onnx>` で読み、スラーの始まりの数を比べる。採るかどうかは ROADMAP の S58 の目安（種違い 2 つの平均で評価台のスキャンが 42 を揺れより大きく越える）で。コミットが 94 GB を超えたら自分の学習を止める見張りを付ける（読み込みの山は 90 GB、余裕は 4 GB）。
+2. **REQUESTS 23・24・25 が `fixed` になったら**: 第 13 歩の次の一手 1 のまま。
+3. 小さい残り: 2/4 の線が 2 音の小節（上の正直 2）、9・17 小節の声部の組み方（第 15 歩の正直 1）、`kinkel7-6-scan` の LYS2017。
+
+**私の操作の誤り**: 見張りの条件が最初は厳しすぎて 1 回無駄に止めた（上の一番大事なこと 2）。
+
+**check の記録**: 頭の規則 check OK（0・0）。終わりの規則 check OK（36 better、すべて新しい鍵）→ `-Accept`。検出器 check・評価台・開発用の台・種は回していない（読み手は変えていない）。
+
 ## S57 第 16 歩: lang36-3-scan の LYS2017 2 件を消した（実体は 30・52 小節）。傾いた長い符幹を連桁まで追う（`ReachBeams`）、他の譜表の和音へ突き抜けた符幹を自分の連桁で止める（`StemsThroughOtherStaff`）、インクがつながっているだけの別の組を膝のある連桁と見ない（`BeamRuns`、`KneeBeam`）。開発用の台 28673 → **28685**（lang36-3-scan 1659 → 1670、kinkel10-4-scan 1157 → 1158、他の 33 台は同じ）、評価台 55421 → **55445**（2 better・**1 worse: schumann15-1-rje 216 → 212**）。規則 check OK（1 better・0）、検出器 check OK（0・0）、種 5 of 6（2026-11-09、前の節の次の一手 1）
 
 **現在地**: 検出器は detector42 のまま。`data/eval/chopin28-4/src/*.lys` の 4 つの未追跡ファイルは前からのまま。REQUESTS に `fixed` なし。**23・24・25 が open（Lily# 待ち）**。S57 の読みの締めはこれで終わり。
