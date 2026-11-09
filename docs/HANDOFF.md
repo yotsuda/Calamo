@@ -2,6 +2,15 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## Calamo 0.6.0 を公開した（2026-11-10 未明、オーナーの指示「リリースして」、push もオーナーの許可で）
+
+**現在地**: `v0.6.0`（`010d255`）で GitHub Release と Marketplace の `yotsuda.calamo`（public / preview、win32-x64）を公開した。タグの前に `release.yml` を手動で走らせて成功。旧 ID `yotsuda.lilysharp-omr` は 0.5.0 のまま残っている。読み手は下の節のとおり（検出器 42、生成譜の WORSE は未処理）。
+
+**次の一手**:
+1. **オーナー: 次の Lily#（`yotsuda.calamo` を探す最初の版）を公開する。** 公開済みの Lily# 0.15.0 は旧 ID だけを探すので、それまで Calamo は Lily# から使えない。版が 0.16.0 でなければ `extension/README.md` と CHANGELOG の最低版を直して次の版で出す（README は公開版に入っているので 0.6.0 の表示は変わらない）。Lily# を出してから旧 ID を取り下げる。実際の VS Code で Lily# から Calamo を呼ぶ通し操作はまだ確かめていない。
+2. WORSE の仕分け（下の節の次の一手 2）。
+
+
 ## Calamo 0.6.0 の準備と REQUESTS 23・24 の確認。読み手は変えていない。**新しい lysc で全台を描き直すと check が規則 135・検出器 77 件 WORSE。基準値は更新していない**（2026-11-09 夜、オーナー「calamo に改名した。#23 と #24 を直した」）
 
 **追記（2026-11-10 未明、オーナー「omr.exe を改名して」）**: 読み手の実行ファイルは **`calamo.exe`**（`AssemblyName`、`extension.js`、`pack-extension.ps1`、`tools/` のスクリプト、エラーメッセージの `calamo read:` / `calamo verify:`）。変えていないもの: `src/Omr` などの内部名、`.omr.json`（Lily# との取り決め）、`bin/omr.json`。Lily# は exe の場所を拡張の exports から受け取るので変更不要（コメントとテストの文字列に `omr.exe` が残る）。**ルートの `README.md` の 162・180 行に `omr.exe` が残っている**（オーナーが README を編集中で触らないよう言われた）。確認: 改名後の `.vsix`（`calamo-win32-x64-0.6.0.vsix`、52.4 MB）に `bin/calamo.exe` があり `omr.exe` はない、`extension.js` を VS Code の代役で動かして `calamo.exe` の場所を返す、PNG の読み・`--verify`・`verify` が動く、規則 check は改名前の同じ絵の結果と 2584 項目すべて同じ（135 WORSE はこの節の下のとおりで、受け入れていない）。実際の VS Code で Lily# から呼ぶ通し操作はしていない。
