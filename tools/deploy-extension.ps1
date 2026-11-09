@@ -22,7 +22,7 @@ if (-not $Code) {
 if (-not (Test-Path $Code)) { throw "no VS Code CLI at ${Code}: pass -Code <path to code.cmd>" }
 
 # (a reader still running from the installed extension holds its omr.exe: the old folder cannot go)
-$running = Get-Process omr -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*yotsuda.lilysharp-omr*' }
+$running = Get-Process omr -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*yotsuda.copista*' }
 if ($running) { throw "omr.exe is running from the installed extension (pid $($running.Id -join ', ')): let it finish first" }
 
 "installing {0} into {1}" -f $vsix.Name, $Code

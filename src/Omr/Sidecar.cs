@@ -379,7 +379,7 @@ sealed class Sidecar
         var doc = new
         {
             version = 1,
-            omr = $"Lily# Scan Import {ReadCommand.Version}",
+            omr = $"Copista {ReadCommand.Version}",
             lys = Path.GetFileName(lysPath),
             pages = pages.Select(p => new { page = p.Page, image = Relative(ImageOf.GetValueOrDefault(p.Page, p.Image), dir), width = p.Width, height = p.Height }),
             measures,

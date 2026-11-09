@@ -1,6 +1,6 @@
 # Third-party notices
 
-Lily# Scan Import contains the following third-party components. Each is used under its own
+Copista contains the following third-party components. Each is used under its own
 license, reproduced or referenced below.
 
 ## ONNX Runtime

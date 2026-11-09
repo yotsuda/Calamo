@@ -1,9 +1,9 @@
-// Lily# Scan Import: carries the OMR reader (bin/omr.exe) and tells the Lily# extension where it is.
+// Copista: carries the OMR reader (bin/omr.exe) and tells the Lily# extension where it is.
 // Starts on onStartupFinished (light: no child process) with no dependency on Lily#: VS Code starts a
 // dependency first, and Lily#'s start brings up its language server in every window.
 // No commands of its own: Lily#'s "Convert Image/PDF to Lily# (.lys)…", "Show Original Scan" and verify on save
 // run the reader as a child process (docs/repro/lilysharp-handoff-2026-10-12.md §1.3). Lily# reads
-// what activate returns through vscode.extensions.getExtension('yotsuda.lilysharp-omr').exports.
+// what activate returns through vscode.extensions.getExtension('yotsuda.copista').exports.
 'use strict';
 
 const fs = require('fs');
@@ -22,7 +22,7 @@ function offerLilySharp(context) {
     }
     void context.globalState.update('lilysharpOffered', true);
     void vscode.window.showInformationMessage(
-        'Lily# Scan Import runs inside the Lily# extension (Convert Image/PDF to Lily# (.lys)…). Install Lily#?',
+        'Copista runs inside the Lily# extension (Convert Image/PDF to Lily# (.lys)…). Install Lily#?',
         'Install Lily#').then(choice => {
             if (choice === 'Install Lily#') {
                 void vscode.commands.executeCommand('workbench.extensions.installExtension', 'yotsuda.lilysharp');

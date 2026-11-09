@@ -1,11 +1,12 @@
 # Changelog
 
-Notable changes to Lily# Scan Import are recorded here, newest first. Release notes are
+Notable changes to Copista (formerly Lily# Scan Import) are recorded here, newest first. Release notes are
 taken from this file: the topmost section is the version being tagged, and the release
 workflow (`.github/workflows/release.yml`) attaches that section to the GitHub Release.
 
 ## 0.5.0
 
+- **Renamed from Lily# Scan Import to Copista**, the copyist of a score: the extension id is now `yotsuda.copista`.
 - **Lyrics.** A song's words are read verse by verse and written as `lyrics` lines under the
   music: each syllable on its note, its hyphen or extender, syllables set touching in a tight bar
   parted onto their notes, and the punctuation an old print sets apart ("Traum ?", "ruht .") or

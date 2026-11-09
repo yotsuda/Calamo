@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for taking an interest in Lily# Scan Import.
+Thank you for taking an interest in Copista.
 
 ## Reports are the most useful help
 
