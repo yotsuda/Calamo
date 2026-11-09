@@ -25,7 +25,7 @@ Source, issues and reports of misread pages: <https://github.com/yotsuda/LilySha
 ## Use
 
 1. Install the [Lily#](https://marketplace.visualstudio.com/items?itemName=yotsuda.lilysharp) extension
-   (0.14.0 or later) too: the commands that read a scan are Lily#'s, and this extension shows
+   (0.16.0 or later) too: the commands that read a scan are Lily#'s, and this extension shows
    nothing without it.
 2. Right-click an image (PNG, JPEG, BMP, TIFF) or a PDF in the Explorer, or run
    **Convert Image/PDF to Lily# (.lys)… (Beta)** from the Command Palette, and pick the pages of
@@ -98,6 +98,6 @@ picture from the scan) go to the language model you choose in VS Code, as with a
 
 ## Requirements
 
-Windows 10 version 2004 (build 19041) or later, x64. The Lily# extension 0.14.0 or later
+Windows 10 version 2004 (build 19041) or later, x64. The Lily# extension 0.16.0 or later
 (installed separately; this one starts with VS Code, lightly, only to tell Lily# the reader is
 there, and never starts Lily# itself).

@@ -4,9 +4,18 @@ Notable changes to Calamo (formerly Lily# Scan Import) are recorded here, newest
 taken from this file: the topmost section is the version being tagged, and the release
 workflow (`.github/workflows/release.yml`) attaches that section to the GitHub Release.
 
+## 0.6.0
+
+- **Renamed from Lily# Scan Import to Calamo**, the reed pen a copyist writes with: the extension id is now `yotsuda.calamo`. Lily# looks for the new id from 0.16.0, so install the two together; the old extension can then be uninstalled.
+- **Voices.** The notes of a staff are put into voices by what the columns and the durations allow, not by which way the stems point, so a line that changes stem direction stays one line. A stem against its voice's usual direction is kept with `@stemUp` or `@stemDown`, so the drawing stays that of the page.
+- **Across the staves.** A line shared by the two hands stays with the hand it began in from bar to bar. A lower staff's notes doubling the upper staff's beamed figure take its values, a stem that stops short of the other hand's beam is followed up to it, and two beamed groups the ink only seems to join are no longer read as one kneed beam.
+- **Long leaning stems** are followed to their beams, and a sharp that overlaps its note or stands to its right goes to the right note.
+- A clef change inside a bar that holds into the next bar is written so the next bar is drawn in it, and a pair of dots seen as both end and start of a repeat no longer makes a false repeat.
+- The `.lys` the reader writes begins `// Read by Calamo <version> …`.
+- Needs Lily# 0.16.0 or later: it finds this extension by its new id, and it draws a song's left-hand `@cross` on the right hand's staff and no longer repeats the key's accidentals after a clef change in mid-line, so the check against the scan is not misled by either.
+
 ## 0.5.0
 
-- **Renamed from Lily# Scan Import to Calamo**, the reed pen a copyist writes with: the extension id is now `yotsuda.calamo`.
 - **Lyrics.** A song's words are read verse by verse and written as `lyrics` lines under the
   music: each syllable on its note, its hyphen or extender, syllables set touching in a tight bar
   parted onto their notes, and the punctuation an old print sets apart ("Traum ?", "ruht .") or

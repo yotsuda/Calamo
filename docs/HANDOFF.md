@@ -2,6 +2,30 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## Calamo 0.6.0 の準備と REQUESTS 23・24 の確認。読み手は変えていない。**新しい lysc で全台を描き直すと check が規則 135・検出器 77 件 WORSE。基準値は更新していない**（2026-11-09 夜、オーナー「calamo に改名した。#23 と #24 を直した」）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS 23・24 は `done`（Release の lysc 0.15.0 21:23 のビルド、Lily# `a155f6e8a`。再現譜の絵は `out/repro/fixed-2026-11-09/`）、25 は open。製品名は Calamo（`yotsuda.calamo`、表示名 Calamo Sheet Music Scanner、オーナーが改名）。版は 0.6.0（`v0.5.0` のタグは使用済みで `release.yml` が同じ版を通さない）。`extension/README.md` と CHANGELOG の Lily# の最低版 **0.16.0 は仮置き**（`yotsuda.calamo` を探す最初の Lily# は次のリリース。Lily# の CHANGELOG はまだ Unreleased）。`out/gen*` は新しい絵のまま。
+
+**数字**: 読み手のコードは版の文字列だけ変更。開発用の台 28685 / 29553（**35 台とも同じ**、印の悪化は `schumann25-15-ms` のスラーの終わりの誤り 0 → 1 の 1 件）。評価台 55445 / 58271（**66 台とも同じ**、印も 0・0）。種 5 of 6（bar31-p3 は `new-symbol` のまま）。検算の空振りは減った: kinkel10-6-ms の余分な ♭ の todo 0 件、Widmung の `much of this bar differs` 0 件（開発用の台の合計 20 件。依頼のときの目安は 32 件だが数え方が違う）。`docs/dev-sets.tsv`・`eval-sets.tsv` は写していない。
+
+**一番大事なこと**:
+1. **check の WORSE は全部「絵の描き直し」が原因**（描き直す前の同じ読み手は 18:02 に規則 OK 0・0）。基準値の絵は前回の `-Fresh` より古い lysc のもので、#23・#24 以外の `[engraving]`（`@cross` の符頭の避け方、声部をまたぐ付点の列など）も入っている。どの変更がどの WORSE かは分けていない。
+2. 見て分かった型: (a) `rest.dots` 0 → 1 が全台に並ぶのは piano009 と voices2008 の 1 か所ずつを各派生台が数えているだけ。付点 4 分休符の付点が別の声部の付点の列まで離れて描かれ、読み手が取りこぼす。(b) gen-cross の `head.beams` 2 for 1 は `@cross` で移った音の加線が符幹に接して連桁に見える形らしい（threes005 の 1 枚を見ただけ）。(c) gen-doubled の `head.dots` 1 for 0 は 2 声が共有する符頭の付点を付点なしの声部にも付けている（lied004 の 1 枚を見ただけ）。(d) 規則の `genMxS.lied` 94.32 → 88.88 の主因は lied009 の拍子 3/4 を 3/1 と読んで全曲が崩れたこと。検出器ではこの崩れは出ない。
+
+**正直に書いておくこと**:
+1. 基準値は `-Accept` していない。理由を全部は説明できていない（`lyrD.noteRecall` 99.5 → 96.7、`spanX` の recall −1.4〜−2.9、`genCr` −0.5、`genOS.piano` −0.42 は原因を見ていない）。次の check はこの WORSE が同じように出る。
+2. 上の (b)(c) は 1 枚ずつ見た見立て。
+3. 改名後の `.vsix` は作っていない。`release.yml` の手動実行（workflow_dispatch）もしていない（push が要る）。商標は未確認（名前の衝突は検索と Marketplace で OMR の同名なしまで）。
+
+**次の一手**:
+1. **オーナーの判断**: Lily# の次の版の番号（0.16.0 でなければ README と CHANGELOG を直す）。公開の順番は Calamo → Lily# → 旧 ID `yotsuda.lilysharp-omr` の取り下げ（公開済みの Lily# 0.15.0 は旧 ID だけを探す）。タグの前に `release.yml` を手動で走らせる。
+2. **WORSE の仕分け**（検出器の方から。`lyrD`、`spanX`、`genCr`、`rest.dots` の順）。読み手で直すものと、説明して `-Accept` するものに分ける。評価台・開発用の台は動いていないので、リリースを止める理由にはしない。
+3. **S58 の学習**: 前の節の次の一手 1 のまま。ただし絵が変わったので、`gen-*.ps1` の学習データを描き直すかを先に決める。メモリは 2026-11-09 17:30 に VS Code から起動した VOICEVOX のエンジン（run.exe、遊んでいても私有メモリ 67.5 GB）も塞いでいた。cantilena（今は Cantoria）と合わせて閉じられるときに。
+4. REQUESTS 25 が `fixed` になったら: 第 13 歩の次の一手 1 のまま。
+
+**check の記録**: 頭の規則 check OK（0・0、改名の前の `e20535a`）。終わり（`out/validate-s58-lysc`、`check -Fresh`）: 規則 135 WORSE、検出器 77 WORSE（どちらも受け入れていない）、開発用の台 0・0（印 1 worse）、評価台 0・0、種 5 of 6。
+
+
 ## S58 第 1 歩（途中）: 切り離された組とスラーの始まりの生成器 `--detach` を足した（2068fcb）。学習は 2 回ともメモリで止まり、**detector50・51 はまだできていない**。読み手は変えていない（2026-11-09 午後、前の節の次の一手 2）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、23・24・25 は open。種は 6 つとも triage 済み。頭の規則 check OK（0・0）、終わりの規則 check OK（新しい鍵 36 本だけ better、`-Accept` で基準に）。**検出器 check は回していない**（`genDe*`・`symDe*` の検出器の基準はまだない。次の `-Detector` で新しい鍵として出る）。評価台・開発用の台も回していない（読み手を変えていないので数字は前の節のまま）。
