@@ -63,3 +63,10 @@ License (the text above, with that copyright line).
 <https://github.com/dotnet/runtime/blob/main/LICENSE.TXT>,
 <https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT>,
 <https://github.com/microsoft/CsWinRT/blob/master/LICENSE>
+
+## The icon
+
+The extension's icon is the fermata of Emmentaler, LilyPond's music font.
+Copyright (C) 1997-2023 Han-Wen Nienhuys, Jan Nieuwenhuizen, Werner Lemberg, and the LilyPond
+project contributors. The font is dual-licensed; the icon uses it under the SIL Open Font License.
+<https://gitlab.com/lilypond/lilypond>
