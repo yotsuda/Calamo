@@ -55,6 +55,10 @@ hairpins, pedal marks, articulations and ornaments, trill lines ("tr" and a wave
 over the first system, and the rehearsal marks in boxes over the staff, which become the sections
 of the `.lys`.
 
+Lyrics are read verse by verse and written as `lyrics` lines under the music. The form is read too
+(repeat barlines, the endings with their numbers, segno and coda, "To Coda", "Fine", "D.C. al Fine",
+"D.S. al Coda" and the like) and written as a `form` line.
+
 Best results come from clean digital pages (PDF or image exports of LilyPond, MuseScore, Dorico,
 Finale) and good black-and-white scans at about 300 dpi. Older prints scanned small (the 96 dpi
 pages of many IMSLP files, nineteenth-century engraving, a page bowed at the binding) are read
@@ -62,13 +66,10 @@ too, with more marks to check.
 
 ## Not yet (Beta)
 
-- Lyrics are read verse by verse and written as `lyrics` lines under the music. On clean pages
-  about 95 syllables in a hundred come out right; on old prints scanned small about a quarter are
-  wrong or missing, so check them against the page. Chord names are passed over (not
-  misread as notes, but not written).
-- The form is read (repeat barlines, the endings with their numbers, segno and coda, "To Coda",
-  "Fine", "D.C. al Fine", "D.S. al Coda" and the like) and written as a `form` line; "D.S." or
-  "D.C." standing alone, and a "Fine" among other words, are not.
+- Chord names are passed over (not misread as notes, but not written).
+- Lyrics: on clean pages about 95 syllables in a hundred come out right; on old prints scanned
+  small about a quarter are wrong or missing, so check them against the page.
+- The form: "D.S." or "D.C." standing alone, and a "Fine" among other words, are not read.
 - Words of expression are written only when they are among the common ones the reader knows
   ("dolce", "espress.", "rit.", "pizz.", "sempre legato" and the like) and printed in italic;
   others ("tenderly", "sul G") are passed over. A "rit." with a dashed line too short to show a

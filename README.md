@@ -1,4 +1,4 @@
-# Calamo (LilySharp-Omr)
+# Calamo
 
 Optical music recognition for [Lily#](https://yotsuda.github.io/LilySharp/): reads a page image or
 a PDF of printed sheet music and writes editable Lily# text (`.lys`), with the places it is unsure
@@ -47,7 +47,7 @@ part is asked a different question from that of a reader that reads a staff end 
 | | This reader | A reader that reads a staff end to end |
 |---|---|---|
 | What the model is asked | What symbol is here? | What music is written on this staff? |
-| How | A small convolutional network (CenterNet-like, with no box sizes): the page is scaled to 16 pixels a staff space and read in bands 14 spaces tall, with a heat map per kind of symbol (95 kinds), each peak one symbol | A staff is cut out, and a sequence model writes out its symbols (pitches, values…) one token after another |
+| How | A small convolutional network (CenterNet-like, with no box sizes): the page is scaled to 16 pixels a staff space and read in bands 14 spaces tall, with a heat map per kind of symbol (97 kinds), each peak one symbol | A staff is cut out, and a sequence model writes out its symbols (pitches, values…) one token after another |
 | Where the staves are | Found by the rules; the detector does not know where they are | Found first, so that each staff can be cut out for the model |
 | What comes out | Symbols with their kind, place on the page and confidence, in no order | The music in order, with the staff's place on the page but not each symbol's |
 | What it looks at | About 8 staff spaces around each symbol | The whole staff, the context before and after |
@@ -144,11 +144,11 @@ development set (`data/dev`), whose scans the detector learns from.
 
 | Pages | Sets | Notes and rests | Read right |
 |---|---|---|---|
-| Engraved with MuseScore (OpenScore Lieder) | 31 | 25,605 | 96.7% |
-| Engraved with LilyPond (Mutopia) | 8 | 2,959 | 94.1% |
-| Other modern engravings (Dorico, abcm2ps and others, from IMSLP) | 7 | 2,374 | 93.2% |
-| Scans of 19th- and early 20th-century prints (IMSLP) | 20 | 27,333 | 91.5% |
-| All | 66 | 58,271 | 94.0% |
+| Engraved with MuseScore (OpenScore Lieder) | 31 | 25,605 | 97.3% |
+| Engraved with LilyPond (Mutopia) | 8 | 2,959 | 96.8% |
+| Other modern engravings (Dorico, abcm2ps and others, from IMSLP) | 7 | 2,374 | 96.3% |
+| Scans of 19th- and early 20th-century prints (IMSLP) | 20 | 27,333 | 92.9% |
+| All | 66 | 58,271 | 95.2% |
 
 A page reads in about ten seconds on the CPU; an old print scanned small, or a long PDF, takes
 longer. The marks are not a proof: a bar with no mark can still be wrong.
@@ -198,4 +198,5 @@ may share), what it wrote and what the page says. See [CONTRIBUTING.md](CONTRIBU
 
 The code is under the [Apache License 2.0](LICENSE) (see also [NOTICE](NOTICE)). The data under
 `data/` keeps the licenses of its sources: public domain, CC0, CC BY 4.0, and LilyPond's GPL for
-the `event-listener*.ly` files; [data/LICENSES.md](data/LICENSES.md) lists each.
+the `event-listener*.ly` files. What the project made itself, the detector included, is under
+Apache-2.0. [data/LICENSES.md](data/LICENSES.md) lists each.
