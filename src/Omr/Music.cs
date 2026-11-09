@@ -112,6 +112,7 @@ sealed class Ev
     public bool MidiOnly;                       // truth knows the sounding pitch, not its spelling
     public List<Pitch> Tied;                    // the notes a tie starts at, low to high (a chord's: some of them, or all), or null: none
     public bool Tie => Tied != null;            // held into the next event (a tie starts at one of its notes at least)
+    public int BeamRun;                         // OMR: the run of stems beams really join within its ink piece (Head's; Reader.KneeBeam)
     public bool SlurStart, SlurEnd;             // OMR: a slur starts / ends at it
     public bool SlurStartAcross, SlurEndAcross; // OMR: a sure slur start / end at it that nothing on its staff pairs with (Head's): a line handed to the neighbouring staff (Reader.HandedGroups)
     public bool PhraseStart, PhraseEnd;         // OMR: that slur is written as a phrasing slur: it runs over notes with syllables of their own, which a slur would hold

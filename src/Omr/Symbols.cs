@@ -22,6 +22,7 @@ sealed class Head
     public bool SlurStartAcross, SlurEndAcross;   // a sure slur start / end at it that nothing on its staff pairs with: a slur to / from the neighbouring staff, its other end unseen there, or unseen on this one (Reader.HandedGroups)
     public double Score;        // the learnt detector's confidence (0: the rules found it)
     public int Cluster;          // ink component id
+    public int BeamRun;          // which run of stems really joined by beams within its piece (Symbols.BeamRuns; 0: none)
     public (int Num, int Den) Scale = (1, 1);   // tuplet
     public int Tuplet;           // which tuplet number's span it is under (0: none): the .lys keeps the groups as written
     public List<HeadAlt> Alts;   // other readings the page half supports (Symbols.Doubts): the .lys's @todo and its candidates
@@ -670,6 +671,7 @@ static partial class Symbols
         // (twice: a stem reaches its beams by a neighbour's tip at them, which may itself have reached them first)
         for (int pass = 0; pass < 2; pass++)
             foreach (var h in ps.Heads.Where(h => h.HasStem && !h.Hollow)) ReachBeams(ink, ps.Heads, h, s);
+        StemsThroughOtherStaff(ink, ps.Heads, s);
         if (ps.Detections != null) StemsUnderBeams(ink, ps.Heads, s);
         foreach (var h in ps.Heads.Where(h => !h.Hollow && h.Score > 0 && !h.Cross && !h.Slash && !h.WholeShape).ToList())
             ShortStem(ink, ps.Heads, h, s);
@@ -711,6 +713,7 @@ static partial class Symbols
             if (id != 0) clusters.Add(id);
             if (own != 0) clusters.Add(own);
         }
+        BeamRuns(ink, ps.Heads, s);
         BeamStaves(d, ps, staves, s);
         // (a head beyond its staff on a page levelled by strips: its position from the ledger lines as
         // printed, LedgerPos. Not elsewhere: a degraded page's blurred ledgers moved chords on ledger

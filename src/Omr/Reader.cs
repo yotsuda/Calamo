@@ -821,6 +821,10 @@ static class Reader
         var upper = parts[p].Where(Head).ToList();
         var all = lower.Concat(upper).OrderBy(e => e.X).ToList();
         if (upper.Count == 0 || all.Count < 3) return false;
+        // (one beam joins them, not one piece of ink: lang36-3's scan, bar 30, the left hand's group and the right hand's next
+        // one at one height, a slur and the chords' stems between. Two runs of two stems or more: a stem alone may be one a
+        // beam's line test missed, lang36-3's bars 40 and 42, the f'16 drawn in the chord's column)
+        if (all.GroupBy(e => e.BeamRun).Count(g => g.Select(e => Math.Round(e.StemX / s)).Distinct().Count() >= 2) > 1) return false;
         bool falling = upper.Contains(all[0]);
         // (falling: the lower staff's notes with stems down are not its)
         if (falling && parts[q].Any(e => e.Beam == beam && e.Stem < 0 && !e.IsRest)) return false;
@@ -1673,7 +1677,7 @@ static class Reader
                     // (a two-note tremolo's two notes alternate for the time of one: each plays half its written value)
                     P = pitch, Ticks = Dur.Of(basis, h.Dots) * h.Scale.Num / h.Scale.Den / (h.Tremolo > 0 ? 2 : 1), X = x, Scale = h.Scale, Tuplet = h.Tuplet,
                     Tremolo = h.Tremolo, TremoloFirst = h.TremoloFirst,
-                    Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 && !h.Held ? h.Cluster : 0, Held = h.Held,
+                    Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 && !h.Held ? h.Cluster : 0, BeamRun = h.BeamRun, Held = h.Held,
                     Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, PosLo = h.Pos, PosHi = h.Pos, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
                     SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, SlurStartAcross = h.SlurStartAcross, SlurEndAcross = h.SlurEndAcross, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,

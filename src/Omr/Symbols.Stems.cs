@@ -305,12 +305,18 @@ static partial class Symbols
         // (the column and its neighbours: the stem's found column may end where a ragged edge leaves it)
         // (and on past the reach while the walk has been mostly a stem's thin ink: a long stem broken
         // far from its beams -- kinkel10-4's scan, the low G's stem broken 3.6 spaces under them)
+        // (a long stem may lean: the walk goes with it -- lang36-3's scan, bar 52, stems of 12 spaces up to a beam over
+        // the other staff, 4 px aside by their top)
         int thin = 0;
-        for (int y = tip + dir; Math.Abs(y - tip) <= reach || (Math.Abs(y - tip) <= 6 * s && thin >= 0.7 * Math.Abs(y - tip)); y += dir)
+        for (int y = tip + dir; Math.Abs(y - tip) <= reach || (Math.Abs(y - tip) <= 8 * s && thin >= 0.7 * Math.Abs(y - tip)); y += dir)
         {
             if (Ink(y))
             {
-                if (Thin(ink, x, y, s)) thin++;
+                if (Thin(ink, x, y, s))
+                {
+                    thin++;
+                    if (!ink[x, y]) x += ink[x - 1, y] ? -1 : 1;
+                }
                 // (the next beam's ragged edge may run thin for a few rows)
                 if (gap > 0) edge = inBeams ? (int)(0.15 * s) + 1 : 0;
                 if (edge > 0 && Thin(ink, x, y, s) && --edge == 0) break;
@@ -340,7 +346,7 @@ static partial class Symbols
         {
             var at = new Dictionary<int, int>();
             bool moved = false;
-            bool Ends(Head o)
+            bool Ends(Head o, bool orRuns = false)
             {
                 int c = (int)Math.Round(o.StemX);
                 int? yo = at.TryGetValue(c, out var y) || at.TryGetValue(c - 1, out y) || at.TryGetValue(c + 1, out y) ? y : null;
@@ -348,7 +354,32 @@ static partial class Symbols
                 // says nothing -- gen-orn-scan's piano006, a turn over the beam followed round its curl)
                 if (yo == null && moved) return false;
                 int off = (yo ?? yy) - yy;
-                return o.Tip >= Math.Min(y0, y1) + off - 0.25 * s && o.Tip <= Math.Max(y0, y1) + off + 0.25 * s;
+                if (o.Tip >= Math.Min(y0, y1) + off - 0.25 * s && o.Tip <= Math.Max(y0, y1) + off + 0.25 * s) return true;
+                // (or its stem runs on, thin all the way, into the beam there: a group's stems may all stop short of it, and
+                // none then has a tip in the beam for the others to find -- lang36-3's scan, bar 52)
+                // (a beam's thickness: a staff line or a ledger the walk crosses is wide for a few rows as well. And for a stem
+                // well short of the beam only: just past a tip the ink may be anything -- kinkel7-6's scan, eighths read as sixteenths)
+                return orRuns && yo != null && Math.Abs(y1 - y0) + 1 >= 0.4 * s && Math.Abs(yy - tip) >= 2 * s && Runs(o, o.Up ? Math.Max(y0, y1) + off : Math.Min(y0, y1) + off);
+            }
+            bool Runs(Head o, int row)
+            {
+                int c = (int)Math.Round(o.StemX), d = o.Up ? -1 : 1, miss = 0, thick = 0, slack = (int)(0.3 * s);
+                // (a removed staff line's width of white, not the white between two beams)
+                int most = Math.Max(2, slack);
+                if (o.Up ? o.Tip <= row : o.Tip >= row) return false;
+                // (a stem that ends in a beam of its own is done: this one is another's)
+                if (!Thin(ink, c, (int)o.Tip, s) || !Thin(ink, c, (int)o.Tip - d, s)) return false;
+                for (int yr = (int)o.Tip + d; o.Up ? yr > row + slack : yr < row - slack; yr += d)
+                {
+                    if (yr <= 0 || yr >= ink.H - 1) return false;
+                    if (!ink[c, yr] && !ink[c - 1, yr] && !ink[c + 1, yr]) { if (++miss > most) return false; continue; }
+                    miss = 0;
+                    // (wide for no more than a staff line: wider is a beam or a head on the way)
+                    if (!Thin(ink, c, yr, s)) { if (++thick > 0.4 * s) return false; continue; }
+                    thick = 0;
+                    if (!ink[c, yr]) c += ink[c - 1, yr] ? -1 : 1;
+                }
+                return true;
             }
             // (a beam's stems stand a space or more apart: another stem the same way close by, ending in the
             // beam, is the beam's there -- lang36-3's eighth by the first stem of a beamed group)
@@ -385,10 +416,76 @@ static partial class Symbols
                 // half a space under the right hand's, holds no tip of this staff's stems)
                 if (heads.Any(o => o != h && o.HasStem && o.St == h.St && o.Up == h.Up && Math.Abs(o.StemX - x) >= 0.8 * s
                                    && Math.Sign(o.StemX - x) == side && Math.Abs(o.StemX - x) <= Math.Abs(far - x) + 0.3 * s
-                                   && Ends(o))) return true;
+                                   && Ends(o, orRuns: true))) return true;
             }
             return false;
         }
+    }
+
+    /// <summary>A beam's ink along the line from one stem's tip to another's, the columns between them all but filled.</summary>
+    static bool BeamBetween(Img ink, double x0, double y0, double x1, double y1, double s)
+    {
+        int n = 0, hit = 0, band = (int)(0.9 * s);
+        for (int x = (int)(Math.Min(x0, x1) + 0.25 * s); x < Math.Max(x0, x1) - 0.25 * s; x++)
+        {
+            if (x <= 0 || x >= ink.W - 1) return false;
+            int y = (int)(y0 + (y1 - y0) * (x - x0) / (x1 - x0));
+            n++;
+            for (int k = Math.Max(1, y - band); k <= Math.Min(ink.H - 2, y + band); k++)
+                if (ink[x, k]) { hit++; break; }
+        }
+        return n > 0 && hit >= 0.85 * n;
+    }
+
+    /// <summary>
+    /// A stem up that ran on through its own beam into the stem of a chord of the staff above, in the same column,
+    /// the two one line of ink (lang36-3's scan, bar 30: the left hand's g16 under the right hand's chord, read as a
+    /// quarter with the chord's stem for its own). It ends where the next stem of its staff does, if a beam joins the two.
+    /// </summary>
+    static void StemsThroughOtherStaff(Img ink, List<Head> heads, double s)
+    {
+        foreach (var h in heads.Where(h => h.HasStem && h.Up && !h.Hollow).ToList())
+        {
+            var over = heads.Where(o => o.St != h.St && o.HasStem && o.Up && o.Y < h.Y && o.Y > h.Tip && Math.Abs(o.StemX - h.StemX) < 0.3 * s).ToList();
+            if (over.Count == 0) continue;
+            double floor = over.Max(o => o.Y);
+            var next = heads.Where(o => o.St == h.St && o.HasStem && o.Up && !o.Hollow && o.Tip > floor && o.Tip < h.Y
+                                        && Math.Abs(o.StemX - h.StemX) >= 0.8 * s && Math.Abs(o.StemX - h.StemX) <= 4 * s)
+                            .OrderBy(o => Math.Abs(o.StemX - h.StemX)).FirstOrDefault();
+            if (next == null || !BeamBetween(ink, h.StemX, next.Tip, next.StemX, next.Tip, s)) continue;
+            foreach (var c in heads.Where(c => c.St == h.St && c.HasStem && c.Up && Math.Abs(c.StemX - h.StemX) < 0.3 * s)) c.Tip = next.Tip;
+        }
+    }
+
+    /// <summary>
+    /// The stems of one ink piece that beams really join. A piece may hold two groups a slur or a text touching their stems
+    /// made one (lang36-3's scan, bar 30: the left hand's group and the right hand's next one, at one height, a slur between).
+    /// Each head gets the number of its run (<see cref="Head.BeamRun"/>).
+    /// </summary>
+    static void BeamRuns(Img ink, List<Head> heads, double s)
+    {
+        int next = 1;
+        foreach (var piece in heads.Where(h => h.HasStem && !h.Hollow && h.Beams > 0 && h.Cluster != 0).GroupBy(h => h.Cluster))
+        {
+            // (a stem's heads as one, by its column and way)
+            var stems = new List<List<Head>>();
+            foreach (var h in piece.OrderBy(h => h.StemX))
+                if (stems.FirstOrDefault(g => g[0].Up == h.Up && Math.Abs(g[0].StemX - h.StemX) < 0.3 * s) is { } g) g.Add(h);
+                else stems.Add(new List<Head> { h });
+            var run = new int[stems.Count];
+            double Far(List<Head> g) => g[0].Up ? g.Min(h => h.Tip) : g.Max(h => h.Tip);
+            for (int i = 0; i < stems.Count; i++)
+            {
+                if (run[i] == 0) run[i] = next++;
+                for (int j = i + 1; j < stems.Count; j++)
+                {
+                    if (Math.Abs(Far(stems[i]) - Far(stems[j])) > 2 * s) continue;
+                    if (!BeamBetween(ink, stems[i][0].StemX, Far(stems[i]), stems[j][0].StemX, Far(stems[j]), s)) continue;
+                    if (run[j] == 0) run[j] = run[i];
+                    else if (run[j] != run[i]) { int was = run[j]; for (int k = 0; k < run.Length; k++) if (run[k] == was) run[k] = run[i]; }
+                }
+            }
+            for (int i = 0; i < stems.Count; i++) foreach (var h in stems[i]) h.BeamRun = run[i];        }
     }
 
     /// <summary>Beams (or flags) crossing a column just beside the stem, near its tip.</summary>
