@@ -30,8 +30,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-ONNX Runtime's own third-party notices:
-<https://github.com/microsoft/onnxruntime/blob/main/ThirdPartyNotices.txt>
+ONNX Runtime's own third-party notices are in `bin/licenses/onnxruntime-ThirdPartyNotices.txt`.
 
 ## Music fonts the reader learnt from
 
@@ -54,15 +53,24 @@ documents, and what is made from them, unrestricted.
 
 The SIL Open Font License is at <https://openfontlicense.org/open-font-license-official-text/>.
 
-## .NET runtime, System.Drawing.Common, Windows SDK projection
+The detector also learnt from public-domain scans of songs whose notes are CC0 (IMSLP prints and
+OpenScore Lieder). Some TAB numbers on the generated pages were drawn with fonts that come with
+Windows; no font file is included from those either.
 
-The reader is published self-contained: the .NET runtime and libraries, `System.Drawing.Common`
-and `Microsoft.Windows.SDK.NET` (C#/WinRT projection, used to draw PDF pages) are in `bin/`.
-All are Copyright (c) .NET Foundation and Contributors / Microsoft Corporation, under the MIT
-License (the text above, with that copyright line).
-<https://github.com/dotnet/runtime/blob/main/LICENSE.TXT>,
-<https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT>,
-<https://github.com/microsoft/CsWinRT/blob/master/LICENSE>
+## .NET runtime and System.Drawing.Common
+
+The reader is published self-contained: the .NET runtime and libraries and `System.Drawing.Common`
+are in `bin/`. Copyright (c) .NET Foundation and Contributors, under the MIT License. Their licenses
+and third-party notices are in `bin/licenses/`.
+
+## Windows SDK projection
+
+`bin/Microsoft.Windows.SDK.NET.dll` and `bin/WinRT.Runtime.dll` let the reader call Windows to draw
+PDF pages and read text. They come from Microsoft's package `Microsoft.Windows.SDK.NET.Ref` and are
+Copyright (c) Microsoft Corporation. They are not under this extension's license: that package's
+terms are the Microsoft Software License Terms for the Windows SDK, and these two files may be used
+only under them. <https://aka.ms/WinSDKLicenseURL> They are distributed unmodified, as that package's
+entry on the SDK's list of distributable files allows. <https://learn.microsoft.com/legal/windows-sdk/redist>
 
 ## The icon
 

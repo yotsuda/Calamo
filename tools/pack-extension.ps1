@@ -18,6 +18,25 @@ $bin = "$stage\bin"
 cmd /d /s /c "dotnet publish `"$root\src\Omr`" -c Release -r win-x64 --self-contained -o `"$bin`" -v q -nologo < NUL"
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 Get-ChildItem $bin -Filter *.pdb | Remove-Item
+# The licenses of what is bundled: the VSIX is all a user receives, and the packages' copies stay on this machine.
+$packages = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { "$HOME\.nuget\packages" }
+$libraries = (Get-Content "$bin\omr.deps.json" -Raw | ConvertFrom-Json).libraries.PSObject.Properties.Name
+function PackageDir([string]$id) {
+    $found = $libraries | Where-Object { $_ -like "$id/*" } | Select-Object -First 1
+    if (-not $found) { throw "$id is not among the reader's libraries" }
+    "$packages\$($id.ToLowerInvariant())\$($found.Split('/')[1])"
+}
+$runtime = (Get-Content "$bin\omr.runtimeconfig.json" -Raw | ConvertFrom-Json).runtimeOptions.includedFrameworks[0].version
+$copies = @{
+    'dotnet-LICENSE.txt'                       = "$packages\microsoft.netcore.app.runtime.win-x64\$runtime\LICENSE.TXT"
+    'dotnet-THIRD-PARTY-NOTICES.txt'           = "$packages\microsoft.netcore.app.runtime.win-x64\$runtime\THIRD-PARTY-NOTICES.TXT"
+    'onnxruntime-LICENSE.txt'                  = "$(PackageDir 'Microsoft.ML.OnnxRuntime')\LICENSE"
+    'onnxruntime-ThirdPartyNotices.txt'        = "$(PackageDir 'Microsoft.ML.OnnxRuntime')\ThirdPartyNotices.txt"
+    'System.Drawing.Common-LICENSE.txt'        = "$(PackageDir 'System.Drawing.Common')\LICENSE.TXT"
+    'System.Drawing.Common-THIRD-PARTY-NOTICES.txt' = "$(PackageDir 'System.Drawing.Common')\THIRD-PARTY-NOTICES.TXT"
+}
+New-Item -ItemType Directory -Force "$bin\licenses" | Out-Null
+foreach ($name in $copies.Keys) { Copy-Item -LiteralPath $copies[$name] "$bin\licenses\$name" }
 
 # the version in package.json is the reader's own, and the contract it speaks goes with it
 $info = & "$bin\omr.exe" --version --json | ConvertFrom-Json

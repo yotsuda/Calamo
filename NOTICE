@@ -9,5 +9,7 @@ LilyPond and are under the GNU General Public License, version 3 or later.
 
 The symbol detector (data/detector.onnx) and the shape classifier's samples
 (data/glyph-train.tsv) were trained on generated music engraved with the Emmentaler, Leland,
-MuseJazz, Bravura, Petaluma, Finale Maestro, Finale Broadway and Gonville fonts. No font file is
-included. Their licenses are listed in extension/THIRD-PARTY-NOTICES.md.
+MuseJazz, Bravura, Petaluma, Finale Maestro, Finale Broadway and Gonville fonts, with some TAB
+numbers in fonts that come with Windows. The detector also learnt from public-domain scans of
+songs whose notes are CC0 (data/dev/lieder). No font file is included. The fonts' licenses are
+listed in extension/THIRD-PARTY-NOTICES.md.
