@@ -159,7 +159,7 @@ Needs Windows 10 version 2004 (build 19041) or later, x64, and the .NET 10 SDK.
 
 ```
 dotnet build src/Omr -c Release
-src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe read data\eval\chopin28-4\src\Chop-28-4a-a4.pdf --out out\try
+src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe read data\eval\chopin28-4\src\Chop-28-4a-a4.pdf --out out\try
 ```
 
 `omr read` takes PNG, JPEG, BMP, TIFF and PDF pages of one piece, in order, and writes `x.lys`,
@@ -177,7 +177,7 @@ calls them: [docs/protocol.md](docs/protocol.md).
 
 | Folder | What is in it |
 |---|---|
-| `src/Omr` | the reader (`omr.exe`) |
+| `src/Omr` | the reader (`calamo.exe`) |
 | `src/OmrGen` | the generator of pieces with their truth, drawn by Lily#, for training and testing |
 | `src/OmrDegrade` | makes a clean page look printed and scanned |
 | `tools` | the regression gate (`check.ps1`), the runs of each set, packing the extension; `train-model/` trains the detector (Python 3.12, PyTorch with CUDA; see its `requirements.txt`) |
