@@ -537,7 +537,7 @@ static partial class Symbols
                     // (the beams stand evenly spaced: past two, a thin run much farther off than the second
                     // from the first is none -- lang36-3's scan, a staff line's remains under a sixteenth's two
                     // beams read as a third. A tremolo's slashes, measured aslant, space unevenly: as thick)
-                    if (run > 0 && count == 2 && gap12 >= 0 && before > 1.5 * gap12 + 0.15 * s && run < 0.7 * first) break;
+                    if (run > 0 && count == 2 && gap12 >= 0 && (before > 1.5 * gap12 + 0.15 * s && run < 0.7 * first || before > 2.5 * gap12 + 0.15 * s)) break;   // (or as thick, far off: the next note's head on its ledger, drawn across from the other staff, gen-cross's threes002)
                     if (run >= 0.28 * s && Joined(y - dir * (run / 2)) && !Blot(y - dir * (run / 2), run))
                     {
                         // (the first run may begin before the scan does, in a sloping beam: measured to its start)
@@ -553,7 +553,7 @@ static partial class Symbols
             // (a run cut off at the limit is measured to its end for the thickness test)
             int whole = run;
             if (run > 0 && count > 0) for (int yy = y; ink[x, yy] && whole <= 2 * first; yy += dir) whole++;
-            bool farThin = run > 0 && count == 2 && gap12 >= 0 && before > 1.5 * gap12 + 0.15 * s && whole < 0.7 * first;
+            bool farThin = run > 0 && count == 2 && gap12 >= 0 && (before > 1.5 * gap12 + 0.15 * s && whole < 0.7 * first || before > 2.5 * gap12 + 0.15 * s);
             if (run >= 0.28 * s && !farThin && !(count > 0 && whole > 1.6 * first) && Joined(y - dir * (run / 2)) && !Blot(y - dir * (run / 2), whole)) count++;
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                 Console.WriteLine($"beams at x {x}: tip {tip} limit {limit} stemLabel {stemLabel} count {count}; column: " +

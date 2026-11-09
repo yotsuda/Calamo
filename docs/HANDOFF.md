@@ -2,6 +2,36 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## WORSE の仕分け 第 1 歩: 新しい lysc の絵で落ちた読みのうち 3 つの型を読み手で直した。`lyrD.noteRecall` 96.7 → **99.5**。開発用の台 **28685 のまま**（1 better・1 worse）、評価台 55445 → **55449**（3 better・1 worse）。**基準値は更新していない**（規則 134・検出器 76 WORSE が残る。2026-11-10 未明、前の節の次の一手 2）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、25 は open。種は 6 つとも triage 済み、5 of 6。頭の規則 check は 135 WORSE で、前回の `-Fresh` の結果と全項目が一致（読み手のずれなし）。
+
+**直したもの**:
+1. `Symbols.Ties.cs` の「確かな終わりが弱い始まりを取る」: 候補が複数なら、インクが確かな終わりから一本でつながる一番遠い始まりを取る。符幹を横切る弧は検出器に「終わり 0.47 + 始まり 0.20」と切って見られ、一番近い偽の始まりが本物（0.49）を押しのけていた（gen-doubled の lied002、19 小節）。
+2. `Program.cs`: ユニゾンの双子を声部探索が入れ替えた小節で、`(` と `)` が別の声部に分かれたら、閉じをユニゾンの相手へ移す。lysc が対にできず、後ろの音節がメリスマに吸われて描かれなかった。
+3. `Symbols.cs` の `HasLedgers`: 加線の 1 本が連桁に隠れて太く見えても、頭までの間に細い加線が別に見えていれば加線と認める（`e@cross` が低音部の `d'` になっていた。gen-cross の threes009）。
+4. `Symbols.Stems.cs` の `CountBeams`: 「連桁は等間隔」を広げ、2 本目からの間隔が 1・2 本目の間隔の 2.5 倍を超える run は太さを問わず連桁に数えない（隣の音の符頭と加線を 3 本目と数えていた。threes002）。`symCr.head.beams` 54 → 44。
+
+**WORSE の仕分けの結果**（検出器）:
+- 直った: `lyrD.noteRecall`（WORSE から外れた）。`genCr`・`genCrS` は −0.5 → −0.1〜−0.3 に縮んだ（`genCr.inVoice` は基準より上、99.33）。
+- 説明がついた（絵の変化で、読み手では直せない）: `spanX` の取りこぼしの大半。短い span（`molto rit.` が 16 分 4 つの上など）は文字が音符の上を埋めて**破線が描かれず**、絵の上ではただの文字（basic001 の絵で確認。`basic010`・`ledger006`・`piano003` 3 小節・`piano006` は同じ型と見ている）。`piano003` の `allargando` は文字が左手の連桁に重なって描かれ OCR で読めない（lysc の衝突回避の話で、Lily# に頼むかは未判断）。
+- 2 か所だけ: `rest.dots`（35 キーあるが piano009 と voices2008 の 1 か所ずつを派生台が数えている。付点が休符から離れて描かれた絵を piano009 で確認。読み手は直していない）。
+
+**正直に書いておくこと**:
+1. 基準値は `-Accept` していない。未説明が残る: `genOS.piano`（piano002 の 1 曲に集中、中身は見ていない）、`spanend` の 1 小節ずれ（basic008、piano008）、規則の `genMxS.lied`（前の節の lied009 の 3/1）、`head.beams` の残り 44 件。
+2. 修正で増えた WORSE が 1 つ: `symCrS.threes.head.stem` 0 → 1（スキャン版 threes004 の `@cross` の音）。
+3. `dev-kinkel10-4-scan` 1158 → 1157（`value` が 1 増。4 の連桁の規則のせいかは見ていない）。評価台の `lang36-2-ms` 563 → 562、スラーの終わりの見つけた数が 2 台で −1 は原因を見ていない（評価台なのでデバッグしない）。
+4. `threes005` 等の `head.beams` を「加線が符幹に接している」とした前の節の見立ては、threes002 では「隣の符頭」だった。残り 44 件が同じ型かは見ていない。
+
+**次の一手**:
+1. **オーナー: 次の Lily# の公開**（前の節の次の一手 1 のまま）。
+2. **残りの WORSE**: `genOS.piano` の piano002 → `head.beams` の残り → `spanend` のずれ → `genMxS.lied`。説明がそろったら `-Accept` する。
+3. S58 の学習、REQUESTS 25: 前の節のまま。
+
+**check の記録**（`out/validate-s58-worse`）: 終わりの規則 134 WORSE（修正前と比べて 2 better・0 worse）、検出器 76 WORSE、開発用の台 1 better・1 worse（印 0・0）、評価台 3 better・1 worse（印 8 better・3 worse）、種 5 of 6。`docs/dev-sets.tsv`・`eval-sets.tsv` は写した。
+
+
+
 ## Calamo 0.6.0 を公開した（2026-11-10 未明、オーナーの指示「リリースして」、push もオーナーの許可で）
 
 **現在地**: `v0.6.0`（`010d255`）で GitHub Release と Marketplace の `yotsuda.calamo`（public / preview、win32-x64）を公開した。タグの前に `release.yml` を手動で走らせて成功。旧 ID `yotsuda.lilysharp-omr` は 0.5.0 のまま残っている。読み手は下の節のとおり（検出器 42、生成譜の WORSE は未処理）。

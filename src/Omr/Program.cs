@@ -657,6 +657,21 @@ var prevBars = Enumerable.Repeat(-1, cfg.Parts.Count).ToArray();
 var sysPages = Enumerable.Repeat(-1, cfg.Parts.Count).ToArray();
 // (the bar after each: a system's last bar ends its line with the break)
 var nextBars = all.Keys.Zip(all.Keys.Skip(1)).ToDictionary(p => p.First, p => p.Second);
+// a tune doubled as two voices (one head, a stem each way) has its notes dealt to the voices either way round where
+// they sound together: a slur over the line, opened on one voice's note and closed on the other's unison, lysc does
+// not pair, and the words after it are lost (gen-doubled's lied002, bar 19). The close goes on the unison in the voice it opened in
+foreach (var vs in allVoices.Values.Where(vs => vs.Count == 2))
+    for (int a = 0; a < 2; a++)
+        foreach (var start in vs[a].Where(e => e.SlurStart && !e.IsRest).ToList())
+        {
+            if (vs[a].Any(e => e.X > start.X && e.SlurEnd)) continue;
+            var end = vs[1 - a].FirstOrDefault(e => e.X > start.X && e.SlurEnd && !e.IsRest);
+            if (end == null || vs[1 - a].Any(e => e.X < end.X && e.SlurStart)) continue;
+            var twin = vs[a].FirstOrDefault(e => !e.IsRest && Math.Abs(e.X - end.X) < 1 && e.Chord == null && end.Chord == null && e.P.Equals(end.P));
+            if (twin == null) continue;
+            end.SlurEnd = false;
+            twin.SlurEnd = true;
+        }
 // a span carried over a cut of the form's (a repeat sign, an ending, a jump: what is played before the
 // section differs from pass to pass) is lysc's error LYS4023, and one left open at the piece's end
 // (a pedal never released) LYS4018: close it on the last note before the cut (or the end), drop the close

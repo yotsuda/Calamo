@@ -841,6 +841,7 @@ static partial class Symbols
             for (int x = x0; x <= x1; x++, n++) if (d[x, yy]) c++;
             return c >= 0.8 * n;
         }
+        int beamed = 0, thin = 0;
         for (int k = 6; k <= Math.Abs(p); k += 2)
         {
             double y = h.St.Mid - sign * k * h.St.S / 2;
@@ -855,17 +856,24 @@ static partial class Symbols
             // staff, its lines 1.1 spaces long, gen-cue's tuplets004 -- dropped as a grace head off the staff)
             double reach = h.Grace ? 0.45 : 0.7;
             int x0 = own ? (int)(h.R > h.L ? h.L : h.X - 0.55 * s) : (int)(h.X - reach * s), x1 = own ? (int)(h.R > h.L ? h.R : h.X + 0.55 * s) : (int)(h.X + reach * s);
+            bool beam = false;
             for (int yy = (int)y - win; yy <= (int)y + win && !found; yy++)
-                found = Inked(x0, x1, yy)
-                        && (!wider || Inked((int)(h.L - 0.3 * s), (int)(h.L - 0.1 * s), yy) && Inked((int)(h.R + 0.1 * s), (int)(h.R + 0.3 * s), yy))
-                        // (a ledger line is thin: a beam of the other staff's notes through the gap, half a
-                        // space thick, is no ledger line -- kinkel7-1's left-hand chords climbing into the
-                        // right hand's beams, their top heads given to the right hand. Not on the head's own
-                        // row or at its edge, half a space off, where the head's ink is, or a chord-mate's)
-                        && (Math.Abs(p) - k < 2 || Thin(yy));
-            if (!found) return false;
+            {
+                if (!Inked(x0, x1, yy) || wider && !(Inked((int)(h.L - 0.3 * s), (int)(h.L - 0.1 * s), yy) && Inked((int)(h.R + 0.1 * s), (int)(h.R + 0.3 * s), yy))) continue;
+                // (a ledger line is thin: a beam of the other staff's notes through the gap, half a
+                // space thick, is no ledger line -- kinkel7-1's left-hand chords climbing into the
+                // right hand's beams, their top heads given to the right hand. Not on the head's own
+                // row or at its edge, half a space off, where the head's ink is, or a chord-mate's)
+                if (Math.Abs(p) - k < 2 || Thin(yy)) found = true;
+                else beam = true;
+            }
+            // (one ledger line a beam lies over, thick there, is still one when a thin one is seen on the way to the
+            // head: a note drawn across to the staff above, under the beam it shares with the left hand, gen-cross's
+            // threes009, e on three ledgers under the treble staff, the first merged with the beam)
+            if (!found && (!beam || ++beamed > 1)) return false;
+            if (found && Math.Abs(p) - k >= 2) thin++;
         }
-        return true;
+        return beamed == 0 || thin > 0;
         // whether the ink through the row is a line's: beyond the head's width on either side (a ledger
         // line reaches a third of a space past the head; a chord-mate on the row, or touching the line,
         // and the stem stand within), the run of dark rows there is no thicker than a third of a space.

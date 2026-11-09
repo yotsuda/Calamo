@@ -796,10 +796,15 @@ static partial class Symbols
             {
                 double bx = X(r);
                 double last = rights.Where(o => Sure(o) && o != r && at[o].Above == at[r].Above && X(o) < bx).Select(X).DefaultIfEmpty(double.MinValue).Max();
-                var l = lefts.Where(l => !Sure(l) && !used.Contains(l) && at[l].Chord != at[r].Chord && X(l) < bx && X(l) > last && at[l].Above == at[r].Above
+                var weak = lefts.Where(l => !Sure(l) && !used.Contains(l) && at[l].Chord != at[r].Chord && X(l) < bx && X(l) > last && at[l].Above == at[r].Above
                                          && (!fromTie.Contains(l) || bx - X(l) < 12 * s)
                                          && !lefts.Any(o => Sure(o) && at[o].Above == at[r].Above && X(o) > X(l) && X(o) < bx) && !TiePartner(l, r) && !Bracket(l, r) && !Fermata(l, r) && (r.X - l.X <= FarSlur * s || Joined(r, l)))
-                             .OrderBy(l => l.X).LastOrDefault();
+                             .OrderBy(l => l.X).ToList();
+                var l = weak.LastOrDefault();
+                // (of several, the farthest the arc's ink runs back to from the end: an arc through a stem on its way is seen as
+                // an end and a start either side of the stem, the start the nearest, slur_r 0.47 and slur_l 0.20 by the up stem
+                // of a doubled tune's quarter under the arc from its half note, slur_l 0.49, gen-doubled's lied002, bar 19)
+                if (weak.Count > 1) l = weak.FirstOrDefault(o => o != l && Joined(r, o)) ?? l;
                 if (l != null) { used.Add(l); Pair(l, r); }
             }
             // a weak start and a weak end on the two notes a tie joins, the arc's ink running from the one to
