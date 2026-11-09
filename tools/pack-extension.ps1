@@ -3,7 +3,7 @@ param(
 )
 # The OMR as a VS Code extension (docs/repro/lilysharp-handoff-2026-10-12.md §1.3): calamo.exe
 # published self-contained for win-x64 into extension/bin, its `omr --version --json` beside it
-# (bin/omr.json, which extension.js hands to Lily#), and `vsce package --target win32-x64`.
+# (bin/calamo.json, which extension.js hands to Lily#), and `vsce package --target win32-x64`.
 # Packages only. Publishing is the tag-driven workflow's (.github/workflows/release.yml: this script,
 # then the GitHub Release and `vsce publish` with the VSCE_PAT secret); a push of v0.3.0 releases 0.3.0.
 $ErrorActionPreference = 'Stop'
@@ -42,7 +42,7 @@ foreach ($name in $copies.Keys) { Copy-Item -LiteralPath $copies[$name] "$bin\li
 $info = & "$bin\calamo.exe" --version --json | ConvertFrom-Json
 $pkg = Get-Content "$stage\package.json" -Raw | ConvertFrom-Json
 if ($pkg.version -ne $info.version) { throw "extension/package.json is $($pkg.version), the reader $($info.version): make them one" }
-[IO.File]::WriteAllText("$bin\omr.json", (& "$bin\calamo.exe" --version --json))
+[IO.File]::WriteAllText("$bin\calamo.json", (& "$bin\calamo.exe" --version --json))
 
 # (the owner's seeds, their readings and tools/seeds.ps1 stay on the owner's machine: never in a release.
 # docs/repro/lilysharp-requests-2026-10-29-seed-from-fixed-bars.md)

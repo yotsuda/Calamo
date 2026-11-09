@@ -32,7 +32,7 @@ function offerLilySharp(context) {
 
 /**
  * @returns {{ path: string, version: string, protocol: number } | undefined}
- *   the reader and its `omr --version --json` (written to bin/omr.json when the package is built,
+ *   the reader and its `omr --version --json` (written to bin/calamo.json when the package is built,
  *   so nothing is started here); undefined where it cannot run (not Windows x64, or bin missing)
  */
 function activate(context) {
@@ -43,7 +43,7 @@ function activate(context) {
     const bin = path.join(context.extensionPath, 'bin');
     const exe = path.join(bin, 'calamo.exe');
     try {
-        const info = JSON.parse(fs.readFileSync(path.join(bin, 'omr.json'), 'utf8'));
+        const info = JSON.parse(fs.readFileSync(path.join(bin, 'calamo.json'), 'utf8'));
         if (!fs.existsSync(exe)) {
             return undefined;
         }

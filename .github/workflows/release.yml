@@ -15,7 +15,7 @@ name: Release
 # platforms, and no race between legs on the first publish.
 #
 # Windows runner: pack-extension.ps1 runs the published calamo.exe (`--version --json`) to
-# write bin/omr.json and to check that extension/package.json names the same version, and
+# write bin/calamo.json and to check that extension/package.json names the same version, and
 # a Windows TFM is simplest to publish from Windows.
 #
 # Secret: VSCE_PAT. A Marketplace -> Manage token belonging to the Microsoft account that
