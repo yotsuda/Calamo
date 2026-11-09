@@ -38,7 +38,7 @@ workflow (`.github/workflows/release.yml`) attaches that section to the GitHub R
   and Sibelius parts' systems are read; a fingering over the first system is no longer taken for
   the composer; a later voice running over the bar line is cut at it, as Lily# draws it.
 - **Open source.** The reader and this extension are now under the Apache License 2.0, and the
-  source is public: <https://github.com/yotsuda/LilySharp-Omr>. Reports of misread pages are
+  source is public: <https://github.com/yotsuda/Calamo>. Reports of misread pages are
   welcome there as issues. The extension's own terms of use are gone.
 - The `.lys` the reader writes begins `// Read by Lily# Scan Import <version> …`, and
   `x.omr.json` names the reader the same way.

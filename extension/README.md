@@ -5,22 +5,22 @@ image or a PDF of printed sheet music into editable Lily# text (`.lys`). The pla
 of are marked in the text with `@todo`; Lily# shows them in
 red in the preview, with a note on what to check, and opens the original page beside the score.
 
-![A scanned page: the first two systems of Tchaikovsky's March of the Wooden Soldiers](https://raw.githubusercontent.com/yotsuda/LilySharp-Omr/main/docs/figures/readme-scan.png)
+![A scanned page: the first two systems of Tchaikovsky's March of the Wooden Soldiers](https://raw.githubusercontent.com/yotsuda/Calamo/main/docs/figures/readme-scan.png)
 
-![The same bars as the reader wrote them, drawn by Lily#, with the place it asks to check marked in red](https://raw.githubusercontent.com/yotsuda/LilySharp-Omr/main/docs/figures/readme-result.png)
+![The same bars as the reader wrote them, drawn by Lily#, with the place it asks to check marked in red](https://raw.githubusercontent.com/yotsuda/Calamo/main/docs/figures/readme-result.png)
 
 *Above: Tchaikovsky, Album for the Young, Op. 39 No. 5, G. Schirmer 1904 (public domain, from
 IMSLP). Below: the reader's `.lys` for the same bars, drawn by Lily#. Red marks the place it asks
 you to check: the last bar of the right hand, read wrong.*
 
-![Lily#'s Bar fixes panel: the marked bar as read, the same bar on the scan, and the corrected draft](https://raw.githubusercontent.com/yotsuda/LilySharp-Omr/main/docs/figures/readme-bar-fixes.png)
+![Lily#'s Bar fixes panel: the marked bar as read, the same bar on the scan, and the corrected draft](https://raw.githubusercontent.com/yotsuda/Calamo/main/docs/figures/readme-bar-fixes.png)
 
 *Correcting that marked bar in Lily#: the bar as read (left) opens beside the same bar on the scan
 (middle), and the draft (right) is edited by hand or with an AI model; it shows whether it compiles,
 fills its bar and matches the scan before Accept writes it.*
 
-**Beta, open source** ([Apache-2.0](https://github.com/yotsuda/LilySharp-Omr/blob/main/LICENSE)).
-Source, issues and reports of misread pages: <https://github.com/yotsuda/LilySharp-Omr>.
+**Beta, open source** ([Apache-2.0](https://github.com/yotsuda/Calamo/blob/main/LICENSE)).
+Source, issues and reports of misread pages: <https://github.com/yotsuda/Calamo>.
 
 ## Use
 
