@@ -1,7 +1,7 @@
 name: Release
 
 # Tag-driven release, after Lily#'s release.yml: pushing a tag like v0.3.0 packs the
-# extension (tools/pack-extension.ps1: omr.exe published self-contained for win-x64, the
+# extension (tools/pack-extension.ps1: calamo.exe published self-contained for win-x64, the
 # version check, `vsce package --target win32-x64`), attaches the .vsix to a GitHub
 # Release, and publishes it to the VS Code Marketplace.
 #
@@ -14,7 +14,7 @@ name: Release
 # own APIs (net10.0-windows10.0.19041.0), so there is nothing to publish for other
 # platforms, and no race between legs on the first publish.
 #
-# Windows runner: pack-extension.ps1 runs the published omr.exe (`--version --json`) to
+# Windows runner: pack-extension.ps1 runs the published calamo.exe (`--version --json`) to
 # write bin/omr.json and to check that extension/package.json names the same version, and
 # a Windows TFM is simplest to publish from Windows.
 #

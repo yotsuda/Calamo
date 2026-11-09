@@ -315,7 +315,7 @@ static class VerifyCommand
     static Exception Fail(string message)
     {
         Emit(new { @event = "error", code = "input", message }, always: true);
-        Console.Error.WriteLine("omr verify: " + message);
+        Console.Error.WriteLine("calamo verify: " + message);
         return new Failed(message);
     }
 }

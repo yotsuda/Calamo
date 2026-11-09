@@ -22,7 +22,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\.."
 $gen = "$root\src\OmrGen\bin\Release\net10.0\OmrGen.exe"
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $lysc = $Lysc
 
 if ($Redraw) {

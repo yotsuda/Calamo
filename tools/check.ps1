@@ -382,7 +382,7 @@ Remove-Item $sr -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $sr | Out-Null
 Copy-Item "$root\docs\repro\section-resets-time.lys" "$sr\s.lys"
 $srLysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
-$srOmr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$srOmr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 cmd /d /s /c "`"$srLysc`" png --scale 5.6 `"$sr\s.lys`" < NUL > `"$sr\draw.log`" 2>&1"
 cmd /d /s /c "`"$srOmr`" read `"$sr\s.png`" --out `"$sr\out`" --name r < NUL > `"$sr\read.log`" 2>&1"
 $srDrawn = cmd /d /s /c "`"$srLysc`" png --scale 1 -d `"$sr\out`" `"$sr\out\r.lys`" < NUL 2>&1"

@@ -7,7 +7,7 @@ param(
 # repeats Verse, read as Verse_2; variations' marks are printed "Var. I": the names differ, the reading is right.)
 $ErrorActionPreference = 'Stop'
 $lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
-$omr = "$PSScriptRoot\..\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$PSScriptRoot\..\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $lab = 'C:\MyProj\LilySharp-Lab\corpora\dogfood'
 $pieces = [ordered]@{
     'quartet-collide' = "$lab\collide\quartet-collide.lys"; 'piano-collide' = "$lab\collide\piano-collide.lys"

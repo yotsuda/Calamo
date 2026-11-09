@@ -8,7 +8,7 @@ param(
 # --export-read. Run run-audiveris -Dev first: its out/audiveris/dev-*/pages are the pages read.
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\..\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 New-Item -ItemType Directory -Force $Out | Out-Null
 $empty = "$Out\empty.txt"
 [IO.File]::WriteAllText($empty, '')   # (stdin: nothing)

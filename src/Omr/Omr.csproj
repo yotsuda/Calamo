@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Omr</RootNamespace>
-    <!-- the reader is omr.exe in development as in the extension's bin -->
-    <AssemblyName>omr</AssemblyName>
+    <!-- the reader is calamo.exe in development as in the extension's bin -->
+    <AssemblyName>calamo</AssemblyName>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ param(
     [string[]]$Fonts,                                         # some of the eight (all by default)
     [string[]]$Pieces,                                        # band002 ... (all by default)
     [switch]$Trace,                                           # keep omr read's stderr (Layout.TraceJoins) beside each page as pNN.joins.txt
-    [string]$Omr                                              # another omr.exe (a build of an older commit, to compare)
+    [string]$Omr                                              # another calamo.exe (a build of an older commit, to compare)
 )
 # omr read --parts-only on every page of the MuseScore band evaluation set, against the piece's .score:
 # the staves of a system by kind (5 a five-line staff, T a TAB, L a one-line staff) and what joins each
@@ -12,7 +12,7 @@ param(
 # staff and its TAB -- MuseScore draws one, Lily# does not; the .score's tab line hides it from the
 # .lys). Prints every page that differs and the counts; writes them all to <Eval>\layouts.txt.
 $ErrorActionPreference = 'Stop'
-$omr = if ($Omr) { $Omr } else { "$PSScriptRoot\..\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe" }
+$omr = if ($Omr) { $Omr } else { "$PSScriptRoot\..\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe" }
 $tmp = Join-Path ([IO.Path]::GetTempPath()) 'ms-layouts'
 New-Item -ItemType Directory -Force $tmp | Out-Null
 $fontDirs = Get-ChildItem $Eval -Directory | Where-Object { -not $Fonts -or $Fonts -contains $_.Name }

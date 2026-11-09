@@ -1,7 +1,7 @@
 param([string[]]$OmrArgs = @())    # more arguments for omr (e.g. '--detector')
 # The real-score benchmarks: the scores the rules were first worked out on. Run after any change.
 $root = Resolve-Path "$PSScriptRoot\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $out = "$root\out\real"
 function Run($name, [string[]]$a, $pattern) {
     $a += $OmrArgs

@@ -19,7 +19,7 @@ $root = Resolve-Path "$PSScriptRoot\.."
 # a folder's pages, p01.png on (not the page images Lily# leaves beside a page it read, p01.omr-p01.png:
 # one in tchaikovsky39-5's scan made it a page of two from 2026-10-28, and its row fell out of the table)
 function PageCount($dir) { @(Get-ChildItem "$dir\p*.png" | Where-Object Name -match '^p\d+\.png$').Count }
-$omr ="$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr ="$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $out = "$root\out\audiveris"
 $lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
 if ($Verify) { $OmrArgs += '--verify', $lysc }

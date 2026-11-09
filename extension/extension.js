@@ -1,4 +1,4 @@
-// Calamo: carries the OMR reader (bin/omr.exe) and tells the Lily# extension where it is.
+// Calamo: carries the OMR reader (bin/calamo.exe) and tells the Lily# extension where it is.
 // Starts on onStartupFinished (light: no child process) with no dependency on Lily#: VS Code starts a
 // dependency first, and Lily#'s start brings up its language server in every window.
 // No commands of its own: Lily#'s "Convert Image/PDF to Lily# (.lys)…", "Show Original Scan" and verify on save
@@ -41,7 +41,7 @@ function activate(context) {
     }
     offerLilySharp(context);
     const bin = path.join(context.extensionPath, 'bin');
-    const exe = path.join(bin, 'omr.exe');
+    const exe = path.join(bin, 'calamo.exe');
     try {
         const info = JSON.parse(fs.readFileSync(path.join(bin, 'omr.json'), 'utf8'));
         if (!fs.existsSync(exe)) {

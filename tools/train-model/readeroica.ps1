@@ -6,13 +6,13 @@ param([string]$Model = '', [string]$Tag = 'now')
 #   pwsh tools\train-model\readeroica.ps1 -Model tools\train-model\detector42.onnx -Tag d42
 # (omr read takes the detector beside the exe: with -Model, a copy of the build with the model in its place)
 $root = Resolve-Path "$PSScriptRoot\..\.."
-$exe = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$exe = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 if ($Model) {
     $bin = "$root\out\eroica\omr-$Tag"
     if (Test-Path $bin) { Remove-Item -Recurse -Force $bin }
     Copy-Item -Recurse (Split-Path $exe) $bin
     Copy-Item -Force (Resolve-Path $Model).Path "$bin\detector.onnx"
-    $exe = "$bin\omr.exe"
+    $exe = "$bin\calamo.exe"
 }
 $src = 'C:\MyProj\omr-compare\scoringnotes-2024\files'
 $out = "$root\out\eroica\$Tag"

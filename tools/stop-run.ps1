@@ -15,7 +15,7 @@ function Mine([string[]]$names, [string]$pattern) {
 }
 $steps = @(
     @{ What = 'scripts'; Names = @('cmd.exe', 'pwsh.exe'); Pattern = "tools\\($own)\.ps1" }
-    @{ What = 'readers and tools'; Names = @('omr.exe', 'OmrGen.exe', 'OmrDegrade.exe'); Pattern = [regex]::Escape($root) }
+    @{ What = 'readers and tools'; Names = @('calamo.exe', 'OmrGen.exe', 'OmrDegrade.exe'); Pattern = [regex]::Escape($root) }
     @{ What = 'lysc'; Names = @('lysc.exe'); Pattern = [regex]::Escape($root) }
 )
 foreach ($step in $steps) {

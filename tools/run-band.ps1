@@ -9,7 +9,7 @@ param(
 # (data/scans/<song>/layout.txt; B2). The pages are the JPEGs as PNG under out/band/<song>/pages.
 Add-Type -AssemblyName System.Drawing
 $root = Resolve-Path "$PSScriptRoot\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $OmrArgs = @($OmrArgs | ForEach-Object { $_ -split ',' })   # (pwsh -File passes a list as one string)
 if ($NoDetector) { $OmrArgs = @($OmrArgs | Where-Object { $_ -ne '--detector' }) }
 if ($Overlay) { $OmrArgs += '--overlay' }

@@ -414,7 +414,7 @@ sealed class ReadCommand
     {
         stdout.WriteLine(Json(new { @event = "error", code = "input", message }));
         stdout.Flush();
-        Console.Error.WriteLine("omr read: " + message);
+        Console.Error.WriteLine("calamo read: " + message);
         current?.Cleanup();
         Environment.Exit(2);
         return null;

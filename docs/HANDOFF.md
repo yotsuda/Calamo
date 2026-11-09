@@ -4,6 +4,9 @@
 
 ## Calamo 0.6.0 の準備と REQUESTS 23・24 の確認。読み手は変えていない。**新しい lysc で全台を描き直すと check が規則 135・検出器 77 件 WORSE。基準値は更新していない**（2026-11-09 夜、オーナー「calamo に改名した。#23 と #24 を直した」）
 
+**追記（2026-11-10 未明、オーナー「omr.exe を改名して」）**: 読み手の実行ファイルは **`calamo.exe`**（`AssemblyName`、`extension.js`、`pack-extension.ps1`、`tools/` のスクリプト、エラーメッセージの `calamo read:` / `calamo verify:`）。変えていないもの: `src/Omr` などの内部名、`.omr.json`（Lily# との取り決め）、`bin/omr.json`。Lily# は exe の場所を拡張の exports から受け取るので変更不要（コメントとテストの文字列に `omr.exe` が残る）。**ルートの `README.md` の 162・180 行に `omr.exe` が残っている**（オーナーが README を編集中で触らないよう言われた）。確認: 改名後の `.vsix`（`calamo-win32-x64-0.6.0.vsix`、52.4 MB）に `bin/calamo.exe` があり `omr.exe` はない、`extension.js` を VS Code の代役で動かして `calamo.exe` の場所を返す、PNG の読み・`--verify`・`verify` が動く、規則 check は改名前の同じ絵の結果と 2584 項目すべて同じ（135 WORSE はこの節の下のとおりで、受け入れていない）。実際の VS Code で Lily# から呼ぶ通し操作はしていない。
+
+
 **現在地**: 検出器は detector42 のまま。REQUESTS 23・24 は `done`（Release の lysc 0.15.0 21:23 のビルド、Lily# `a155f6e8a`。再現譜の絵は `out/repro/fixed-2026-11-09/`）、25 は open。製品名は Calamo（`yotsuda.calamo`、表示名 Calamo Sheet Music Scanner、オーナーが改名）。版は 0.6.0（`v0.5.0` のタグは使用済みで `release.yml` が同じ版を通さない）。`extension/README.md` と CHANGELOG の Lily# の最低版 **0.16.0 は仮置き**（`yotsuda.calamo` を探す最初の Lily# は次のリリース。Lily# の CHANGELOG はまだ Unreleased）。`out/gen*` は新しい絵のまま。
 
 **数字**: 読み手のコードは版の文字列だけ変更。開発用の台 28685 / 29553（**35 台とも同じ**、印の悪化は `schumann25-15-ms` のスラーの終わりの誤り 0 → 1 の 1 件）。評価台 55445 / 58271（**66 台とも同じ**、印も 0・0）。種 5 of 6（bar31-p3 は `new-symbol` のまま）。検算の空振りは減った: kinkel10-6-ms の余分な ♭ の todo 0 件、Widmung の `much of this bar differs` 0 件（開発用の台の合計 20 件。依頼のときの目安は 32 件だが数え方が違う）。`docs/dev-sets.tsv`・`eval-sets.tsv` は写していない。

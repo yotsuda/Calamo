@@ -10,7 +10,7 @@ param(
 # A folder with no omr-triage.json is one nobody here has looked at yet.
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $work = "$root\out\seeds"
 $commit = (git -C $root rev-parse --short HEAD)
 

@@ -1,7 +1,7 @@
 param(
     [string]$Out = "$PSScriptRoot\..\out\extension"   # the staging folder and the .vsix
 )
-# The OMR as a VS Code extension (docs/repro/lilysharp-handoff-2026-10-12.md §1.3): omr.exe
+# The OMR as a VS Code extension (docs/repro/lilysharp-handoff-2026-10-12.md §1.3): calamo.exe
 # published self-contained for win-x64 into extension/bin, its `omr --version --json` beside it
 # (bin/omr.json, which extension.js hands to Lily#), and `vsce package --target win32-x64`.
 # Packages only. Publishing is the tag-driven workflow's (.github/workflows/release.yml: this script,
@@ -20,13 +20,13 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 Get-ChildItem $bin -Filter *.pdb | Remove-Item
 # The licenses of what is bundled: the VSIX is all a user receives, and the packages' copies stay on this machine.
 $packages = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { "$HOME\.nuget\packages" }
-$libraries = (Get-Content "$bin\omr.deps.json" -Raw | ConvertFrom-Json).libraries.PSObject.Properties.Name
+$libraries = (Get-Content "$bin\calamo.deps.json" -Raw | ConvertFrom-Json).libraries.PSObject.Properties.Name
 function PackageDir([string]$id) {
     $found = $libraries | Where-Object { $_ -like "$id/*" } | Select-Object -First 1
     if (-not $found) { throw "$id is not among the reader's libraries" }
     "$packages\$($id.ToLowerInvariant())\$($found.Split('/')[1])"
 }
-$runtime = (Get-Content "$bin\omr.runtimeconfig.json" -Raw | ConvertFrom-Json).runtimeOptions.includedFrameworks[0].version
+$runtime = (Get-Content "$bin\calamo.runtimeconfig.json" -Raw | ConvertFrom-Json).runtimeOptions.includedFrameworks[0].version
 $copies = @{
     'dotnet-LICENSE.txt'                       = "$packages\microsoft.netcore.app.runtime.win-x64\$runtime\LICENSE.TXT"
     'dotnet-THIRD-PARTY-NOTICES.txt'           = "$packages\microsoft.netcore.app.runtime.win-x64\$runtime\THIRD-PARTY-NOTICES.TXT"
@@ -39,10 +39,10 @@ New-Item -ItemType Directory -Force "$bin\licenses" | Out-Null
 foreach ($name in $copies.Keys) { Copy-Item -LiteralPath $copies[$name] "$bin\licenses\$name" }
 
 # the version in package.json is the reader's own, and the contract it speaks goes with it
-$info = & "$bin\omr.exe" --version --json | ConvertFrom-Json
+$info = & "$bin\calamo.exe" --version --json | ConvertFrom-Json
 $pkg = Get-Content "$stage\package.json" -Raw | ConvertFrom-Json
 if ($pkg.version -ne $info.version) { throw "extension/package.json is $($pkg.version), the reader $($info.version): make them one" }
-[IO.File]::WriteAllText("$bin\omr.json", (& "$bin\omr.exe" --version --json))
+[IO.File]::WriteAllText("$bin\omr.json", (& "$bin\calamo.exe" --version --json))
 
 # (the owner's seeds, their readings and tools/seeds.ps1 stay on the owner's machine: never in a release.
 # docs/repro/lilysharp-requests-2026-10-29-seed-from-fixed-bars.md)

@@ -39,7 +39,7 @@ if ($Cut) {
 }
 $png.Dispose()
 if ($Read) {
-    $exe = Get-ChildItem "$PSScriptRoot\..\src\Omr\bin\Release\*\omr.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+    $exe = Get-ChildItem "$PSScriptRoot\..\src\Omr\bin\Release\*\calamo.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
     $tmp = Join-Path $env:TEMP "grace-at-$name"
     $args = @('--config', "$Dir\$name.score", '--pages', $Dir, '--from', '1', '--to', '1', '--out', $tmp, '--poly', '--detector', '--at', "$([int]$x),$([int]$y)") + ($OmrArgs -split ' ' | Where-Object { $_ })
     & $exe @args 2>&1 | Where-Object { $_ -match 'grace|detected|stem|beams|head at|rest at|flag rows' }

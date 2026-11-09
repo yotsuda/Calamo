@@ -11,7 +11,7 @@ param(
 # comes from the piece's own set (out\<set>\<suite>\<piece>). Per font and suite, as run-gen's table.
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\.."
-$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\omr.exe"
+$omr = "$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $Out = (Resolve-Path $Out).Path
 $OmrArgs = @($OmrArgs | ForEach-Object { $_ -split ',' })   # (pwsh -File passes a list as one string)
 $Fonts = @($Fonts | ForEach-Object { $_ -split ',' })
