@@ -207,6 +207,14 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genFa -Reuse -OmrArgs $omrArgs | Out-
 $genFaS = "$root\out\gen-fall-scan"
 if ($Fresh -or -not (Test-Path "$genFaS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genFaS -Suite threes -Count 10 -Seed 7 -GenArgs @('--fall') -Degrade -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genFaS -Reuse -OmrArgs $omrArgs | Out-Null }
+# a plain line of eighths falling to the left hand's staff in a beam of its own, its slur from high on the upper staff, and the same
+# shape left to the left hand itself under the right hand's rest (OmrGen --detach; Op.25-15, bars 9 to 15, Reader.RunsOnInto), and as printed and scanned
+$genDe = "$root\out\gen-detach"
+if ($Fresh -or -not (Test-Path "$genDe\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genDe -Suite threes -Count 10 -Seed 7 -GenArgs @('--detach') -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genDe -Reuse -OmrArgs $omrArgs | Out-Null }
+$genDeS = "$root\out\gen-detach-scan"
+if ($Fresh -or -not (Test-Path "$genDeS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genDeS -Suite threes -Count 10 -Seed 7 -GenArgs @('--detach') -Degrade -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genDeS -Reuse -OmrArgs $omrArgs | Out-Null }
 # the right hand's line with its stems turning in mid bar, a note or a melody beside it, the clef changing within it, and bars the
 # right hand starts and the left hand ends (OmrGen --flip; Op.27-2's bars 12, 37, 40 and 42, Voices.TurningLine), and as printed and scanned
 $genFl = "$root\out\gen-flip"
@@ -255,7 +263,7 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genY; Tag = 'genY'; Sym = 'symY' }, @{ Dir = $genYS; Tag = 'genYS'; Sym = 'symYS' },
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
-           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genFa; Tag = 'genFa'; Sym = 'symFa' }, @{ Dir = $genFaS; Tag = 'genFaS'; Sym = 'symFaS' }, @{ Dir = $genMx; Tag = 'genMx'; Sym = 'symMx' }, @{ Dir = $genMxS; Tag = 'genMxS'; Sym = 'symMxS' }, @{ Dir = $genFl; Tag = 'genFl'; Sym = 'symFl' }, @{ Dir = $genFlS; Tag = 'genFlS'; Sym = 'symFlS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
+           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genFa; Tag = 'genFa'; Sym = 'symFa' }, @{ Dir = $genFaS; Tag = 'genFaS'; Sym = 'symFaS' }, @{ Dir = $genDe; Tag = 'genDe'; Sym = 'symDe' }, @{ Dir = $genDeS; Tag = 'genDeS'; Sym = 'symDeS' },@{ Dir = $genMx; Tag = 'genMx'; Sym = 'symMx' }, @{ Dir = $genMxS; Tag = 'genMxS'; Sym = 'symMxS' }, @{ Dir = $genFl; Tag = 'genFl'; Sym = 'symFl' }, @{ Dir = $genFlS; Tag = 'genFlS'; Sym = 'symFlS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it

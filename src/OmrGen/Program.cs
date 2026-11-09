@@ -85,6 +85,8 @@ static class Program
         Gen.FlipLine = opt.ContainsKey("flip");
         // --fall: the right hand's triplets falling to the left hand's staff for a group's last notes, a kneed beam between the staves
         Gen.FallStaff = opt.ContainsKey("fall");
+        // --detach: a plain line of eighths falling to the left hand's staff in a beam of its own under a slur from high on the upper staff
+        Gen.DetachFall = opt.ContainsKey("detach");
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams || Gen.FallStaff;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)

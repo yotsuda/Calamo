@@ -169,14 +169,16 @@ static class Gen
         // (--cross: a beam to join the two staves, so no 2/2's quarters; a group's first note is its hand's)
         // (--knee: 2/2's six eighths to a half under one beam are Op.27-2's own, below)
         if (CrossStaff && !KneeBeams) while (p.Time == "2/2") p.Time = Pick(rng, ThreesTimes);
+        // (--detach: a line long enough to run on into its last group, four beats or three)
+        if (DetachFall) while (p.Time is "2/2" or "2/4") p.Time = Pick(rng, ThreesTimes);
         // (every draw of the piece's shape made whether used or not: the draws stay in step)
         double shape = rng.NextDouble(), unit = rng.NextDouble(), rests = rng.NextDouble(), turn = rng.NextDouble();
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
         // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three,
-        // 4: the right hand's, falling to the left hand's staff (--fall)
-        int mode = FallStaff ? 4 : CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
-        // (--knee, --fall: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
-        int value = KneeBeams || FlipLine || FallStaff ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
+        // 4: the right hand's, falling to the left hand's staff (--fall), 5: a plain line falling to it in a beam of its own (--detach)
+        int mode = DetachFall ? 5 : FallStaff ? 4 : CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        // (--knee, --fall, --detach: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
+        int value = KneeBeams || FlipLine || FallStaff || DetachFall ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
         bool restOpens = rests < 0.2 && !CrossStaff && !FlipLine;
         // the order of a group's three chord tones: up (Op.27-2), up and back, or the middle first (--fall: down, the
         // notes that fall the group's lowest)
@@ -236,6 +238,24 @@ static class Gen
                 }
             }
             return evs;
+        }
+        // a bar of n eighths running down the half bar's chord to a note low on the bass staff (--detach): up from the
+        // last note, a chord tone or the one past it, so that the top stands high over the treble staff
+        List<GEv> Falling(int b, int n, int k)
+        {
+            int root = (tonic + chords[2 * b]) % 7, d = 20 + rng.Next(3);
+            bool Tone(int x) => (((x - root) % 7 + 7) % 7) is 0 or 2 or 4;
+            while (!Tone(d)) d++;
+            var up = new List<int> { d };
+            while (up.Count < n)
+            {
+                do d++; while (!Tone(d));
+                // (the notes above the drop stay on the treble staff, b or higher; a short bar leaps to reach as high)
+                if (up.Count == k) while (d < 27 || !Tone(d)) d++;
+                if (up.Count > k && d < 44 && rng.NextDouble() < (n < 8 ? 0.75 : 0.4)) do d++; while (!Tone(d));
+                up.Add(d);
+            }
+            return Enumerable.Reverse(up).Select(x => { var e = new GEv { Ticks = 240 }; e.Pitches.Add(At(x)); return e; }).ToList();
         }
         // a melody note on a beat now and then takes the head of the triplets' group under it:
         // the group turned to open on its top tone, the melody's note that tone
@@ -410,6 +430,50 @@ static class Gen
                 }
                 lh.Bars.Add(new() { Bass(b) });
             }
+            else if (mode == 5)
+            {
+                // (--detach: a bar's line of eighths runs down the chord from high over the staff, its last notes drawn on
+                // the left hand's staff in a beam of their own, the slur from high on the upper staff down to them; the
+                // left hand holds and leaves those beats to the line. Schumann's Op.25-15, bars 9 to 15. Now and then the
+                // right hand rests there and the left hand has that figure itself: the same shape, not the line's)
+                int n = p.BarTicks / 240, k = n <= 4 && rng.NextDouble() < 0.4 ? 1 : 2;
+                bool own = rng.NextDouble() < 0.15;
+                var line = Falling(b, n, k);
+                int head = n - k;
+                // the beams by hand, so that the last notes make a group whatever the meter's beaming
+                for (int g = 0; g < head; g += 2) if (g + 1 < head) { line[g].Marks = "[" + line[g].Marks; line[g + 1].Marks += "]"; }
+                if (k > 1) { line[head].Marks = "[" + line[head].Marks; line[^1].Marks += "]"; }
+                var upper = line.Take(head).ToList();
+                var lower = new List<GEv>();
+                // the left hand: quarters on the root (a rest now and then) up to the line's last notes
+                for (int t = 0; t < head * 240;)
+                {
+                    int v = Math.Min(480, head * 240 - t);
+                    var e = new GEv { Ticks = v };
+                    if (rng.NextDouble() < 0.85) e.Pitches.Add(At(14 + (tonic + chords[2 * b]) % 7));
+                    lower.Add(e);
+                    t += v;
+                }
+                if (own)
+                {
+                    upper.Add(new GEv { Ticks = k * 240 });
+                    lower.AddRange(line.Skip(head));
+                }
+                else
+                {
+                    foreach (var e in line.Skip(head)) e.Marks = e.Marks.Replace("]", "") + "@cross" + (e.Marks.EndsWith("]") ? "]" : "");
+                    upper.AddRange(line.Skip(head));
+                    lower.Add(new GEv { Ticks = k * 240, Space = true });
+                    // (the slur: from the top or the note below it, on the staff above, down to the last)
+                    if (rng.NextDouble() < 0.75)
+                    {
+                        line[rng.NextDouble() < 0.7 ? 0 : 1].SlurStart = true;
+                        line[^1].SlurEnd = true;
+                    }
+                }
+                rh.Bars.Add(new() { upper });
+                lh.Bars.Add(new() { lower });
+            }
             else if (mode == 4)
             {
                 // (--fall: the right hand's triplets run down, each group's last note or two drawn on the left hand's staff
@@ -514,6 +578,8 @@ static class Gen
     public static bool KneeBeams;
     // OmrGen --fall: threes' right hand falling to the left hand's staff for a group's last notes, a kneed beam between the staves (Schumann's Op.25-9)
     public static bool FallStaff;
+    // OmrGen --detach: a plain line of eighths falling to the left hand's staff in a beam of its own under a slur from high on the upper staff (Op.25-15)
+    public static bool DetachFall;
     // OmrGen --handover: the same with a melody stems up, and bars the left hand starts and the right hand ends
     public static bool HandOver;
     // OmrGen --flip: the right hand's line of triplets with its stems turning in mid bar (Op.27-2's bars 37, 40 and 42)
