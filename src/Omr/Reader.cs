@@ -611,6 +611,7 @@ static class Reader
         }
         CrossBeams(ms.Evs, ms.Single, s, ms.BarTicks, state, b);
         HandedGroups(ms.Evs, ms.Single, s, ms.BarTicks);
+        StemsShortOfBeam(ms.Evs, ms.Single, s, ms.BarTicks);
         for (int p = 0; p < n; p++)
         {
             var st = sys.Staves.FirstOrDefault(x => x.Part == p);
@@ -726,6 +727,30 @@ static class Reader
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// A note under the lower staff's line whose stem goes up towards a beam on the upper staff and stops short of
+    /// it, with no flag or beam of its own: MuseScore's way of drawing a chord in a group shared with the
+    /// other hand, the note on the upper staff in the same column carrying the stem to the beam (lang36-3's
+    /// bars 48, 54 and 58, the left hand's chords at the head of each group of sixteenths). It looks like a quarter
+    /// and makes the staff's bar too long; it is worth what the note over it in its column is. Only where the beam
+    /// has notes of the lower staff on it too, and the staff's bar does not fill as read.
+    /// </summary>
+    static void StemsShortOfBeam(List<Ev>[] parts, List<Ev>[] singles, double s, int barTicks)
+    {
+        if (barTicks <= 0) return;
+        for (int p = 0; p + 1 < parts.Length; p++)
+        {
+            int q = p + 1;
+            if (parts[p] == null || parts[q] == null || Fills(parts[q], barTicks)) continue;
+            var over = parts[p].Where(o => !o.IsRest && o.Stem > 0 && o.Beam != 0 && o.Scale == (1, 1)
+                                           && parts[q].Any(x => x.Beam == o.Beam && x.Stem > 0)).ToList();
+            if (over.Count == 0) continue;
+            foreach (var list in new[] { parts[q], singles[q] })
+                foreach (var e in list.Where(e => !e.IsRest && e.Stem > 0 && e.Beam == 0 && !e.Held && !e.Cue && e.Ticks == Dur.Of(4, 0)))
+                    if (over.FirstOrDefault(o => Math.Abs(o.StemX - e.StemX) < 0.2 * s) is { } o) e.Ticks = o.Ticks;
         }
     }
 
