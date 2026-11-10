@@ -465,7 +465,7 @@ static partial class Symbols
                 if (pos < -12 || pos > 12) { o.Class = "?"; return true; }
                 var kind = label == "rests.2" ? RestKind.Quarter : label == "rests.3" ? RestKind.Eighth : RestKind.Sixteenth;
                 // (a grace note, its small head at the foot, is no rest)
-                if (kind != RestKind.Quarter && HeadAtFoot(ps, c, s)) { o.Class = "?"; return true; }
+                if (kind != RestKind.Quarter && (HeadAtFoot(ps, c, s) || StraightStem(ps, c, s))) { o.Class = "?"; return true; }
                 o.Class = "rest";
                 ps.Rests.Add(new Rest { St = o.St, X = c.Cx, Y = c.MinY + c.H / 2.0, L = c.MinX, R = c.MaxX, Kind = kind });
                 return true;
@@ -802,5 +802,24 @@ static partial class Symbols
                 else run = 0;
         }
         return widest >= 0.5 * s;
+    }
+
+    /// <summary>
+    /// Whether a piece holds a long upright stroke in one column: a note's stem (a slashed grace note's,
+    /// a hollow head the head-finder missed, its head at the top: gen-grace-scan's piano003 and piano004).
+    /// An eighth or sixteenth rest's stem slants, and a column of it crosses only the stroke's width.
+    /// </summary>
+    static bool StraightStem(PageSymbols ps, Comp c, double s)
+    {
+        int longest = 0;
+        for (int x = c.MinX; x <= c.MaxX; x++)
+        {
+            int run = 0;
+            for (int y = c.MinY; y <= c.MaxY; y++)
+                if (ps.Labels[y * ps.LabelW + x] == c.Id) { if (++run > longest) longest = run; }
+                else run = 0;
+        }
+        // (the two stems 2.6 spaces; a rest's column under 0.9 on a clean page, up to 2.0 on a page enlarged from 7 pixels a space)
+        return longest >= 2.3 * s;
     }
 }

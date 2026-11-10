@@ -118,7 +118,7 @@ static partial class Symbols
             // (the whole and half rests' blocks have their own test above)
             if (kind is not (RestKind.Whole or RestKind.Half) && Math.Abs(pos) > 7) continue;
             if (Math.Abs(pos) > 5 && InTextRow(ps, o, s)) continue;
-            if (kind is RestKind.Eighth or RestKind.Sixteenth && HeadAtFoot(ps, c, s)) continue;
+            if (kind is RestKind.Eighth or RestKind.Sixteenth && (HeadAtFoot(ps, c, s) || StraightStem(ps, c, s))) continue;
             o.Class = "rest";
             ps.Rests.Add(new Rest { St = o.St, X = c.Cx, Y = c.MinY + c.H / 2.0, L = c.MinX, R = c.MaxX, Kind = kind.Value });
             Learn(kind switch { RestKind.Whole => "rests.0", RestKind.Half => "rests.1", RestKind.Quarter => "rests.2", RestKind.Eighth => "rests.3", _ => "rests.4" });

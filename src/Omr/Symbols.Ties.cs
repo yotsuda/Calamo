@@ -121,6 +121,13 @@ static partial class Symbols
                 while (b < d.H - 1 && d[x, b + 1]) b++;
                 return b - t + 1;
             }
+            // a staff line itself: a bent page carries a line out of the rows left out above, and the edge
+            // that shows is a thin even stroke running on from head to head (gen-warp's piano004). It stays
+            // at the line's height and adds nothing to the line's thickness, where a tie lying along a line
+            // thickens it and a tie crossing one soon leaves it
+            int lineThick = st.Lines.Max(ln => ln.Bot - ln.Top + 1);
+            // (a line measured where the page is thinnest can be a single row: the floor is a printed line's thickness)
+            bool OnStaffLine(int x, (int T, int B) r) => Whole(x, r) <= Math.Max(lineThick + 1, 0.13 * s) && st.Lines.Any(ln => Math.Abs((r.T + r.B) / 2.0 - ln.Y) <= 0.25 * s);
             bool tied = false;
             string why = "no stroke";
             // the stroke starts just past the head's edge (a short tie between close chords a little
@@ -136,6 +143,7 @@ static partial class Symbols
                     int reach = x0, thick = 0;
                     bool clipped = false;
                     var widths = new List<int> { start.B - start.T + 1 };
+                    int along = OnStaffLine(x0, start) ? 1 : 0;
                     for (int x = x0 + 1; x < goal; x++)
                     {
                         // the run that carries on from the last one (rows overlapping, a hair of play)
@@ -144,6 +152,7 @@ static partial class Symbols
                         int w = next.Value.B - next.Value.T + 1;
                         if (w > thinMax) { if (++thick > 0.35 * s) break; continue; }    // a barline or a stem: pass
                         cur = next.Value; reach = x; widths.Add(w);
+                        if (OnStaffLine(x, cur)) along++;
                         // a stroke cut by the window's edge is something beyond it (a beam) seen in part
                         if (cur.T <= y0 || cur.B >= y1) { clipped = true; break; }
                     }
@@ -151,8 +160,11 @@ static partial class Symbols
                     int n = widths.Count;
                     double wa = widths.Take(Math.Max(1, n / 4)).Average(), wb = widths.Skip(n - Math.Max(1, n / 4)).Average();
                     bool even = Math.Abs(wa - wb) <= 0.1 * s;
-                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even;
-                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}";
+                    // (the edge is a hair: a real tie lying along a line stays a stroke -- kinkel10-4's scan, bar 10, b'16.~, 0.09
+                    // of a space on average where the edges of gen-warp's lines are 0.045)
+                    bool staffLine = along >= 0.8 * n && widths.Average() <= 0.065 * s;
+                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine;
+                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)})";
                     if (tied) break;
                 }
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
