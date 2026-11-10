@@ -194,8 +194,13 @@ static partial class Symbols
                     // (at the margin, a ledger line of the last chord beside the head: dead level at a ledger's height, where
                     // a hanging tie curves away -- gen-cross' threes002)
                     bool ledger = b == null && rows.Max() - rows.Min() <= 1 && OnLedgerRow(rows[0]);
-                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine && stroke && !ledger;
-                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)}), {thick} thick";
+                    // (a tie ends in the white just before its head; a stroke that stops short of it inside a tall
+                    // upright is a sign's bar run into the sign's stem -- the natural before another head of the
+                    // next chord, its bar at a height the sign before this head's partner is not looked for at:
+                    // gen-arp's chords008)
+                    bool intoSign = b != null && goal - reach > 0.2 * s && Whole(reach, cur) > 1.5 * s;
+                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine && stroke && !ledger && !intoSign;
+                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}{(intoSign ? ", into a sign" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)}), {thick} thick";
                     if (tied) break;
                 }
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
