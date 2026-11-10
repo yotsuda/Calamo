@@ -1998,6 +1998,15 @@ static class Reader
                 }
             if (contents.Count < 2) continue;
             int Filled(int ticks) => contents.Count(evs => Fills(evs, ticks));
+            // (the staves' readings part over the lower number: the one whose sign the measures fill goes, not the one
+            // most staves read. A scan's 4 broken up and read as 1 by the rules on two staves of three outvoted the third's 4)
+            if (readings.Any(r => r.Den != den))
+            {
+                static bool Power(int d) => d >= 1 && d <= 16 && (d & (d - 1)) == 0;
+                int FillsRead(int d) => readings.Where(r => r.Den == d && r.Num > 0).Select(r => Filled(Dur.Whole * r.Num / r.Den)).DefaultIfEmpty(0).Max();
+                int other = readings.Select(r => r.Den).Distinct().Where(Power).OrderByDescending(FillsRead).ThenBy(d => d).First();
+                if (other != den && 2 * FillsRead(other) >= contents.Count && FillsRead(other) > FillsRead(den)) { den = other; unit = Dur.Whole / den; }
+            }
             // the upper number the most staff-measures fill; a tie goes to the one most of the signs read
             int best = readings.Where(r => r.Den == den).GroupBy(r => r.Num).OrderByDescending(grp => grp.Count()).First().Key;
             int read = best;
