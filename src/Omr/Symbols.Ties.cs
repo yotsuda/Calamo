@@ -9,6 +9,33 @@ static partial class Symbols
     /// </summary>
     static void FindTies(PageSymbols ps, Img d, Img ink, double s)
     {
+        // a sign right before a head (a tall stroke on the page, shorter than a barline), looked for
+        // from `from` on: a flat's stem stands well over a space left of its head, its bowl between them
+        bool SignBefore(Head b, double from)
+        {
+            // (a barline the layout found is none, however a scan has broken it up)
+            var bars = (ps.Systems ?? new List<SystemInfo>()).Where(sys => sys.All.Contains(b.St) || sys.Staves.Contains(b.St)).SelectMany(sys => sys.Bars).ToList();
+            for (int x = (int)Math.Max(from, b.L - 1.5 * s); x <= (int)(b.L - 0.15 * s); x++)
+            {
+                if (bars.Any(bx => Math.Abs(bx - x) <= 0.35 * s)) continue;
+                // (past the reach of a sharp's or a natural's strokes only a flat's stem: from well above its head's
+                // height to below it, where the tail of a flag before the head stops short)
+                bool far = x < b.L - 0.9 * s;
+                // (each stroke at its whole height, so that a barline beside a head off the staff is not cut
+                // down to a sign's; a sign stands at its head's height)
+                int y0 = Math.Max(1, (int)(b.Y - 8 * s)), y1 = Math.Min(d.H - 2, (int)(b.Y + 8 * s));
+                for (int yy = y0; yy <= y1; yy++)
+                {
+                    if (!d[x, yy]) continue;
+                    int t = yy;
+                    while (yy + 1 <= y1 && d[x, yy + 1]) yy++;
+                    int len = yy - t + 1;
+                    if (len < 1.5 * s || len > 3.5 * s) continue;
+                    if (far ? t <= b.Y - 1.0 * s && yy >= b.Y - 0.2 * s : t <= b.Y + 0.8 * s && yy >= b.Y - 0.8 * s) return true;
+                }
+            }
+            return false;
+        }
         // 1. arcs among the loose ink: thin, wide, sparse pieces, and their ends' heights
         var arcs = new List<(int X0, int X1, double Yl, double Yr, Staff St, List<Other> Parts)>();
         foreach (var o in ps.Others)
@@ -94,21 +121,11 @@ static partial class Symbols
             if (goal < 0) continue;
             // a note with an accidental is never tied to: a sign right before the next head (a tall
             // stroke on the page, shorter than a barline) ends whatever runs there
-            if (b != null)
+            if (b != null && SignBefore(b, h.R + 0.3 * s))
             {
-                bool sign = false;
-                for (int x = (int)(b.L - 0.9 * s); x <= (int)(b.L - 0.15 * s) && !sign; x++)
-                {
-                    // (over a tall window, so that a barline shows its full height and is not taken for a sign)
-                    int run = 0, best = 0;
-                    for (int yy = Math.Max(1, (int)(b.Y - 3.2 * s)); yy <= Math.Min(d.H - 2, (int)(b.Y + 3.2 * s)); yy++)
-                    {
-                        if (d[x, yy]) { run++; best = Math.Max(best, run); }
-                        else run = 0;
-                    }
-                    sign = best >= 1.5 * s && best <= 3.5 * s;
-                }
-                if (sign) continue;
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
+                    Console.WriteLine($"trace tie? head at {h.X:F0},{h.Y:F0} pos {h.Pos}: next {b.X:F0} has a sign before it");
+                continue;
             }
             int thinMax = (int)(0.3 * s);
             // the stroke's height on the page with the staff's line rows in: a beam along a staff line is a thin
@@ -128,6 +145,13 @@ static partial class Symbols
             int lineThick = st.Lines.Max(ln => ln.Bot - ln.Top + 1);
             // (a line measured where the page is thinnest can be a single row: the floor is a printed line's thickness)
             bool OnStaffLine(int x, (int T, int B) r) => Whole(x, r) <= Math.Max(lineThick + 1, 0.13 * s) && st.Lines.Any(ln => Math.Abs((r.T + r.B) / 2.0 - ln.Y) <= 0.25 * s);
+            // a row at a ledger line's height: outside the staff, a whole number of spaces from its outer line
+            bool OnLedgerRow(int y)
+            {
+                double top = st.Lines.Min(ln => ln.Y), bot = st.Lines.Max(ln => ln.Y);
+                double off = y < top ? top - y : y > bot ? y - bot : 0;
+                return off > 0.5 * s && Math.Abs(off / s - Math.Round(off / s)) <= 0.2;
+            }
             bool tied = false;
             string why = "no stroke";
             // the stroke starts just past the head's edge (a short tie between close chords a little
@@ -143,6 +167,7 @@ static partial class Symbols
                     int reach = x0, thick = 0;
                     bool clipped = false;
                     var widths = new List<int> { start.B - start.T + 1 };
+                    var rows = new List<int> { start.T };
                     int along = OnStaffLine(x0, start) ? 1 : 0;
                     for (int x = x0 + 1; x < goal; x++)
                     {
@@ -151,7 +176,7 @@ static partial class Symbols
                         if (next == null) break;
                         int w = next.Value.B - next.Value.T + 1;
                         if (w > thinMax) { if (++thick > 0.35 * s) break; continue; }    // a barline or a stem: pass
-                        cur = next.Value; reach = x; widths.Add(w);
+                        cur = next.Value; reach = x; widths.Add(w); rows.Add(cur.T);
                         if (OnStaffLine(x, cur)) along++;
                         // a stroke cut by the window's edge is something beyond it (a beam) seen in part
                         if (cur.T <= y0 || cur.B >= y1) { clipped = true; break; }
@@ -163,8 +188,14 @@ static partial class Symbols
                     // (the edge is a hair: a real tie lying along a line stays a stroke -- kinkel10-4's scan, bar 10, b'16.~, 0.09
                     // of a space on average where the edges of gen-warp's lines are 0.045)
                     bool staffLine = along >= 0.8 * n && widths.Average() <= 0.065 * s;
-                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine;
-                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)})";
+                    // (a stroke is mostly thin: the two slivers either side of a dot, the staff line's rows left out of it, are
+                    // a dot's width of "stem" with hardly any stroke -- gen-span's piano006)
+                    bool stroke = thick <= n;
+                    // (at the margin, a ledger line of the last chord beside the head: dead level at a ledger's height, where
+                    // a hanging tie curves away -- gen-cross' threes002)
+                    bool ledger = b == null && rows.Max() - rows.Min() <= 1 && OnLedgerRow(rows[0]);
+                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine && stroke && !ledger;
+                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)}), {thick} thick";
                     if (tied) break;
                 }
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
