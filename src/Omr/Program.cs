@@ -524,7 +524,14 @@ if (all.Count == 0)
 var firstTempo = textMarks.FirstOrDefault(m => m.Bar == firstBar && m.IsTempo);
 if (firstTempo != null) lys.AppendLine($"tempo {Tempo.Lys(firstTempo.Words, firstTempo.Bpm, state.BarTime[firstBar])}");
 lys.AppendLine($"time {state.BarTime[firstBar]}");
-lys.AppendLine($"key {Keys.MajorName(state.BarKey[(firstBar, 0)])}");
+// (a part in another key than the first, a transposing instrument's, is in the same mode, and its notes are left out of the judging)
+var minorBars = Keys.MinorBars(all.Keys, bar => state.BarKey[(bar, 0)], bar => Enumerable.Range(0, cfg.Parts.Count)
+    .Where(pi => state.BarKey.TryGetValue((bar, pi), out int key) && key == state.BarKey[(bar, 0)])
+    .SelectMany(pi => (allVoices.GetValueOrDefault((bar, pi)) ?? new List<List<Ev>> { all[bar][pi] ?? new List<Ev>() }).SelectMany(v => v))
+    .Where(e => !e.IsRest && !e.Slash)
+    .SelectMany(e => (e.Chord ?? new List<Pitch> { e.P }).Select(p => (p.Midi(), e.Ticks))));
+string KeyName(int bar, int pi) => Keys.Name(state.BarKey[(bar, pi)], minorBars.Contains(bar));
+lys.AppendLine($"key {KeyName(firstBar, 0)}");
 lys.AppendLine();
 for (int pi = 0; pi < cfg.Parts.Count; pi++)
 {
@@ -873,7 +880,7 @@ for (int si = 0; si < sections.Count; si++)
             string post = nextBars.TryGetValue(endBar, out int nextBar) && systemStarts.TryGetValue(nextBar, out int nextPage)
                 ? (nextPage != sysPage ? " pageBreak" : " break") : "";
             if (prevBar >= 0 && (state.BarTime[bar] != state.BarTime[prevBar] || atOpening && state.BarTime[bar] != state.BarTime[firstBar])) pre.Add("time " + state.BarTime[bar]);
-            if (prevBar >= 0 && (state.BarKey[(bar, pi)] != state.BarKey[(prevBar, pi)] || atOpening && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)])) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
+            if (prevBar >= 0 && (state.BarKey[(bar, pi)] != state.BarKey[(prevBar, pi)] || atOpening && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)])) pre.Add("key " + KeyName(bar, pi));
             // (against the clef the text is in after the bar before: the last one printed inside it (Ev.ClefBefore), not the
             // one that bar opened with -- kinkel10-5's left hand opens every bar in bass between changes to treble inside
             // them, and a bar not said back to bass was drawn in treble, every head a twelfth off, from there to the end)
@@ -881,8 +888,8 @@ for (int si = 0; si < sections.Count; si++)
             if (prevBar >= 0 && cfg.Parts[pi].Lines != 1 && (MidClef(state.BarClef[(bar, pi)]) != MidClef(textClef)
                                                               || atOpening && MidClef(state.BarClef[(bar, pi)]) != MidClef(state.BarClef[(firstBar, pi)])))
                 pre.Add("clef " + MidClef(state.BarClef[(bar, pi)]));
-            if (pi == 0 && firstBar == bar && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
-            if (pi != 0 && prevBar < 0 && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + Keys.MajorName(state.BarKey[(bar, pi)]));
+            if (pi == 0 && firstBar == bar && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + KeyName(bar, pi));
+            if (pi != 0 && prevBar < 0 && state.BarKey[(bar, pi)] != state.BarKey[(firstBar, 0)]) pre.Add("key " + KeyName(bar, pi));
             if (pi == 0 && textMarks.FirstOrDefault(m => m.Bar == bar && m.IsTempo && m != firstTempo) is { } tm)
                 pre.Add("tempo " + Tempo.Lys(tm.Words, tm.Bpm, state.BarTime[bar]));
             prevBar = bar;

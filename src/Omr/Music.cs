@@ -209,6 +209,60 @@ static class Keys
         return names[fifths + 7] + " major";
     }
 
+    /// <summary>The signature's key as a .lys writes it, its major or its relative minor.</summary>
+    public static string Name(int fifths, bool minor)
+    {
+        string[] minors = { "aes", "ees", "bes", "f", "c", "g", "d", "a", "e", "b", "fis", "cis", "gis", "dis", "ais" };
+        return minor ? minors[fifths + 7] + " minor" : MajorName(fifths);
+    }
+
+    // Krumhansl and Kessler's key profiles, from the tonic up (Lily#'s KeyEstimator has the same)
+    static readonly double[] MajorProfile = { 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88 };
+    static readonly double[] MinorProfile = { 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17 };
+    const int FewestNotes = 16;         // fewer notes than this say nothing of the mode
+    // How much better the relative minor's profile must fit: on the development set's songs a minor key fits by
+    // 0.17 or more, a major one by -0.24 or less, and the one song between (0.03) stays major, as the signature's first name
+    const double MinorBetterBy = 0.1;
+
+    static double Fit(double[] weight, double[] profile, int tonic)
+    {
+        double mw = weight.Average(), mp = profile.Average(), c = 0, sw = 0, sp = 0;
+        for (int i = 0; i < 12; i++)
+        {
+            double w = weight[i] - mw, p = profile[((i - tonic) % 12 + 12) % 12] - mp;
+            c += w * p; sw += w * w; sp += p * p;
+        }
+        return sw > 0 ? c / Math.Sqrt(sw * sp) : 0;
+    }
+
+    /// <summary>The bars whose key is the signature's relative minor. A signature names two keys and the
+    /// page shows only the signature: each stretch of bars under one signature is judged by how its
+    /// notes (MIDI number, length) fit the two keys. Not by the last bass note, which an excerpt cuts off.</summary>
+    public static HashSet<int> MinorBars(IEnumerable<int> bars, Func<int, int> fifthsAt, Func<int, IEnumerable<(int Midi, int Ticks)>> notes)
+    {
+        var minor = new HashSet<int>();
+        var run = new List<int>();
+        void Decide()
+        {
+            if (run.Count == 0) return;
+            var weight = new double[12];
+            int count = 0;
+            foreach (int bar in run)
+                foreach (var (midi, ticks) in notes(bar)) { weight[(midi % 12 + 12) % 12] += ticks; count++; }
+            int major = (fifthsAt(run[0]) * 7 % 12 + 12) % 12;
+            if (count >= FewestNotes && Fit(weight, MinorProfile, (major + 9) % 12) - Fit(weight, MajorProfile, major) >= MinorBetterBy)
+                minor.UnionWith(run);
+            run.Clear();
+        }
+        foreach (int bar in bars)
+        {
+            if (run.Count > 0 && fifthsAt(bar) != fifthsAt(run[^1])) Decide();
+            run.Add(bar);
+        }
+        Decide();
+        return minor;
+    }
+
     public static int ParseMajor(string name)
     {
         for (int f = -7; f <= 7; f++) if (MajorName(f) == name + " major" || MajorName(f) == name) return f;
