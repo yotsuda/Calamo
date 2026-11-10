@@ -206,6 +206,15 @@ static partial class Symbols
                 if (d.O != null && d.St.Lines.Min(l => Math.Abs(l.Y - d.Y)) < 0.2 * s) continue;
                 if (dx < bd) { bd = dx; best = r; }
             }
+            // (a rest's dot lined up with another voice's dot stands well out from the rest -- lysc sets
+            // a bar's dots in one column, piano009's r4. at 1.8 spaces under a dotted note: a dot no head
+            // took, with a note's dot over or under it at the same x, goes to the nearest rest left of it.
+            // A note's: a repeat sign's two dots stand in a column too, kinkel7-1's scan's r8 before a :| read r8.)
+            if (best == null && dots.Any(o => o != d && o.St == d.St && Math.Abs(o.X - d.X) < 0.3 * s && Math.Abs(o.Y - d.Y) > 0.7 * s && Math.Abs(o.Y - d.Y) < 6 * s
+                                              && ps.Heads.Any(h => h.On(o.St) && o.X - h.R >= 0.05 * s && o.X - h.R <= 1.8 * s && Math.Abs(o.Y - h.Y) <= 0.65 * s))
+                && (d.O == null || d.St.Lines.Min(l => Math.Abs(l.Y - d.Y)) >= 0.2 * s))
+                foreach (var r in ps.Rests.Where(r => r.St == d.St && d.X - r.R >= 0.05 * s && d.X - r.R <= 3 * s && Math.Abs(d.Y - r.Y) <= 1.5 * s))
+                    if (d.X - r.R < bd) { bd = d.X - r.R; best = r; }
             // (a unison, one head on two stems, has one dot for both voices: two of one value are both
             // dotted; of two values the longer is -- an old print shares the head of bes'8. a'16 with
             // the lower voice's 16ths, kinkel19-1's scan, bar 9: the 16th was dotted, both voices

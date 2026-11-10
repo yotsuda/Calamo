@@ -185,8 +185,11 @@ static partial class Symbols
                 // stem left of it, beside a head of the chord a step away on the other side
                 // (a quarter space off its edge: a scan's head, its rim eaten, is narrower than drawn --
                 // kinkel10-2's scan, the right hand's <a b>16 on a down stem 0.18 space off the a)
-                bool flipped = (o.Up ? o.StemX >= h.L - 0.25 * s && o.StemX <= h.L + 0.35 * s
-                                     : o.StemX >= h.R - 0.35 * s && o.StemX <= h.R + 0.25 * s)
+                // (a hollow head's far edge is its hole's plus up to 0.45 space of the ink running on into the stem
+                // and the neighbour: that much further inside -- piano003's <b des'>2, the b's stem a pixel short)
+                double inside = h.Hollow ? 0.5 * s : 0.35 * s;
+                bool flipped = (o.Up ? o.StemX >= h.L - 0.25 * s && o.StemX <= h.L + inside
+                                     : o.StemX >= h.R - inside && o.StemX <= h.R + 0.25 * s)
                     && heads.Any(n => n != h && n.St == h.St && Math.Abs(n.Pos - h.Pos) == 1
                                       && Math.Abs(n.X - h.X) > 0.8 * s && Math.Abs(n.X - h.X) < 1.6 * s);
                 // (or a detected head by its centre, half a space to a space off the stem, its neighbour on the
