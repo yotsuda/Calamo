@@ -57,7 +57,7 @@ def written(lys_path):
     n = 0
     with open(lys_path, encoding='utf-8-sig') as f:
         for line in f:
-            m = re.match(r'^\s*lyrics\s+\S+\s+sings\s+\S+\s*\{(.*)\}\s*$', line)
+            m = re.match(r'^\s*lyrics\s+\S+\s*\{(.*)\}\s*$', line)
             if m:
                 n += sum(1 for w in re.findall(r'"[^"]*"-?|\S+', m.group(1)) if w not in ('|', '~', '_'))
     return n

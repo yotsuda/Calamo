@@ -40,7 +40,7 @@ def read_tracks(path):
     seen = defaultdict(int)
     with open(path, encoding='utf-8') as f:
         for line in f:
-            m = re.match(r'\s*lyrics\s+(\S+?)words(\d+)\s+sings\s+\S+\s*\{(.*)\}\s*$', line)
+            m = re.match(r'\s*lyrics\s+(\S+?)words(\d+)\s*\{(.*)\}\s*$', line)
             if not m:
                 continue
             for tok in re.findall(r'"[^"]*"-?|[^\s|]+', m.group(3)):

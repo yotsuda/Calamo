@@ -402,7 +402,7 @@ static class Writer
                 }
                 lys.AppendLine("  }");
                 if (part.Lyrics != null)
-                    lys.AppendLine($"  lyrics {part.Id}words sings {part.Id} {{ {string.Concat(part.Lyrics.Skip(from).Take(to - from).Select(b => b + " | "))}}}");
+                    lys.AppendLine($"  lyrics {part.Id}words {{ {string.Concat(part.Lyrics.Skip(from).Take(to - from).Select(b => b + " | "))}}}");
             }
             lys.AppendLine("}");
         }

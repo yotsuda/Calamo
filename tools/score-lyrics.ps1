@@ -12,7 +12,7 @@ $ErrorActionPreference = 'Stop'
 function Tracks([string]$path) {
     $tracks = @{}
     foreach ($line in Get-Content $path) {
-        if ($line -notmatch '^\s*lyrics\s+\S+\s+sings\s+(\S+)\s*\{(.*)\}\s*$') { continue }
+        if ($line -notmatch '^\s*lyrics\s+(\S+?)words\d*\s*\{(.*)\}\s*$') { continue }
         $part = $Matches[1]; $body = $Matches[2]
         if (-not $tracks.ContainsKey($part)) { $tracks[$part] = [Collections.Generic.List[object]]::new() }
         $bars = [Collections.Generic.List[object]]::new()

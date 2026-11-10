@@ -2,6 +2,28 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## Lily# の歌詞の文法に合わせた: `.lys` の歌詞は `lyrics NAME { … }` だけを書く（`sings PART` を外した）。読みの数字は同じ: 規則 **46**・検出器 **34** WORSE は前回と全行一致、開発用の台 **28691 のまま**（0・0、印 0・0）、評価台 **55451 のまま**（0・0、印 0・0）、種 5 of 6。**基準値は更新していない**（2026-11-10 夜、オーナーの指示「lily# からの連絡を見て」、前の節の次の一手 1）
+
+**現在地**: 検出器は detector42 のまま。前の節の「保留」は片づいた。Lily# の連絡（`docs/repro/REQUESTS.md` の第1217・第1222）に返事を書いた。
+
+**直したもの**: `src/Omr/Program.cs`、`src/OmrGen/Program.cs` の書き手。`tools/score-lyrics.ps1`（パート名はトラック名 `(\S+?)words\d*` から取る）、`tools/lyric-errors.py`、`tools/score-lyrics-xml.py`、`tools/score-lyrics-notes.py` の正規表現。`singer` の行は書かない（印刷だけなら要らない、第1222）。読み手の出力と生成器の出力と、下の空白に置き換えた正解は、Lily# の master `733107fba` からビルドした lysc でエラーなく通った。
+
+**`out/` の生成譜**: `SvgTruth` は SVG の `data-pos` を `.lys` の文字位置として引くので、`out/gen-*` の 58 曲の ` sings vo` は**同じ長さの空白**に置き換えた（`lyrics vowords          { … }`。ファイルの大きさは変わらない）。次に `-Fresh` で作り直せば普通の形になる。`out/` のほかの置き場（`dev-prev`、`period-ab-*`）は古い形のままで、古い読みの比較用。
+
+**正直に書いておくこと**:
+1. 基準値は `-Accept` していない。残りは規則 46、検出器 34。
+2. 検証の lysc は手元の 15:34 のビルド（0.16.0 `a87f8b67`）。master のビルドに差し替えると組版の変化が混ざるので変えていない。master の lysc では 3 通りの `.lys` を通しただけで、数字は測っていない。
+3. 評価台の原因の内訳で `extra` 499 → 498、`extraMeasure` 100 → 99（`lied-chaminade-paysbleu-scan`、`lied-kinkel7-2-scan` の 1 セルずつ）。前の表は歌詞の行が構文エラーのまま Verify していたので、その違いと見ているが確かめていない。音の数字は 66 台とも同じで、`docs/eval-sets.tsv` は写した。`docs/dev-sets.tsv` は全同。前の節の正直 1 の心配はこの範囲で収まった。
+4. 公開済みの Calamo 0.6.0 は `sings` を書く。**次の Lily# の公開と次の Calamo の公開は同時に要る。**
+
+**次の一手**:
+1. **オーナー: 次の Lily# の公開と、それに合わせた Calamo の公開。**
+2. **残りの WORSE**: 規則の `piano` の残り（`Lo7`・`Lo10`・スキャン）→ 検出器の `threes`・`head.beams`。説明がそろったら `-Accept` する（`scan-voices2006` の説明は前の節）。
+3. 隠れた 4 分を読み手で組み立てるか、S58 の学習: 前の節のまま。
+
+**check の記録**（`out/validate-sings`）: 規則 46 WORSE・検出器 34 WORSE（ともに前回とログが全行一致）、開発用の台 0 better・0 worse（印 0・0）、評価台 0 better・0 worse（印 0・0）、種 5 of 6。`data/eval/chopin28-4/src/` の新しいファイルは自分のものではないので含めていない。
+
+
 ## WORSE の仕分け 第 6 歩: `real.scan-voices2006` の −1 ポイントは説明がついた（読みの壊れたページの偽の `r16` が消えただけ）。コードは変えていない。**Lily# の `sings` の廃止への対応はオーナーの指示で保留**（2026-11-10 夕、前の節の次の一手 2）
 
 **現在地**: 検出器は detector42 のまま。種は 6 つとも triage 済み。規則の WORSE は **46** のまま（基準値は更新していない）。REQUESTS に `fixed` なし。頭の規則 check は 46 WORSE で前回と全項目が一致（読み手のずれなし。ログ `out/validate-s3/rules-head.log` の 61 WORSE のうち 15 件は `lyr*` の MISSING で、下の「保留」の編集を check の走行中に入れたせい。編集は戻した）。

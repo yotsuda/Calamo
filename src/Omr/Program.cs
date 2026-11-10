@@ -983,7 +983,7 @@ for (int si = 0; si < sections.Count; si++)
         lys.AppendLine("  }");
         // (a song's words beside the part: a track a verse, a bar's syllables on its line's notes)
         foreach (int verse in LyricVerses(pi))
-            lys.AppendLine($"  lyrics {cfg.LysId(pi)}words{verse + 1} sings {cfg.LysId(pi)} {{ {LyricBars(pi, verse, secFrom, secTo)}}}");
+            lys.AppendLine($"  lyrics {cfg.LysId(pi)}words{verse + 1} {{ {LyricBars(pi, verse, secFrom, secTo)}}}");
     }
     lys.AppendLine("}");
 }

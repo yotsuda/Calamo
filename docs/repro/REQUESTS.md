@@ -24,6 +24,12 @@
 
 Lily# 側へのお願い 1 つ: **組版に影響する変更**（記号の置き場所、間隔、線の描き方）は CHANGELOG の行に印（例: `[engraving]`）を付けてほしい。OMR の学習データと正解は lysc の絵から作っていて（今は 0.14.0、master `371e8f3e8` の後で全部描き直した）、絵が変わると描き直しの要否を判断したい。
 
+## Lily# からの連絡
+
+- **2026-11-10・第1217（Lily# の master、次の版から）: `lyrics NAME sings PART { … }` は構文エラーになった。** `src/Omr/Program.cs` と `src/OmrGen/Program.cs` が書く `sings PART` を外して `lyrics NAME { … }` にしてほしい。score の `lyrics NAME` 行は直上の譜に付く。別のパートに合わせるときは `lyrics NAME on PART`。歌わせるのはファイル直下の `singer sings NAME on PART`（詳細は Lily# の `docs/lyrics-singer-design.md`）。
+- **2026-11-10・第1222（上の続き。歌詞と歌唱の文法が固まった。正は Lily# の `docs/GRAMMAR.md` と `docs/lyrics-singer-design.md`）。** ⚠️ **`src/Omr/Program.cs:986` と `src/OmrGen/Program.cs:405` はまだ `lyrics … sings …` を書いている。今の master の lysc では構文エラーで、その譜は通らない**（`lyrics w1 sings sop { … }` を実際に通して確認）。`sings {id}` を消すだけでよい。**OMR が書くのは次の 2 つで足りる**: 定義 `lyrics NAME { … }`（section の中、パートの `{ }` の外）と、score の行 `staff PART  lyrics NAME`（行は直上の譜に付く。複数の行は節として積まれる）。別のパートの旋律に合わせる行だけ `lyrics NAME on PART`。`on` は score の行にだけ書け、定義に書くとエラー。トラック名はパート名や声部名と同じにできない（LYS7008。今の `{id}words{n}` なら問題なし）。**読んだ譜を印刷するだけなら `singer` の行は要らない**（`singer` がなければ歌詞は印刷だけで、パートは楽器のまま鳴る）。歌わせるならファイル直下に `singer sings NAME on PART` を 1 パート 1 行。**任意**: パートの見出しに `part sop { lyrics words }` と書くと、そのパートの歌詞を宣言できる。ただし 1 つでも書いたパートは、そのパートの行に使うトラックを全部書かないと警告が出る（LYS4055）ので、OMR は書かないのが簡単。歌詞の言語の既定は japanese で、それ以外はファイルの `language english` か `lyrics NAME language english { … }`（names: japanese english chinese korean）。印刷には効かず、歌うときの読みに効く。
+  - **OMR → Lily#（2026-11-10 夜）: 対応した。** 読み手と生成器は `lyrics NAME { … }`（section の中、パートの `{ }` の外）と score の行 `lyrics NAME` だけを書く。`singer` の行は書かない。読み手と生成器の出力は master `733107fba` の lysc で通ることを確かめた。**次の Lily# の公開は、次の Calamo の公開と同時にしたい**（公開済みの 0.6.0 は `sings` を書く）。
+
 ## 依頼（open が上）
 
 | # | 日付 | 内容 | 再現・根拠 | LilyPond 2.26.0 | OMR の回避 | 状態 |
