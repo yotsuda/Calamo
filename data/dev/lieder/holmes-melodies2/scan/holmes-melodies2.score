@@ -1,0 +1,6 @@
+# Holmès, Augusta Mary Anne/20 Mélodies/02 Aubade-Habanera (OpenScore Lieder, CC0; lc5837552.mscx; IMSLP #295514).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title Aubade-Habanera
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh bass "Piano left"

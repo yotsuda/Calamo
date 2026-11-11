@@ -1,0 +1,6 @@
+# Holmès, Augusta Mary Anne/20 Mélodies/04 En chemin (OpenScore Lieder, CC0; lc5855050.mscx; IMSLP #295514).
+# Development (data/dev): outside the held-out set, to debug the reader on.
+title En chemin
+part voice treble "Voice"
+part rh treble "Piano right"
+part lh treble "Piano left"

@@ -22,3 +22,7 @@ schumann25-9	Schumann,_Robert/Myrthen,_Op.25/09_Lied_der_Suleika	6914397	270905
 schumann25-15	Schumann,_Robert/Myrthen,_Op.25/15_Aus_den_hebräischen_Gesängen_(Mein_Herz_ist_schwer)	6925763	270905	
 schumann39-7	Schumann,_Robert/Liederkreis,_Op.39/07_Auf_einer_Burg	4987658		
 schumann96-2	Schumann,_Robert/Lieder_und_Gesänge,_Vol.IV,_Op.96/2_Schneeglöckchen	6984553	271884	
+# Holmès songs from OpenScore Lieder (2026-11-11): siblings of the held-out La princesse sans cœur, from the same IMSLP file (read in place
+# from data/eval/lieder/holmes-melodies16/scan/imslp.pdf). Slurs on both piano staves (where the held-out song's cross-staff pairs go wrong); No.2 has real cross-staff slurs.
+holmes-melodies2	Holmès,_Augusta_Mary_Anne/20_Mélodies/02_Aubade-Habanera	5837552	295514	12-16
+holmes-melodies4	Holmès,_Augusta_Mary_Anne/20_Mélodies/04_En_chemin	5855050	295514	27-31
