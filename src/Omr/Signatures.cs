@@ -238,19 +238,30 @@ static class Signatures
                 // (or one sign more, its last at the height of the first head a space or so to its right:
                 // that note's accidental, which stands where the larger key's next sign would --
                 // kinkel10-4's right hand, its C sharp before a c'' read as the key's second sharp)
-                Head own = null;
-                if (dk != null && common.Key != 0 && dk.Value.Sig.Fifths == common.Key + Math.Sign(common.Key))
+                // (with no key, one sign is the note's too where every other staff of the system reads
+                // no key: a change of key at a system's start is printed on all its staves --
+                // holmes-melodies2's right hand, a flat before a grace note just past the clef, read
+                // as F major on that staff alone, its B's flat for four bars; a grace note's head is no
+                // Head yet, and the detector's is looked for)
+                double? own = null;
+                bool oneMore = dk != null && (common.Key != 0 ? dk.Value.Sig.Fifths == common.Key + Math.Sign(common.Key)
+                                                              : Math.Abs(dk.Value.Sig.Fifths.Value) == 1 && mates.Count > 0 && mates.All(o => o.Fifths == 0));
+                if (oneMore)
                 {
                     var last = signs[^1];
                     double pos = g.St.Pos(last.Y) - (last.Class == "flat" ? 1 : 0);
-                    own = ps.Heads.Where(h => h.St == g.St && h.L > last.X && h.L < last.X + 1.5 * s).MinBy(h => h.L) is { } h0 && Math.Abs(h0.Pos - pos) <= 0.6 ? h0 : null;
+                    own = ps.Heads.Where(h => h.St == g.St && h.L > last.X && h.L < last.X + 1.5 * s).MinBy(h => h.L) is { } h0 && Math.Abs(h0.Pos - pos) <= 0.6 ? h0.L : null;
+                    if (own == null && common.Key == 0)
+                        own = ps.Detections.Where(t => (t.Class == "grace_head" || t.Class == "grace_hollow") && t.Score >= Detector.Threshold
+                                                       && t.X > last.X && t.X < last.X + 1.5 * s && Math.Abs(g.St.Pos(t.Y) - pos) <= 0.6)
+                                           .MinBy(t => t.X)?.X;
                 }
                 if (dk == null || (dk.Value.Sig.Fifths != common.Key && !fewer && own == null))
                 {
                     if (Verbose) Console.WriteLine($"    key {g.Fifths} of staff {g.St.System + 1}/{g.St.Part} unlike the other systems' {common.Key}; the detector sees {(dk == null ? "no key" : dk.Value.Sig.Fifths.ToString())} there: kept");
                     continue;
                 }
-                if (Verbose) Console.WriteLine($"    key {g.Fifths} of staff {g.St.System + 1}/{g.St.Part} unlike the other systems' {common.Key}, which the detector sees there{(fewer ? $" in part ({dk.Value.Sig.Fifths}, no natural)" : own != null ? $" (its last sign the note's at x {own.L:F0})" : "")}: taken");
+                if (Verbose) Console.WriteLine($"    key {g.Fifths} of staff {g.St.System + 1}/{g.St.Part} unlike the other systems' {common.Key}, which the detector sees there{(fewer ? $" in part ({dk.Value.Sig.Fifths}, no natural)" : own != null ? $" (its last sign the note's at x {own:F0})" : "")}: taken");
                 g.Fifths = common.Key;
                 if (own != null)
                 {

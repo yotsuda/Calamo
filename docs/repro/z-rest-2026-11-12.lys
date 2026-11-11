@@ -1,0 +1,28 @@
+// A shape to draw for training (REQUESTS 26): an old French print's quarter rest is a "z" with a
+// knob at each end (the top knob on the right, the bottom knob on the left, the stroke between them
+// bent once), not the modern zigzag. Holmes, "Aubade-Habanera" (20 Melodies No. 2), the OMR's
+// development set data/dev/lieder/holmes-melodies2, scan, page 2: the left hand's lower voice ends
+// nearly every bar with this rest, below the bass staff. The OMR's detector, taught only Lily#'s
+// zigzag, sees no rest there at all (about 45 notes of that page set are missed). Bars 1-2 are that
+// left hand (two voices); bar 3 is the same rest in one voice, in the middle of the staff. Today
+// lysc draws every one of these quarter rests as the modern zigzag.
+title "Z Rest"
+octave absolute
+time 2/2
+key c major
+
+part lh { clef bass }
+
+section Piece {
+  lh {
+    voice { r2 <g, c e g>4@staccato <g, c e>4@staccato } { <c, g,>2~ <c, g,>4 r4 } |
+    voice { r2 <g, c e g>4@staccato <g, c e>4@staccato } { <c, c>2~ <c, c>4 r4 } |
+    c4 r4 e4 r4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff lh "Piano"
+}
