@@ -370,13 +370,43 @@ static partial class Symbols
         return hit >= 0.9 * (n - 1);
     }
 
+    /// <summary>
+    /// Whether the page shows a bracket's line from a piece's end on the number's side (its first ink from
+    /// the side away from the staff) to within a space of the number: a thin run in every column, each
+    /// within two pixels of the last (the line may slope).
+    /// </summary>
+    static bool LineTo(Img d, Comp bc, Comp c, bool above, double s)
+    {
+        bool isLeft = bc.MaxX < c.MinX;
+        int x = isLeft ? bc.MaxX : bc.MinX, end = isLeft ? (int)(c.MinX - 1.0 * s) : (int)(c.MaxX + 1.0 * s), dir = isLeft ? 1 : -1;
+        int y = -1;
+        for (int yy = above ? bc.MinY : bc.MaxY; above ? yy <= bc.MaxY : yy >= bc.MinY; yy += above ? 1 : -1)
+            if (d[x, yy]) { y = yy; break; }
+        if (y < 0) return false;
+        for (int xx = x + dir; isLeft ? xx <= end : xx >= end; xx += dir)
+        {
+            if (xx <= 0 || xx >= d.W - 1) return false;
+            int at = -1;
+            for (int dy = 0; dy <= 2 && at < 0; dy++)
+                if (y + dy < d.H - 1 && d[xx, y + dy]) at = y + dy;
+                else if (y - dy > 0 && d[xx, y - dy]) at = y - dy;
+            if (at < 0) return false;
+            int t = at, e = at;
+            while (t > 1 && d[xx, t - 1]) t--;
+            while (e < d.H - 2 && d[xx, e + 1]) e++;
+            if (e - t > 0.3 * s) return false;   // (a stem, a head or a letter across it: no bracket's line)
+            y = at;
+        }
+        return true;
+    }
+
     /// <summary>The two halves of a tuplet bracket either side of a number (null where there is none).</summary>
     static (Other Left, Other Right) BracketHalves(PageSymbols ps, Img d, Other o, double s)
     {
         var c = o.C;
         Other left = null, right = null;
         if (TupletVerbose)
-            foreach (var b in ps.Others.Where(b => b != o && Math.Abs(b.C.Cx - c.Cx) < 4 * s && Math.Abs(b.C.Cy - c.Cy) < 2 * s))
+            foreach (var b in ps.Others.Where(b => b != o && Math.Abs(b.C.Cx - c.Cx) < 9 * s && Math.Abs(b.C.Cy - c.Cy) < 2 * s))
                 Console.WriteLine($"      bracket? piece {b.Class} at {b.C.Cx:F0},{b.C.Cy:F0} {b.C.W / s:F2}x{b.C.H / s:F2} fill {b.C.Fill:F2}{(b.St != o.St ? " (another staff's)" : "")}");
         foreach (var b in ps.Others)
         {
@@ -397,8 +427,11 @@ static partial class Symbols
                     && Math.Abs(q.C.Cy - bc.Cy) < 0.15 * s && (onLeft ? bc.MinX - q.C.MaxX : q.C.MinX - bc.MaxX) is var g && g > 0 && g < 1.5 * s))
                 continue;
             // (within a space and a fifth of the number: the same hooks stand 0.9 space off their 3)
-            if (bc.MaxX < c.MinX && c.MinX - bc.MaxX < 1.2 * s && (left == null || bc.MaxX > left.C.MaxX)) left = b;
-            if (bc.MinX > c.MaxX && bc.MinX - c.MaxX < 1.2 * s && (right == null || bc.MinX < right.C.MinX)) right = b;
+            // (or further, up to four spaces, where the page shows its line on to the number: a line on a ledger
+            // line's row was taken out with them over a part of its length, Holmes's No.2 bar 37, the right half 2.4 spaces off)
+            bool Reaches(double gap) => gap < 1.2 * s || gap < 4 * s && LineTo(d, bc, c, c.Cy < o.St.Top, s);
+            if (bc.MaxX < c.MinX && Reaches(c.MinX - bc.MaxX) && (left == null || bc.MaxX > left.C.MaxX)) left = b;
+            if (bc.MinX > c.MaxX && Reaches(bc.MinX - c.MaxX) && (right == null || bc.MinX < right.C.MinX)) right = b;
         }
         // A bracket's line at the height of a ledger line is taken out with the ledger lines
         // (Bravura's meters002, three spaces over the staff): its hook is left alone, a thin upright
@@ -413,7 +446,10 @@ static partial class Symbols
                 if (bc.W > 1.0 * s || (bc.W > 0.25 * s && bc.Fill > 0.4) || bc.H < 0.3 * s || bc.H > 1.3 * s || Math.Abs(bc.Cy - c.Cy) > 1.0 * s) continue;
                 bool isLeft = bc.MaxX < c.MinX;
                 double gap = isLeft ? c.MinX - bc.MaxX : bc.MinX - c.MaxX;
-                if (gap < 0.8 * s || gap > 4 * s || (isLeft ? left : right) != null) continue;
+                if (gap < 0.8 * s || (isLeft ? left : right) != null) continue;
+                // (further off, up to ten spaces, where the page shows its line all the way to the number: a sloping
+                // line crossing the ledger lines' rows, Holmes's No.2 bar 37, its left hook 7.6 spaces off)
+                if (gap > 4 * s && !(gap < 10 * s && LineTo(d, bc, c, c.Cy < o.St.Top, s))) continue;
                 // (the line leaves the hook's end on the number's side of it: over the staff the hook
                 // hangs down from it, under the staff it stands up)
                 int y0 = c.Cy < o.St.Top ? bc.MinY : bc.MaxY;

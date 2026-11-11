@@ -168,6 +168,7 @@ static class Reader
         sym.WeakHairpins = weakHairpins;
         sym.WeakPedals = weakPedals;
         sym.WeakOttavas = weakOttavas;
+        sym.WeakTabs = weakTabs;
         sym.WeakSegnos = weakSegnos;
         sym.WeakTrills = weakTrills;
         sym.WeakRests = weakRests;

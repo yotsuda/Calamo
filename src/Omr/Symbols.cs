@@ -91,6 +91,8 @@ sealed class PageSymbols
     public List<Detection> WeakHairpins = new();   // its hairpins' ends under Detector.Threshold: only where the ink holds the two lines (Expressions)
     public List<Detection> WeakPedals = new();     // its pedal brackets' end hooks and notches and its *s under Detector.Threshold: only where the pedal is down (Expressions)
     public List<Detection> WeakOttavas = new();    // its octave lines' signs under Detector.Threshold: only where the dashes run on from them in the ink (Ottavas)
+    public List<Detection> WeakTabs = new();       // its TAB digits under Detector.Threshold: a fret's rivals (Tab), and a bare 8 whose dashes and hook are found (Ottavas.BareEights)
+    public List<Comp> InkHoles = new();            // the white shut in by the ink (staff lines out): a bare 8's two loops where the detector saw none (Ottavas.BareEights)
     public List<Detection> OctaveSigns = new();    // the octave lines' signs whose letters hold no heads: the sure ones, and the unsure whose line runs on
     public List<(double X0, double X1, double Top, double Bottom)> OctaveWaves = new();   // an old print's wavy octave lines on from those signs (Ottavas.WaveEnd): their columns and rows
     public List<Detection> WeakSegnos = new();     // its segnos under Detector.Threshold: only where a jump back to the sign was read in words and no sure segno seen (Form)
@@ -181,6 +183,7 @@ static partial class Symbols
         var (labels, comps) = Components.Label(ink.W, ink.H, i => ink.D[i], eight: true);
         ps.Labels = labels; ps.LabelW = ink.W;
         var inkHoles = Components.Holes(ink);
+        ps.InkHoles = inkHoles;
         string hollowNote = "";
         bool rulesRead = true;
         if (det != null)
