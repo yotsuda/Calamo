@@ -451,11 +451,12 @@ sealed class SymEval
             var b = sl.EndSrc >= 0 ? ChordBefore(sl.EndSrc) : new();
             if (a.Count == 0) continue;
             foreach (var h in a) slurFrom.Add(h.Chord);
-            bool start = a.Any(h => h.Found != null && h.Found.SlurStart), end = b.Count == 0 || b.Any(h => h.Found != null && h.Found.SlurEnd);
+            // (a slur paired across the staves counts as the symbols read it: the reader writes it when it hands the notes back)
+            bool start = a.Any(h => h.Found != null && (h.Found.SlurStart || h.Found.SlurStartCross)), end = b.Count == 0 || b.Any(h => h.Found != null && (h.Found.SlurEnd || h.Found.SlurEndCross));
             Count("slur", start && end);
             if (!(start && end)) Miss(res, a[0].St, $"slur {(start ? "end" : end ? "start" : "")} missed (pos {a[0].Pos})".Replace("  ", " "), sl.X1, sl.Y1);
         }
-        foreach (var t in heads.Where(t => t.Found != null && t.Found.SlurStart && !slurFrom.Contains(t.Chord)).GroupBy(t => t.Chord).Select(g => g.First()))
+        foreach (var t in heads.Where(t => t.Found != null && (t.Found.SlurStart || t.Found.SlurStartCross) && !slurFrom.Contains(t.Chord)).GroupBy(t => t.Chord).Select(g => g.First()))
         {
             Extra["slur"] = Extra.GetValueOrDefault("slur") + 1;
             Miss(res, t.St, $"slur extra (pos {t.Pos})", t.G.Cx, t.G.Cy);

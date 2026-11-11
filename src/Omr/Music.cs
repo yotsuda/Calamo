@@ -115,6 +115,7 @@ sealed class Ev
     public int BeamRun;                         // OMR: the run of stems beams really join within its ink piece (Head's; Reader.KneeBeam)
     public bool SlurStart, SlurEnd;             // OMR: a slur starts / ends at it
     public bool SlurStartAcross, SlurEndAcross; // OMR: a sure slur start / end at it that nothing on its staff pairs with (Head's): a line handed to the neighbouring staff (Reader.HandedGroups)
+    public bool SlurStartCross, SlurEndCross;   // OMR: ...paired with an end / start on the neighbouring staff (Head's): a slur once that end's notes are handed back (Reader.HandedGroups)
     public bool PhraseStart, PhraseEnd;         // OMR: that slur is written as a phrasing slur: it runs over notes with syllables of their own, which a slur would hold
     public int Stem;                            // OMR: +1 stem up, -1 stem down, 0 none (rest, whole note)
     public int StemForced;                      // OMR: +1 @stemUp, -1 @stemDown: its voice is written out of order, for the words on it

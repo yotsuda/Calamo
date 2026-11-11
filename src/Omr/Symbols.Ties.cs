@@ -486,10 +486,26 @@ static partial class Symbols
             return (dx + 0.5 * gap, t.Y < (c.Min(h => h.Y) + c.Max(h => h.Y)) / 2);
         }
         var at = new Dictionary<Detection, (List<Head> Chord, bool Above)>();
+        var staves = ps.Heads.Select(h => h.St).Distinct().ToList();
+        var acrossOnly = new HashSet<Detection>();   // ends given a chord of the neighbouring staff (Across): paired only across, below
+        // (a sure end by no note of its staff, in the half towards the neighbouring staff of the system, is the end of a chord
+        // there at its x: Lily# draws the slur to a line's @cross notes under it only to the upper staff's bottom line, five and
+        // a half spaces over their heads, gen-detach's threes001, or to its fourth space, threes002. Its end at a system's end
+        // is no broken slur's then. Not a start by the staff's left edge, a broken slur's second piece)
+        (List<Head> Chord, bool Above)? Across(Detection t, Staff st)
+        {
+            if (st == null || !Sure(t) || Math.Abs(t.Y - st.Mid) < 0.5 * s || t.Class == "slur_l" && t.X - st.Left < 12 * s) return null;
+            bool below = t.Y > st.Mid;
+            var nb = staves.FirstOrDefault(o => o.System == st.System && o.Part == st.Part + (below ? 1 : -1));
+            if (nb == null || (below ? t.Y > nb.Top : t.Y < nb.Bottom)) return null;
+            var c = chords.Where(c => c[0].St == nb && t.X >= c.Min(h => h.L) - 1.0 * s && t.X <= c.Max(h => h.R + (h.Dots > 0 ? 0.8 * s : 0)) + 1.0 * s)
+                          .MinBy(c => Math.Abs(c.Average(h => h.X) - t.X));
+            return c == null ? null : (c, below);
+        }
         foreach (var t in ends)
         {
             // (a broken slur's first piece ends at the staff's very end, past the last note's reach)
-            var near = Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
+            var near = Nearest(staves, t.Y, s);
             if (t.Class == "slur_r" && near != null && near.Right - t.X < 0.6 * s) continue;
             // (not moved to the other voice's chord at the same x when level with this one's outer head:
             // tried for kinkel7-6's 21st bar as MuseScore draws it, where the arc over the second voice's
@@ -506,6 +522,14 @@ static partial class Symbols
                 continue;
             }
             if (best.c != null) at[t] = (best.c, best.f.Above);
+            else if (Across(t, near) is { } across)
+            {
+                at[t] = across;
+                acrossOnly.Add(t);
+                if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
+                    Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): by no note of its staff, {(across.Above ? "over" : "under")} the chord at {across.Chord.Average(h => h.X):F0} on the staff {(across.Above ? "below" : "above")}");
+                continue;
+            }
             if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                 Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): " + (best.c == null ? "by no note"
                     : $"{(best.f.Above ? "over" : "under")} the chord at {best.c.Average(h => h.X):F0} ({string.Join(" ", best.c.Select(h => h.Pos))})"));
@@ -532,6 +556,7 @@ static partial class Symbols
         // (--at 0,0: every slur's working on the page)
         bool Debug(Detection t) => DebugAt.HasValue && (DebugAt.Value == (0, 0) || Math.Abs(t.X - DebugAt.Value.X) < 3 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s);
         var carried = new Dictionary<int, bool>();   // part -> a slur ran on from its staff in the system before
+        var unpaired = new List<(Detection T, Staff St)>();   // sure ends no slur on their own staff took (paired across below)
         foreach (var g in ends.GroupBy(StaffOf).Where(g => g.Key != null).OrderBy(g => g.Key.System).ThenBy(g => g.Key.Part))
         {
             var st = g.Key;
@@ -540,8 +565,11 @@ static partial class Symbols
             // the end of the one after, kinkel19-4's left hand)
             List<Detection> OnePerChord(IEnumerable<Detection> ts) => ts.GroupBy(t => (at[t].Chord, at[t].Above))
                 .Select(c => c.MaxBy(t => (fromTie.Contains(t) ? 0 : 1, t.Score))).OrderBy(t => t.X).ToList();
-            var lefts = OnePerChord(g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t)));
-            var rights = OnePerChord(g.Where(t => t.Class == "slur_r" && at.ContainsKey(t)));
+            // (an end Across gave this staff's chord is not this staff's to pair: only a start left over on the staff it was seen by
+            // pairs with it, below)
+            foreach (var t in g.Where(acrossOnly.Contains)) unpaired.Add((t, st));
+            var lefts = OnePerChord(g.Where(t => (t.Class == "slur_l" || fromTie.Contains(t)) && at.ContainsKey(t) && !acrossOnly.Contains(t)));
+            var rights = OnePerChord(g.Where(t => t.Class == "slur_r" && at.ContainsKey(t) && !acrossOnly.Contains(t)));
             // the ends by no note: a broken slur's, at the staff's two edges
             bool hangsRight = g.Any(t => t.Class == "slur_r" && Sure(t) && !at.ContainsKey(t) && st.Right - t.X < 3 * s);
             bool hangsLeft = g.Any(t => t.Class == "slur_l" && Sure(t) && !at.ContainsKey(t) && t.X - st.Left < 12 * s);
@@ -913,7 +941,10 @@ static partial class Symbols
             // line down to its last two notes drawn on the left hand's staff, Schumann's Op.25-15 -- or unseen on this one.
             // Noted on the heads for the reader to weigh (Reader.HandedGroups); nothing is written for it)
             foreach (var t in lefts.Concat(rights).Where(t => Sure(t) && !used.Contains(t) && !fromTie.Contains(t)))
+            {
                 foreach (var h in at[t].Chord) { if (t.Class == "slur_r") h.SlurEndAcross = true; else h.SlurStartAcross = true; }
+                unpaired.Add((t, st));
+            }
             void Pair(Detection l, Detection r)
             {
                 var (a, above) = at[l];
@@ -954,6 +985,28 @@ static partial class Symbols
                     if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {ax:F0},{a[0].Y:F0} ({l.Score:F2}) to {at[r].Chord[0].X:F0},{at[r].Chord[0].Y:F0} ({r.Score:F2}), {(above ? "over" : "under")}");
                 }
             }
+        }
+        // a sure start and a sure end left over on the two neighbouring staves of a system, the end after the start
+        // within a slur's reach, are one slur from the one staff to the other: a line's last notes drawn on the other
+        // hand's staff, the slur from the line down to them (gen-detach: the right hand's eighths, the last two @cross
+        // under the left hand's quarters, the detector sure of both ends). The first such end after the start, before
+        // the start's staff's next start left over. Marked on the heads only (Cross, and Across, by which Reader.HandedGroups
+        // moves the group): the reader writes the slur when it hands the far end's notes back to the start's hand. Written
+        // as a slur here, the held-out set's slur ends gained 31 right and 24 wrong (2026-11-11)
+        double Cx(Detection t) => at[t].Chord.Average(h => h.X);
+        var taken = new HashSet<Detection>();
+        foreach (var (l, la) in unpaired.Where(u => u.T.Class != "slur_r").OrderBy(u => u.St.System).ThenBy(u => Cx(u.T)))
+        {
+            double lx = Cx(l);
+            double next = unpaired.Where(u => u.T != l && u.T.Class != "slur_r" && u.St == la && Cx(u.T) > lx).Select(u => Cx(u.T)).DefaultIfEmpty(double.MaxValue).Min();
+            var r = unpaired.Where(u => u.T.Class == "slur_r" && !taken.Contains(u.T) && u.St != la && u.St.System == la.System && Math.Abs(u.St.Part - la.Part) == 1
+                                        && Cx(u.T) > lx && Cx(u.T) < next && u.T.X - l.X <= FarSlur * s)
+                            .OrderBy(u => Cx(u.T)).Select(u => u.T).FirstOrDefault();
+            if (r == null) continue;
+            taken.Add(r);
+            foreach (var h in at[l].Chord) { h.SlurStartCross = true; h.SlurStartAcross = true; }
+            foreach (var h in at[r].Chord) { h.SlurEndCross = true; h.SlurEndAcross = true; }
+            if (Debug(l) || Debug(r)) Console.WriteLine($"slur from {lx:F0},{l.Y:F0} ({l.Score:F2}) to {Cx(r):F0},{r.Y:F0} ({r.Score:F2}) on the neighbouring staff, both ends left over on their own");
         }
     }
 

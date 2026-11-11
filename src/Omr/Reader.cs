@@ -933,6 +933,12 @@ static class Reader
                         arr[away].RemoveAll(moved.Contains);
                         foreach (var e in moved) e.DrawnOn = away;
                         arr[home] = arr[home].Concat(moved).OrderBy(e => e.X).ToList();
+                        // (the slur the symbols paired across the staves, from the line to the group's last note or from its first
+                        // to the line, is the line's now: gen-detach, the slur from high on the upper staff to the @cross eighths)
+                        if (after && moved.Count > 0 && moved[^1].SlurEndCross && arr[home].LastOrDefault(e => e.X < moved[0].X && e.SlurStartCross) is { } from)
+                        { from.SlurStart = true; moved[^1].SlurEnd = true; }
+                        if (before && moved.Count > 0 && moved[0].SlurStartCross && arr[home].FirstOrDefault(e => e.X > moved[^1].X && e.SlurEndCross) is { } to)
+                        { moved[0].SlurStart = true; to.SlurEnd = true; }
                     }
                     break;
                 }
@@ -1680,7 +1686,7 @@ static class Reader
                     Beam = h.HasStem && h.Beams > 0 && h.Cluster != 0 && !h.Held ? h.Cluster : 0, BeamRun = h.BeamRun, Held = h.Held,
                     Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, PosLo = h.Pos, PosHi = h.Pos, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
-                    SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, SlurStartAcross = h.SlurStartAcross, SlurEndAcross = h.SlurEndAcross, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
+                    SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, SlurStartAcross = h.SlurStartAcross, SlurEndAcross = h.SlurEndAcross, SlurStartCross = h.SlurStartCross, SlurEndCross = h.SlurEndCross, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
                     Bare = bare && !h.Slash ? new List<int> { dia } : null, OctaveClef = octaveClef,
                 };
                 // heads on one stem (or stemless heads at one x) make a chord (a slash is no chord's)
