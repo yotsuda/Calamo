@@ -168,6 +168,7 @@ static partial class Symbols
                     bool clipped = false;
                     var widths = new List<int> { start.B - start.T + 1 };
                     var rows = new List<int> { start.T };
+                    var path = new List<(int X, double Y)> { (x0, (start.T + start.B) / 2.0) };
                     int along = OnStaffLine(x0, start) ? 1 : 0;
                     for (int x = x0 + 1; x < goal; x++)
                     {
@@ -176,7 +177,7 @@ static partial class Symbols
                         if (next == null) break;
                         int w = next.Value.B - next.Value.T + 1;
                         if (w > thinMax) { if (++thick > 0.35 * s) break; continue; }    // a barline or a stem: pass
-                        cur = next.Value; reach = x; widths.Add(w); rows.Add(cur.T);
+                        cur = next.Value; reach = x; widths.Add(w); rows.Add(cur.T); path.Add((x, (cur.T + cur.B) / 2.0));
                         if (OnStaffLine(x, cur)) along++;
                         // a stroke cut by the window's edge is something beyond it (a beam) seen in part
                         if (cur.T <= y0 || cur.B >= y1) { clipped = true; break; }
@@ -199,8 +200,13 @@ static partial class Symbols
                     // next chord, its bar at a height the sign before this head's partner is not looked for at:
                     // gen-arp's chords008)
                     bool intoSign = b != null && goal - reach > 0.2 * s && Whole(reach, cur) > 1.5 * s;
-                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine && stroke && !ledger && !intoSign;
-                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}{(intoSign ? ", into a sign" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)}), {thick} thick";
+                    // (a tie runs in the white between heads; a stroke lying mostly within another head is that head's
+                    // rim -- the hollow head of the next chord pushed left by a second, its outline followed from
+                    // below round to the partner at this head's height: gen-arp's chords010)
+                    int inHead = path.Count(p => ps.Heads.Any(o => o != h && o != b && o.St == st && p.X >= o.L && p.X <= o.R && Math.Abs(p.Y - o.Y) <= 0.6 * s));
+                    bool rim = inHead >= 0.5 * path.Count;
+                    tied = !clipped && reach - x0 >= 0.4 * s && goal - reach <= 0.45 * s && even && !staffLine && stroke && !ledger && !intoSign && !rim;
+                    why = $"from {x0} rows {start.T}-{start.B} reach {reach} of {goal}, widths {wa:F1}..{wb:F1}{(clipped ? ", clipped" : "")}{(intoSign ? ", into a sign" : "")}{(rim ? $", a head's rim ({inHead} of {path.Count})" : "")}, {along} of {n} along a staff line (thickness {lineThick}, here {Whole(reach, cur)}), {thick} thick";
                     if (tied) break;
                 }
             if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < 3 * s && Math.Abs(h.Y - DebugAt.Value.Y) < 3 * s)
