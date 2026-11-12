@@ -42,7 +42,7 @@ static class Ottavas
     /// <summary>
     /// How far the dashes run right of x at the height y, in the ink: along the band of 0.4 of a space
     /// about y, the end of the last run of ink that is a dash's (0.6 of a space long, up to 1.2 as
-    /// printed; thin, and on the row the first dash set: the dashes are collinear) before a gap of two
+    /// printed; thin, and on the row the dashes before it set: the dashes are collinear) before a gap of two
     /// and a half spaces (a dash's gap is 1.4), a longer run (a beam, a ledger line: not the dashes')
     /// or ink that is no dash (a head's top in the band, off the dashes' row: ledger002's bes' after a
     /// hook the detector missed ran the line on to the head's edge). A stem through the band, ink on
@@ -62,15 +62,29 @@ static class Ottavas
         hooked = false; dashed = false;
         int y0 = (int)Math.Max(0, y - 0.4 * s), y1 = (int)Math.Min(ink.H - 1, y + 0.4 * s);
         double row = double.NaN;    // the dashes' row, from the first dash's ink
+        double Thin() => double.IsNaN(row) ? 0.25 * s : 0.3 * s;   // a dash's thickness at most (see Column)
         // the ink in the column within the band: 0 none, 1 a dash's (thin, on the row; or a stem
         // through the band), 2 something else's; with the rows it covers
         (int Kind, int Top, int Bottom) Column(int xx)
         {
             int top = -1, bottom = -1;
-            for (int yy = y0; yy <= y1; yy++) if (ink[xx, yy]) { if (top < 0) top = yy; bottom = yy; }
+            // (once the row is set, the run of ink nearest it: other ink in the band apart from it is not the
+            // dash's column -- a slur under the dashes reaching into the band, Holmes's No.2 scan, bar 53)
+            double near = double.MaxValue;
+            for (int yy = y0; yy <= y1; yy++)
+            {
+                if (!ink[xx, yy]) continue;
+                int e = yy; while (e < y1 && ink[xx, e + 1]) e++;
+                if (double.IsNaN(row)) { if (top < 0) top = yy; bottom = e; }
+                else if (Math.Max(0, Math.Max(yy - row, row - e)) is var d && d < near) { near = d; top = yy; bottom = e; }
+                yy = e;
+            }
             if (top < 0) return (0, top, bottom);
             double thick = bottom - top + 1, centre = (top + bottom) / 2.0;
-            if (thick <= 0.25 * s && (double.IsNaN(row) || Math.Abs(centre - row) <= 0.15 * s)) return (1, top, bottom);
+            // (once the first dash set the row, a scan's dashes may run thicker: Holmes's No.2's, six pixels at 23 to
+            // the space, 0.26. The first is thin: a letter's stroke four pixels thick at 15 to the space, the "d" of a
+            // "ritard.", taken for one, an unsure 15ma in its letters, schumann25-1's MuseScore page, bar 25)
+            if (thick <= Thin() && (double.IsNaN(row) || Math.Abs(centre - row) <= 0.15 * s)) return (1, top, bottom);
             if (!double.IsNaN(row) && Reach(xx, (int)Math.Round(row), -1) >= 0.4 * s && Reach(xx, (int)Math.Round(row), 1) >= 0.4 * s) return (1, top, bottom);
             return (2, top, bottom);
         }
@@ -107,7 +121,10 @@ static class Ottavas
                 // edge, which must not set the row)
                 if (runStart >= 0)
                 {
-                    if (xx - runStart >= 0.35 * s || !double.IsNaN(row)) { dashSeen = dashed = true; if (double.IsNaN(row) && rowN > 0) row = rowSum / rowN; }
+                    // (the row follows the dashes, each one long enough setting it again: a scan's line slants, Holmes's
+                    // No.2 bar 45's 8va falling 10 pixels over 30 spaces, off the first dash's row by more than a dash's
+                    // play two thirds of the way)
+                    if (xx - runStart >= 0.35 * s || !double.IsNaN(row)) { dashSeen = dashed = true; if (rowN > 0 && (double.IsNaN(row) || xx - runStart >= 0.35 * s)) row = rowSum / rowN; }
                     last = xx - 1; runStart = -1;
                 }
                 continue;
@@ -116,7 +133,7 @@ static class Ottavas
             {
                 if (runStart < 0) { runStart = xx; rowSum = 0; rowN = 0; }
                 if (xx - runStart > 1.2 * s) break;
-                if (bottom - top + 1 <= 0.25 * s) { rowSum += (top + bottom) / 2.0; rowN++; }
+                if (bottom - top + 1 <= Thin()) { rowSum += (top + bottom) / 2.0; rowN++; }
                 continue;
             }
             // ink that is no dash: the hook, joined to the dash before it, narrow, its stroke running one
@@ -127,15 +144,26 @@ static class Ottavas
             // detector missed, ledger002, or the next system's ledger-line note reaching up into the band
             // of a line that runs on, ledger008)
             int w = 0; while (xx + w < ink.W && Column(xx + w).Kind == 2) w++;
+            bool seenBefore = dashSeen;
             // (the run leading into it is a dash too, when long enough: "- " then the hook, with no gap
             // between them to end the run, sets the row here: basic001's "(15ma)" over one note)
             if (runStart >= 0 && xx - runStart >= 0.35 * s && double.IsNaN(row) && rowN > 0) { row = rowSum / rowN; dashSeen = dashed = true; }
             if (runStart >= 0 && !double.IsNaN(row) && w <= 0.3 * s)
             {
+                // (the row a pixel off the hook's end will do, after dashes seen: the row, following the dashes, at 3318.5
+                // and rounded to 3318, the hook's stroke from 3319 -- gen-ott-scan's piano002, a 15ma's hook missed, hung under
+                // the staff above. Not with the row just set by this run: a letter's stroke, the "d" of a "ritard." after an
+                // unsure 15ma, its upright taken for the hook, schumann25-1's MuseScore page)
                 int r = (int)Math.Round(row);
+                if (!ink[xx, r] && seenBefore) r = Enumerable.Range(1, Math.Max(1, (int)(0.1 * s))).SelectMany(k => new[] { r + k, r - k }).Where(rr => ink[xx, rr]).DefaultIfEmpty(r).First();
                 double up = Reach(xx, r, -1), down = Reach(xx, r, 1);
                 if (ink[xx, r] && Math.Max(up, down) >= 0.4 * s && Math.Min(up, down) <= 0.2 * s && !DashAhead(xx + w)) { hooked = true; return xx + w - 1; }
             }
+            // (no hook: the run leading into it, a dash's length, is a dash all the same -- a staccato dot just
+            // under the dashes touching the band at a dash's end, Holmes's No.2 scan, bar 31, lost the dash before it)
+            // (after a dash seen only: before one, a letter's stroke running into the rest of its word is no dash -- the
+            // "rd" of a "ritard." an unsure 15ma was seen in, schumann25-1's MuseScore page, bar 25)
+            if (seenBefore && runStart >= 0 && !double.IsNaN(row) && xx - runStart >= 0.35 * s) { last = xx - 1; }
             // (or the hook's upright alone, a dash's gap after the last dash: Lily# leaves the hook's foot out
             // where the dashes' pattern has a gap, seed 11's ledger007 bar 9. Short, as a hook is, not a stem
             // ending at the row. Its end within the dash's thickness of the row, a pixel off it: seed 11's
@@ -362,7 +390,7 @@ static class Ottavas
     /// The digit may be seen under the threshold, from WeakBareEight up, its dashes and hook found all
     /// the same: MuseScore's italic 8 over Holmes's No.2 (bar 29), seen as a TAB 8 at 0.45. Or not at
     /// all, its two loops in the ink saying it (bars 30 and 53); and with no hook, the dashes running to
-    /// the system's end, the line goes on, its side the digit's to its staff.
+    /// the system's end, the line goes on, its side the digit's to its staff (or stopping a few spaces short of it, as an old print does).
     /// </summary>
     static IEnumerable<Detection> BareEights(PageResult res, List<Detection> det)
     {
@@ -373,34 +401,83 @@ static class Ottavas
         // at a system's start, Holmes's No.2 bars 30 and 53. Each loop a fifth to seven tenths of a space, the upper
         // one 0.35 to a space over the lower, the italic's slant leaning it at most 0.4 to the right)
         var loops = res.Sym.InkHoles.Where(h => h.W >= 0.15 * s && h.W <= 0.7 * s && h.H >= 0.15 * s && h.H <= 0.7 * s).ToList();
+        bool Ink(int x0, int x1, int y0, int y1)
+        {
+            for (int yy = Math.Max(0, y0); yy <= Math.Min(ink.H - 1, y1); yy++)
+                for (int xx = Math.Max(0, x0); xx <= Math.Min(ink.W - 1, x1); xx++)
+                    if (ink[xx, yy]) return true;
+            return false;
+        }
+        // the piece of ink about a loop (lo) taken as an 8, the upper loop hi with it or none (open): a digit's size,
+        // shutting in the loops it should and no other (a pedal's star, loops in a ring, is none, nor two notes' loops)
+        void Eight(Comp lo, Comp hi)
+        {
+            var piece = PieceAbove(res.Sym, hi ?? lo, s);
+            bool In(Comp h) => piece != null && h.MinX > piece.MinX && h.MaxX < piece.MaxX && h.MinY > piece.MinY && h.MaxY < piece.MaxY;
+            if (piece == null || !In(lo) || piece.H < 1.0 * s || piece.H > 1.9 * s || piece.W < 0.6 * s || piece.W > 1.4 * s
+                || res.Sym.InkHoles.Count(h => h.N >= 4 && In(h)) != (hi == null ? 1 : 2)) return;
+            int mid = (piece.MinY + piece.MaxY) / 2;
+            if (hi == null)
+            {
+                // (an open upper loop: the one loop in the lower half, half the piece's width and more, and the upper
+                // half as wide as a bowl -- no b's or d's stem over its loop, no 6's hook)
+                // (its middle a tenth of the piece's height under the piece's: a pedal's star shuts in its loop at its middle)
+                if (lo.Cy < mid + 0.1 * piece.H || lo.W < 0.35 * piece.W) return;
+                int l = int.MaxValue, r = -1;
+                for (int yy = piece.MinY; yy < piece.MinY + (mid - piece.MinY) * 2 / 3; yy++)
+                    for (int xx = piece.MinX; xx <= piece.MaxX; xx++)
+                        if (ink[xx, yy]) { l = Math.Min(l, xx); r = Math.Max(r, xx); }
+                if (r - l + 1 < 0.6 * (piece.MaxX - piece.MinX + 1)) return;
+                // (and the bowl's two sides there, ink in the left and the right third of the piece in seven rows of ten
+                // over the middle: an a's hook has its ball on one side only, its stem on the other -- a song's "a" and
+                // the hyphens after it in gen-band's band007)
+                int both = 0, rows = 0, third = (piece.MaxX - piece.MinX + 1) / 3;
+                for (int yy = piece.MinY + (int)(0.15 * piece.H); yy < mid - (int)(0.05 * piece.H); yy++, rows++)
+                {
+                    bool left = false, right = false;
+                    for (int k = 0; k < third; k++) { left |= ink[piece.MinX + k, yy]; right |= ink[piece.MaxX - k, yy]; }
+                    if (left && right) both++;
+                }
+                if (rows == 0 || both < 0.7 * rows) return;
+                // (and no stem: in neither outer third three columns whose ink runs unbroken for three quarters of the piece's
+                // height -- an a's stem on its right, nine columns at 0.9, its ball wide enough to give it two sides over its
+                // bowl, gen-band's band007; an 8's waist breaks all but its edge, one column at 0.84 on Holmes's No.2 scan)
+                foreach (int side in new[] { 1, -1 })
+                {
+                    int stem = 0;
+                    for (int k = 0; k < third; k++)
+                    {
+                        int cx = side > 0 ? piece.MinX + k : piece.MaxX - k, run = 0, longest = 0;
+                        for (int yy = piece.MinY; yy <= piece.MaxY; yy++) { run = ink[cx, yy] ? run + 1 : 0; longest = Math.Max(longest, run); }
+                        if (longest >= 0.75 * piece.H) stem++;
+                    }
+                    if (stem >= 3) return;
+                }
+            }
+            // (alone, no word's letter: nothing within eight tenths of a space before it, nor after it below
+            // the dashes' row, its top -- the italic g of an "allargando" with its spanner's dashes, gen-span-scan's basic005)
+            // (an open 8's dashes may stand at its middle, its lower loop alone in the lower part: there, only that part's
+            // height is looked at -- Holmes's No.2 scan, bar 29, the first dash at the 8's middle half a space off it)
+            int under = hi == null ? piece.MaxY - (int)(0.3 * piece.H) : mid;
+            if (Ink(piece.MinX - (int)(0.8 * s), piece.MinX - 2, piece.MinY, piece.MaxY) || Ink(piece.MaxX + 2, piece.MaxX + (int)(0.8 * s), under, piece.MaxY)) return;
+            double x = hi == null ? (piece.MinX + piece.MaxX) / 2.0 : (lo.Cx + hi.Cx) / 2, y = hi == null ? (piece.MinY + piece.MaxY) / 2.0 : (lo.Cy + hi.Cy) / 2;
+            if (Verbose) Console.WriteLine($"  digit 8 in the ink at {x:F0},{y:F0}{(hi == null ? ", its upper loop open" : "")}: piece {piece.MinX}-{piece.MaxX} x {piece.MinY}-{piece.MaxY}, loop {lo.MinX}-{lo.MaxX} x {lo.MinY}-{lo.MaxY}");
+            if (!digits.Any(t => Math.Abs(t.X - x) < 0.8 * s && Math.Abs(t.Y - y) < 0.8 * s))
+                digits.Add(new Detection { Class = "digit_8", X = x, Y = y, Score = 0 });
+        }
         foreach (var lo in loops)
+        {
             foreach (var hi in loops)
                 if (hi != lo && lo.Cy - hi.Cy is var gap && gap >= 0.35 * s && gap <= 1.0 * s && hi.Cx - lo.Cx > -0.15 * s && hi.Cx - lo.Cx < 0.4 * s)
-                {
-                    double x = (lo.Cx + hi.Cx) / 2, y = (lo.Cy + hi.Cy) / 2;
-                    // (one piece of ink about the two, a digit's size, shutting in no other loop: a pedal's star, loops
-                    // in a ring, is none, nor two notes' loops)
-                    var piece = PieceAbove(res.Sym, hi, s);
-                    bool In(Comp h) => piece != null && h.MinX > piece.MinX && h.MaxX < piece.MaxX && h.MinY > piece.MinY && h.MaxY < piece.MaxY;
-                    if (piece == null || !In(lo) || piece.H < 1.0 * s || piece.H > 1.9 * s || piece.W < 0.6 * s || piece.W > 1.4 * s
-                        || res.Sym.InkHoles.Count(h => h.N >= 4 && In(h)) != 2) continue;
-                    // (alone, no word's letter: nothing within eight tenths of a space before it, nor after it below
-                    // the dashes' row, its top -- the italic g of an "allargando" with its spanner's dashes, gen-span-scan's basic005)
-                    bool Ink(int x0, int x1, int y0, int y1)
-                    {
-                        for (int yy = Math.Max(0, y0); yy <= Math.Min(ink.H - 1, y1); yy++)
-                            for (int xx = Math.Max(0, x0); xx <= Math.Min(ink.W - 1, x1); xx++)
-                                if (ink[xx, yy]) return true;
-                        return false;
-                    }
-                    int mid = (piece.MinY + piece.MaxY) / 2;
-                    if (Ink(piece.MinX - (int)(0.8 * s), piece.MinX - 2, piece.MinY, piece.MaxY) || Ink(piece.MaxX + 2, piece.MaxX + (int)(0.8 * s), mid, piece.MaxY)) continue;
-                    if (!digits.Any(t => Math.Abs(t.X - x) < 0.8 * s && Math.Abs(t.Y - y) < 0.8 * s))
-                        digits.Add(new Detection { Class = "digit_8", X = x, Y = y, Score = 0 });
-                }
+                    Eight(lo, hi);
+            // (or its upper loop open, a scan's grain breaking the bowl's top: Holmes's No.2 scan, bar 29)
+            Eight(lo, null);
+        }
         foreach (var t in digits)
         {
-            if (res.Systems.Any(q => q.Staves.Any(st => t.Y > st.Top - 0.5 * s && t.Y < st.Bottom + 0.5 * s && t.X > q.Bars[0] - 2 * s && t.X < q.Bars[^1] + 2 * s))) continue;
+            // (a TAB's too: its fret numbers' 8s, the string's line between them broken into what looks like
+            // dashes, gen-band's band001)
+            if (res.Systems.Any(q => q.All.Any(st => t.Y > st.Top - 0.5 * s && t.Y < st.Bottom + 0.5 * s && t.X > q.Bars[0] - 2 * s && t.X < q.Bars[^1] + 2 * s))) continue;
             // (the system it stands in, across its width: a line with no hook that runs to its end goes on to the next)
             var sys = res.Systems.Where(q => t.X > q.Bars[0] - 2 * s && t.X < q.Bars[^1]).OrderBy(q => Math.Min(Math.Abs(q.Staves[0].Top - t.Y), Math.Abs(q.Staves[^1].Bottom - t.Y))).FirstOrDefault();
             foreach (double dy in new[] { 0.0, -0.4, 0.4, -0.8, 0.8 })
@@ -412,11 +489,26 @@ static class Ottavas
                 if (!hooked)
                 {
                     // (the dashes on to the system's last barline: the line goes on, its side the digit's to the
-                    // staff nearest it, as MuseScore sets an 8va over its staff and an 8vb under)
-                    if (sys == null || sys.Bars[^1] - end > 1.5 * s) continue;
+                    // staff nearest it, as MuseScore sets an 8va over its staff and an 8vb under. An old print stops
+                    // them short of it, three spaces and a half and more: Holmes's No.2 scan, bars 32 and 48, 3.6 and
+                    // 3.7. Further short, no line: a word's letters and its hyphens after an unsure 8, kinkel19-1's scan)
+                    if (sys == null || sys.Bars[^1] - end > 4.5 * s) continue;
                     var near = sys.Staves.OrderBy(st => Math.Min(Math.Abs(st.Top - t.Y), Math.Abs(st.Bottom - t.Y))).First();
-                    if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): dashes at {y:F0} to the system's end {end:F0}, {(t.Y < near.Top ? "over" : "under")} its staff");
-                    yield return new Detection { Class = t.Y < near.Top ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = y, Score = Math.Max(t.Score, Symbols.SureScore) };
+                    bool over = t.Y < near.Top;
+                    // (between two staves, the one whose notes under the line stand out of it towards the line: the
+                    // notes an 8va is written for stand high over their staff, an 8vb's low under it. The nearer staff
+                    // may be the other: a voice's, its words between it and the line, Holmes's No.2 scan, bar 45)
+                    var below = sys.Staves.Where(st => st.Top > t.Y).OrderBy(st => st.Top).FirstOrDefault();
+                    var above = sys.Staves.Where(st => st.Bottom < t.Y).OrderByDescending(st => st.Bottom).FirstOrDefault();
+                    if (below != null && above != null)
+                    {
+                        int high = res.Sym.Heads.Count(h => h.On(below) && h.X > t.X && h.X < end && h.Y < below.Top - 1.5 * s);
+                        int low = res.Sym.Heads.Count(h => h.On(above) && h.X > t.X && h.X < end && h.Y > above.Bottom + 1.5 * s);
+                        if (high != low) over = high > low;
+                        if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0}: {high} notes high over the staff below, {low} low under the staff above");
+                    }
+                    if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): dashes at {y:F0} to {end:F0} (the system's end {sys.Bars[^1]:F0}), {(over ? "over" : "under")} its staff");
+                    yield return new Detection { Class = over ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = y, Score = Math.Max(t.Score, Symbols.SureScore) };
                     break;
                 }
                 // (the dashes' own row, in the last dash; the hook from it, shorter than HookDir asks: 0.6 of a space here)
