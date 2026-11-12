@@ -184,6 +184,7 @@ static partial class Symbols
             var (left, right) = BracketHalves(ps, d, o, s);
             double x0, x1;
             bool? up = null;    // a number by a beam group: its voice's stems (another voice under it keeps its time)
+            bool? bracketAbove = null;
             // (one half, long and hooked, the other run into a mark: the number stands at the bracket's middle.
             // kinkel10-1's bar 6, the left hook on the accent under it, the number too far over the heads for a group)
             var lone = left ?? right;
@@ -204,6 +205,7 @@ static partial class Symbols
                 if (!near) { o.Class = "?"; continue; }
                 if (left != null) left.Class = "bracket";
                 if (right != null) right.Class = "bracket";
+                bracketAbove = c.Cy < (o.St.Top + o.St.Bottom) / 2;
             }
             else
             {
@@ -338,9 +340,13 @@ static partial class Symbols
             // voice's triplet, voices2003)
             bool twoVoices = up != null && ps.Heads.Any(hd => hd.St == o.St && hd.HasStem && hd.Up != up && hd.X > x0 && hd.X < x1);
             double mid = (o.St.Top + o.St.Bottom) / 2;
+            // (nor, under a bracket, a rest out past the staff's middle on the side away from it, a space and a
+            // half off: another voice's, whose notes there may be none -- Holmes's No.2 bar 45, the right hand's
+            // triplet bracketed over the staff, the lower voice's half rest under the staff)
+            bool Far(Rest r) => bracketAbove == true ? r.Y > mid + 1.5 * s : bracketAbove == false && r.Y < mid - 1.5 * s;
             foreach (var r in ps.Rests)
                 // (not the whole rest under a cue: the part's own bar of rest, its notes' span about it)
-                if (r.St == o.St && r.X > x0 && r.X < x1 && r.Kind != RestKind.Whole && !(twoVoices && (up == true ? r.Y > mid + 0.5 * s : r.Y < mid - 0.5 * s))) { r.Scale = (num, den); r.Tuplet = tupletId; }
+                if (r.St == o.St && r.X > x0 && r.X < x1 && r.Kind != RestKind.Whole && !(twoVoices && (up == true ? r.Y > mid + 0.5 * s : r.Y < mid - 0.5 * s)) && !Far(r)) { r.Scale = (num, den); r.Tuplet = tupletId; }
         }
     }
 
@@ -471,6 +477,80 @@ static partial class Symbols
                 if (!line) continue;
                 if (isLeft) left = b; else right = b;
             }
+        // (one half found, the other's hook no piece of its own -- joined to another piece or taken with
+        // a note's: the page shows the line from the number to a hook. Holmes's No.2 bars 45, 46, 48, the
+        // right hooks of triplets over an octave line's chords, the left half a hook alone. The bracket so
+        // made spans three columns of notes or rests at least: two under it is a wrong piece taken for
+        // the other half, the span cut short)
+        if ((left == null) != (right == null) && TracedHook(d, c, left == null, c.Cy < o.St.Top, s) is { } hook)
+        {
+            double lo = Math.Min(hook.MinX, (left ?? right).C.MinX) - 0.8 * s, hi = Math.Max(hook.MaxX, (left ?? right).C.MaxX) + 0.8 * s;
+            int cols = ps.Heads.Where(hd => hd.St == o.St && hd.X > lo && hd.X < hi).Select(hd => Math.Round((hd.HasStem ? hd.StemX : hd.X) / (0.6 * s))).Distinct().Count()
+                       + ps.Rests.Count(r => r.St == o.St && r.X > lo && r.X < hi);
+            if (TupletVerbose) Console.WriteLine($"      bracket: the {(left == null ? "left" : "right")} hook traced on the page at x {hook.MinX}, y {hook.MinY}-{hook.MaxY}, {cols} columns under it");
+            // (and the bracket so made stands as a bracket does: its number at the middle, the hook about as far
+            // off it as the found half's far end, and the two halves' lines at one height, give or take a space
+            // for the slope -- not a fingering's 3 by some line on the page)
+            var found = (left ?? right).C;
+            double near = Math.Abs(hook.MinX - c.Cx), far = left != null ? c.Cx - found.MinX : found.MaxX - c.Cx;
+            int rowHook = c.Cy < o.St.Top ? hook.MinY : hook.MaxY, rowFound = c.Cy < o.St.Top ? found.MinY : found.MaxY;
+            bool even = near > 0.6 * far && near < 1.6 * far && Math.Abs(rowHook - rowFound) <= 1.0 * s;
+            if (TupletVerbose) Console.WriteLine($"        hook {near:F0} off the number, the found half {far:F0}, rows {rowHook}/{rowFound}{(even ? "" : ": no bracket")}");
+            if (cols >= 3 && even)
+            {
+                if (left == null) left = new Other { C = hook, St = o.St }; else right = new Other { C = hook, St = o.St };
+            }
+        }
         return (left, right);
+    }
+
+    /// <summary>
+    /// A bracket's half traced on the page from beside the number: a thin line (each column within
+    /// two pixels of the last) running at least a space and at most twelve to a hook, an upright stroke
+    /// from the line's row towards the staff (down over it, up under it) of half a space to two, past
+    /// which the line goes no further. The hook's stroke, as a piece, or null.
+    /// </summary>
+    static Comp TracedHook(Img d, Comp c, bool isLeft, bool above, double s)
+    {
+        int dir = isLeft ? -1 : 1, x0 = isLeft ? c.MinX - 1 : c.MaxX + 1;
+        int x = -1, y = -1;
+        // the line's first ink beside the number, within the number's height: a thin run
+        for (int xx = x0; Math.Abs(xx - x0) <= 1.2 * s && y < 0; xx += dir)
+        {
+            if (xx <= 0 || xx >= d.W - 1) return null;
+            for (int yy = Math.Max(1, c.MinY); yy <= Math.Min(d.H - 2, c.MaxY) && y < 0; yy++)
+            {
+                if (!d[xx, yy]) continue;
+                int e = yy;
+                while (e < d.H - 2 && d[xx, e + 1]) e++;
+                if (e - yy <= 0.25 * s) { x = xx; y = yy; }
+                yy = e;
+            }
+        }
+        if (y < 0) return null;
+        int gap = (int)Math.Max(2, 0.3 * s);
+        for (int xx = x + dir; Math.Abs(xx - x) <= 12 * s; xx += dir)
+        {
+            if (xx <= gap || xx >= d.W - 1 - gap) return null;
+            int at = -1;
+            for (int dy = 0; dy <= 2 && at < 0; dy++)
+                if (y + dy < d.H - 1 && d[xx, y + dy]) at = y + dy;
+                else if (y - dy > 0 && d[xx, y - dy]) at = y - dy;
+            if (at < 0) return null;
+            int t = at, e = at;
+            while (t > 1 && d[xx, t - 1]) t--;
+            while (e < d.H - 2 && d[xx, e + 1]) e++;
+            if (e - t > 0.3 * s)
+            {
+                // a hook: from the line's row towards the staff, not a stem crossing it, and the line ends
+                int along = above ? e - at : at - t, back = above ? at - t : e - at;
+                if (Math.Abs(xx - x) < 1.0 * s || along < 0.5 * s || along > 2 * s || back > 0.2 * s) return null;
+                for (int yy = at - 3; yy <= at + 3; yy++)
+                    if (yy > 0 && yy < d.H && d[xx + gap * dir, yy]) return null;
+                return new Comp { MinX = xx, MaxX = xx, MinY = t, MaxY = e, N = e - t + 1, Sx = (long)xx * (e - t + 1), Sy = (long)(t + e) * (e - t + 1) / 2 };
+            }
+            y = at;
+        }
+        return null;
     }
 }
