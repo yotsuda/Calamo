@@ -148,7 +148,9 @@ static class Ottavas
             // (the run leading into it is a dash too, when long enough: "- " then the hook, with no gap
             // between them to end the run, sets the row here: basic001's "(15ma)" over one note)
             if (runStart >= 0 && xx - runStart >= 0.35 * s && double.IsNaN(row) && rowN > 0) { row = rowSum / rowN; dashSeen = dashed = true; }
-            if (runStart >= 0 && !double.IsNaN(row) && w <= 0.3 * s)
+            // (half a space wide at most: a staccato dot under the last dash touching the hook's foot, Holmes's No.2 scan,
+            // bar 54, the two nine pixels wide, 0.38)
+            if (runStart >= 0 && !double.IsNaN(row) && w <= 0.5 * s)
             {
                 // (the row a pixel off the hook's end will do, after dashes seen: the row, following the dashes, at 3318.5
                 // and rounded to 3318, the hook's stroke from 3319 -- gen-ott-scan's piano002, a 15ma's hook missed, hung under
