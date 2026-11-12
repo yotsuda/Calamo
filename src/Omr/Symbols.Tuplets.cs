@@ -279,6 +279,24 @@ static partial class Symbols
                 x0 = group.Min(hd => hd.L) - 0.1 * s; x1 = group.Max(hd => hd.R) + 0.1 * s;
                 up = near.Up;
             }
+            // An old print sets a triplet of unbeamed quarters or halves under a slur with the 3 on its arc and
+            // no bracket, the 3 over the middle note (Holmes's No.2 scan, the voice's e' dis' e' in half its
+            // bars). Read by the beam it is that one note; the slur's pieces taken for a bracket's halves
+            // span one or two of the three. Under fewer than three columns, the group is the note under the
+            // 3 and its neighbour on either side in its bar, the two standing about as far from it
+            if (value == 3)
+            {
+                int cols = ps.Heads.Where(hd => hd.St == o.St && hd.X > x0 && hd.X < x1).Select(hd => Math.Round(hd.X / (0.6 * s)))
+                                   .Concat(ps.Rests.Where(r => r.St == o.St && r.X > x0 && r.X < x1).Select(r => Math.Round(r.X / (0.6 * s)))).Distinct().Count();
+                var under3 = ps.Heads.Where(hd => hd.St == o.St && hd.HasStem && hd.Beams == 0 && Math.Abs(hd.X - c.Cx) < s)
+                                  .OrderBy(hd => Math.Abs(hd.X - c.Cx)).FirstOrDefault();
+                if (cols < 3 && under3 != null && Unbeamed3(ps, o.St, under3, c.Cx, s) is var (l3, r3) && l3 > 0)
+                {
+                    x0 = l3; x1 = r3;
+                    if (up != null) up = under3.Up;
+                    if (TupletVerbose) Console.WriteLine($"      -> {cols} columns under it, the 3 over an unbeamed note: with its neighbours, x {x0:F0}-{x1:F0}");
+                }
+            }
             // a tuplet holds two notes or rests at least: a "number" over one note's column is a
             // lyric's kana, a chord name's letter or a flag (揺れる想い, a tuplet 3/2 { a8 } in half the vocal's bars)
             if (!det)
@@ -348,6 +366,40 @@ static partial class Symbols
                 // (not the whole rest under a cue: the part's own bar of rest, its notes' span about it)
                 if (r.St == o.St && r.X > x0 && r.X < x1 && r.Kind != RestKind.Whole && !(twoVoices && (up == true ? r.Y > mid + 0.5 * s : r.Y < mid - 0.5 * s)) && !Far(r)) { r.Scale = (num, den); r.Tuplet = tupletId; }
         }
+    }
+
+    /// <summary>
+    /// The span of an unbeamed triplet whose 3 stands over its middle note: the nearest column of notes
+    /// or rests on either side of the note in its bar (the note's voice's stems, unbeamed), when the 3 is
+    /// over the note's middle and the two stand about as far from it, within eight spaces. (0, 0): none.
+    /// </summary>
+    static (double L, double R) Unbeamed3(PageSymbols ps, Staff st, Head near, double cx, double s)
+    {
+        var sys = ps.Systems?.FirstOrDefault(sy => sy.Staves.Contains(st) || sy.All.Contains(st));
+        double b0 = sys?.Bars.Where(b => b < near.X).DefaultIfEmpty(double.MinValue).Max() ?? double.MinValue;
+        double b1 = sys?.Bars.Where(b => b > near.X).DefaultIfEmpty(double.MaxValue).Min() ?? double.MaxValue;
+        var cols = ps.Heads.Where(hd => hd.St == st && hd != near && (hd.HasStem ? hd.Up == near.Up && hd.Beams == 0 : !hd.WholeShape))
+                           .Select(hd => (hd.X, hd.L, hd.R))
+                           .Concat(ps.Rests.Where(r => r.St == st && r.Kind != RestKind.Whole).Select(r => (r.X, r.L, r.R)))
+                           .Where(p => p.X > b0 && p.X < b1).ToList();
+        var left = cols.Where(p => p.X < near.X - 0.6 * s).OrderBy(p => p.X).LastOrDefault();
+        var right = cols.Where(p => p.X > near.X + 0.6 * s).OrderBy(p => p.X).FirstOrDefault();
+        if (left == default || right == default) return (0, 0);
+        double gl = near.X - left.X, gr = right.X - near.X;
+        if (Math.Max(gl, gr) > 8 * s || Math.Max(gl, gr) > 1.6 * Math.Min(gl, gr) || Math.Abs(cx - near.X) > 0.3 * Math.Min(gl, gr)) return (0, 0);
+        // (and its bar holds more than the three: three alike that are the whole bar fill a 3/4's as they
+        // stand, the "3" over them some other mark's -- a fingering's. Any note or rest of the staff off
+        // their columns counts, whatever its stem: Holmes's voice runs on after its triplet with its stems
+        // down, and a rest of any kind -- his right hand rests a half before its triplet, read as a whole's)
+        if (!ps.Heads.Where(hd => hd.St == st).Select(hd => hd.X).Concat(ps.Rests.Where(r => r.St == st).Select(r => r.X))
+                 .Any(x => x > b0 && x < b1 && (x < left.X - 1.5 * s || x > right.X + 1.5 * s)))   // (a chord's head pushed aside by a second is its column's)
+        {
+            if (TupletVerbose) Console.WriteLine($"      -> the 3 over an unbeamed note at {near.X:F0},{near.Y:F0}: its neighbours are the whole bar, no triplet");
+            return (0, 0);
+        }
+        // (a chord's heads, a column's: the whole column)
+        double lo = cols.Where(p => Math.Abs(p.X - left.X) < 0.6 * s).Min(p => p.L), hi = cols.Where(p => Math.Abs(p.X - right.X) < 0.6 * s).Max(p => p.R);
+        return (lo - 0.1 * s, hi + 0.1 * s);
     }
 
     /// <summary>
