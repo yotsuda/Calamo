@@ -69,6 +69,7 @@ static partial class Symbols
         // detector sees where the rules have no piece becomes one of its own.
         var sure = new HashSet<Other>();
         var detValue = new Dictionary<Other, int>();     // the number the detector read on a sure piece
+        var threeByNotes = new HashSet<Other>();         // a piece the detector passed by, a 3 by the unbeamed three under it
         if (ps.Detections != null)
         {
             if (TupletVerbose)
@@ -109,6 +110,32 @@ static partial class Symbols
                 if (TupletVerbose)
                     foreach (var o in numbers.Where(o => !sure.Contains(o) && o.C.H > 1.0 * s && o.C.H < 1.8 * s && o.C.W > 0.5 * s && o.C.W < 1.3 * s))
                         Console.WriteLine($"    tuplet? piece at {o.C.Cx:F0},{o.C.Cy:F0} {o.C.W / s:F2}x{o.C.H / s:F2}: no detection on it, {(Bracketed(o) ? "kept: bracketed" : "dropped")}");
+                // (nor does an old print's 3 over the middle of three unbeamed notes under a slur, no bracket, standing
+                // on the middle note's stem tip: the detector, taught Lily#'s bracketed unbeamed triplets only, passes
+                // it by -- Holmes's No.2 scan, the voice's quarters in bars 39, 43, 51 and 69. The notes say what
+                // it is: an unbeamed stem up under it, a neighbour on either side as far off (Unbeamed3), a slur
+                // starting by the first)
+                foreach (var o in numbers.Where(o => !sure.Contains(o) && OverUnbeamed3(o)))
+                {
+                    if (TupletVerbose) Console.WriteLine($"    tuplet? piece at {o.C.Cx:F0},{o.C.Cy:F0}: no detection on it, kept: a 3 on the stem tip of an unbeamed three under a slur");
+                    sure.Add(o); threeByNotes.Add(o);
+                }
+                bool OverUnbeamed3(Other o)
+                {
+                    var c = o.C;
+                    if (o.St == null || c.H < 0.9 * s || c.H > 1.6 * s || c.W < 0.5 * s || c.W > 1.2 * s || c.Cy > o.St.Top) return false;
+                    // (its shape no matter: three notes say 3, the toner's blot filling its curls to an 8's loops -- bar 69)
+                    // (the stem may run into the number's foot, its tip read at the number's top)
+                    var mid = ps.Heads.Where(hd => hd.St == o.St && hd.HasStem && hd.Up && hd.Beams == 0 && Math.Abs(hd.StemX - c.Cx) < 0.5 * s
+                                                   && hd.Tip > c.MinY - 0.3 * s && hd.Tip < c.MaxY + 1.0 * s)
+                                      .OrderBy(hd => Math.Abs(hd.StemX - c.Cx)).FirstOrDefault();
+                    if (TupletVerbose && c.H > 1.0 * s) Console.WriteLine($"    unbeamed 3? piece at {c.Cx:F0},{c.Cy:F0}: stem {(mid == null ? "none" : $"{mid.StemX:F0}, tip {mid.Tip:F0}")}");
+                    if (mid == null) return false;
+                    var (l3, _) = Unbeamed3(ps, o.St, mid, c.Cx, s);
+                    if (l3 <= 0) return false;
+                    if (TupletVerbose) Console.WriteLine($"    unbeamed 3? slur starts {string.Join(" ", ps.Detections.Where(t => t.Class == "slur_l" && Math.Abs(t.X - mid.X) < 8 * s && Math.Abs(t.Y - c.Cy) < 4 * s).Select(t => $"{t.X:F0},{t.Y:F0}"))}");
+                    return ps.Detections.Any(t => t.Class == "slur_l" && t.X > l3 - 1.5 * s && t.X < mid.X - 1.0 * s && t.Y < c.MaxY + 0.5 * s && t.Y > c.MinY - 3 * s);
+                }
                 numbers.RemoveAll(o => !sure.Contains(o) && !Bracketed(o));
             }
             else sure.Clear();     // (nothing sure on the page: the rules read as they did)
@@ -130,8 +157,19 @@ static partial class Symbols
             // thin line (six spaces or more, with its hooks under three spaces tall) hooked down at its
             // left end right beside the number (the rules read the bold 1 as a 2, and the bar under it
             // as a duplet: gen-rep's chords002)
+            // (the rule straight along the top of its piece, ink in its top rows across four fifths of its width: a
+            // slur's arc over the number is a piece as wide, its top only by the arc's crown -- Holmes's No.2 scan,
+            // bar 51's voice, the arc broken by the 3 into a piece starting just left of it)
+            bool RuleAlongTop(Comp q)
+            {
+                int on = 0, y1 = Math.Min(q.MaxY, q.MinY + (int)Math.Ceiling(0.3 * s));
+                for (int x = q.MinX; x <= q.MaxX; x++)
+                    for (int y = q.MinY; y <= y1; y++)
+                        if (d[x, y]) { on++; break; }
+                return on >= 0.8 * (q.MaxX - q.MinX + 1);
+            }
             if (ps.Others.Any(q => q.C != c && q.C.W >= 6 * s && q.C.H <= 3 * s && q.C.Fill < 0.3
-                                   && c.MinX - q.C.MinX > 0 && c.MinX - q.C.MinX < 3 * s && c.MinY - q.C.MinY > 0 && c.MinY - q.C.MinY < 1.5 * s))
+                                   && c.MinX - q.C.MinX > 0 && c.MinX - q.C.MinX < 3 * s && c.MinY - q.C.MinY > 0 && c.MinY - q.C.MinY < 1.5 * s && RuleAlongTop(q.C)))
             { if (TupletVerbose) Console.WriteLine("      -> under a bracket's rule, by its left hook: an ending's number"); o.Class = "volta_num"; continue; }
             // nor a letter's neighbour in a word: a chord name's raised digit (Cm7, Bb6) beside its
             // letters, which reach into its height (an m is 1.35 spaces wide). A bracket's line by the
@@ -177,7 +215,8 @@ static partial class Symbols
             // the value holds on a page it was sure of no number on, too: quartet-collide's 5 and 7
             // beside accidentals, seen at 0.74-0.82
             var own = pieceOf.TryGetValue(o, out var ps0) ? ps0.Select(q => q.C).ToList() : new List<Comp> { c };
-            int value = detValue.TryGetValue(o, out int dv) && dv != 3 ? dv
+            int value = threeByNotes.Contains(o) ? 3
+                : detValue.TryGetValue(o, out int dv) && dv != 3 ? dv
                 : holes.Any(hl => hl.W > 0.15 * s && hl.H > 0.2 * s && own.Any(p => hl.MinX >= p.MinX && hl.MaxX <= p.MaxX && hl.MinY >= p.MinY && hl.MaxY <= p.MaxY)) && !det ? 4
                 : IsTwo(d, own, s) ? 2 : 3;
             o.Class = "tuplet" + value;
