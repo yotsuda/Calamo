@@ -1,5 +1,6 @@
 set	truth	found	tieTruth	tieFound	tieOmr	tieRight	slurStartTruth	slurStartFound	slurStartOmr	slurStartRight	slurEndTruth	slurEndFound	slurEndOmr	slurEndRight	arpTruth	arpFound	arpOmr	arpRight	dynTruth	dynFound	dynOmr	dynRight	hairpinTruth	hairpinFound	hairpinOmr	hairpinRight	articTruth	articFound	articOmr	articRight	ornTruth	ornFound	ornOmr	ornRight	fermataTruth	fermataFound	fermataOmr	fermataRight	pedalTruth	pedalFound	pedalOmr	pedalRight	c_lost	c_missed	c_extra	c_extraMeasure	c_value	c_tuplet	c_key	c_accidental	c_octave	c_clef	c_pitch	c_voice
 fair-hue-melodies1-leduc	601	590	14	7	7	7	60	27	28	27	60	25	27	25	6	1	2	1	9	6	11	6	5	1	1	1													7	0	0	0	0	4	0	0	1	3	0	1	0	0	2	3
+fair-lacombe28-1-hamelle	630	541	8	6	12	6	95	39	43	39	95	36	44	36	4	0	1	0	8	4	12	4	12	7	8	7	23	15	19	15													0	28	23	0	7	10	0	10	18	12	4	0
 fair-lassen48-4-bosworth	517	506	1	0	0	0	4	0	0	0	6	0	0	0	4	4	4	4	8	4	5	4													3	3	3	3	62	50	50	50	0	0	0	0	3	0	0	0	0	0	8	0
 fair-lassen48-4-hainauer	517	503	1	0	0	0	4	0	0	0	6	0	0	0	4	3	3	3	8	4	6	4													3	3	3	3	62	11	13	11	0	2	6	0	4	1	0	1	0	0	6	6
 fair-sommer9-1-litolff	523	508	9	7	7	7	2	0	2	0	2	0	2	0	1	1	1	1	11	7	10	7	4	2	3	2									1	0	0	0	0	0	3	0	0	3	2	0	6	6	0	0	0	0	0	0

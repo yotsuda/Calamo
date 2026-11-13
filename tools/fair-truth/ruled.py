@@ -55,6 +55,7 @@ except OSError: font = ImageFont.load_default()
 for si in range(0, len(staves) - per + 1, per):
     sys_staves = staves[si:si + per]; n += 1
     ya = int(at(sys_staves[0][0], x0) - 260); yb = int(at(sys_staves[-1][4], x0) + 260)
+    print(f'system {n}: crop top y {ya} (piece y = (page y - {ya}) * zoom); staff tops', ' '.join(str(int(at(s[0], x0))) for s in sys_staves))
     out = im.copy(); d = ImageDraw.Draw(out)
     for st, c in zip(sys_staves, clefs):
         t = top[c.lower()]
