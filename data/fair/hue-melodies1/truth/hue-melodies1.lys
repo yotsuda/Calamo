@@ -1,0 +1,128 @@
+// The truth of the fair set (S59) for Georges Hüe, Six Mélodies (Heine) No.1: written from the Leduc print
+// (c.1886, the 1991 reprint scanned, IMSLP #994220, data/fair/hue-melodies1/leduc), bar by bar. Never to debug the reader on.
+// As the print has them: bar 17's voice is a quarter and seven eighths; the three g'' are taken as a triplet with no
+// number (the only reading that fills the bar).
+title "Six Melodies I"
+tempo "Andantino grazioso."
+octave absolute
+paper { breaksOnly }
+time 4/4
+key f major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef treble pedal text }
+
+section Piece {
+  voice_ {
+    R1 |
+    R1 |
+    R1 | break
+    a'8 a'8 f'4 d''8 d''8 e'8 e'8 |
+    f'4 f'8 a'8 a'8 g'8 g'8 bes'8 | break
+    d''4.( bes'8) a'4 r4 |
+    g'8 g'8 c''8 c''8 a'4 b'8@cresc c''8 |
+    d''8 e''8 f''2@!cresc f''4~ | pageBreak
+    f''8@text("Espress.").up e''8 d''8 c''8 b'4 a'8 b'8 |
+    d''8 c''8 g''2@text("Poco rall.").up b'8 d''8 |
+    tempo "A tempo" c''2 r2 | break
+    R1 |
+    tempo "Plus animé." r8 a'8 a'8 a'8 c''4. c''8 |
+    d''8 d''8 a'8 a'8 c''4 bes'8 r8 | break
+    r8 bes'8 c''8 d''8 ees''8 ees''8 f''8 ees''8 |
+    ees''4( d''8) r8 r8 d''8 e''8 f''8 |
+    e''4 e''8 e''8 tuplet 3/2 { g''8 g''8 g''8 } f''8 e''8 | break
+    f''4. r8 r8 f''8@f@text("Avec passion.").up g''8 aes''8 |
+    aes''4 ees''4 r4@text("Dim.").up ees''4~ |
+    ees''4 des''8@text("Rall.").up( c''8) f''4. g'8 | pageBreak
+    tempo "1° Tempo." aes'2 r2 |
+    r4 r8 f'8@p e'8 e'8 g'8 g'8 | break
+    f'2 aes'8 g'8 g'8 bes'8 |
+    bes'2 aes'4 r8 aes'8 |
+    aes'4 bes'8 c''8 c''4 bes'8 r8 | break
+    r8 f''8 ees''8 des''8 c''8 bes'8 aes'8 g'8 |
+    f'4 g'8 g'8 c''2~ |
+    tempo "Andante." c''2 r2 | break
+    tempo "Très simplement." a'8 a'8 f'4 d''8 d''8 e'8 e'8 |
+    g'1@text("Rall.").up |
+    f'4 r4 r2 |
+  }
+  lyrics fr { | | | J'ai rê- vé d'une en- fant de | roi aux joues pâ- les et hu- | mi- des: | nous é- tions as- sis sous les | til- leuls verts et | nous nous te- nions a- mou- | reu- se- ment em- bras- | sés. | | Je ne veux pas le | trô- ne de ton pè- re, | je ne veux pas son scep- tre | d'or, je ne veux | pas sa cou- ron- ne de di- a- | mants, je veux toi | mê- me, toi, | fleur de beau- | té! | Ce- la ne se peut | pas, me ré- pon- dit | el- le, j'ha- | bi- te la tom- be, | et je ne peux ve- nir à | toi que la nuit, | | et je viens par- ce- que je | t'ai- | me! | }
+  rh {
+    voice { a''4@p( f''4) d'''4( e''4) } { c''2 d''2 } |
+    <c'' f''>4 <c'' e'' a''>4. <c'' e'' g''>8 <c'' f''>8 <c'' e''>8 |
+    <bes'~ d''>2( <bes' c''>4) r4 | break
+    voice { a'4@p( f'4) d'4( e'4) } { c'2 c'2 } |
+    voice { <c' f'>4 <f' a'>4 a'4( g'8 bes'8) } { s2 d'2 } | break
+    voice { bes'2( a'4) r4 } { d'4( e'4 f'4) s4 } |
+    voice { g'4( c''4 a'4) b'8@cresc c''8 } { c'2 g'2 } |
+    voice { d''8@!cresc e''8 f''2 g'4@decresc } { f'2. f'4 } | pageBreak
+    voice { f'4@!decresc( e'4@cresc) <c' d' fis'>2@!cresc } { <c' g'>2 s2 } |
+    <e' g'>2. <g b f'>4 |
+    voice { <g c' e'>4 bes'4@cresc( a'4 f'4@!cresc) } { s4 c'2. } | break
+    voice { d''4( e'4) g'4( f'8) r8 } { d'4 c'8( bes8) bes4 a8 r8 } |
+    voice { a'4( c''4) c'4( g'4) } { c'2 c'2 } |
+    voice { a'2 a'4 g'8 r8 } { g'4 fis'4~ fis'8 d'8 g'8 bes'8 } | break
+    voice { bes'4( f''4) g'4 a'4( } { f'2. ees'4 } |
+    voice { a'8) f'8 bes'8 d''8 d''4( a''4) } { ees'4( d'8) r8 a'2 } |
+    voice { bes'2 <g' a'>2 } { a'4( g'4) s2 } | break
+    <f' a'>8 <d' f'>8 <f' a'>8 <a' d''>8 <f' aes'>8 <aes' b'>8 <b' d''>8 <d'' f''>8 |
+    <aes' c'' f''>8@f <aes' c'' ees''>8 <c'' ees'' aes''>8 <ees'' aes'' c'''>8 <aes'' c''' ees'''>4 <aes' ees''>4@p~ |
+    voice { <aes' ees''>4 des''8( c''8) c''4.( bes'8) } { s4 aes'4 f'4( g'4) } | pageBreak
+    <c' ees' aes'>4 r4 c'8( e'8 aes'8 c''8) |
+    voice { aes'4@p( f'4) des''4( e'4) } { c'2 des'2 } | break
+    voice { f'4 f'8( aes'8) aes'8( g'8) g'8 bes'8 } { c'4 r4 des'2 } |
+    voice { des''4.( bes'8 aes'4) r4 } { e'2 f'4 s4 } |
+    voice { ees''4( aes'4) c''4( bes'4~ } { ees'2 f'2 } | break
+    voice { bes'8) f''8 ees''8( des''8 c''8 bes'8 aes'8 g'8) } { f'2( e'4) c'8( bes8) } |
+    voice { f'4 g'4 c''8( c'8 d'8 e'8) } { aes4 des'4 c'4 bes4 } |
+    voice { a'4@pp( f'4) d''4( e'4) } { <c' f'>2 c'2 } | break
+    voice { a''4( f''4) <d'' d'''>4( e''4) } { c''2 c''2 } |
+    <bes' c''~ g''>1 |
+    <a' c'' f''>4 <f' a' c'' f'' a'' c''' f'''>2@pp r4 |
+  }
+  lh {
+    <f' a'>2 <f' g' bes'>2 |
+    <f' a'>4 <c' bes'>4. <c' bes'>8 <c' a'>8 <c' g'>8 |
+    <c'~ f'>2( <c' e'>4) r4 | break
+    clef bass <f, c a>2@arpeggio <f, c bes>2@arpeggio |
+    voice { <f, c a>4 <f c'>4 bes4( a8 g8) } { s2 f2 } | break
+    <c g bes>2( <f a>8) a8( c'8 f'8) |
+    voice { g4( c'4) a4 b8 c'8 } { e2 f4( e4) } |
+    <d a d'>4. a8 d'8 c'8 a8 b8 | pageBreak
+    <g,~ g~>1 |
+    <g, g>4 b8 c'8 d'8 c'8 <g, d>4 |
+    <c, c>8 c8 d8 e8 f4 a4 | break
+    voice { <bes, f bes>4 <c g>4 e4( f8) r8 } { s2 <f, c>2 } |
+    voice { a2. g4 } { f2 ees2 } |
+    voice { s2 c'4( bes8) r8 } { <d c'>2 g2 } | break
+    <d bes>2 <c c'>4 <f c'>4 |
+    voice { c'4( bes4) <f a d'>2 } { <bes, f>2@arpeggio s2 } |
+    voice { d'4( e'8 d'8) d'4 cis'4 } { g2 a2 } | break
+    <d d'>8 a8 d'8 f'8 b8 d'8 f'8 aes'8 |
+    <ees aes c' ees'>2.@sustain g'4@!sustain~ |
+    voice { g'4 f'8( ees'8) ees'4( des'4) } { s2 ees2 } | pageBreak
+    aes,8( ees8 aes8 c'8) aes4 e4 |
+    <f aes>2 <f g>2 | break
+    voice { aes4 aes8( c'8) c'8( bes8) bes8 g8 } { f4 r4 f2 } |
+    voice { g4( bes8 des'8 c'4) r4 } { f2~ f4 f4 } |
+    voice { aes2. g8( aes8) } { c2 des2 } | break
+    <g, des bes>2@arpeggio <c g>4 <c e>4 |
+    <des f>4 <bes, e>4 <aes, f>4 <g, c>4 |
+    <f, c a>2@arpeggio@sustain <f, c bes>2@arpeggio@sustain | break
+    clef treble <c' f' a'>2@!sustain <c' g' bes'>2 |
+    <c' e'>2 clef bass c2 |
+    <f, c f>2.@sustain r4@!sustain |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff voice_ "Voice"
+  lyrics fr
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
