@@ -138,11 +138,17 @@ static partial class Symbols
     public static double SureClef = 0.9;     // a clef left of a staff's start; the detector's kind over the rules' it also sees
     public static double SureKey = 0.9;      // a key's signs: the detector's key of more signs over the rules'
     public static double SureSign = 0.9;     // an accidental over the rules' alteration or a rest it sits on; a sign in a rules' time signature
-    public static double SureTuplet = 0.9;   // a tuplet number that makes the page's detector competent at numbers
+    public static double SureTupletPage = 0.9;   // a tuplet number that makes the page's detector competent at numbers (the rules' unconfirmed ones go)
+    public static double SureTupletAlone = 0.9;  // a tuplet number with no rules' piece under it, a number of its own
+    // this many rules' pieces the detector confirms make the page competent too. Off (S60): at 8 it took
+    // detector49 on Holmes 2's scan from 1625 to 1687 (42 the same, the dev set 35066 -> 35128), but the
+    // held-out set fell 55619 -> 55516 (piano pieces, Clementi 36-1 and Schumann 15-7). A confirmation
+    // counts any number by a piece, not only a tuplet's
+    public static double TupletAgree = 99;
     public static double SureBar = 0.9;      // a barline the rules doubt
     public static double SureOttava = 0.9;   // an octave line's letters taken on their side of the staff
     public static double SureTab = 0.9;      // a tab number moved off its string
-    public static void SetSure(double v) => SureHead = SureSlash = SureFlag = SureClef = SureKey = SureSign = SureTuplet = SureBar = SureOttava = SureTab = v;
+    public static void SetSure(double v) => SureHead = SureSlash = SureFlag = SureClef = SureKey = SureSign = SureTupletPage = SureTupletAlone = SureBar = SureOttava = SureTab = v;
     public static double TrustScore = 0.5;
     // A slur's weak end (Detector.WeakSlur up) pairs with a sure one this far away, in spaces, on the
     // detector's word alone; farther, only along the arc's ink (DetectedSlurs' Joined)

@@ -87,12 +87,18 @@ static partial class Symbols
             foreach (var o in numbers)
                 if (seen.Where(t => On(o, t)).OrderByDescending(t => t.Score).FirstOrDefault() is Detection on) { sure.Add(o); detValue[o] = ValueOf(on); }
             var staves = ps.Heads.Select(h => h.St).Distinct().ToList();
-            bool competent = seen.Any(t => t.Score >= SureTuplet);
+            // (one sure number made a page competent; one seed sees Holmes 2's scan's page 2 at 0.92, another
+            // at 0.76 and keeps 140 false numbers there. The detector agreeing with the rules on several
+            // pieces would say the same without hanging on one score, but as counted now it lost on the
+            // held-out set: TupletAgree is off)
+            int agreed = sure.Count;
+            bool competent = seen.Any(t => t.Score >= SureTupletPage) || agreed >= TupletAgree;
+            if (TupletVerbose) Console.WriteLine($"    tuplet numbers: {agreed} rules' pieces the detector confirms, surest {(seen.Count == 0 ? 0 : seen.Max(t => t.Score)):F2}: {(competent ? "competent" : "not competent")}");
             // (a less sure one too where its number is one piece with a slur that touches it, the
             // piece a wide arc of little ink: slurs006, the slur under a triplet through its 3)
             bool OnArc(Detection t) => ps.Others.Any(o => o.Class == "?" && o.C.W > 2.5 * s && o.C.Fill < 0.3
                 && t.X > o.C.MinX && t.X < o.C.MaxX && t.Y > o.C.MinY && t.Y < o.C.MaxY);
-            foreach (var t in seen.Where(t => t.Score >= SureTuplet || t.Score >= 0.8 && OnArc(t)))
+            foreach (var t in seen.Where(t => t.Score >= SureTupletAlone || t.Score >= 0.8 && OnArc(t)))
             {
                 if (numbers.Any(o => On(o, t))) continue;
                 var st = Nearest(staves, t.Y, s);
