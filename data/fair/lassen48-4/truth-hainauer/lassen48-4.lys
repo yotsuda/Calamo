@@ -1,0 +1,137 @@
+// The truth of the fair set (S59) for Lassen, Vorsatz Op.48-4, as the Hainauer print has it
+// (IMSLP #710192, data/fair/lassen48-4/hainauer): a minor third above the Bosworth print (G flat major), with
+// its own English words, the left hand changing clef inside each bar. Started as ../truth/lassen48-4.lys
+// transposed, then read against the print bar by bar. Never to debug the reader on.
+// Its notes are the Bosworth print's but for bar 27's right hand, <ces' f'> here (a third above would be des').
+// As the print has them: the arpeggios of bars 4 and 31 are one wavy line through both staves (both chords
+// are marked); the releases of bars 19 and 27 stand under the held chord (a spacer carries them); a release
+// between the second and third beats is the third beat's; "meno f" is the word and the dynamic's sign.
+title "Vorsatz"
+subtitle "(Resolution.)"
+composer "E. Lassen, Op. 48. No 4."
+poet "R. Prutz."
+tempo "Andantino"
+octave absolute
+paper { breaksOnly }
+time 3/4
+key ges major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass pedal text }
+
+section Piece {
+  voice_ {
+    R2. |
+    R2. |
+    R2. |
+    R2. | break
+    r8 bes'8@p bes'8 ces''8 aes'8 bes'8 |
+    ges'4 des'2 |
+    r8 bes'8 bes'8 ces''8 aes'8 des''8 |
+    des''2. | break
+    r8 ees''8 ees''8 ees''8 ces''8 ees''8 |
+    des''4 bes'4. bes'8 |
+    des''4. bes'8 ges'8 aes'8 |
+    aes'2. | break
+    r8 ces''8 ces''8 bes'8 bes'8 a'8 |
+    a'4 bes'2 |
+    r8 ees''8@textSpan("cresc.") ees''8 des''8 des''8 c''8 |
+    des''2. | pageBreak
+    r8 des''8 des''8 ees''8 des''8 ees''8 |
+    f''4 aes'4. f''8@!textSpan |
+    aes''4.@f@fermata ges''8 grace { f''16( ges''16 } f''8.) ees''16 |
+    des''2. | break
+    r8 ees''8@text("meno").up@f ees''8 ees''8 f''8 ges''8 |
+    ges''4 bes'2 |
+    r8 c''8 c''8 c''8 des''8 ees''8 |
+    des''2. | break
+    r8 ces''8@textSpan("rit. dim.") ces''8 ces''8 des''8 ees''8 |
+    ees''4 ges'4. bes'8 |
+    f''4. ees''8 grace { ces''16( des''16 } ces''8.) f'16@!textSpan | break
+    ges'4 r4 r4 |
+    R2. |
+    R2. |
+    R2. |
+  }
+  lyrics de { | | | | Ich will dir's nim- mer | sa- gen | wie ich so lieb dich | hab', | im Her- zen will ich's | tra- gen. will | stumm sein wie das | Grab. | Kein Lied soll dir's ge- | ste- hen | soll fle- hen um mein | Glück, | du sel- ber sollst es | se- hen, du | selbst in mei- nem | Blick. | Und kannst du es nicht | le- sen, | was dort so zärt- lich | spricht, | so ist's ein Traum ge- | we- sen, dem | Träu- mer zür- ne | nicht. | | | | }
+  lyrics en { | | | | I nev- er will re- | veal it | How dear- ly I love | thee, | But in my heart con- | ceal it As | death so si- lent | be. | No song shall e'er con- | fess it | Or plead my love per- | chance | But thou thy- self must | guess it Thy- | self from my fond | glance. | And if thou canst not | read it | The thought which there doth | live | A dream thou wilt con- | cede it The | dream- er bold for- | give. | | | | }
+  rh {
+    r8@p <bes' bes''>8 <bes' bes''>8 <des'' des'''>8 <aes' aes''>4 |
+    r8 <bes' bes''>8 <bes' bes''>8 <des'' des'''>8 <aes' aes''>4 |
+    r8 <bes' bes''>8 <f'' f'''>8 <ees'' ees'''>8 <des'' des'''>8 <aes' aes''>16 <bes' bes''>16 |
+    <ges' ges''>4 <ges'' bes'' ges'''>8@arpeggio r8 r4 | break
+    r4@p <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 | break
+    r4 <ees'' ees'''>4 <ees'' ees'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 | break
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <f'' f'''>4@textSpan("cresc.") <f'' f'''>4 |
+    r4 <f'' f'''>4 <f'' f'''>4 | pageBreak
+    r4 <f'' f'''>4 <f'' f'''>4 |
+    r4 <aes'' aes'''>4 <aes'' aes'''>4@!textSpan |
+    r4@f <c' ges' c''>2@fermata( |
+    <des' f' des''>4) <des'' des'''>4@text("meno")@f <des'' des'''>4 | break
+    r4 <ees'' ees'''>4 <ees'' ees'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 |
+    r4 <c'' c'''>4 <c'' c'''>4 |
+    r4 <des'' des'''>4 <des'' des'''>4 | break
+    r4@textSpan("rit. dim.") <ces'' ces'''>4 <ces'' ces'''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <ces' f'>2@!textSpan( | break
+    tempo "a tempo" <bes ges'>8) <bes' bes''>8@p <bes' bes''>8 <des'' des'''>8 <aes' aes''>4 |
+    r8 <bes' bes''>8 <bes' bes''>8 <des'' des'''>8 <aes' aes''>4 |
+    r8 <bes' bes''>8 <f'' f'''>8 <ees'' ees'''>8 <des'' des'''>8 <aes' aes''>16 <bes' bes''>16 |
+    <ges' ges''>4 <ges'' bes'' ges'''>8@arpeggio r8 r4 |
+  }
+  lh {
+    <ges, ges>4@sustain clef treble <des' ges'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>8@arpeggio r8 r4@!sustain clef bass | break
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass | break
+    <ges, ges>4@sustain clef treble <ees' ges' ces''>4 <ces' ees' ges'>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass |
+    <des, des>4@sustain clef treble <des' f' aes'>4 <aes des' f'>4@!sustain clef bass | break
+    <des, des>4@sustain clef treble <des' f' ces''>4 <ces' des' f'>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass |
+    <f, f>4@sustain clef treble <ees' f' a'>4 <a ees' f'>4@!sustain clef bass |
+    <bes, bes>4@sustain clef treble <des' f' bes'>4 <bes des' f'>4@!sustain clef bass | pageBreak
+    <bes, bes>4@sustain clef treble <des' f' g'>4 <g des' f'>4@!sustain clef bass |
+    <aes, aes>4@sustain clef treble <des' f' aes'>4 <aes des' f'>4@!sustain clef bass |
+    voice { <aes, aes>2.@fermata@sustain( } { s2 s4@!sustain } |
+    <des, des>4)@sustain clef treble <des' f' aes'>4 <aes des' f'>4@!sustain clef bass | break
+    <des, des>4@sustain clef treble <ees' ges' ces''>4 <ces' ees' ges'>4@!sustain clef bass |
+    <des, des>4@sustain clef treble <des' ges' bes'>4 <bes des' ges'>4@!sustain clef bass |
+    <des, des>4@sustain clef treble <c' f' a'>4 <a c' f'>4@!sustain clef bass |
+    <des, des>4@sustain clef treble <des' f' bes'>4 <bes des' f'>4@!sustain clef bass | break
+    <des, des>4@sustain clef treble <ces' ees' aes'>4 <aes ces' ees'>4@!sustain clef bass |
+    <des, des>4@sustain clef treble <bes des' ges'>4 <ges bes des'>4@!sustain clef bass |
+    voice { <des, des~>2.@sustain( } { s2 s4@!sustain } | break
+    <ges, des>4)@sustain clef treble <des' ges'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>4 <des' f' ces''>4@!sustain clef bass |
+    <ges, ges>4@sustain clef treble <des' ges' bes'>8@arpeggio r8 r4@!sustain |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff voice_ "Voice"
+  lyrics de
+  lyrics en
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}

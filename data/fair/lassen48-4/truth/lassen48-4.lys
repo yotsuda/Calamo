@@ -1,0 +1,134 @@
+// The truth of the fair set (S59) for Lassen, Vorsatz Op.48-4: written from the Bosworth print
+// (IMSLP #679347, data/fair/lassen48-4/bosworth), bar by bar. Never to debug the reader on.
+// As the print has them: the arpeggios of bars 4 and 31 are one wavy line through both staves (both chords
+// are marked); the releases of bars 19 and 27 stand under the held chord (a spacer carries them); "meno f"
+// is the word and the dynamic's sign.
+title "Resolution"
+subtitle "(Vorsatz.)"
+composer "Ed. Lassen, Op. 48. No 4."
+poet "Robert Prutz."
+tempo "Andantino"
+octave absolute
+paper { breaksOnly }
+time 3/4
+key ees major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass pedal text }
+
+section Piece {
+  voice_ {
+    R2. |
+    R2. |
+    R2. |
+    R2. | break
+    r8 g'8@p g'8 aes'8 f'8 g'8 |
+    ees'4 bes2 |
+    r8 g'8 g'8 aes'8 f'8 bes'8 |
+    bes'2. | break
+    r8 c''8 c''8 c''8 aes'8 c''8 |
+    bes'4 g'4. g'8 |
+    bes'4. g'8 ees'8 f'8 |
+    f'2. | break
+    r8 aes'8 aes'8 g'8 g'8 fis'8 |
+    fis'4 g'2 |
+    r8 c''8@textSpan("cresc.") c''8 bes'8 bes'8 a'8 |
+    bes'2. | pageBreak
+    r8 bes'8 bes'8 c''8 bes'8 c''8 |
+    d''4 f'4. d''8@!textSpan |
+    f''4.@f@fermata ees''8 grace { d''16( ees''16 } d''8.) c''16 |
+    bes'2. | break
+    r8 c''8@text("meno").up@f c''8 c''8 d''8 ees''8 |
+    ees''4 g'2 |
+    r8 a'8 a'8 a'8 bes'8 c''8 |
+    bes'2. | break
+    r8 aes'8@textSpan("dim. ritard.") aes'8 aes'8 bes'8 c''8 |
+    c''4 ees'4. g'8 |
+    d''4. c''8 grace { aes'16( bes'16 } aes'8.) d'16@!textSpan | break
+    ees'4 r4 r4 |
+    R2. |
+    R2. |
+    R2. |
+  }
+  lyrics en { | | | | I will ne- ver tell | to thee | How deep the love I | gave, | Safe in my heart I'll | keep it, Be | si- lent as the | grave. | No song shall e'er be- | tray it, | No sighs shew thee my | pain, | For thou thy- self should | see it, Should | see it in mine | eyes. | And if thou canst not | read it, | What there so soft- ly | speaks, | It must have been a | dream dear, Oh! | blame the dream- er | not. | | | | }
+  lyrics de { | | | | Ich will dir's im- mer | sa- gen, | wie ich so lieb dich | hab, | im Her- zen will ich's | tra- gen, will | stumm sein wie das | Grab. | Kein Lied soll dir's ge- | ste- hen, | soll fle- hen um mein | Glück, | du sel- ber sollst es | se- hen, du | selbst in mei- nem | Blick. | Und kannst du es nicht | le- sen, | was dort so zärt- lich | spricht, | so ist's ein Traum ge- | we- sen, dem | Träu- mer zür- ne | nicht! | | | | }
+  rh {
+    r8@p <g' g''>8 <g' g''>8 <bes' bes''>8 <f' f''>4 |
+    r8 <g' g''>8 <g' g''>8 <bes' bes''>8 <f' f''>4 |
+    r8 <g' g''>8 <d'' d'''>8 <c'' c'''>8 <bes' bes''>8 <f' f''>16 <g' g''>16 |
+    <ees' ees''>4 <ees'' g'' ees'''>8@arpeggio r8 r4 | break
+    r4@p <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 | break
+    r4 <c'' c'''>4 <c'' c'''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 | break
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <d'' d'''>4@textSpan("cresc.") <d'' d'''>4 |
+    r4 <d'' d'''>4 <d'' d'''>4 | pageBreak
+    r4 <d'' d'''>4 <d'' d'''>4 |
+    r4 <f'' f'''>4 <f'' f'''>4@!textSpan |
+    r4@f <a ees' a'>2@fermata( |
+    <bes d' bes'>4) <bes' bes''>4@text("meno")@f <bes' bes''>4 | break
+    r4 <c'' c'''>4 <c'' c'''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 |
+    r4 <a' a''>4 <a' a''>4 |
+    r4 <bes' bes''>4 <bes' bes''>4 | break
+    r4 <aes' aes''>4@textSpan("dim. ritard.") <aes' aes''>4 |
+    r4 <g' g''>4 <g' g''>4 |
+    r4 <bes d'>2@!textSpan( | break
+    tempo "a tempo" <g ees'>8) <g' g''>8@p <g' g''>8 <bes' bes''>8 <f' f''>4 |
+    r8 <g' g''>8 <g' g''>8 <bes' bes''>8 <f' f''>4 |
+    r8 <g' g''>8 <d'' d'''>8 <c'' c'''>8 <bes' bes''>8 <f' f''>16 <g' g''>16 |
+    <ees' ees''>4 <ees'' g'' ees'''>8@arpeggio r8 r4 |
+  }
+  lh {
+    <ees, ees>4@sustain <bes ees'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>8@arpeggio r8@!sustain r4 | break
+    <ees, ees>4@sustain <bes ees' g'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain | break
+    <ees, ees>4@sustain <c' ees' aes'>4 <aes c' ees'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain |
+    <bes,, bes,>4@sustain <bes d' f'>4 <f bes d'>4@!sustain | break
+    <bes,, bes,>4@sustain <bes d' aes'>4 <aes bes d'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain |
+    <d, d>4@sustain <c' d' fis'>4 <fis c' d'>4@!sustain |
+    <g, g>4@sustain <bes d' g'>4 <g bes d'>4@!sustain | pageBreak
+    <g, g>4@sustain <bes d' e'>4 <e bes d'>4@!sustain |
+    <f, f>4@sustain <bes d' f'>4 <f bes d'>4@!sustain |
+    voice { <f, f>2.@fermata@sustain( } { s2 s4@!sustain } |
+    <bes,, bes,>4)@sustain <bes d' f'>4 <f bes d'>4@!sustain | break
+    <bes,, bes,>4@sustain <c' ees' aes'>4 <aes c' ees'>4@!sustain |
+    <bes,, bes,>4@sustain <bes ees' g'>4 <g bes ees'>4@!sustain |
+    <bes,, bes,>4@sustain <a d' fis'>4 <fis a d'>4@!sustain |
+    <bes,, bes,>4@sustain <bes d' g'>4 <g bes d'>4@!sustain | break
+    <bes,, bes,>4@sustain <aes c' f'>4 <f aes c'>4@!sustain |
+    <bes,, bes,>4@sustain <g bes ees'>4 <ees g bes>4@!sustain |
+    voice { <bes,, bes,~>2.@sustain( } { s2 s4@!sustain } | break
+    <ees, bes,>4)@sustain <bes ees'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>4 <bes d' aes'>4@!sustain |
+    <ees, ees>4@sustain <bes ees' g'>8@arpeggio r8@!sustain r4 |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff voice_ "Voice"
+  lyrics en
+  lyrics de
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}

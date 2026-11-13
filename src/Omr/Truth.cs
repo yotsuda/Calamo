@@ -177,10 +177,25 @@ static class MusicXmlTruth
         var t = into ?? new Truth();
         var doc = System.Xml.Linq.XDocument.Load(path);
         int staffBase = 0, partNo = 0;
+        // (a grand staff written as two parts under a brace -- Lily#'s export of a piano -- is one group, as
+        // MuseScore's one part of two staves is: a dynamic between the staves is either's)
+        var braced = new Dictionary<string, int>();
+        string brace = null; int braces = 0;
+        foreach (var el in doc.Root.Element("part-list")?.Elements() ?? Enumerable.Empty<System.Xml.Linq.XElement>())
+        {
+            if (el.Name.LocalName == "part-group")
+            {
+                string number = (string)el.Attribute("number") ?? "1";
+                if ((string)el.Attribute("type") == "start" && el.Element("group-symbol")?.Value == "brace") { brace = number; braces++; }
+                else if ((string)el.Attribute("type") == "stop" && number == brace) brace = null;
+            }
+            else if (el.Name.LocalName == "score-part" && brace != null) braced[(string)el.Attribute("id") ?? ""] = -braces;
+        }
         foreach (var part in doc.Root.Elements("part"))
         {
             int divisions = 1, staves = 1, bar = barBase, fifths = 0;
             partNo++;
+            int group = braced.TryGetValue((string)part.Attribute("id") ?? "", out int bg) ? bg : partNo;
             foreach (var measure in part.Elements("measure"))
             {
                 bar++;
@@ -257,7 +272,7 @@ static class MusicXmlTruth
                 {
                     if (staffBase + s - 1 >= parts.Count) break;
                     string id = parts[staffBase + s - 1];
-                    t.Group[id] = partNo;
+                    t.Group[id] = group;
                     t.Fifths[(bar, id)] = fifths;
                     var all = new List<Ev>();
                     var chords = new List<Ev>();

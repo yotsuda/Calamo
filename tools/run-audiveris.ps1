@@ -5,7 +5,8 @@ param(
     [switch]$Reuse,                         # keep the pages and Audiveris's output from the run before
     [switch]$Eval,                          # the held-out set (data/eval, prep-eval.ps1) instead of the benchmarks
     [switch]$Dev,                           # data/dev/lieder (prep-eval.ps1's E): scored as -Eval, but NOT held out -- debug on it
-    [switch]$NoAlign,                       # (-Eval, -Dev) score the measures in the order read, not matched with the truth's bars (--align)
+    [switch]$Fair,                          # data/fair (prep-fair.ps1, S59): old prints outside homr's training data, their truth written by hand; scored as -Eval, held out
+    [switch]$NoAlign,                       # (-Eval, -Dev, -Fair) score the measures in the order read, not matched with the truth's bars (--align)
     [string[]]$OmrArgs = @(),               # more arguments for this reader's own reading (e.g. '--no-unprinted', to tell what a step does)
     [switch]$Verify                         # this reader's reading with the redraw check (--verify): its todos as Lily# gets them (tools/todo-quality.ps1)
 )
@@ -80,6 +81,28 @@ if ($Dev) {
             if (-not (Test-Path "$($d.FullName)\$kind\p01.png")) { continue }
             $benches["dev-$($d.Name)-$kind"] = @{ Pages = "$($d.FullName)\$kind"; To = (PageCount "$($d.FullName)\$kind")
                                                  Args = @('--config', "$($d.FullName)\$kind\$($d.Name).score", '--truth', "$($d.FullName)\ms\truth.musicxml", '--poly') }
+        }
+    }
+}
+if ($Fair) {
+    # (never debug the reader on these: see prep-fair.ps1. The truth is a .lys written from the print,
+    # data/fair/<piece>/truth/<piece>.lys -- an edition whose notes differ has its own, truth-<edition>/ --
+    # exported to MusicXML here, so that it is never an older one than its source. Only the pieces with a truth run.)
+    $Eval = $true
+    $benches = [ordered]@{}
+    foreach ($d in Get-ChildItem "$root\data\fair" -Directory | Sort-Object Name) {
+        $n = $d.Name
+        foreach ($ed in Get-ChildItem $d.FullName -Directory | Where-Object { Test-Path "$($_.FullName)\$n.score" } | Sort-Object Name) {
+            $truth = if (Test-Path "$($d.FullName)\truth-$($ed.Name)\$n.lys") { "$($d.FullName)\truth-$($ed.Name)" } else { "$($d.FullName)\truth" }
+            if (-not (Test-Path "$truth\$n.lys")) { continue }
+            $name = "fair-$n-$($ed.Name)"
+            if ($Sets.Count -gt 0 -and $Sets -notcontains $name) { continue }
+            $xml = "$out\$name-truth"
+            New-Item -ItemType Directory -Force $xml | Out-Null
+            $said = & $lysc xml "$truth\$n.lys" -d $xml 2>&1 | Out-String
+            if ($LASTEXITCODE -or -not (Test-Path "$xml\$n.xml")) { throw "${name}: no MusicXML of $truth\$n.lys`n$said" }
+            $benches[$name] = @{ Pages = $ed.FullName; To = (PageCount $ed.FullName)
+                                 Args = @('--config', "$($ed.FullName)\$n.score", '--truth', "$xml\$n.xml", '--poly') }
         }
     }
 }
@@ -181,7 +204,7 @@ foreach ($m in $marks) {
 # baseline is) so that the next run says which sets went up or down -- the totals alone hid elgar60-1's
 # 539 -> 517 behind other sets' gains (ROADMAP section 7). A run of every set writes out/audiveris/<kind>-sets.tsv
 # and compares it with the kept one; copy it over docs/ to keep the new numbers.
-$kind = if ($Dev) { 'dev' } elseif ($Eval) { 'eval' } else { 'real' }
+$kind = if ($Fair) { 'fair' } elseif ($Dev) { 'dev' } elseif ($Eval) { 'eval' } else { 'real' }
 if ($Sets.Count -eq 0 -and $rows.Count -gt 0) {
     $rows | Export-Csv "$out\$kind-sets.tsv" -Delimiter "`t" -NoTypeInformation -UseQuotes Never
     $kept = "$root\docs\$kind-sets.tsv"

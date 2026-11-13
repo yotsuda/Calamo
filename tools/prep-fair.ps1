@@ -5,7 +5,8 @@ param(
 # S59, the fair set (2026-11-14, owner's decision of 2026-11-13): old prints outside homr's training data
 # (OpenScore Lieder, PDMX, GrandStaff), scanned page by page. Held out like data/eval: never debug the reader on them.
 # data/fair/<piece>/<edition>/: imslp.pdf (the whole download), pNN.png (the piece's pages, grey), <piece>.score.
-# A piece in two editions (Lassen, Bargiel) reads both against one truth (data/fair/<piece>/truth/).
+# The truth is written by hand, data/fair/<piece>/truth/<piece>.lys; an edition whose notes differ (Lassen's Hainauer
+# print, in another key) has its own, data/fair/<piece>/truth-<edition>/<piece>.lys. run-audiveris.ps1 -Fair scores them.
 $ErrorActionPreference = 'Stop'
 $root = Resolve-Path "$PSScriptRoot\.."
 $fair = "$root\data\fair"
