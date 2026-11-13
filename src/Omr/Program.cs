@@ -33,6 +33,8 @@ if (opt.TryGetValue("detector", out var detPath) && !(detPath == "true" && Detec
 if (opt.TryGetValue("sure", out var sure)) Symbols.SureScore = double.Parse(sure, CultureInfo.InvariantCulture);
 // --trust <score>: a detection this sure fills in where the rules read nothing (see Symbols.TrustScore)
 if (opt.TryGetValue("trust", out var trust)) Symbols.TrustScore = double.Parse(trust, CultureInfo.InvariantCulture);
+// (OMR_TUNE: a threshold set for a measurement, S60; Tune)
+Tune.Apply(Environment.GetEnvironmentVariable("OMR_TUNE"));
 // --knn-test <samples.tsv>: how well the classifier labels samples it was not trained on
 if (opt.TryGetValue("knn-test", out var testPath))
 {

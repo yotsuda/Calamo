@@ -205,7 +205,8 @@ static class Detector
 
     // (--evidence: every peak down to this score, whatever the reading keeps, for measuring what the
     // detector saw of a note read wrong. The reading itself does not look at it)
-    public static double RawFloor = 0;
+    // (OMR_DUMP_DETECTIONS, below, writes these out)
+    public static double RawFloor = Environment.GetEnvironmentVariable("OMR_DUMP_DETECTIONS") != null ? 0.05 : 0;
     public static List<Detection> Raw = new();
 
     public static List<Detection> Detect(byte[] gray, int w, int h, double s)
@@ -253,7 +254,22 @@ static class Detector
         foreach (var e in edge)
             if (!found.Any(t => t.Class == e.Class && Math.Abs(t.X - e.X) < 0.5 * s && Math.Abs(t.Y - e.Y) < 0.5 * s))
                 found.Add(e);
+        if (DumpDir != null) Dump(gray, w, h, s);
         return found;
+    }
+
+    // OMR_DUMP_DETECTIONS=<dir> (S60): every peak down to 0.05 written to <dir>/<page>.tsv, the page named by
+    // a hash of its pixels, so that two models' runs over the same pages pair up (tools/train-model/splits.py)
+    static readonly string DumpDir = Environment.GetEnvironmentVariable("OMR_DUMP_DETECTIONS");
+    static void Dump(byte[] gray, int w, int h, double s)
+    {
+        if (RawFloor == 0) throw new InvalidOperationException("OMR_DUMP_DETECTIONS needs RawFloor");
+        ulong hash = 14695981039346656037UL;
+        foreach (byte b in gray) hash = (hash ^ b) * 1099511628211UL;
+        Directory.CreateDirectory(DumpDir);
+        var lines = Raw.Select(t => FormattableString.Invariant($"{t.Class}\t{t.X:F1}\t{t.Y:F1}\t{t.Score:F4}"));
+        File.WriteAllLines(Path.Combine(DumpDir, FormattableString.Invariant($"{w}x{h}-{hash:x16}-s{s:F2}.tsv")),
+                           lines.Prepend(FormattableString.Invariant($"# space\t{s:F3}")));
     }
 
     static readonly int Tab0 = Array.IndexOf(Classes, "tab_0");
