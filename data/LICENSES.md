@@ -28,7 +28,7 @@ that need it (`docs/eval-sets.tsv`) cannot run without it.
 | #67290 | Schumann Op.15, Richard Johnson Editions 2010 | CC BY-NC 3.0 | `eval/schumann15-1/imslp/rje-2010.pdf` |
 | #154626 | Tchaikovsky Op.39-1, Hapebe 2011 | not stated | `eval/tchaikovsky39-1/imslp/hapebe-2011.pdf` |
 | #154630 | Tchaikovsky Op.39-5, Hapebe 2011 | not stated | `eval/tchaikovsky39-5/imslp/hapebe-2011.pdf` |
-| #510037 (PMLUS00461) | M. R. Lang, An Irish Love Song Op.22, A. P. Schmidt 1895 | public domain in the US only (Lang died 1972: not in life+70 countries, Japan among them) | `fair/lang22/schmidt/imslp.pdf` |
+| #510037 (PMLUS00461) | M. R. Lang, An Irish Love Song Op.22, A. P. Schmidt 1895 | public domain in the US only (Lang died 1972: not in life+70 countries, Japan among them) | `fair/lang22/schmidt/imslp.pdf`; the truth written from it (`fair/lang22/truth/lang22.lys`, a transcription) is kept out too |
 
 Band scores scanned from commercial books, used during development, are not in this repository
 and never will be.
