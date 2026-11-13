@@ -1,0 +1,138 @@
+// The truth of the fair set (S59) for Hans Sommer, Der Bote Op.9-1: written from the Litolff print
+// (Collection Litolff No.1584, IMSLP #777922, data/fair/sommer9-1/litolff), bar by bar. Never to debug the reader on.
+// As the print has them: bar 33's right hand adds up to five eighths (the tied chord is a dotted quarter, no rest
+// after it; a spacer fills the bar); bar 34's right hand is empty (no rest printed, a spacer); bar 4's d' is one head
+// shared by the beamed eighths and the dotted chord under them (both voices carry it).
+title "Der Bote."
+tempo "Volksthümlich, innig."
+octave absolute
+paper { breaksOnly }
+time 3/4
+key f major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  voice_ {
+    R2. |
+    R2. |
+    R2. |
+    r4 r4 r8 c'8@p | break
+    f'4. g'8 a'4 |
+    a'4 d'4 r8 d'8 |
+    a'4. g'8 c'4 |
+    f'4. r8 bes'8@text("Stärker").up( a'8) |
+    a'4. b'4 c''8 | break
+    c''4 f'4 r8 f'8 |
+    c''8@text("Riten. e dimin.").up b'8 b'4. e'8 |
+    a'4. r8 r4 |
+    r4 r8@fermata e'8@p f'8 g'8 | break
+    tempo "a tempo" f'4. g'8 a'4 |
+    a'4 d'4 cis'8 d'8 |
+    a'4 g'4. c'8 |
+    f'2 c'4 | pageBreak
+    a'4. b'4 c''8 |
+    c''4 f'4 tuplet 3/2 { a'8@text("Zart").up( b'8) c''8@pp } |
+    e''4. d''8 g'4 |
+    c''4 r4 r4 | break
+    r4 r4 g'8 a'8 |
+    bes'4@text("Poco stringendo e crescendo").up a'4 r8 g'8 |
+    f'4 e'4 tuplet 3/2 { e'8 dis'8 e'8 } |
+    c''4. bes'8 bes'8 a'8 | break
+    g'4. r8 d''4@f |
+    f''2@text("Breiter").up e''8 d''8 |
+    c''4 f'4 bes'8 c''8 |
+    e''4. d''8 bes'4 | break
+    a'4 r4 r4 |
+    r4 c''4.@pp@text("Ritenuto").up c''8 |
+    e''4. d''8 e'4 |
+    f'2. |
+    R2. |
+  }
+  lyrics de { | | | Am | Him- mels- grund | schies- sen so | lu- stig die | Stern', dein | Schatz lässt dich | grü- ssen aus | wei- ter, wei- ter | Fern'! | Hat ei- ne | Zi- ther ge- | han- gen an der | Thür un- be- | acht't, der | Wind ist ge- | gan- gen durch die | Sai- ten bei | Nacht. | Schwang sich | auf dann vom | Git- ter ü- ber die | Ber- ge, ü- bern | Wald mein | Herz ist die | Zi- ther, giebt ein'n | fröh- li- chen | Schall, | giebt ein'n | fröh- li- chen | Schall. | | }
+  rh {
+    voice { r8 f''4 f''8 e''8 d''8 } { f'2@mf@cresc r8 f'8@!cresc~ } { bes'4 b'2 } |
+    voice { c''8 <c'' e''>4 <c'' e''>8 <bes' d''>8 <a' c''>8 } { f'4 f'2 } |
+    <e' g' bes'>4 <c'' e''>4. <e' g'>8@decresc |
+    voice { <bes' d''>4. d'8 e'8 g'8@!decresc } { s4. <bes d'>4. } | break
+    <a f'>4.@p <bes g'>8 <c' a'>4 |
+    <bes a'>2. |
+    <c' a'>4. <bes g'>8 <bes c'>4 |
+    voice { c'8 <a' c''>4 <a' c''>8 <g' bes'>8 a'8 } { s2 e'8 f'8 } |
+    <c' a'>4. <d' b'>4 <e' c''>8 | break
+    <f' c''>2. |
+    <e' c''>8 <d' b'>8 <d' b'>2 |
+    voice { e'8 <c'' e''>4 <c'' e''>8 <b' d''>8 <d' e'>8 } { c'2 r4 } |
+    voice { e'8 <c'' e''>4@fermata <c'' e''>8@p <bes' d''>8 <bes e'>8 } { c'2 s4 } | break
+    <a f'>4. <bes g'>8 <c' a'>4 |
+    <bes a'>2. |
+    <c' a'>4 <bes g'>4. <bes c'>8 |
+    voice { c'8 <a' c''>4 <a' c''>8 <g' bes'>8 a'8 } { s2 e'8 f'8 } | pageBreak
+    <c' a'>4. <d' b'>4 <e' c''>8 |
+    voice { c''2. } { f'2 f'4 } |
+    voice { g''2.@arpeggio } { <g' e''>4.@arpeggio@pp <f' d''>8 <b f' g'>4 } |
+    voice { g'8 <e'' g''>4 <e'' g''>8 <d'' f''>8 <c'' e''>8 } { <c' e'>4 s2 } | break
+    e'8@cresc <c'' e''>4 <bes' d''>8@!cresc bes'8 c'8 |
+    r8 <bes c'>8 e'8 c''8 r8 <bes e'>8 |
+    r8 c'8 e'8 c'8 e'8 d''8 |
+    c''8 <c' d'>8 fis'8 d'8 fis'8 ees''8 | break
+    d''8 g'8 bes'8 d''8 r8 <bes' d''>8 |
+    voice { r8 f''4 f''8 e''8 d''8 } { f'2 r8 f'8~ } { bes'4@f b'2 } |
+    voice { c''8 <c'' e''>4 <c'' e''>8 <bes' d''>8 <a' c''>8 } { f'4 f'2 } |
+    <e' g' bes'>8 <c'' e''>8 <c' e'>8 <bes' d''>4 <bes e'>8 | break
+    voice { r8 f''4 f''8 e''8 d''8 } { f'4 g'4 gis'4 } |
+    voice { c''8 <f'' a''>4 <f' a'>8@pp <e' g'>8 <f' a'>8 } { <c' a'>2 s4 } |
+    <e' g' bes'>8 <c'' e''>8 <c' e'>8 <bes' d''>4 <bes e'>8@decresc |
+    <a f'>8 <f'' a''>8~ <f'' a''>4.@!decresc s8 |
+    s2. |
+  }
+  lh {
+    voice { r8 d'4 d'4. } { g4 g,4 gis,4 } |
+    voice { r8 c'4 d'4. } { a,4 bes,2 } |
+    voice { r8 d'4 c'8 bes8 a8 } { c2. } |
+    voice { r8 g8 f8 e8 d8 c8 } { c,2. } | break
+    voice { r8 c4. r8 c8 } { f,2. } |
+    voice { r8 d4 f8 e8 d8 } { f,2. } |
+    voice { r8 e4. r8 e8 } { f,2. } |
+    voice { a4 <bes d'>4 c'4 } { f,2. } |
+    voice { r8 a4. r8 a8 } { f,2 e,4 } | break
+    voice { r8 a4 c'8 b8 a8 } { d,2. } |
+    voice { gis2 gis4 } { e,4. e,8~ e,4 } |
+    voice { e4 fis4 gis4 } { a,2. } |
+    <a, a>2 <c, c>4 | break
+    voice { r8 c4. r8 c8 } { f,2 f,4 } |
+    voice { r8 d4 f8 e8 d8 } { f,2. } |
+    voice { r8 e4 e4 e8 } { f,2. } |
+    voice { a4 <bes d'>4 c'4 } { f,2. } | pageBreak
+    voice { r8 a4. r8 a8 } { f,2 e,4 } |
+    voice { r8 a8~ a2 } { d,4. d8~ d8 c8 } |
+    voice { r8 g4. r8 g8 } { b,2 g,4 } |
+    voice { r4 <f a>4 <g b>4 } { c,2. } | break
+    voice { <a c'>4 <bes d'>4 <c' e'>4 } { c2. } |
+    voice { c2. } { g,2 g,4 } |
+    voice { g2. } { bes,2 bes,4 } |
+    voice { fis2. } { a,2 d8 c8 } | break
+    voice { g4 d'2 } { bes,2 bes8 a8 } |
+    voice { r8 d'4 d'4. } { g4 g,4 gis,4 } |
+    voice { r8 c'4 d'4. } { a,4 bes,2 } |
+    c2 c,4 | break
+    voice { a4 bes4 b4 } { f,2 f,4 } |
+    f,2. |
+    c2 c,4 |
+    voice { s2 s8 <f a>8~ } { f,2. } |
+    voice { <f a>2. } { f,4 f,,2 } |
+  }
+}
+
+form { ~Piece }
+
+score {
+  staff voice_ "Voice"
+  lyrics de
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
