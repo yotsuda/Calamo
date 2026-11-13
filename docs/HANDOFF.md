@@ -2,6 +2,57 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S60 第 1 歩（前半）: 閾値を動かす口と、42・49 の割れ方を測る道具を足し、`SureScore`・`TrustScore` を掃いた。S59 の候補 7 曲を挙げた。REQUESTS 26 を `done` に。読み手の読みは変えていない（開発用の台 **35093 のまま**）（2026-11-13 午後、前の節の次の一手 2・3）
+
+**現在地**: 検出器は detector42 のまま。頭の check は OK（0・0）。種 6 つとも triage 済み（新しい報告なし）。REQUESTS 26 は `done`（下）。
+
+**足したもの（コミット `52a63aa`）**:
+1. `Tune`（`src/Omr/Tune.cs`）: 環境変数 `OMR_TUNE="Symbols.SureScore=0.8,Detector.WeakDot=0.3"` で static の double を読む前に書き換える。クラス名を省いた名前は 1 つに決まるときだけ通る。環境変数なので `check.ps1`・`run-audiveris.ps1` が起こす読み手すべてに効く。
+2. `OMR_DUMP_DETECTIONS=<dir>`（`Detector.Dump`）: 頁ごとに 0.05 以上の山を全部 `<dir>/<w>x<h>-<画素の hash>-s<間>.tsv` に書く（`RawFloor` を 0.05 にする。読みは `Raw` を見ないので変わらない）。
+3. `tools/train-model/splits.py <dumpA> <dumpB>`: 2 つの模型の山を同じクラス・半間以内で組み、各閾値で「片方だけ越える組」を数える。`--by-class 0.9` でクラス別。
+- 道具を入れた版で規則 check OK（0・0）、`OMR_TUNE` なしの開発用の台は 35093 で全 39 台同じ。
+
+**測ったもの**（開発用の台、表の引数 `-Dev -Reuse -Verify`、ログと表は `out/s68/`）:
+- 42 = **35093**、49 = **35022（−71）**。49 は 12 better・16 worse。大きいのは kinkel19-6-scan −43、holmes2-scan −36、schumann25-1-ms +30、kinkel19-1-scan −12。原因の内訳は `clef` 9 → 50（うち kinkel19-6-scan 0 → 36: 音部記号を 1 つ読み違えて区間ごとずれる型）、`extraMeasure` 28 → 39（kinkel19-1-scan 0 → 13）、`tuplet` 180 → 201。
+- 山の割れ（`splits-42-49.tsv`、126 頁・44 万組）: 割れの数は `SureScore` 0.9 が最大（12,611 組。`head_black` 両側に約 1,600 ずつ、`stem_2` は 42 だけ 1,140、`flat` 42 だけ 459、`barline` 49 だけ 427、`clef_f` 42 だけ 128・`clef_g` 49 だけ 163）、次が `WeakHairpin` 0.08（7,002）、`Threshold`/`TrustScore` 0.5（3,040。`stem_3` は 42 だけ 375・49 だけ 2 で、49 は 3 本の連桁の符幹の先をほとんど 0.5 未満に見る）、`WeakSlur` 0.2（2,387）。
+- 掃き（`sweep.log`、タグの数字は値の小数部: `8` = 0.8、`0` = 1.0、`4` = 0.4、`6` = 0.6）:
+
+| | 42 | 49 | 差 |
+|---|---|---|---|
+| そのまま | 35093 | 35022 | −71 |
+| `SureScore` 0.8 | 35099（+6） | 35053（+31） | −46 |
+| `SureScore` 1.0（検出器が規則を覆さない） | 34880（−213） | 34871（−151） | −9 |
+| `TrustScore` 0.4 | 35093（±0） | 35022（±0） | −71 |
+| `TrustScore` 0.6 | 35012（−81） | 34984（−38） | −28 |
+
+**分かったこと**:
+1. **`SureScore` は種で答えが割れる閾値**。1.0 にすると差は −9 まで縮むが、42 も −213 落ちる。落ちた分の大半は 3 連符（`tuplet` 180 → 325、`Symbols.Tuplets` の `competent` が 0.9 の数字を要る）と `lost` 24 → 54、`extra` 153 → 187。つまり **1 つの `SureScore` を 30 か所以上で共有していて、効いている使い道と種に振られる使い道が混ざっている**。全体を動かしても切り分けられない。
+2. `SureScore` 0.8 は 42 でもわずかに上がり（+6、5 better・0 worse）、49 では +31。0.9 は 42 の点数に合わせすぎの疑い。ただし開発用の台だけの数字で、評価台は回していない（第 1 歩の取り決め）。
+3. `TrustScore` を 0.5 より下げても効かない（0.5 未満の山は `Detector.Threshold` で一覧に入らない）。動かすなら `Threshold` と組で。0.6 に上げると両方下がり（42 の方が大きく −81）、差は −28 に縮む。0.5〜0.6 の山は 42 では役に立ち、49 では半分ほどしか役に立たない。これも 50 余りの使い道で共有している。
+4. 49 の `clef` 50 は `SureScore` を 0.8 にしても 1.0 にしても 50 のまま。音部記号の読み違えは別の閾値（`TrustScore` か `WeakClef`、`Signatures.MidClefs` の形の確かめ）から来ている。
+
+**S59 の候補**（オーナーに選んでもらう。3〜5 曲・1,500 音以上。調べは web だけで、スキャンの画質は見ていない。PDMX に無いことは musescore.com の題名検索で見ただけで、完全な証明ではない。OpenScore Lieder の作曲家一覧（`data/composers.yaml`）とは照合済みで、7 人とも入っていない）:
+- 歌: ⑴ Lassen「Vorsatz」Op.48-4（Bosworth、3 頁、英訳詞つきで歌詞 2 行）https://imslp.org/wiki/6_Lieder,_Op.48_(Lassen,_Eduard)。⑵ Hans Sommer『Eichendorff 歌曲集』Op.9 から 1〜2 曲（Litolff 1886）https://imslp.org/wiki/Lieder_nach_Eichendorff's_Gedichten,_Op.9_(Sommer,_Hans)。⑶ M. R. Lang「An Irish Love Song」Op.22（Schmidt、ボストン 1895、4 頁）https://imslp.org/wiki/An_Irish_Love_Song,_Op.22_(Lang,_Margaret_Ruthven)。⑷ Hüe『6 Mélodies』No.4 か No.1（Leduc 1886 頃。No.2 は musescore に編曲あり。復刻のスキャンの疑い）https://imslp.org/wiki/6_Mélodies_(Hüe,_Georges)
+- ピアノ: ⑸ Kirchner『Neue Albumblätter』Op.49 から 2〜3 曲（Augener 1880）https://imslp.org/wiki/Neue_Albumblätter,_Op.49_(Kirchner,_Theodor)。⑹ Bargiel『8 Pianofortestücke』Op.41 の No.1・No.3（Breitkopf 1877 頃。No.1 は Schirmer 1879 の LoC スキャンも）https://imslp.org/wiki/8_Pianofortestücke,_Op.41_(Bargiel,_Woldemar)。⑺ Lacombe『Esquisses et souvenirs』Op.28 から 2〜3 曲（Hamelle 1878、Gallica のグレースケール）https://imslp.org/wiki/Esquisses_et_souvenirs,_Op.28_(Lacombe,_Paul)
+- 版はドイツ 3・フランス 2・英米 3 にばらけている。外した作曲家（musescore に転写が多い）: Allitsen、Goring Thomas、Backer Grøndahl、Schytte、Jensen、Foote、Dubois、Thomé、Pessard。
+
+**REQUESTS 26**: Lily# の `c18f49198`（`restStyle z | classical | default`、`--set` でも）を確かめて `done` にした。Release の lysc（`LilySharp.Cli\bin\Release`）は 11-12 17:48 のビルドのままで、Lily# の作業ツリーに未コミットの変更があったので上書きせず、`git archive` で scratch に取り出してビルドした lysc で再現譜を描いた（`out/repro/fixed-2026-11-13/`）。**生成器で使うには Release の lysc を作り直す必要がある**（オーナーか Lily# 側の判断）。
+
+**正直に書いておくこと**:
+1. 掃きは開発用の台だけ（9〜16 分 × 8 回）。生成譜の check・評価台は回していない。
+2. 割れの数は山の密度に比例するので、数の多さがそのまま読みへの効き目ではない（`WeakHairpin` は 7,002 割れるが、松葉の読みにどれだけ効くかは測っていない）。
+3. `splits.py` の閾値とクラスの対応は手で書いた近似（`WeakStar` を `ped_up` にした、`SureScore` は全クラス、など）。
+4. 頭の check は道具を入れる前の版で、ビルドは check の後。道具を入れた版でもう一度 check を回して OK。
+
+**次の一手**:
+1. **オーナー: S59 の曲を上の 7 曲から選んで落とす**（§5、落とすのはオーナー）。Release の lysc を `c18f49198` 以降で作り直すか決める（S60 第 2 歩の「z」形の休符に要る）。次の Lily# と Calamo の公開（`sings` の廃止）は前のまま。
+2. **S60 第 1 歩（後半）: `SureScore` を使い道ごとに分ける**。30 余りの使い道（`Symbols` の符頭を残す・消す、`Symbols.Tuplets` の `competent`、`Signatures` の調号・音部記号、`Layout.Bars` の小節線、`Symbols.Stems` の旗、`Symbols.Classify` の臨時記号、`Tab`）を名前つきの閾値に分け（初めは全部 0.9 で読みが同じことを check で確かめる）、`OMR_TUNE` で 1 つずつ 0.8・1.0 にして 42・49 の開発用の台を読む。種で割れる使い道を構造の確かめに置き換える候補にする。1 回 10 分なので、使い道を 6〜8 組にまとめて背景で回す（`out/s68/sweep.ps1` を写して使う）。
+3. 49 の kinkel19-6-scan の音部記号の読み違え（`clef` 0 → 36）と kinkel19-1-scan の余分な小節（0 → 13）を見る。42 と 49 で読んだ `.lys` を並べ、どの検出がどの閾値で割れたかを `splits.py` の頁の表で引く。開発用の台なので絵を見てよい。
+4. `stem_3`（3 本の連桁の符幹の先）を 49 がほとんど 0.5 未満に見る件: 学習データの 32 分の少なさの疑い。S60 第 2 歩の生成器に足すかを見る。
+5. 待ち時間の仕事は前のまま（浄書の声部、小さな残り）。
+
+**check の記録**（`out/s68/`）: 頭の規則 check OK（0・0）、道具を入れた版の規則 check OK（0・0）、開発用の台（42、`OMR_TUNE` なし）0 better・0 worse（印 0・0）。検出器 check・評価台は回していない（読みを変えていないため）。
+
 ## Holmès 2 の scan の右手の加線の上の `r2` と、左手の「Ped.」の上の 2 分音符を直した。開発用の台 35084 → **35093**（2 better・0 worse）、評価台 55610 → **55612**（1 better・0 worse）（2026-11-13 昼、前の節の次の一手 2）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種 5 of 6（変わらず）。REQUESTS 26 は `open` のまま。頭の check は OK（0・0）。
