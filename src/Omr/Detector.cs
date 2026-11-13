@@ -164,8 +164,14 @@ static class Detector
     public static bool IsWeakTrill(Detection t) => t.Class == "orn_trill" && t.Score <= Threshold;
     // A clef likewise, kept apart (PageSymbols.WeakClefs) and taken only inside a staff, past its start,
     // on a clef's own shape in the ink (Signatures.MidClefs): an old print's left hand changing clef
-    // within the bar, its F clefs back from the treble seen at 0.2-0.5 (Kinkel Op.7-1, Brandt 1838)
-    public static double WeakClef = 0.2;
+    // within the bar, its F clefs back from the treble seen at 0.2-0.5 (Kinkel Op.7-1, Brandt 1838), down to
+    // 0.1 since the clef's shape there is what decides: kinkel19-6's small G clef back from the F clef in the
+    // right hand, 0.39 to detector42 and 0.19 to 49 (S60, a threshold the seed decided; under 0.2 nothing false
+    // on the dev set passed the shape)
+    public static double WeakClef = 0.1;
+    // ...but only one this sure keeps a head's piece out of the heads for it (Symbols.Find's midClefs): at 0.1
+    // a weak clef over a chord took a head's piece, kinkel10-5's scan losing a natural (b' read bes')
+    public static double WeakClefPiece = 0.2;
     public static bool IsWeakClef(Detection t) => t.Class.StartsWith("clef_") && t.Score <= Threshold;
     static InferenceSession session;
 

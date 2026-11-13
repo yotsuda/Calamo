@@ -549,6 +549,11 @@ static partial class Symbols
         }
         // a black head needs a stem; a hollow one is a half (stem) or a whole (wide, no stem)
         Drop("no stem", h => !h.HasStem && (!h.Hollow || (!h.WholeShape && h.OuterW < 1.3 * s)), TrustScore);
+        // an old print's custos (Trautwein, kinkel19-1's scan): a "w" with a tail at the very end of a staff
+        // whose system ends open, telling the next system's first pitch. The detector has no class for it and
+        // sees a cross, at 0.45 (detector42) or 0.54 (49, a quarter note too many in the bar split across the
+        // break, the split no longer found): a stemless cross within a space and a half of the staff's end is no note
+        Drop("a custos at the staff's end", h => h.Cross && !h.HasStem && h.St != null && h.X > h.St.Right - 1.5 * s);
         // the heads on one stem are all black or all hollow: a hollow "head" on a black chord's stem
         // is the hole a flag's curl closes against the stem
         // (two voices a second apart put an up stem and a down stem in one column: only one stem's
@@ -759,7 +764,7 @@ static partial class Symbols
         // (a piece holding a head is no loose symbol -- unless the detector sees a clef inside the staff on
         // it, past the staff's start: a G clef's loop read as a head, the piece then kept for Signatures.MidClefs)
         var midClefs = det == null ? new List<Detection>() : det.Concat(ps.WeakClefs)
-            .Where(t => t.Class.StartsWith("clef_") && t.Score >= Detector.WeakClef && staves.Any(st => t.X > st.Left + 6 * s && Math.Abs(t.Y - st.Mid) < 2 * s)).ToList();
+            .Where(t => t.Class.StartsWith("clef_") && t.Score >= Detector.WeakClefPiece && staves.Any(st => t.X > st.Left + 6 * s && Math.Abs(t.Y - st.Mid) < 2 * s)).ToList();
         bool OnMidClef(Comp c) => midClefs.Any(t => t.X > c.MinX && t.X < c.MaxX && t.Y > c.MinY && t.Y < c.MaxY);
         var beatIds = BeatRepeats(labels, comps, clusters, ps, staves, s);
         if (Signatures.Verbose)
