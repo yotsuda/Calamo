@@ -88,6 +88,7 @@ static partial class Symbols
                 // a whole rest hangs from a line, a half rest sits on one (lines run on as ledgers)
                 bool hangs = OnLine(o.St, c.MinY, s), sits = OnLine(o.St, c.MaxY, s);
                 bool outside = Math.Abs(pos) > 4;
+                if (outside && LedgerSide(page, c, s) is var side && side.Hangs != side.Sits) (hangs, sits) = side;
                 // beyond the staff (a voice's rest moved aside) only a solid block on a line's place
                 // counts, and not far out: a mark's box or a thick stroke is no rest
                 if (outside && (Math.Abs(pos) > 8 || c.Fill < 0.9 || hangs == sits)) continue;
@@ -125,7 +126,7 @@ static partial class Symbols
         }
         // (after the rules, so that a clean page reads as it did: the detector fills in what the
         // rules could not name, a scan's blurred signs)
-        if (ps.Detections != null) { DropUnseenRests(ps, s); DetectedAccidentals(ps, s); WeakNaturals(ps, s); DetectedRests(ps, s); }
+        if (ps.Detections != null) { DropUnseenRests(ps, s); DetectedAccidentals(ps, s); WeakNaturals(ps, s); DetectedRests(ps, page, s); }
         TwinFlats(ps, s);
         // the slur Lily# draws from an acciaccatura or appoggiatura down (or up) to its note is no
         // rest (chords005's bar 3: an eighth rest read on it, and the grace note before a "rest" is

@@ -322,7 +322,7 @@ static partial class Symbols
     /// tells them apart. The rest's piece of ink is named, and the dots after it are given to it
     /// as to any rest.
     /// </summary>
-    static void DetectedRests(PageSymbols ps, double s)
+    static void DetectedRests(PageSymbols ps, Img page, double s)
     {
         var staves = ps.Heads.Select(h => h.St).Concat(ps.Rests.Select(r => r.St)).Concat(ps.Others.Select(o => o.St)).Distinct().ToList();
         foreach (var t in ps.Detections.Where(t => t.Score >= TrustScore))
@@ -376,13 +376,19 @@ static partial class Symbols
                 // Fugue 1 sets a moved rest's ledger off the staff's line places (1.5 spaces above
                 // it), so no line position tells. In the staff (its lines are not in the ink) the
                 // piece's edges tell, as for the rules' rests; else the detector's centre, a quarter
-                // space below or above the line (as Verify does)
-                bool hangs = false, sits = false;
-                if (owner != null && owner.C.W > 2.0 * s)
+                // space below or above the line (as Verify does). (A ledger as wide as two spaces holds
+                // a block of 1.3: Holmès's No. 2, its half rests' pieces 1.96 wide on a bowed page, whose
+                // grid puts the centre under the ledger's place. A piece of the block alone is told by
+                // the ledger beside it in the page's ink, LedgerSide)
+                // (in the staff a piece of 1.6 to 2 is a block run on into a staff line's remains: gen-lo7's
+                // basic003, a half rest on a page of 7 pixels to the space, its rows' ink two pixels apart)
+                bool hangs = false, sits = false, beyond = Math.Abs(st.Pos(t.Y)) > 4;
+                if (owner != null && owner.C.W > (beyond ? 1.6 : 2.0) * s)
                 {
                     int top = RowInk(ps, owner.C, owner.C.MinY + 1), bottom = RowInk(ps, owner.C, owner.C.MaxY - 1);
                     if (Math.Abs(top - bottom) > 0.3 * s) (hangs, sits) = (top > bottom, bottom > top);
                 }
+                if (owner != null && hangs == sits && beyond) (hangs, sits) = LedgerSide(page, owner.C, s);
                 if (owner != null && hangs == sits) { hangs = OnLine(st, owner.C.MinY, s); sits = OnLine(st, owner.C.MaxY, s); }
                 if (hangs == sits) { double p = st.Pos(t.Y); hangs = p - 2 * Math.Round(p / 2) < 0; }
                 kind = hangs ? RestKind.Whole : RestKind.Half;

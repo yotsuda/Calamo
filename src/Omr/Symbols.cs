@@ -810,6 +810,31 @@ static partial class Symbols
     }
 
     /// <summary>
+    /// Which side of a block rest beyond the staff its ledger runs, from the ink rather than the grid: a
+    /// thin line out past both its edges, and ending within a space of them (no staff line), in the
+    /// rows just under its bottom (it sits: a half rest) or just over its top (it hangs: a whole). An
+    /// old print sets a moved rest's ledger off the line places -- Holmès's No. 2, its half rests over
+    /// a ledger 1.7 spaces under the staff, the block's top on the first ledger's place.
+    /// </summary>
+    static (bool Hangs, bool Sits) LedgerSide(Img d, Comp c, double s)
+    {
+        bool Clear(int x, int yy) => x < 0 || x >= d.W || !d[x, yy];
+        bool Ledger(int yy)
+        {
+            if (yy < 1 || yy >= d.H - 1) return false;
+            double? left = LineThickness(d, (int)(c.MinX - 0.35 * s), (int)(c.MinX - 0.1 * s), yy);
+            double? right = LineThickness(d, (int)(c.MaxX + 0.1 * s), (int)(c.MaxX + 0.35 * s), yy);
+            if (left is not { } a || right is not { } b || a > 0.35 * s || b > 0.35 * s) return false;
+            int xl = (int)(c.MinX - 1.0 * s), xr = (int)(c.MaxX + 1.0 * s);
+            return Clear(xl, yy) && Clear(xl, yy - 1) && Clear(xl, yy + 1) && Clear(xr, yy) && Clear(xr, yy - 1) && Clear(xr, yy + 1);
+        }
+        bool under = false, over = false;
+        for (int yy = (int)(c.MaxY - 0.1 * s); yy <= c.MaxY + 0.3 * s && !under; yy++) under = Ledger(yy);
+        for (int yy = (int)(c.MinY - 0.3 * s); yy <= c.MinY + 0.1 * s && !over; yy++) over = Ledger(yy);
+        return (over && !under, under && !over);
+    }
+
+    /// <summary>
     /// Whether a head on the first ledger's place by the grid has no ledger there: on neither side, in the
     /// third of a space past its edges, does a thin line run at any row within 0.4 space of that place,
     /// and its centre stands on the staff's side of the place.

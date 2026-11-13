@@ -54,6 +54,11 @@ static partial class Symbols
             // hand's d, white a third of a space under the beam and once more over the staff, read a quarter)
             Search((int)(0.55 * s), Math.Max(1, (int)(0.3 * s)), 0.3, (int)(0.5 * s));
         }
+        // (a hollow head the detector took for a half, not a whole, has a stem: an old print shortens it to clear
+        // a "Ped." under it -- Holmès's No. 2, the left hand's low halves on three ledgers, their stems 2.1 spaces
+        // and read as wholes)
+        if (bestLen < least && bestLen >= 1.8 * s && h.Score > 0 && h.Hollow && !h.WholeShape && !h.Grace && !h.Slash && !h.Cross)
+            least = 1.8 * s;
         if (bestLen >= least)
         {
             h.HasStem = true; h.Up = bestUp; h.StemX = bestX; h.Tip = bestTip;
@@ -223,7 +228,11 @@ static partial class Symbols
                 // (save the second's outer head a step from the stem's own head: the stem's tip on a scan
                 // may be found short of its beam, kinkel10-2's <a b>16 at 1.7 spaces)
                 bool second = flipped && Math.Abs(o.Pos - h.Pos) == 1 && Math.Abs(o.X - h.X) > 0.8 * s;
-                if (Math.Abs(h.Y - o.Tip) < 1.8 * s && !second) continue;
+                // (and two halves the detector saw: no flag nor beam at a half's tip, and an old print shortens
+                // the stem to clear a "Ped." under it -- Holmès's No. 2, the left hand's <d, d>2, 1.65 spaces past the d,)
+                bool halves = h.Hollow && o.Hollow && !h.WholeShape && !o.WholeShape && h.Score > 0 && o.Score > 0
+                              && Math.Abs(h.Y - o.Tip) >= 1.2 * s;
+                if (Math.Abs(h.Y - o.Tip) < 1.8 * s && !second && !halves) continue;
                 h.HasStem = true; h.Up = o.Up; h.StemX = o.StemX;
                 // the tip is the stem's far end, beyond whichever head is further from it
                 h.Tip = o.Tip;
