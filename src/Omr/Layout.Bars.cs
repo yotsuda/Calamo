@@ -92,7 +92,7 @@ static partial class Layout
                 // on a single staff, where nothing else is asked of it -- gen-cue-scan's chords005 with
                 // detector42, its first bar cut after <d'' e''>8. A barline is a line: its column is dark
                 // from the top line to the bottom line, and the dots' is not)
-                if (group.Max(t => t.Score) < Symbols.SureScore
+                if (group.Max(t => t.Score) < Symbols.SureBar
                     && onStaves.Any(st => !Dark(st) && det.Any(t => t.Class == "dot" && Math.Abs(t.X - x) < 0.3 * s && Math.Abs(t.Y - st.Mid) < 2.5 * s)))
                 {
                     if (Signatures.Verbose) Console.WriteLine($"    barline at x {x:F0} (system {sys.Index + 1}): seen at {group.Max(t => t.Score):F2} on a dot's column, not dark: dropped");
@@ -109,7 +109,7 @@ static partial class Layout
                     if (Signatures.Verbose) Console.WriteLine($"    barline at x {x:F0} (system {sys.Index + 1}): seen on {onStaves.Count} of {sys.Staves.Count} staves, runs past the system and does not cover the other: dropped");
                     continue;
                 }
-                if (onStaves.Count < sys.Staves.Count && group.Max(t => t.Score) < Symbols.SureScore)
+                if (onStaves.Count < sys.Staves.Count && group.Max(t => t.Score) < Symbols.SureBar)
                 {
                     // seen on some staves only, and not surely: it fills in what the rules read nothing
                     // of, so TrustScore is enough when nothing says the line is a stem -- no stem's tip

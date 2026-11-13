@@ -129,7 +129,20 @@ static partial class Symbols
     //   with no stem or ledger line found, a clef or rest the rules did not find, a sign the rules
     //   did not name), and where it only extends the rules' reading (a key of more signs, the
     //   rules' among them). Above 1 = the rules decide, as before.
-    public static double SureScore = 0.9;
+    // SureScore is no one number any more (S60): it overruled the rules in 30 places, and retraining
+    // with another seed moved some of those and not others (detector42 against 49 on the dev set).
+    // Each use has its own, all 0.9 when split, so that OMR_TUNE moves one at a time:
+    public static double SureHead = 0.9;     // a detected head the rules would drop stays; a black head goes hollow on a white one's stem; a head before a key change
+    public static double SureSlash = 0.9;    // a cross or slash head (or one not so sure: a slur's end, a mark, kept only by its stem)
+    public static double SureFlag = 0.9;     // a grace note's slash and a lone note's flags, else counted in the ink
+    public static double SureClef = 0.9;     // a clef left of a staff's start; the detector's kind over the rules' it also sees
+    public static double SureKey = 0.9;      // a key's signs: the detector's key of more signs over the rules'
+    public static double SureSign = 0.9;     // an accidental over the rules' alteration or a rest it sits on; a sign in a rules' time signature
+    public static double SureTuplet = 0.9;   // a tuplet number that makes the page's detector competent at numbers
+    public static double SureBar = 0.9;      // a barline the rules doubt
+    public static double SureOttava = 0.9;   // an octave line's letters taken on their side of the staff
+    public static double SureTab = 0.9;      // a tab number moved off its string
+    public static void SetSure(double v) => SureHead = SureSlash = SureFlag = SureClef = SureKey = SureSign = SureTuplet = SureBar = SureOttava = SureTab = v;
     public static double TrustScore = 0.5;
     // A slur's weak end (Detector.WeakSlur up) pairs with a sure one this far away, in spaces, on the
     // detector's word alone; farther, only along the arc's ink (DetectedSlurs' Joined)
@@ -528,7 +541,7 @@ static partial class Symbols
             int before = ps.Heads.Count;
             ps.Heads.RemoveAll(h =>
             {
-                if (h.Score >= (keep ?? SureScore) || !gone(h)) return false;
+                if (h.Score >= (keep ?? SureHead) || !gone(h)) return false;
                 if (h.Score > 0 && droppedAt.Count < 12) droppedAt.Add($"{h.X:F0},{h.Y:F0}");
                 return true;
             });
@@ -546,7 +559,7 @@ static partial class Symbols
         // one goes hollow with them, below)
         bool OnStemWith(Head h, Head o) => o.HasStem && o.St == h.St && o.Up == h.Up && Math.Abs(o.StemX - h.StemX) < 0.3 * s && Math.Abs(o.Y - h.Y) < 4 * s;
         Drop("hollow on a black stem", h => h.Hollow && h.HasStem && ps.Heads.Any(o => !o.Hollow && o.Score >= h.Score && OnStemWith(h, o)));
-        foreach (var h in ps.Heads.Where(h => !h.Hollow && h.HasStem && h.Score > 0 && h.Score < SureScore).ToList())
+        foreach (var h in ps.Heads.Where(h => !h.Hollow && h.HasStem && h.Score > 0 && h.Score < SureHead).ToList())
             if (ps.Heads.Any(o => o.Hollow && o.Score > h.Score && OnStemWith(h, o))) h.Hollow = true;
         // a whole note has nothing long above or below it: the white between two beams of a group
         // (a beam runs on past two spaces; a whole note's ring does not)

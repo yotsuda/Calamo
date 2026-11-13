@@ -847,7 +847,7 @@ static partial class Symbols
             // them on gen-grace-scan. A slur crossing the stem low passes for one, piano009's ces'8)
             var stroke = lone && g.HasStem ? LeftStroke(ink, g, s) : (Rows: 0, Reach: 0, Slant: 0, Any: 0);
             g.Slashed = !lone ? slash != null
-                      : g.HasStem && (slash != null ? stroke.Any > 0 || slash.Score >= SureScore
+                      : g.HasStem && (slash != null ? stroke.Any > 0 || slash.Score >= SureFlag
                                                     : stroke.Rows >= 0.1 * s && stroke.Reach >= 0.3 * s && stroke.Slant >= 0.12 * s);
             // the flags of a lone grace note, counted in the ink where the detector is unsure of its tip
             // or saw none: the runs of ink joined to the stem's right side between the tip and the head
@@ -855,7 +855,7 @@ static partial class Symbols
             // a notch between. The runs in a column beside the stem are no count: an eighth's flag,
             // swinging out and back, crosses it twice). A slashed lone grace note is an eighth, as
             // acciaccaturas are written: its slash through the flag looks like a second curl
-            int runs = lone && g.HasStem && !g.Slashed && (best == null || best.Score < SureScore) ? FlagRuns(ink, g, s) : 0;
+            int runs = lone && g.HasStem && !g.Slashed && (best == null || best.Score < SureFlag) ? FlagRuns(ink, g, s) : 0;
             if (lone && g.HasStem && g.Slashed) g.Beams = 1;
             else if (runs is 1 or 2) g.Beams = runs;
             if (DebugAt.HasValue && Math.Abs(g.X - DebugAt.Value.X) < 2 * s && Math.Abs(g.Y - DebugAt.Value.Y) < 3 * s)
@@ -1214,7 +1214,7 @@ static partial class Symbols
             // stroke runs through the stem's tip to its left over half a space -- a slur or a tie crossing it;
             // a flag lies to the right alone -- is the stroke's: the rules' none stands. kinkel7-1's scan,
             // bar 17's c'''4.~ under the bar before's slur, read as an eighth at stem_1 0.55)
-            if (n == 1 && h.Beams == 0 && best.Score < SureScore && ink != null && ps.Labels != null && CrossedAtTip(h) && !SharedPiece(h))
+            if (n == 1 && h.Beams == 0 && best.Score < SureFlag && ink != null && ps.Labels != null && CrossedAtTip(h) && !SharedPiece(h))
             {
                 if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                     Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: a stroke crosses the tip to the left, no flag's: the rules' 0 stands");
@@ -1227,14 +1227,14 @@ static partial class Symbols
             // down-stemmed sixteenths in pairs half a space apart passed for flags, their short beam a wedge)
             // (a two the detector is less than sure of, marked in an old print's wavy octave line that runs along the
             // beam's top: the wave's, the rules' one stands -- kinkel7-1's scan, bar 21's f''8 and e''8 at stem_2 0.66, 0.71)
-            if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureScore
+            if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureFlag
                 && ps.OctaveWaves.Any(w => h.StemX > w.X0 && h.StemX < w.X1 && best.Y > w.Top - 0.2 * s && best.Y < w.Bottom + 0.2 * s))
             {
                 if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                     Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: the two marked in an octave line's wave, the rules' 1 stands");
                 continue;
             }
-            if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureScore && ink != null && ps.Labels != null && LoneFlag(h))
+            if (n == 2 && h.Beams == 1 && h.Up && best.Score < SureFlag && ink != null && ps.Labels != null && LoneFlag(h))
             {
                 if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                     Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: one flag's ink, the rules' 1 stands");

@@ -24,7 +24,17 @@ def pre(*p): return lambda c: c.startswith(p)
 ANY = lambda c: True
 THRESHOLDS = [
     ("Detector.Threshold / Symbols.TrustScore", 0.5, ANY),
-    ("Symbols.SureScore", 0.9, ANY),
+    # (SureScore split by its uses, S60)
+    ("Symbols.SureHead", 0.9, cls("head_black", "head_half", "head_whole")),
+    ("Symbols.SureSlash", 0.9, lambda c: c == "head_x" or c.startswith("slash_")),
+    ("Symbols.SureFlag", 0.9, pre("flag", "stem_", "grace_slash")),
+    ("Symbols.SureClef", 0.9, pre("clef_")),
+    ("Symbols.SureKey", 0.9, cls("sharp", "flat")),
+    ("Symbols.SureSign", 0.9, cls(*SIGNS)),
+    ("Symbols.SureTuplet", 0.9, pre("tuplet_")),
+    ("Symbols.SureBar", 0.9, pre("barline")),
+    ("Symbols.SureOttava", 0.9, cls(*OTT)),
+    ("Symbols.SureTab", 0.9, pre("tab_")),
     ("Detector.WeakCross", 0.15, cls("head_x")),
     ("Detector.WeakPercent", 0.2, cls("percent_1", "percent_2")),
     ("Detector.WeakKey", 0.25, cls("sharp", "flat")),

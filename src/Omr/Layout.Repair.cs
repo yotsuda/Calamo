@@ -302,7 +302,7 @@ static partial class Layout
             // the part's names, Gonville band007's first page and Bravura band003's last drum
             // staff; voices2007's tenor clef of a staff below an indented one, 0.99)
             int others = staves.Count > 1 ? Enumerable.Range(0, staves.Count).Where(i => staves[i] != st).Min(i => lefts[i]) : 0;
-            var clef = clefs.Where(t => t.X < st.Left + 1.0 * s && (t.X >= others - 1.0 * s || t.Score >= Symbols.SureScore))
+            var clef = clefs.Where(t => t.X < st.Left + 1.0 * s && (t.X >= others - 1.0 * s || t.Score >= Symbols.SureClef))
                             .OrderBy(t => t.X).FirstOrDefault();
             if (clef == null) continue;
             int left = Math.Max(0, (int)(clef.X - 2.0 * s));

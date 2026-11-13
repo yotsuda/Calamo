@@ -13,7 +13,7 @@ static partial class Symbols
     /// </summary>
     static void ChordRepeats(Img ink, PageSymbols ps, List<Staff> staves, double s)
     {
-        bool Loose(Head h) => (h.Cross || h.Slash) && h.Score < SureScore;
+        bool Loose(Head h) => (h.Cross || h.Slash) && h.Score < SureSlash;
         var added = new List<Head>();
         var gone = new HashSet<Head>();
         // (the stem hangs from the chord's beam: a tip with no beam is a rhythm slash's own stem, a half's)
@@ -164,7 +164,7 @@ static partial class Symbols
         // the pieces on a staff that are no notes', a stroke's height at most, near ones together
         // (a piece only a stemless slash or cross the detector is unsure of stands on is no note's: kinkel19-6's
         // old print, its thin strokes seen as rhythm slashes at 0.61 and 0.74 -- as among the strokes below)
-        bool Unsure(Head h) => (h.Cross || h.Slash) && h.Score < SureScore && !h.HasStem;
+        bool Unsure(Head h) => (h.Cross || h.Slash) && h.Score < SureSlash && !h.HasStem;
         var notes = ps.Heads.Where(h => !Unsure(h)).Select(h => h.Cluster).ToHashSet();
         var unsure = ps.Heads.Where(Unsure).Select(h => h.Cluster).Where(id => !notes.Contains(id)).ToHashSet();
         var pieces = new List<(Comp C, Staff St)>();
@@ -250,7 +250,7 @@ static partial class Symbols
                 double l = on.Min(q => q.X), r = on.Max(q => q.X), t = mark.Min(m => m.T), b = mark.Max(m => m.Bot);
                 if (Math.Abs((t + b) / 2 - st.Mid) > 0.75 * s) { if (dbg) Console.WriteLine($"beat repeat? x {l}-{r}: not about the middle line"); continue; }
                 // (no head or stem among them: a beam's slanting piece between its stems is the notes')
-                var among = ps.Heads.FirstOrDefault(h => !h.Grace && !((h.Cross || h.Slash) && h.Score < SureScore) && (h.X > l && h.X < r && h.Y > t - 0.5 * s && h.Y < b + 0.5 * s || h.HasStem && h.StemX > l + 0.2 * s && h.StemX < r - 0.2 * s && Math.Min(h.Y, h.Tip) < b && Math.Max(h.Y, h.Tip) > t));
+                var among = ps.Heads.FirstOrDefault(h => !h.Grace && !((h.Cross || h.Slash) && h.Score < SureSlash) && (h.X > l && h.X < r && h.Y > t - 0.5 * s && h.Y < b + 0.5 * s || h.HasStem && h.StemX > l + 0.2 * s && h.StemX < r - 0.2 * s && Math.Min(h.Y, h.Tip) < b && Math.Max(h.Y, h.Tip) > t));
                 if (among != null)
                 { if (dbg) Console.WriteLine($"beat repeat? x {l}-{r}: the head at {among.X:F0},{among.Y:F0} among them ({among.Score:F2}{(among.HasStem ? $", stem at {among.StemX:F0} tip {among.Tip:F0}" : "")})"); continue; }
                 // (nor a rest the detector sees: an eighth rest's stem leans so, and two may stand close)
@@ -259,7 +259,7 @@ static partial class Symbols
                 if (dbg) Console.WriteLine($"beat repeat at x {l}-{r} y {t}-{b}: {n} strokes");
                 ps.BeatRepeats.Add(new BeatRepeat(st, l, r, n));
                 // (a cross or a slash the detector is unsure of on them is their ink)
-                ps.Heads.RemoveAll(h => (h.Cross || h.Slash) && h.Score < SureScore && h.X > l && h.X < r && h.Y > t - 0.5 * s && h.Y < b + 0.5 * s);
+                ps.Heads.RemoveAll(h => (h.Cross || h.Slash) && h.Score < SureSlash && h.X > l && h.X < r && h.Y > t - 0.5 * s && h.Y < b + 0.5 * s);
                 // (the pieces mostly in its strokes are no symbols)
                 foreach (var g in on.GroupBy(q => q.Id))
                     if (g.Count() >= 0.5 * px.Count(q => q.Id == g.Key)) ids.Add(g.Key);
@@ -533,7 +533,7 @@ static partial class Symbols
             // a rest to the rules, seen at 0.66 by a detector retrained -- kinkel10-2's scan, bar 3, the
             // right hand's <aes' des''>16 read a')
             bool headBeside = ps.Heads.Any(hd => hd.On(st) && hd.Acc == null && hd.L - right >= -0.15 * s && hd.L - right <= 1.2 * s && Math.Abs(hd.Y - at) <= 0.3 * s);
-            bool overRest = owner != null && owner.Class == "rest" && !restSeen && (t.Score >= SureScore || graceSign || headBeside);
+            bool overRest = owner != null && owner.Class == "rest" && !restSeen && (t.Score >= SureSign || graceSign || headBeside);
             if (owner != null && owner.Class != "?" && !overRest && !graceSign)
             {
                 if (DebugAt.HasValue && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)

@@ -510,7 +510,7 @@ static class Ottavas
                         if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0}: {high} notes high over the staff below, {low} low under the staff above");
                     }
                     if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): dashes at {y:F0} to {end:F0} (the system's end {sys.Bars[^1]:F0}), {(over ? "over" : "under")} its staff");
-                    yield return new Detection { Class = over ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = y, Score = Math.Max(t.Score, Symbols.SureScore) };
+                    yield return new Detection { Class = over ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = y, Score = Math.Max(t.Score, Symbols.SureOttava) };
                     break;
                 }
                 // (the dashes' own row, in the last dash; the hook from it, shorter than HookDir asks: 0.6 of a space here)
@@ -530,7 +530,7 @@ static class Ottavas
                 int down = Rows(1, bottom), up = Rows(-1, top);
                 if (Math.Max(down, up) < 0.4 * s || Math.Min(down, up) > 0.1 * s) continue;
                 if (Verbose) Console.WriteLine($"  bare 8 at {t.X:F0},{t.Y:F0} ({t.Score:F2}): dashes at {top} to {end:F0}, hook {(down > up ? "down" : "up")}");
-                yield return new Detection { Class = down > up ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = (top + bottom) / 2.0, Score = Math.Max(t.Score, Symbols.SureScore) };
+                yield return new Detection { Class = down > up ? "ott_8va" : "ott_8vb", X = t.X - 0.6 * s + 1.85 * s, Y = (top + bottom) / 2.0, Score = Math.Max(t.Score, Symbols.SureOttava) };
                 break;
             }
         }
@@ -660,7 +660,7 @@ static class Ottavas
                 up = !up; sure = false;
                 if (Verbose) res.Notes.Add($"octave line sign {t.Class[4..]} at {t.X:F0},{t.Y:F0}: no staff on its side; taken {(up ? "over" : "under")} by its hook");
             }
-            else if (t.Score < Symbols.SureScore && (up ? under : over).St != null)
+            else if (t.Score < Symbols.SureOttava && (up ? under : over).St != null)
             {
                 // letters read unsurely, a staff on either side (an 8va read as an 8vb at 0.46-0.55: basic008's
                 // over its staff, hung under the staff above; piano002's over the left hand, hung under the

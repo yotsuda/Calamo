@@ -224,7 +224,7 @@ static class Tab
             var p = h != null ? Spell(want, h.P.Diatonic, otherAlt != null && fifths == 0 ? otherAlt : keyAlt) : default;
             bool keyed = h != null && p.Diatonic == h.P.Diatonic
                          && (p.Alter == keyAlt[Pitch.Mod7(p.Diatonic)] || otherAlt != null && p.Alter == otherAlt[Pitch.Mod7(p.Diatonic)]);
-            if (h != null && (keyed || t.Score >= Symbols.SureScore))
+            if (h != null && (keyed || t.Score >= Symbols.SureTab))
             {
                 if (Verbose) Console.WriteLine($"    tab: {h.P.Lys()} at x {h.E.X:F0} y {h.E.Y:F0} -> {p.Lys()} (fret {t.Fret} on string {t.String}, {t.Score:F2})");
                 Replace(h.E, single, h.P, p, s);
@@ -242,7 +242,7 @@ static class Tab
             // digit read twice). (Time After Time's frets stand off their column: the next note's
             // fret bears out a head, and this one's would join it)
             var col = Near(t, 1.0);
-            if (t.Score < Symbols.SureScore || col.Count == 0 || col.Any(c => !c.Taken) || Near(t, 2.5).Any(c => c.P.Midi() == want)) continue;
+            if (t.Score < Symbols.SureTab || col.Count == 0 || col.Any(c => !c.Taken) || Near(t, 2.5).Any(c => c.P.Midi() == want)) continue;
             var near = col.OrderBy(c => Math.Abs(c.P.Midi() - want)).First();
             var q = Spell(want, near.P.Diatonic, keyAlt);
             if (Verbose) Console.WriteLine($"    tab: {q.Lys()} added to {near.P.Lys()} at x {near.E.X:F0} y {near.E.Y:F0} (fret {t.Fret} on string {t.String}, {t.Score:F2})");

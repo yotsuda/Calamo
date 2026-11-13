@@ -30,7 +30,7 @@ if (opt.TryGetValue("detector", out var detPath) && !(detPath == "true" && Detec
     Detector.Load(detPath == "true" ? Path.Combine(AppContext.BaseDirectory, "detector.onnx") : detPath,
         int.Parse(opt.GetValueOrDefault("threads", "0")));
 // --sure <score>: a detected head this sure stays whatever the rules say (2 = the rules decide every head)
-if (opt.TryGetValue("sure", out var sure)) Symbols.SureScore = double.Parse(sure, CultureInfo.InvariantCulture);
+if (opt.TryGetValue("sure", out var sure)) Symbols.SetSure(double.Parse(sure, CultureInfo.InvariantCulture));
 // --trust <score>: a detection this sure fills in where the rules read nothing (see Symbols.TrustScore)
 if (opt.TryGetValue("trust", out var trust)) Symbols.TrustScore = double.Parse(trust, CultureInfo.InvariantCulture);
 // (OMR_TUNE: a threshold set for a measurement, S60; Tune)

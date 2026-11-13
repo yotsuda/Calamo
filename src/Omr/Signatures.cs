@@ -59,7 +59,7 @@ static class Signatures
                     bool more = dk != null && key != null && Math.Abs(dk.Value.Sig.Fifths.Value) > Math.Abs(key.Value.Sig.Fifths.Value);
                     bool extends = more && Math.Sign(dk.Value.Sig.Fifths.Value) == Math.Sign(key.Value.Sig.Fifths.Value)
                                         && dk.Value.Sig.X < key.Value.Sig.X + 0.6 * s && dk.Value.EndX > key.Value.EndX - 0.6 * s;
-                    if (dk != null && (key == null || (more && (extends || signs.All(t => t.Score >= Symbols.SureScore)))))
+                    if (dk != null && (key == null || (more && (extends || signs.All(t => t.Score >= Symbols.SureKey)))))
                     {
                         if (Verbose && key != null) Console.WriteLine($"    key from the detector over the rules' {key.Value.Sig.Fifths}, staff {st.System + 1}/{st.Part}{(extends ? " (the rules' signs among its own)" : "")}");
                         key = dk;
@@ -377,7 +377,7 @@ static class Signatures
     static (Sig Sig, double EndX)? DetectedKey(PageSymbols ps, Staff st, double startX, double s, out List<Detection> signs, double? minScore = null, bool weak = false, string clef = null)
     {
         double firstHead = ps.Heads.Where(h => h.St == st).Select(h => h.L).DefaultIfEmpty(double.MaxValue).Min();
-        signs = (weak ? ps.Detections.Concat(ps.WeakSigns) : ps.Detections).Where(t => (t.Class == "sharp" || t.Class == "flat") && t.Score >= (minScore ?? Symbols.SureScore)
+        signs = (weak ? ps.Detections.Concat(ps.WeakSigns) : ps.Detections).Where(t => (t.Class == "sharp" || t.Class == "flat") && t.Score >= (minScore ?? Symbols.SureKey)
                                              // (from the clef's start, a clef and seven signs span twelve spaces or so;
                                              // and a key never abuts the first note, while that note's own accidental
                                              // stands within a space of it: Fugue 1's first flat on a staff in C major)
@@ -525,7 +525,7 @@ static class Signatures
         // of the rules' kind there even at the trust score -- on a scan the rules name a broken
         // F clef alto (piano008), and the detector, at 0.89, has no C clef there at all; a rules'
         // kind the detector also sees is a real doubt, left to the rules)
-        if (rules != null && t.Score < Symbols.SureScore && clefs.Any(d => KindOf(d).Replace("tenor", "alto") == rules.Value.Sig.Clef.Replace("_8", "").Replace("tenor", "alto")))
+        if (rules != null && t.Score < Symbols.SureClef && clefs.Any(d => KindOf(d).Replace("tenor", "alto") == rules.Value.Sig.Clef.Replace("_8", "").Replace("tenor", "alto")))
         {
             if (Verbose) Console.WriteLine($"    clef from the detector, staff {st.System + 1}/{st.Part}: {kind} ({t.Score:F2}) unlike the rules' {rules.Value.Sig.Clef}, which it also sees: the rules' stands");
             return rules;
@@ -571,7 +571,7 @@ static class Signatures
             // kinkel7-1's left hand, a chord and a G clef 10.9 spaces in, after a flat)
             .Where(p => p.t.X > after + 3 * s && (p.t.X > st.Left + 11 * s || NoteBefore(p.t.X)) && p.t.X < st.Right - 0.5 * s && Math.Abs(p.t.Y - st.Mid) < 2 * s)
             .OrderBy(p => p.t.X).ToList();
-        bool NoteBefore(double x) => ps.Detections.Any(d => d.Class is "head_black" or "head_half" or "head_whole" && d.Score >= Symbols.SureScore
+        bool NoteBefore(double x) => ps.Detections.Any(d => d.Class is "head_black" or "head_half" or "head_whole" && d.Score >= Symbols.SureHead
                                                             && d.X > after && d.X < x - 0.5 * s && d.Y > st.Top - 3 * s && d.Y < st.Bottom + 3 * s);
         double lastX = double.NegativeInfinity;
         // a dot in the ink right of x at a staff position, whatever piece holds it: a fifth of a space of
@@ -1310,7 +1310,7 @@ static class Signatures
         if (sig == null && rules != null && up.Count == 0 && low.Count == 0
             && !ps.Detections.Any(t => t.Class == "timesig_c" && t.Score >= Detector.Threshold && Math.Abs(t.X - rules.X) < 3 * s && Math.Abs(st.Pos(t.Y)) < 5)
             && ps.Detections.FirstOrDefault(t => (t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" || t.Class.StartsWith("rest_"))
-                                                 && t.Score >= Symbols.SureScore && t.X > rules.X - 0.5 * s && t.X < rules.X + 2.5 * s
+                                                 && t.Score >= Symbols.SureSign && t.X > rules.X - 0.5 * s && t.X < rules.X + 2.5 * s
                                                  && Math.Abs(st.Pos(t.Y)) < 5) is { } other)
         {
             if (Verbose) Console.WriteLine($"    time {rules.Time} of the rules, staff {st.System + 1}/{st.Part}, dropped: the detector sees {other.Class} ({other.Score:F2}) there and no digit");

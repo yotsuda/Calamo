@@ -436,7 +436,7 @@ static partial class Symbols
             // A sign the rules name otherwise than the detector does: the detector's, when it is
             // sure (11 of 11 on the MuseScore fonts: Finale Broadway's double flat read as a natural);
             // otherwise the rules', the detector's on offer
-            else if (Signs[mine.Class].Alt != h.Acc && mine.Score >= SureScore) h.Acc = Signs[mine.Class].Alt;
+            else if (Signs[mine.Class].Alt != h.Acc && mine.Score >= SureSign) h.Acc = Signs[mine.Class].Alt;
             else if (Signs[mine.Class].Alt != h.Acc)
                 Add(h, new HeadAlt($"{Glyph(h.Acc)} read, the detector sees {Signs[mine.Class].Glyph} ({mine.Score:F2})", true, Signs[mine.Class].Alt, 0, mine.Score));
         }
