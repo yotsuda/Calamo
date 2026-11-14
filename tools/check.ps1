@@ -251,6 +251,14 @@ else { & "$PSScriptRoot\run-gen.ps1" -Out $genLo7 -Reuse -OmrArgs $omrArgs | Out
 $genLo10 = "$root\out\gen-lo10"
 if ($Fresh -or -not (Test-Path "$genLo10\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genLo10 -Suite 'basic,piano' -Count 10 -Seed 7 -Degrade -DegradeArgs "--scale 0.18 $loArgs" -OmrArgs $omrArgs | Out-Null }
 else { & "$PSScriptRoot\run-gen.ps1" -Out $genLo10 -Reuse -OmrArgs $omrArgs | Out-Null }
+# a piano edition's fingering over the suites' notes (OmrGen --fingers, ROADMAP section 0's gate 1): digits over runs of
+# eighths that the reader took for unprinted tuplets' numbers (Schirmer's Bargiel on the fair set); clean and printed and scanned
+$genFg = "$root\out\gen-fing"
+if ($Fresh -or -not (Test-Path "$genFg\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genFg -Count 10 -Seed 7 -GenArgs @('--fingers') -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genFg -Reuse -OmrArgs $omrArgs | Out-Null }
+$genFgS = "$root\out\gen-fing-scan"
+if ($Fresh -or -not (Test-Path "$genFgS\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genFgS -Count 10 -Seed 7 -GenArgs @('--fingers') -Degrade -OmrArgs $omrArgs | Out-Null }
+else { & "$PSScriptRoot\run-gen.ps1" -Out $genFgS -Reuse -OmrArgs $omrArgs | Out-Null }
 $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'genLo7'; Sym = 'symLo7' }, @{ Dir = $genLo10; Tag = 'genLo10'; Sym = 'symLo10' }, @{ Dir = $gen3; Tag = 'gen3'; Sym = 'sym3' }, @{ Dir = $genS; Tag = 'genS'; Sym = 'symS' }, @{ Dir = $genL; Tag = 'genL'; Sym = 'symL' },
           @{ Dir = $genA; Tag = 'genA'; Sym = 'symA' }, @{ Dir = $genR; Tag = 'genR'; Sym = 'symR' }, @{ Dir = $genRS; Tag = 'genRS'; Sym = 'symRS' },
           @{ Dir = $genT; Tag = 'genT'; Sym = 'symT' }, @{ Dir = $genTS; Tag = 'genTS'; Sym = 'symTS' }, @{ Dir = $genO; Tag = 'genO'; Sym = 'symO' }, @{ Dir = $genOS; Tag = 'genOS'; Sym = 'symOS' },
@@ -263,7 +271,7 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genY; Tag = 'genY'; Sym = 'symY' }, @{ Dir = $genYS; Tag = 'genYS'; Sym = 'symYS' },
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
-           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genFa; Tag = 'genFa'; Sym = 'symFa' }, @{ Dir = $genFaS; Tag = 'genFaS'; Sym = 'symFaS' }, @{ Dir = $genDe; Tag = 'genDe'; Sym = 'symDe' }, @{ Dir = $genDeS; Tag = 'genDeS'; Sym = 'symDeS' },@{ Dir = $genMx; Tag = 'genMx'; Sym = 'symMx' }, @{ Dir = $genMxS; Tag = 'genMxS'; Sym = 'symMxS' }, @{ Dir = $genFl; Tag = 'genFl'; Sym = 'symFl' }, @{ Dir = $genFlS; Tag = 'genFlS'; Sym = 'symFlS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' })
+           @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genFa; Tag = 'genFa'; Sym = 'symFa' }, @{ Dir = $genFaS; Tag = 'genFaS'; Sym = 'symFaS' }, @{ Dir = $genDe; Tag = 'genDe'; Sym = 'symDe' }, @{ Dir = $genDeS; Tag = 'genDeS'; Sym = 'symDeS' },@{ Dir = $genMx; Tag = 'genMx'; Sym = 'symMx' }, @{ Dir = $genMxS; Tag = 'genMxS'; Sym = 'symMxS' }, @{ Dir = $genFl; Tag = 'genFl'; Sym = 'symFl' }, @{ Dir = $genFlS; Tag = 'genFlS'; Sym = 'symFlS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' }, @{ Dir = $genFg; Tag = 'genFg'; Sym = 'symFg' }, @{ Dir = $genFgS; Tag = 'genFgS'; Sym = 'symFgS' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it

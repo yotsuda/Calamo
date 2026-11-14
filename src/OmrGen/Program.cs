@@ -3,7 +3,7 @@ using System.Text;
 
 namespace OmrGen;
 
-// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>] [--ottava-wave <share>]] [--graces] [--repeats] [--ornaments] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
+// OmrGen --out <dir> --suite <basic|ledger|tuplets|chords|voices2|piano|...|all|band|lied> --count N --seed S --bars B [--lyrics] [--fonts Emmentaler,Bravura,...] [--vary] [--headers] [--marks] [--artic] [--mmrests] [--tuplets] [--ottava [--ottava-15 <share>] [--ottava-wave <share>]] [--graces] [--repeats] [--ornaments] [--fingers] [--scripts2] [--spans] [--trills] [--arpeggios] [--glissandi] [--beams3] [--figures] [--leapslurs] [--cues [--cue-whole <share>]]
 // ("all" is Gen.Suites; "band", the band scores' pieces, "lied", songs whose voice's staff
 // is hidden where it rests, and "threes", music in triplets from end to end, are asked for by
 // name; --lyrics puts words under lied's voice)
@@ -63,6 +63,8 @@ static class Program
         bool repeats = opt.ContainsKey("repeats");
         // --ornaments: a trill, mordent, prall, turn or reverse turn on a note in ten (S23)
         bool ornaments = opt.ContainsKey("ornaments");
+        // --fingers: a piano edition's fingering, runs of digits over single notes (section 0's gate 1)
+        bool fingers = opt.ContainsKey("fingers");
         // --scripts2: a portato, stopped (+) or pralltriller on a note in twelve
         bool scripts2 = opt.ContainsKey("scripts2");
         // --spans: rit., accel., rall. and other words with a dashed line over stretches of notes (S25)
@@ -143,6 +145,8 @@ static class Program
                     if (artic) Gen.AddArticulations(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 5));
                     // (--ornaments: likewise)
                     if (ornaments) Gen.AddOrnaments(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 11));
+                    // (--fingers: likewise, after the other marks: a note with one gets no digit)
+                    if (fingers) Gen.AddFingers(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 23));
                     // (--scripts2: likewise)
                     if (scripts2) Gen.AddScripts2(piece, new Random(seed * 7919 + n * 104729 + suiteKey + 17));
                     // (--spans: likewise)

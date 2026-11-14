@@ -731,6 +731,38 @@ static class Gen
             }
     }
 
+    // OmrGen --fingers: a piano edition's fingering over every suite's notes (2026-11-14, ROADMAP
+    // section 0's gate 1: Schirmer's Bargiel, its digits over runs of eighths taken for unprinted
+    // tuplets' numbers, the assembly writing 120 tuplets from 14 numbers the detector saw strongly).
+    // From a stream of its own after the music like --artic. A run of one to six single notes in a
+    // line, one run starting on a note in five, the digits moving by step as a hand does (a 3 as
+    // likely as any); not on a chord (lysc draws a chord's @finger nowhere, a member's at the stem's
+    // end), a rest, or a note with a mark already
+    public static void AddFingers(GPiece p, Random rng)
+    {
+        foreach (var part in p.Parts)
+            foreach (var voice in Enumerable.Range(0, part.Bars.Max(b => b.Count)))
+            {
+                var line = part.Bars.Where(b => voice < b.Count).SelectMany(b => b[voice]).ToList();
+                for (int i = 0; i < line.Count; i++)
+                {
+                    // (every value drawn whether used or not: the draws stay in step)
+                    double r = rng.NextDouble();
+                    int run = rng.Next(1, 7), finger = rng.Next(1, 6);
+                    if (r >= 0.2) continue;
+                    for (int k = i; k < Math.Min(line.Count, i + run); k++)
+                    {
+                        var e = line[k];
+                        int step = rng.Next(2) * 2 - 1;   // -1 or +1: the next finger, drawn for every note of the run
+                        if (e.IsRest || e.Space || e.Pitches.Count != 1 || e.Marks.Contains('@')) continue;
+                        e.Marks += $"@finger({finger})";
+                        finger = finger + step is >= 1 and <= 5 ? finger + step : finger - step;
+                    }
+                    i += run;
+                }
+            }
+    }
+
     // OmrGen --ornaments: ornaments on every suite's notes (S23: the detector's training data for
     // them), from a stream of their own after the music like --artic: the trill's tr, the mordent,
     // the prall, the turn and the reverse turn, which Lily# sets above the staff whatever the stem.
