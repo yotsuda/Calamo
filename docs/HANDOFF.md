@@ -2,6 +2,31 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S61 歩 3c: 2 つの譜表の間の 3 の持ち主を、両方の小節の長さで選ぶ（`Reader.TupletOwner`）。**check の再現率 gen-mix 規則 97.36 → 97.93・検出器 97.46 → 98.28、gen-mix-scan 規則 95.19 → 95.78・検出器 96.01 → 96.76**（2026-11-15 未明、前の節の次の一手 1）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0・nothing worse、`out/s85/check-head.log`。`gate:` の警告は、走っている間に作業ツリーの Reader.cs を変えたため。走ったのは HEAD の exe）。変更後: 規則 check **OK（6 better・nothing worse、`out/s85/check-rules.log`。gen-mix・gen-mix-scan の recall・precision・inVoice）**、検出器 check **OK（6 better・nothing worse、`out/s85/check-det.log`）**。開発用の台（回帰の確かめ、`-Dev -Reuse -Verify`、`out/s85/dev.log`）**0 better・0 worse・39 同じ**（原因の内訳も全部同じ。`docs/dev-sets.tsv` は写していない）。基準値は規則・検出器とも `-Accept` で受け入れた。
+
+**変更の種類**: 門 1 生成譜で再現（`gen-mix`・`gen-mix-scan`: 譜表の間の数字を、違う譜表の連桁が取る）＋門 2 文法の制約（どの譜表も声部の長さ = 小節の長さ。譜表どうしの制約の最初の形）。
+
+**やったこと**（設計 `docs/assembly-inference.md` の歩 3 の行に「3c 済み」、歩 5 の行に一言）:
+- `FindTuplets` は数字を、連桁の先がいちばん近い譜表に渡す（`Symbols.Tuplets.cs` の 285 行）。小節の長さは見ていない。lied001 の 24 小節: 右手の下の声部の `e'4 e'8` の 3 を、上向きの連桁の左手 `g,16 <f, g,>8` が取った。左手は 16 分足りず、右手は 8 分長すぎる。どちらの組も格子に乗るので `OffGridTuplets` は気づかない。
+- `TupletOwner`（`BuildMeasure` の `StemsShortOfBeam` の後、譜表ごとの連符の直しの前）: 上下に並ぶ 2 つの譜表がどちらも埋まらないとき、2 つの譜表の間に数字がある 3 連符の組（`sym.Tuplets[id - 1]` の位置）ごとに、もう一方の譜表から数字に向いた事象（上の譜表なら下向きの符幹、下の譜表なら上向き、と休符）の連なりを並べる。連なりは書いた長さが 4 分・8 分・16 分の 3 つ分で、両端が音符、数字の x を含む（±1 間）。組をそこへ移して**両方の小節が埋まる**ものだけを採る（中心が数字に近い順の最初）。`Symbols.Tuplets` の `o.St` は書き換えない（小節を組み直すと同じ判断が出るように）。
+- gen-mix で動いたのは 6 曲 6 か所（lied001・003 ×2・004・007・010。`--at 0,0` の `tuplet owner:` の行）。HEAD の版（`out/s85/headbin`）で読み比べると、lied001 は 530 → 535（24 小節が全部合う）、lied003 の 16 小節は左手が全部合い、右手は 1 音を残すだけになった。下がった小節は見つからない。
+
+**正直に書いておくこと**:
+1. 3 連符（倍率 2/3）だけ。5 や 6 の数字の持ち主は見ていない。
+2. 連なりは 1 つの向きの符幹の列から取る。数字の下に 2 声部が混ざる組や、和音の中の別の向きの音は候補にならない。
+3. 両方の小節が埋まることだけで決めるので、どちらかの譜表に別の読み違いがあると動かない（安全側）。
+4. 公平な台・評価台は回していない（歩 3 の終わりで回す。次の一手 3）。
+
+**次の一手**（§0 の (A)、設計の歩 3 の続き）:
+1. 「横に文字がある」で捨てた数字も、歌詞の無い譜表に限って `LooseTuplets` に（gen-mix の lied001 の 22 小節の左手）。その判定（`FindTuplets` の 185〜198 行）は数字の値が決まる前にあるので、歌詞のある譜表かどうかがそこで分かるかを先に見る。
+2. 選ぶ物差しを `Fills` から本番の `Search` に寄せる（歩 2 の結論: 先に `Search` に x の時刻の制約）。
+3. **歩 3 の区切りとして公平な台・評価台**（`-Fair`、`-Eval -Reuse -Verify -OmrArgs --read-lyrics`）。3a・3b・3c がそろったので、1・2 より先にやってもよい。私の推しは 3 が先（どれだけ効いたかを homr との差で測り、残りの型を選び直す）。
+4. (B) の材料: 検出器に運指のクラス。オーナーへの問い (b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ、は残っている。
+
+**読めない型の記録**: 前の節のまま（8va の下の和音と加線の上の音部記号の取り違え（Lacombe）、弱起型の同音の連打の最初を 1 段低く（Bargiel Breitkopf））。
+
 ## S61 歩 3b: 数字のない 3 連符を声部ごとの線の探索に（`Reader.ThreesInLines`）。**gen-mix（規則）4942 → 4984 音、検出器つき 4951 → 4981**（2026-11-14 夜、前の節の次の一手 1）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0・nothing worse、`out/s84/check-head.log`）。変更後: 規則 check **OK（6 better・nothing worse、`out/s84/check-rules3.log`。gen-mix 96.54 → 97.36、gen-mix-scan 94.57 → 95.19、どちらも精度と声部の一致も）**、検出器 check **OK（6 better・nothing worse、`out/s84/check-det2.log`。gen-mix 96.72 → 97.46、gen-mix-scan 95.39 → 96.01）**。開発用の台（回帰の確かめ、`-Dev -Reuse -Verify`）**0 better・0 worse・39 同じ**（原因の内訳も全部同じ。`docs/dev-sets.tsv` は写していない）。基準値は規則・検出器とも `-Accept` で受け入れた。

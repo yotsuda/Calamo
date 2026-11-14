@@ -616,6 +616,7 @@ static class Reader
         CrossBeams(ms.Evs, ms.Single, s, ms.BarTicks, state, b);
         HandedGroups(ms.Evs, ms.Single, s, ms.BarTicks);
         StemsShortOfBeam(ms.Evs, ms.Single, s, ms.BarTicks);
+        TupletOwner(sys, sym, ms, s);
         for (int p = 0; p < n; p++)
         {
             var st = sys.Staves.FirstOrDefault(x => x.Part == p);
@@ -629,6 +630,77 @@ static class Reader
             ThreesInLines(ms.Evs[p], ms.Single[p], ms.BarTicks, time, sym.LooseTuplets.Any(t => t.St == st && t.Value == 3 && t.X > x0 && t.X < x1));
         }
         return ms;
+    }
+
+    /// <summary>
+    /// A 3 between two staves is the group's of the staff whose bar it fills. FindTuplets gives it to the
+    /// beam whose tips stand nearest; where the other staff's notes face the number too, the nearest may be
+    /// the wrong one (gen-mix's lied001 bar 24: the right hand's lower voice e'4 e'8 under the 3, the left
+    /// hand's g,16 &lt;f, g,&gt;8 beamed up to it -- the left hand took it, a sixteenth short, the right hand an
+    /// eighth too long, and both groups on the grid, so OffGridTuplets saw nothing). Where both staves' bars
+    /// fail to fill as read, the group under the number on the other staff -- a run of its events facing the
+    /// number, three quarters, eighths or sixteenths written, notes at either end, about the number's x --
+    /// takes the number, and the reading stands only if both bars then fill (the grammar's hard constraint,
+    /// each staff's voices last the bar: ROADMAP section 0's (A), the first of step 5's constraints between
+    /// staves in docs/assembly-inference.md). Of several runs that do, the one centred nearest the number.
+    /// </summary>
+    static void TupletOwner(SystemInfo sys, PageSymbols sym, Measure ms, double s)
+    {
+        if (NoUnprinted || ms.BarTicks <= 0) return;
+        var staves = sys.Staves.Where(x => x.Part >= 0 && x.Part < ms.Evs.Length && ms.Evs[x.Part] != null).OrderBy(x => x.Top).ToList();
+        for (int k = 0; k + 1 < staves.Count; k++)
+        {
+            var (upper, lower) = (staves[k], staves[k + 1]);
+            if (upper.Part == lower.Part || Fills(ms.Evs[upper.Part], ms.BarTicks) || Fills(ms.Evs[lower.Part], ms.BarTicks)) continue;
+            foreach (var (from, to) in new[] { (upper, lower), (lower, upper) })
+            {
+                List<Ev> fe = ms.Evs[from.Part], fs = ms.Single[from.Part], te = ms.Evs[to.Part], ts = ms.Single[to.Part];
+                foreach (int id in fe.Where(e => e.Tuplet > 0 && e.Scale == (2, 3)).Select(e => e.Tuplet).Distinct().ToList())
+                {
+                    if (id - 1 >= sym.Tuplets.Count || sym.Tuplets[id - 1].C is not { } c) continue;
+                    // (the number between the two staves)
+                    if (!(c.Cy > upper.Bottom && c.Cy < lower.Top)) continue;
+                    var g = fe.Where(e => e.Tuplet == id).ToList();
+                    if (g.Count == 0) continue;
+                    // the other staff's events facing the number: stems down over it, up under it (and rests)
+                    int facing = to == upper ? -1 : 1;
+                    var row = te.Where(e => !e.Cue && !e.FullBar && (e.IsRest || e.Stem == facing)).OrderBy(e => e.X).ToList();
+                    var runs = new List<List<Ev>>();
+                    for (int i = 0; i < row.Count; i++)
+                    {
+                        int written = 0;
+                        for (int j = i; j < row.Count; j++)
+                        {
+                            if (row[j].Scale != (1, 1) || row[j].Tuplet != 0) break;
+                            written += row[j].Ticks;
+                            if (written > 3 * Dur.Of(4, 0)) break;
+                            if (j == i || written != 3 * Dur.Of(4, 0) && written != 3 * Dur.Of(8, 0) && written != 3 * Dur.Of(16, 0)) continue;
+                            var run = row.GetRange(i, j - i + 1);
+                            if (run[0].IsRest || run[^1].IsRest) continue;
+                            if (c.Cx < run[0].X - s || c.Cx > run[^1].X + s) continue;
+                            runs.Add(run);
+                        }
+                    }
+                    if (runs.Count == 0) continue;
+                    var was = fe.Concat(fs).Concat(te).Concat(ts).Distinct().ToDictionary(e => e, e => (e.Ticks, e.Scale, e.Tuplet));
+                    void Restore() { foreach (var (e, (t, sc, tu)) in was) { e.Ticks = t; e.Scale = sc; e.Tuplet = tu; } }
+                    void Apply(List<Ev> run)
+                    {
+                        foreach (var e in fe.Concat(fs).Where(e => e.Tuplet == id).ToList()) { e.Ticks = e.Ticks * 3 / 2; e.Scale = (1, 1); e.Tuplet = 0; }
+                        foreach (var e in run.Concat(ts.Where(f => run.Any(r => r.IsRest == f.IsRest && r.Stem == f.Stem && Math.Abs(r.X - f.X) < 1))).Distinct().ToList())
+                        { e.Ticks = e.Ticks * 2 / 3; e.Scale = (2, 3); e.Tuplet = id; }
+                    }
+                    var pick = runs.OrderBy(r => Math.Abs((r[0].X + r[^1].X) / 2 - c.Cx))
+                                   .FirstOrDefault(r => { Apply(r); bool both = Fills(fe, ms.BarTicks) && Fills(te, ms.BarTicks); Restore(); return both; });
+                    if (pick == null) continue;
+                    Apply(pick);
+                    if (Symbols.DebugAt == (0, 0))
+                        Console.WriteLine($"tuplet owner: the 3 at {c.Cx:F0},{c.Cy:F0} from part {from.Part}'s {string.Join(" ", g.Select(e => e.Show()))} to part {to.Part}'s {string.Join(" ", pick.Select(e => e.Show()))}");
+                    goto next;
+                }
+            }
+            next:;
+        }
     }
 
     /// <summary>
