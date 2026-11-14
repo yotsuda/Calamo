@@ -215,10 +215,18 @@ static class Detector
     public static double RawFloor = Environment.GetEnvironmentVariable("OMR_DUMP_DETECTIONS") != null ? 0.05 : 0;
     public static List<Detection> Raw = new();
 
+    // (S61, step 1 of docs/assembly-inference.md: a stem's tip and a tuplet's number under their thresholds, down
+    // to this score, kept apart in Faint -- never in Detect's list, so the reading is the same to the byte. They
+    // are the candidates' evidence for a value or a tuplet the page half shows: ValueEvidence, --candidates)
+    public static double FaintFloor = 0.1;
+    public static List<Detection> Faint = new();
+
     public static List<Detection> Detect(byte[] gray, int w, int h, double s)
     {
         var found = new List<Detection>();
         Raw = new List<Detection>();
+        Faint = new List<Detection>();
+        var faintEdge = new List<Detection>();
         if (session == null || s <= 0) return found;
         double scale = Space / s;
         int rw = Math.Max(1, (int)Math.Round(w * scale)), rh = Math.Max(1, (int)Math.Round(h * scale));
@@ -246,13 +254,14 @@ static class Detector
             // nothing of its class there (gen-lied-all's lied009, a head on the seam lost with detector47)
             int lo = k == 0 ? 0 : Step / 2, hi = k == tops.Count - 1 ? Height : Step / 2 + Step;
             if (RawFloor > 0)
-                foreach (var (c, fx, fy, score, gy) in Peaks(heat, RawFloor))
+                foreach (var (c, fx, fy, score, gy, _) in Peaks(heat, RawFloor))
                     if (gy >= lo - Stride && gy < hi + Stride)
                         Raw.Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score });
-            foreach (var (c, fx, fy, score, gy) in Peaks(heat))
+            foreach (var (c, fx, fy, score, gy, faint) in Peaks(heat, faintFloor: FaintFloor))
             {
                 bool own = gy >= lo && gy < hi;
                 if (!own && !(gy >= lo - Stride && gy < hi + Stride)) continue;
+                if (faint) { (own ? Faint : faintEdge).Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score }); continue; }
                 (own ? found : edge).Add(new Detection { Class = Classes[c], X = fx / scale, Y = (fy + top) / scale, Score = score,
                                                          Digits = IsTab(c) ? DigitScores(heat, (int)Math.Round(fx / Stride), gy / Stride) : null });
             }
@@ -260,6 +269,9 @@ static class Detector
         foreach (var e in edge)
             if (!found.Any(t => t.Class == e.Class && Math.Abs(t.X - e.X) < 0.5 * s && Math.Abs(t.Y - e.Y) < 0.5 * s))
                 found.Add(e);
+        foreach (var e in faintEdge)
+            if (!Faint.Any(t => t.Class == e.Class && Math.Abs(t.X - e.X) < 0.5 * s && Math.Abs(t.Y - e.Y) < 0.5 * s))
+                Faint.Add(e);
         if (DumpDir != null) Dump(gray, w, h, s);
         return found;
     }
@@ -285,6 +297,7 @@ static class Detector
     // Symbols.WeakTupletNumber up) and taken only to tell a tuplet's arc from a slur (DetectedSlurs'
     // Bracket): an old print's 3 under its arc, seen at 0.42 and 0.49
     static readonly bool[] TupletClass = Classes.Select(c => c.StartsWith("tuplet_")).ToArray();
+    static readonly bool[] StemClass = Classes.Select(c => c.StartsWith("stem_")).ToArray();
     public static bool IsWeakTuplet(Detection t) => t.Class.StartsWith("tuplet_") && t.Score <= Threshold;
 
     /// <summary>Each TAB digit's score around a grid point (the best over its 3x3).</summary>
@@ -308,7 +321,7 @@ static class Detector
     /// placed at the centre of mass of its 3x3 neighbourhood (the grid, a quarter of a space, is
     /// too coarse to tell a line from a space).
     /// </summary>
-    static IEnumerable<(int C, double X, double Y, double Score, int GridY)> Peaks(Tensor<float> heat, double floor = 0)
+    static IEnumerable<(int C, double X, double Y, double Score, int GridY, bool Faint)> Peaks(Tensor<float> heat, double floor = 0, double faintFloor = 0)
     {
         int kk = heat.Dimensions[1], ph = heat.Dimensions[2], pw = heat.Dimensions[3];
         int crossClass = Array.IndexOf(Classes, "head_x"), percentClass = Array.IndexOf(Classes, "percent_1"), percent2Class = Array.IndexOf(Classes, "percent_2");
@@ -348,6 +361,9 @@ static class Detector
                         : TupletClass[c] ? Math.Min(Threshold, Symbols.WeakTupletNumber)
                         : IsTab(c) ? Math.Min(Threshold, WeakTab) : Threshold;
             if (floor > 0) th = floor;
+            // (a stem's tip and a tuplet's number on down to faintFloor, those under th marked faint: Faint)
+            double keep = th;
+            if (floor == 0 && faintFloor > 0 && (StemClass[c] || TupletClass[c])) th = Math.Min(th, faintFloor);
             // (a little under the threshold's logit, then the threshold itself on the sigmoid, as before)
             double zth = Math.Log(th / (1 - th)) - 1e-3;
             for (int y = 0; y < ph; y++)
@@ -370,7 +386,7 @@ static class Detector
                         }
                     if (!max) continue;
                     // (grid point i stands for pixel i * Stride: the training peak sits at round(centre / Stride))
-                    yield return (c, sx / tot * Stride, sy / tot * Stride, v, y * Stride);
+                    yield return (c, sx / tot * Stride, sy / tot * Stride, v, y * Stride, v <= keep);
                 }
         }
     }

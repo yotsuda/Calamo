@@ -112,6 +112,7 @@ static class Reader
         // the learnt detector (--detector) reads the whole page once: the barlines it found tell
         // of the staves too faint for the row test (a scan's), then go to FindBars; the rest to Symbols.Find
         var det = Detector.Enabled && d.Gray != null ? Detector.Detect(d.Gray, d.W, d.H, s) : null;
+        var faint = det != null ? Detector.Faint : new List<Detection>();
         // (a head seen at two sizes, as a black head and as a grace note's, each under the threshold: one head)
         if (det != null) { Detector.JoinSizes(det, s); det.RemoveAll(Detector.IsWeakHollowGrace); }
         // (TAB digits under the threshold are only the TAB's: rivals to a fret's other reading, Tab.Apply)
@@ -173,6 +174,8 @@ static class Reader
         sym.WeakTrills = weakTrills;
         sym.WeakRests = weakRests;
         sym.Scan = d.Raw != null || d.Bowed != null;
+        sym.Faint = faint;
+        ValueEvidence.Attach(sym, s);
         // a head or rest nearest a TAB or a one-line staff is that staff's, not a part's (a
         // percussion line's notes read as a vocal staff's seven spaces up, the next system's)
         // (only one the systems took: a "line" left over is something else, a long beam under a bass's notes)
@@ -1688,7 +1691,7 @@ static class Reader
                     Stem = h.HasStem ? (h.Up ? 1 : -1) : 0, StemX = h.StemX, Y = h.Y, PosLo = h.Pos, PosHi = h.Pos, Tied = h.Tie ? new List<Pitch> { pitch } : null,
                     StemLo = h.HasStem ? Math.Min(h.Y, h.Tip) : h.Y, StemHi = h.HasStem ? Math.Max(h.Y, h.Tip) : h.Y,
                     SlurStart = h.SlurStart, SlurEnd = h.SlurEnd, SlurStartAcross = h.SlurStartAcross, SlurEndAcross = h.SlurEndAcross, SlurStartCross = h.SlurStartCross, SlurEndCross = h.SlurEndCross, Slash = h.Slash, Alts = others?.Count > 0 ? others : null,
-                    Bare = bare && !h.Slash ? new List<int> { dia } : null, OctaveClef = octaveClef,
+                    Bare = bare && !h.Slash ? new List<int> { dia } : null, OctaveClef = octaveClef, Seen = h.Seen,
                 };
                 // heads on one stem (or stemless heads at one x) make a chord (a slash is no chord's)
                 // (and not two values, beamed or flagged both, on stems one past the other's end in one column: a
@@ -1711,6 +1714,7 @@ static class Reader
                     if (ev.Tie) mate.TieAt(pitch);
                     mate.StemLo = Math.Min(mate.StemLo, ev.StemLo); mate.StemHi = Math.Max(mate.StemHi, ev.StemHi);
                     mate.PosLo = Math.Min(mate.PosLo, h.Pos); mate.PosHi = Math.Max(mate.PosHi, h.Pos);
+                    mate.Seen = ValueEvidence.Join(mate.Seen, ev.Seen);
                     mate.SlurStart |= ev.SlurStart;
                     mate.SlurEnd |= ev.SlurEnd;
                     // (a new list: the first head's single copy shares the old one; a chord's dot is one)
@@ -1762,7 +1766,7 @@ static class Reader
                     Console.WriteLine($"rest at {x:F0},{r.Y:F0}: {graces.Count} grace notes before it {(theirs ? "wait for the head past it" : "are nobody's")}");
                 if (!theirs) graces.Clear();
                 int basis = r.Kind switch { RestKind.Whole => 1, RestKind.Half => 2, RestKind.Quarter => 4, RestKind.Eighth => 8, _ => 16 };
-                var ev = new Ev { IsRest = true, Ticks = Dur.Of(basis, r.Dots) * r.Scale.Num / r.Scale.Den, X = x, Scale = r.Scale, Tuplet = r.Tuplet, Y = r.Y, ClefBefore = clefBefore };
+                var ev = new Ev { IsRest = true, Ticks = Dur.Of(basis, r.Dots) * r.Scale.Num / r.Scale.Den, X = x, Scale = r.Scale, Tuplet = r.Tuplet, Y = r.Y, ClefBefore = clefBefore, Seen = r.Seen };
                 clefBefore = null;
                 evs.Add(ev);
                 single.Add(ev.Copy());

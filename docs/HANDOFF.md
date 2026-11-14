@@ -2,6 +2,32 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S61 歩 1: 確信度を `Ev` まで運んだ（`ValueEvidence`、`Detector.Faint`、`--candidates`）。**読みは変えていない**: 規則・検出器の check とも 0 better・nothing worse（2026-11-14、前の節の次の一手 1）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0・nothing worse、`out/s81/check-head.log`）。変更後の check: 規則 OK（0・nothing worse、`out/s81/check-rules.log`）、検出器 OK（0・nothing worse、所要は前回並みの約 47 分、`out/s81/check-det.log`）。基準値は更新していない（要らない）。
+
+**変更の種類**: 道具（読み手の決定は変えない）。check は `gate:` の警告を出した（読み手のファイルが変わり、better が無く、生成器も変わっていない）。**門 2 ではない**: 変えたのは候補の点数を運ぶ欄と書き出しだけで、どの決定もそれを読まない。check が規則・検出器とも全部 same であることがその確かめ。
+
+**やったこと**（設計 `docs/assembly-inference.md` の歩 1。表の行に「済み」を書いた）:
+- `Detector.Faint`: `stem_N` と `tuplet_N` の山を、それぞれの閾値の下 `FaintFloor`（0.1）まで拾い、`Detect` が返す一覧には入れず別に置く（`Peaks` が `Faint` の印を返す。閾値の上の山はもとと同じ判定）。`Reader.Read` が `PageSymbols.Faint` に写す。
+- `Head.RuleBeams`: `DetectedBeams` が上書きする前の規則の本数（`CountBeams`）。
+- `ValueEvidence`（新しいファイル `src/Omr/ValueEvidence.cs`）: 符頭の点数、`head_black`/`head_half`、規則の本数、`stem_0..3`（faint も）、休符 3 クラス（弱いものも）、付点（弱いものも）。窓は `Fixes.Candidates` と同じ。`Symbols.Find` の後に `Head.Seen`・`Rest.Seen` に付け、`StaffEvents` が `Ev.Seen` に渡す（和音は頭ごとの最大、`Join`）。
+- `--candidates`: `candidates.tsv`（事象ごと: 頁・小節・パート・x・y・読み・連符・上の点数）と `candidates-tuplets.tsv`（連符の数字ごと: sure/weak/faint と、読みが採ったか）を書く。切っていれば読みはバイト単位で同じ。
+- 試し: `gen-fing` の basic003（`out/s81/cand-basic003`）で、運指の数字が `tuplet_3`/`tuplet_5` として sure 9・weak 11・faint 11 個に見え、**sure の 9 個は全部連符に採られている**。歩 3 の材料。
+
+**正直に書いておくこと**:
+1. `ValueEvidence` は `Symbols.Find` 直後の符頭・休符に付ける。その後に読み手が足す事象（`Fixes` の「半分見えた休符」、`HeldNotes`、拍の繰り返しの書き出しなど）は `Seen` が null。
+2. 連符の数字の「採ったか」は、`ps.Tuplets` の片の箱の 0.5 間以内に中心があるか、で決めている。検出器だけの数字（片の無いもの）は箱が無いので採ったと出ない場合がある。数えるときは確かめる。
+3. 速さ: `Peaks` が `stem_N`・`tuplet_N` を 0.1 まで走査する分だけ遅くなる。頁ごとには測っていない（規則の check 約 17 分・検出器の check 約 47 分で、前回と同じくらい）。
+
+**次の一手**（§0 の (A)、設計の歩 2 から）:
+1. **歩 2（門 2）**: `Fills` の声部の模型（s = 0 の `ByStems`）を最後の `Store` の `Search` に揃える。生成譜の check で better が出ることを確かめる。
+2. 歩 3（門 1 = `gen-fing`・`gen-fing-scan`、門 2）: 連符の選択を探索に。`candidates-tuplets.tsv` で `gen-fing` 全体の「sure の運指の数字を採った数」を先に数えて物差しにする。λ の合わせ方と S53 の較正表を先に作るかを決める（設計 §5）。
+3. 並べて (B) の材料: 検出器に運指（数字）のクラスを足すか、運指を「連符の数字ではないもの」として学習に入れるか（`--fingers` で教材が作れる）。S60 の学習し直しと一緒に考える。
+4. 前々節からのオーナーへの問い (b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ、は残っている。
+
+**読めない型の記録**: 前の節のまま（8va の下の和音と加線の上の音部記号の取り違え（Lacombe）、弱起型の同音の連打の最初を 1 段低く（Bargiel Breitkopf））。
+
 ## S61 を始めた: (A) の設計（`docs/assembly-inference.md`）と門 1 の台 `gen-fing`。**運指だけで、検出器つきの再現率が 100 → 94.0〜99.4、連符は正解 157 に対して 240**（2026-11-14、オーナーの「§0 の (A) からやって」）
 
 **現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0 better・nothing worse、`out/s80/check-head.log`）。新しい 2 台を足した check は規則・検出器とも nothing worse（better は新しい台の項目だけ、`out/s80/check-fing.log`・`check-fing-det.log`）で、基準値を `-Accept` で受け入れた。

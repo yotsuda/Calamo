@@ -263,6 +263,13 @@ if (opt.TryGetValue("evidence", out var evidenceOpt))
     evidenceDets = new StringBuilder("page\tclass\tx\ty\tscore\n");
     evidenceBars = new StringBuilder("page\tsystem\tbar\tpart\tx0\tx1\ttop\tbottom\ts\tclef\tkey\n");
 }
+// (--candidates: every event's value evidence and every tuplet number seen, ValueEvidence.Write; off, the reading is the same to the byte)
+StringBuilder candEvents = null, candTuplets = null;
+if (opt.ContainsKey("candidates"))
+{
+    candEvents = new StringBuilder("page\tbar\tpart\tx\ty\tevent\ttuplet\t" + ValueEvidence.Header + "\n");
+    candTuplets = new StringBuilder("page\tclass\tx\ty\tscore\thow\ttaken\n");
+}
 for (int page = from; page <= to; page++)
 {
     string path = Path.Combine(opt["pages"], $"p{page:D2}.png");
@@ -286,6 +293,7 @@ for (int page = from; page <= to; page++)
     // the other readings of the bars left doubted go with their length todos (x.omr.json "readings")
     foreach (var fx in Fixes.Apply(res, state, readings, (x, y) => { var p = res.Dark.ToSource(x, y); return ((int)Math.Round(p.X), (int)Math.Round(p.Y)); }))
         sidecar.AddTodo(fx.Bar, fx.Part, "fixed", $"{fx.Was} read as {fx.Now}: {fx.Why} (evidence {fx.Evidence:F2}); the bar fills its time now", 1);
+    if (candEvents != null) ValueEvidence.Write(candEvents, candTuplets, res, p => cfg.Parts[p].Id);
     // the title, subtitle, composer and poet over the first page's music (Header: Windows' OCR); the
     // read command always, a run of the reader with --header
     bool words = (readCmd != null || opt.ContainsKey("header")) && !opt.ContainsKey("no-header");
@@ -492,6 +500,11 @@ for (int page = from; page <= to; page++)
 // (and the last page's: no page follows)
 foreach (var o in carried) o.Close(null, null);
 File.WriteAllText(Path.Combine(outDir, "others.csv"), csv.ToString());
+if (candEvents != null)
+{
+    File.WriteAllText(Path.Combine(outDir, "candidates.tsv"), candEvents.ToString());
+    File.WriteAllText(Path.Combine(outDir, "candidates-tuplets.tsv"), candTuplets.ToString());
+}
 if (opt.ContainsKey("svg"))
 {
     Console.WriteLine(symEval.Summary());

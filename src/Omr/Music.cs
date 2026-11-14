@@ -143,6 +143,7 @@ sealed class Ev
     public bool Held;                           // OMR: another voice's held note written on a beamed chord's stem (Head.Held): its value from the bar's time (Reader.HeldNotes)
     public int DrawnOn = -1;                    // OMR: the part whose staff it is drawn on, its beam group this part's (Reader.CrossBeams; -1: its own): the .lys writes @cross
     public bool CrossStaff => DrawnOn >= 0;
+    public ValueEvidence Seen;                  // OMR: what the page showed for its value, every reading's score (a chord's: its heads' best; S61): no reading takes it yet
 
     public Ev Copy()
     {

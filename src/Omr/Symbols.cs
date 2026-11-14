@@ -36,6 +36,8 @@ sealed class Head
     public bool TremoloFirst;    // the first note of the two
     public bool TremoloStem;     // one of the two has a stem: both are halves (a hollow head's stem missed, read as a whole's)
     public bool Held;            // another voice's held note written on a beamed chord's stem, the chord's dot at it alone (Symbols.Classify): its own event, its value from the bar's time (Reader.HeldNotes)
+    public int RuleBeams = -1;   // the rules' count of beams or flags (CountBeams), before the detector's (DetectedBeams); -1: not counted (no stem, hollow)
+    public ValueEvidence Seen;   // what the page showed for its value, every reading's score (ValueEvidence.Attach): no reading takes it yet (S61)
     /// <summary>Whether its sign or dot may be one found on this staff: its own, or the nearest it was moved from (signs and dots go by the nearest staff).</summary>
     public bool On(Staff st) => St == st || Was == st;
 }
@@ -56,6 +58,7 @@ sealed class Rest
     public int Dots;
     public (int Num, int Den) Scale = (1, 1);
     public int Tuplet;
+    public ValueEvidence Seen;   // what the page showed for its value (ValueEvidence.Attach): no reading takes it yet (S61)
 }
 
 /// <summary>A beat repeat: one to four slashes a beam's thickness on the staff, no head among them (Symbols.BeatRepeats).</summary>
@@ -100,6 +103,7 @@ sealed class PageSymbols
     public List<Detection> WeakRests = new();      // its rests under Detector.Threshold: only as a bar's one reading that fills every voice (Fixes)
     public List<Detection> WeakTrills = new();     // its trills' "tr"s under Detector.Threshold: only where a trill line's wave follows (Articulations)
     public List<Detection> WeakTuplets = new();    // its tuplet numbers under Detector.Threshold (WeakTupletNumber up): only to tell a tuplet's arc from a slur (DetectedSlurs)
+    public List<Detection> Faint = new();          // its stems' tips and tuplet numbers under their thresholds (Detector.Faint): no reading takes them (S61, ValueEvidence)
     public List<Detection> WeakClefs = new();      // its clefs under Detector.Threshold: only inside a staff, on a clef's shape in the ink (Signatures.MidClefs)
     public List<Detection> WeakNaturals = new();   // its naturals under Detector.Threshold: only on a scan, by a head with no sign, on ink no rule named (Symbols.WeakNaturals)
     public List<Arpeggios.Arp> Arpeggios = new();   // the arpeggios' wavy lines left of chords: @arpeggio on them, and no rests in them
@@ -722,6 +726,7 @@ static partial class Symbols
                 if (n <= h.Beams + 1) h.Beams = n;
             }
         }
+        foreach (var h in ps.Heads) h.RuleBeams = h.HasStem && !h.Hollow ? h.Beams : -1;
         if (ps.Detections != null) DetectedBeams(ps, s, ink);
         if (ps.Detections != null) ChordRepeats(ink, ps, staves, s);
         Tremolos(ink, ps, s);
