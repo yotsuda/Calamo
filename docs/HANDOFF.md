@@ -2,6 +2,45 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S61 歩 3 の区切り: 公平な台・評価台を回した。**公平な台 5341 → 5354（90.1 → 90.3%、homr 97.9%）**、評価台 55619 → **55620**（10 better・7 worse。7 つとも歩 3a から）（2026-11-15、前の節の次の一手 3）
+
+**現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。REQUESTS に `fixed` なし（全部 `done`）、種は 6 つとも triage 済み。頭の規則 check は OK（0 better・nothing worse、`out/s86/check-head.log`）。`docs/fair-sets.tsv`・`docs/eval-sets.tsv` を今の数字に写した。
+
+**変更の種類**: 読み手は変えていない（測っただけ）。
+
+**数字**:
+- 公平な台（`-Fair -Reuse -Verify -OmrArgs --read-lyrics`、`out/s86/fair.log`）: **3 better・0 worse・5 同じ**。Bargiel Breitkopf 1148 → 1152、Schirmer 863 → 870、Lassen Hainauer 503 → 505。原因の内訳は tuplet 296 → 284、missed 121 → 119、extra 101 → 99、voice 117 → 116、value 75 → 76。homr との差は 7.8 → **7.6 ポイント**。
+- 評価台（`-Eval -Reuse -Verify -OmrArgs --read-lyrics`、`out/s86/eval.log`、66 台）: 55619 → **55620**。better 10（burgmuller100-01-mutopia +8、faisst4-5-scan +8、chopin28-4-scan +6、schumann15-1-rje +3、schumann15-7-mutopia +3 ほか）、**worse 7**（chaminade-paysbleu-scan −17、kinkel7-2-scan −8、dl-scan・elgar60-1-ms・elgar60-1-scan −2、chaminade-paysbleu-ms・holmes-melodies16-ms −1）。原因: tuplet 543 → 547、key 22 → 20、ほかはほぼ同じ。
+- **下がった 7 台を版ごとに読み比べた**（§7 の「どのコミットからか」まで。画像は見ていない）。歩 3a の前（ecf2271）・3a（1140c87）・3b（2d375d7）の作業ツリーで 7 台だけ（`out/s86/bisect-*.log`）:
+
+| 台 | 3a の前 | 3a | 3b | 3c（HEAD） |
+|---|---|---|---|---|
+| dl-scan | 12680 | 12678 | 12678 | 12678 |
+| chaminade-paysbleu-ms | 1119 | 1118 | 1118 | 1118 |
+| chaminade-paysbleu-scan | 936 | **916** | 919 | 919 |
+| elgar60-1-ms | 745 | 743 | 743 | 743 |
+| elgar60-1-scan | 653 | 651 | 651 | 651 |
+| holmes-melodies16-ms | 1333 | 1332 | 1332 | 1332 |
+| kinkel7-2-scan | 813 | **805** | 805 | 805 |
+
+  7 台とも **3a（`OffGridTuplets`）で下がった**。3a の正直 3「本物の連符で範囲を取りこぼし、さらに別の誤りがある小節では、どの候補も小節を埋めず『外す』に落ちて 1〜2 音悪くなり得る」の型と思うが、確かめていない（評価台の画像は見ない）。
+
+**公平な台の残りの差（台ごとの原因、`out/audiveris/fair-sets.tsv`）**: Schirmer が tuplet 246・voice 80・missed 60・extra 52 で、差の大半。ほかの 7 台は tuplet 0〜19。
+Schirmer の `omr.lys` の頭を見たら **`time 2/4`**（正解は `time 3/4`）で、左手の 8 分 6 つが 2/4 に合わせて 3 連符 2 組にされ、右手の多くの小節に「a quarter too long for 2/4」の todo が付いていた。tuplet 246 の大半はこれと思う。**§0 で公平な台はデバッグに使わないので、ここで止めた**（なぜ 2/4 と読んだかは見ていない）。
+
+**正直に書いておくこと**:
+1. 読み比べたのは下がった 7 台だけ。上がった 10 台がどの歩から来たかは分けていない。
+2. Schirmer の 2/4 は公平な台を開いて見つけた。これを直す仕事にするなら、先に門 1（生成譜で再現）か門 2 の形にする（次の一手 2）。
+3. 3a の前の版は 7 台とも基準値（`docs/eval-sets.tsv` の前の版）を再現したので、読み比べの道具（作業ツリー＋`data` と `bin` の足りないファイルを写す）は信用してよい。作業ツリーは消した。
+
+**次の一手**（§0 の (A)）:
+1. **3a の「外す」の落ち方を門 1 で再現して直す**: 本物の 3 連符の範囲の取りこぼし＋同じ小節の別の誤り（生成譜の劣化版 `gen-mix-scan`・`gen-scan` か、新しい台）で、3a が数字を外して悪くなる小節を探す。出たら「どの候補も小節を埋めないときは外さずに残す（範囲の取りこぼしなら隣を足した候補を採る）」などを試し、評価台の 7 台で戻るかを区切りで見る。
+2. **拍子を小節の中身で選ぶ（門 2）**: 頁の拍子の読みが、多くの小節で同じ長さだけ足りない／長すぎ、別の拍子なら埋まるなら、その拍子を採る（今の `Reader.CheckTimes` は譜表どうしで下の数字が割れたときだけ）。先に生成譜で再現する: 拍子の数字を汚した・欠いた台（`degrade.py` か `OmrGen` で拍子の数字を消す）で、読み手が違う拍子を採るか。Schirmer の 246 はこの型と思うが、公平な台では確かめない。
+3. 前の節の次の一手 1・2（「横に文字がある」で捨てた数字を歌詞の無い譜表で `LooseTuplets` に、選ぶ物差しを `Search` に）。
+4. (B) の材料: 検出器に運指のクラス。オーナーへの問い (b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ、は残っている。
+
+**読めない型の記録**: 前の節のまま（8va の下の和音と加線の上の音部記号の取り違え（Lacombe）、弱起型の同音の連打の最初を 1 段低く（Bargiel Breitkopf））。
+
 ## S61 歩 3c: 2 つの譜表の間の 3 の持ち主を、両方の小節の長さで選ぶ（`Reader.TupletOwner`）。**check の再現率 gen-mix 規則 97.36 → 97.93・検出器 97.46 → 98.28、gen-mix-scan 規則 95.19 → 95.78・検出器 96.01 → 96.76**（2026-11-15 未明、前の節の次の一手 1）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0・nothing worse、`out/s85/check-head.log`。`gate:` の警告は、走っている間に作業ツリーの Reader.cs を変えたため。走ったのは HEAD の exe）。変更後: 規則 check **OK（6 better・nothing worse、`out/s85/check-rules.log`。gen-mix・gen-mix-scan の recall・precision・inVoice）**、検出器 check **OK（6 better・nothing worse、`out/s85/check-det.log`）**。開発用の台（回帰の確かめ、`-Dev -Reuse -Verify`、`out/s85/dev.log`）**0 better・0 worse・39 同じ**（原因の内訳も全部同じ。`docs/dev-sets.tsv` は写していない）。基準値は規則・検出器とも `-Accept` で受け入れた。
