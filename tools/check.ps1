@@ -390,5 +390,15 @@ if (-not (Test-Path "$sr\out\r.lys")) { $worse += "  section-resets: no reading 
 elseif (($srDrawn | Select-String 'LYS2001|LYS2006').Count -gt 0) { $worse += "  section-resets: the reading, drawn again, has bars of the wrong length (out\section-resets\out\r.lys)" }
 $better
 $worse
+# The gate (ROADMAP section 0): a change to the reader's rules is either a pattern first reproduced in the
+# generated set (so this check shows it better, or the generator changed with it) or a constraint of notation
+# that holds in every print. A reader change with neither looks like a rule for one print: say so.
+$changed = @(git -C $root diff HEAD --name-only 2>$null)
+$reader = @($changed | Where-Object { $_ -like 'src/Omr/*.cs' -and $_ -notmatch '/(Truth|SvgTruth|SymEval|Scorer)[^/]*\.cs$' })
+$generator = @($changed | Where-Object { $_ -like 'src/OmrGen/*' -or $_ -like 'src/OmrDegrade/*' -or $_ -in 'tools/run-gen.ps1', 'tools/check.ps1' })
+if ($reader.Count -gt 0 -and $better.Count -eq 0 -and $generator.Count -eq 0) {
+    "gate: the reader changed ($($reader -join ', ')) but nothing in the generated set got better and the generator is unchanged."
+    "      Go on only if it is a constraint of notation (ROADMAP section 0, gate 2), and write why in HANDOFF; otherwise reproduce it in the generator first."
+}
 if ($worse.Count -eq 0) { "check: OK ($($better.Count) better, nothing worse)" }
 else { "check: $($worse.Count) WORSE - look before committing (-Update accepts them as the new baseline)" }
