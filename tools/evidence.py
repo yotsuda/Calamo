@@ -20,7 +20,8 @@ An extra note or rest (nothing in the truth): 'saw' = the detector backs it stro
 'unseen' = the rules alone made it.
 
 Positions go by the reader's own staves and bars, so a staff or a bar misplaced shows as unseen.
-Scoring only: never used by the reading. Usage: py -3.12 -I tools/evidence.py [out\\audiveris] [rows.tsv]
+Scoring only: never used by the reading. Usage: py -3.12 -I tools/evidence.py [out\\audiveris | <pattern of reading folders>] [rows.tsv]
+(e.g. "out\\audiveris\\fair-*\\scored-own", "out\\s79\\ev-gen-scan\\*\\*\\omr": numbers only, for the sets not debugged on)
 """
 import csv
 import glob
@@ -302,12 +303,17 @@ def judge_bar(st, bar, part, rows, out, name, groups):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.join("out", "audiveris")
+    # (a pattern with * names the readings' own folders, any set: out\audiveris\fair-*\scored-own,
+    # out\gen-scan\*\*\omr; the set's name is the path the pattern's first * matched onwards)
+    if "*" in root:
+        star = root.index("*")
+        dirs = [(d, d[len(root[:star]):]) for d in sorted(glob.glob(root))]
+    else:
+        dirs = [(os.path.join(d, "scored-own"), os.path.basename(d)[4:]) for d in sorted(glob.glob(os.path.join(root, "dev-*")))]
     out = []
-    for d in sorted(glob.glob(os.path.join(root, "dev-*"))):
-        own = os.path.join(d, "scored-own")
+    for own, name in dirs:
         if not os.path.exists(os.path.join(own, "evidence-notes.tsv")):
             continue
-        name = os.path.basename(d)[4:]
         st = Set(own)
         groups = defaultdict(list)
         for r in st.notes:
