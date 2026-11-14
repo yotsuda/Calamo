@@ -2,6 +2,47 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S59 第 8 歩: 最新の homr（72fdfa8、2026-11-13）を公平な台 8 つで測った。**homr 5803/5927（97.9%）**、今の読み手 5341（90.1%）、Audiveris 4323（72.9%）。公平な台では **homr が 7.8 ポイント上**（2026-11-14、前の節の次の一手 1）
+
+**現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。REQUESTS に `fixed` なし、種は 6 つとも triage 済み（新しい報告なし）。頭の規則 check は OK（0 better・nothing worse、`out/s78/check-head.log`）。
+
+**置いたもの**:
+- `C:\MyProj\omr-compare\repos\homr` を 8bf2482（10-25）→ **72fdfa8**（11-13、v0.7.1 の後）に早送りし、`homr --init` で新しい模型 4 つ（encoder/decoder 566、staff_relations_pdmx2、staff_pieces_h1）を落とした。依存は pyproject の上限が緩んだだけで入れ直していない。
+- `C:\MyProj\omr-compare\scripts\run-homr-fair.ps1`: `out/audiveris/fair-*/pages`（Audiveris と読み手が読むのと同じ頁）を 1 頁ずつ homr（既定の設定、`--no-title`）に読ませ、`C:\MyProj\omr-compare\homr-out-72fdfa8\<台>\pNN.musicxml` に書く。10-25 の出力（`homr-out\`）はそのまま。
+- `tools/run-audiveris.ps1 -Homr <フォルダー>`: homr の MusicXML を Audiveris と同じ `--pred` の道（同じ `--align`、同じ正解）で採点し、台ごとの行と合計に `homr` を足す。homr はプログラムとして外で走らせ、出力だけを受け取る（AGPL）。
+
+**数字**（`out/s78/fair-homr.log`。`-Fair -Reuse -Verify -OmrArgs --read-lyrics -Homr …`。符頭 + 休符、`--poly`。今の読み手と Audiveris は前の節と全く同じ: 8 台とも same）:
+
+| 台 | 正解 | homr（72fdfa8） | 今の読み手（42） | Audiveris |
+|---|---|---|---|---|
+| fair-bargiel41-1-breitkopf | 1223 | **1220（99.8%）** | 1148（93.9%） | 1087（88.9%） |
+| fair-bargiel41-1-schirmer | 1223 | **1181（96.6%）** | 863（70.6%） | 842（68.8%） |
+| fair-hue-melodies1-leduc | 601 | **597（99.3%）** | 590（98.2%） | 529（88.0%） |
+| fair-lacombe28-1-hamelle | 630 | **562（89.2%**、音の高さだけなら 98.7%） | 541（85.9%） | 245（38.9%） |
+| fair-lang22-schmidt | 693 | **692（99.9%）** | 682（98.4%） | 586（84.6%） |
+| fair-lassen48-4-bosworth | 517 | **515（99.6%）** | 506（97.9%） | 453（87.6%） |
+| fair-lassen48-4-hainauer | 517 | **516（99.8%）** | 503（97.3%） | 106（20.5%） |
+| fair-sommer9-1-litolff | 523 | **520（99.4%）** | 508（97.1%） | 475（90.8%） |
+| 計 | 5927 | **5803（97.9%）** | 5341（90.1%） | 4323（72.9%） |
+
+- homr は 8 台すべてで小節を正しく揃えている（align は全部 n of n）。精度も 89〜99.9%。
+- homr の Lacombe の誤りは大半が**括弧のない 3 連符を 8 分と書く**型（16・30・60 小節の右手の 18 音の分散和音。音の高さは合っている）と、付点 2 分・2 分の長さ。Schirmer の運指は homr を崩していない（96.6%）。
+- 読む時間: homr は GPU で 1 頁 11.6〜33.8 秒（平均 19.5 秒、21 頁で 429 秒）。今の読み手は `--verify` 込みで 8 台 118 秒（1 頁約 5.6 秒）。
+- 今の読み手が homr に勝つ台は無い。差の大半は Schirmer（−318）と Bargiel Breitkopf（−72）、Lacombe（−21）で、残り 5 台は 1〜13 音差。
+
+**正直に書いておくこと**:
+1. 正解の叩き台は**今の読み手**の出力で、homr の出力は正解づくりに一度も使っていない。叩き台の偏りがあるとすれば今の読み手に有利な向き。それでも homr が上。
+2. 公平な台は「homr の学習（OpenScore Lieder・PDMX・GrandStaff）に入っていない」ことを条件に選んだ（S60 第 1 歩（前半）の候補の条件）。**画像が入っていないことは確かだが、曲（音の並び）が PDMX に入っていないかは確かめていない**。Lang・Lassen のような歌曲は MuseScore の利用者の投稿にあり得る。Bargiel・Lacombe・Hüe・Sommer は可能性が低いと思うが、調べていない。
+3. 10-25 の homr はこの台で測っていない。評価台の「homr 94.2%」（10-25 の版、`RESULTS.md`）と比べて、版が上がって強くなったのか、もともとこの種の頁に強いのかは**区別できていない**。
+4. homr の誤りは Lacombe の diffs を見ただけで、型として数えていない。
+
+**次の一手**（S59 第 9 歩）:
+1. **オーナーに**（判断が要る。勝手に進めない）: (a) この数字の受け止め（公平な台で homr 97.9% 対 90.1%。11-03 の「評価台は homr に並んだ」は、少なくともこの種の 19 世紀の刷りには当てはまらない）と次に何を追うか、(b) Lang の正解を git に入れないでよいか、(c) 正解をクラウドの AI に読ませて突き合わせるか。
+2. 区別のための安い計測（どちらも読み手は変えない）: 10-25 の homr（8bf2482）を同じ 21 頁で回す（約 8 分。`git checkout 8bf2482` と古い模型、`run-homr-fair.ps1 -Dst …homr-out-8bf2482`、終わったら 72fdfa8 に戻す）。72fdfa8 で評価台を測り直す（`omr-compare` の `run-homr.ps1` は旧名 `LilySharp-Omr` のパスのまま。`compare.ps1` も同じ）。
+3. 公平な台で見えた型を開発用の台・生成譜で再現できるかを見る（前のまま）: 運指の数字を連符と読む（Schirmer）、Lacombe の 8va と「加線の上の音部記号の取り違え」、弱起型の同音の連打の最初の音を 1 段低く読む（Breitkopf）。
+
+**未解決の疑問**: 前の節の 1（`Scorer.AddMarks` の譜表をまたぐ突き合わせ）は今回も数えていない。
+
 ## S59 第 7 歩: Bargiel Op.41-1 の正解を起こした（2 版で 1 つ）。**公平な台の 6 曲がそろった**: 8 台・5,927 音で今の読み手 **5341（90.1%）**、Audiveris 4323（72.9%）。Bargiel は Breitkopf で今の読み手 **1148/1223（93.9%）**・Audiveris 1087（88.9%）、Schirmer で今の読み手 **863（70.6%）**・Audiveris 842（68.8%）（2026-11-14、前の節の次の一手 1）
 
 **現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。REQUESTS に `fixed` なし、種は 6 つとも triage 済み（新しい報告なし）。頭の check は OK（0 better・nothing worse、`out/s77/check.log`）。
