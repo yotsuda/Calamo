@@ -3,6 +3,7 @@ from PIL import Image
 # crops.py <name> <pieces> <zoom>: each system of a fair-set page (out/fair/<name>/omr.omr.json: the reading's
 # measure boxes, only to find the systems), enlarged, in pieces left to right -- to write the truth from by eye.
 # ruled.py: each system with the pitch of every line and space written beside the staves (names heads at a glance);
+# ruledj.py: the same names, the staves taken from the reading's measure boxes (where ruled.py misses staves);
 # lines.py: the staff lines' y; strips.py: one part's staff; lyr.py: the voice staff and its words; zoom.py: any region; transpose.py: a truth moved to
 # another key. All write to out/fair-truth/<name>/. The pages are held out: to write and check the truth, never to debug the reader.
 name = sys.argv[1]; halves = int(sys.argv[2]); zoom = float(sys.argv[3])
