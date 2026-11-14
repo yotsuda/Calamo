@@ -622,11 +622,115 @@ static class Reader
             if (st == null) continue;
             // (a measure built again, a barline taken out, forgets what the first build read)
             sym.Unprinted.Remove((b, p));
+            OffGridTuplets(ms.Evs[p], ms.Single[p], ms.BarTicks);
             RestsBeforeSixteenths(ms.Evs[p], ms.Single[p], ms.BarTicks);
             if (UnprintedTriplets(ms.Evs[p], ms.Single[p], ms.BarTicks, time, st: st) is { } changed) sym.Unprinted[(b, p)] = (st, changed);
             else MixedThrees(ms.Evs[p], ms.Single[p], ms.BarTicks, time);
         }
         return ms;
+    }
+
+    /// <summary>
+    /// A printed tuplet's notes fill a whole number of its unit: three eighths under a 3 play a quarter,
+    /// five sixteenths under a 5 a quarter. Played, the group lasts a value of the binary grid (a whole
+    /// note halved some times, or a sum of such). Under a number whose group does not -- two eighths or one
+    /// quarter under a "3" or a "5" -- the number is no tuplet's (a fingering the detector read as one,
+    /// gen-fing): the notes keep their written values. Two voices under one number: the group, or each
+    /// voice's part of it (by stem direction), lasts such a value.
+    /// Not where a rest at the group's either end, taken out, leaves it lasting one: the span reached a
+    /// neighbour (tuplets004's quarter rest after its septuplet), which alone leaves the group. Nor where
+    /// the notes as written last no whole number of eighths either: a value under the number is misread
+    /// (a dot too many on a triplet's last eighth, gen-flip's threes005), which no dropping of the number
+    /// mends. A fingering stands over a beat's notes: two eighths, a quarter, four sixteenths, an eighth
+    /// and two sixteenths. But so does a triplet whose span missed its first or last note on a scan
+    /// (data/print's piano002, c'8 then the 3 over d'8 and the chord), or whose number broke in two
+    /// groups: the bar's length chooses between dropping the number and adding the neighbour, the
+    /// reading that fills the bar (dropping where none does).
+    /// </summary>
+    static void OffGridTuplets(List<Ev> evs, List<Ev> single, int barTicks)
+    {
+        // (Dur.Whole is 2^7 * 105: a value on the binary grid is a multiple of 105 ticks)
+        static bool OnGrid(IEnumerable<Ev> g) => g.Sum(e => e.Ticks) % 105 == 0;
+        static bool Lasts(List<Ev> g) => OnGrid(g) || g.GroupBy(e => e.Stem).All(OnGrid);
+        void Unscale(IEnumerable<Ev> which)
+        {
+            foreach (var e in which.ToList())
+            {
+                e.Ticks = e.Ticks * e.Scale.Den / e.Scale.Num;
+                e.Scale = (1, 1);
+                e.Tuplet = 0;
+            }
+        }
+        foreach (int id in evs.Where(e => e.Tuplet > 0 && e.Scale != (1, 1)).Select(e => e.Tuplet).Distinct().ToList())
+        {
+            var g = evs.Where(e => e.Tuplet == id).OrderBy(e => e.X).ToList();
+            if (g.Count == 0 || Lasts(g)) continue;     // (none: joined to a group before it)
+            var scale = g.First(e => e.Scale != (1, 1)).Scale;
+            string Shown() => string.Join(" ", g.Select(e => e.Show()));
+            // (the rests at either end: the fewest taken out first)
+            int lead = g.TakeWhile(e => e.IsRest).Count(), trail = Enumerable.Reverse(g).TakeWhile(e => e.IsRest).Count();
+            var trims = (from a in Enumerable.Range(0, lead + 1) from b in Enumerable.Range(0, trail + 1)
+                         where a + b > 0 && g.Count - a - b >= 2 orderby a + b select (a, b)).ToList();
+            int k = trims.FindIndex(t => Lasts(g.GetRange(t.a, g.Count - t.a - t.b)));
+            if (k >= 0)
+            {
+                var (ta, tb) = trims[k];
+                var off = g.Take(ta).Concat(g.Skip(g.Count - tb)).ToList();
+                if (Symbols.DebugAt == (0, 0)) Console.WriteLine($"off-grid tuplet {scale}: {Shown()} -- {off.Count} rest(s) at its end(s) not its");
+                Unscale(off.Concat(single.Where(f => f.IsRest && f.Tuplet == id && off.Any(e => Math.Abs(e.X - f.X) < 1))));
+                continue;
+            }
+            if (g.Sum(e => e.Ticks * e.Scale.Den / e.Scale.Num) % Dur.Of(8, 0) != 0)
+            {
+                if (Symbols.DebugAt == (0, 0)) Console.WriteLine($"off-grid tuplet {scale}: {Shown()} -- as written no whole number of eighths either: a value misread, kept");
+                continue;
+            }
+            // The number is no tuplet's, or its span missed a note: the voice's next event on either side
+            // (unscaled, or the next group of the same scale, a broken number read as two) makes the group
+            // last a grid value. The bar's length says which: the reading that fills it
+            int side = g.Where(e => !e.IsRest).Select(e => e.Stem).FirstOrDefault();
+            var row = evs.Where(e => !e.Cue && (e.IsRest || e.Stem == side)).OrderBy(e => e.X).ToList();
+            var options = new List<(string Name, Action Apply)> { ("the number is no tuplet's", () => Unscale(evs.Concat(single).Where(e => e.Tuplet == id))) };
+            // (or the number is a 3 read as another, a fingering's 5 by it: tuplets002 on gen-fing, three eighths under a "5")
+            if (scale != (2, 3) && Lasts(g.Select(e => new Ev { Ticks = e.Ticks * e.Scale.Den / e.Scale.Num * 2 / 3, Stem = e.Stem }).ToList()))
+                options.Add(("the number is a 3", () =>
+                {
+                    foreach (var e in evs.Concat(single).Where(e => e.Tuplet == id)) { e.Ticks = e.Ticks * e.Scale.Den / e.Scale.Num * 2 / 3; e.Scale = (2, 3); }
+                }));
+            foreach (var (n, name) in new[] { (row.LastOrDefault(e => e.X < g[0].X), "left"), (row.FirstOrDefault(e => e.X > g[^1].X), "right") })
+            {
+                if (n == null) continue;
+                if (n.Tuplet == 0 && n.Scale == (1, 1))
+                {
+                    if (!Lasts(g.Append(new Ev { Ticks = n.Ticks * scale.Num / scale.Den, Stem = n.Stem }).ToList())) continue;
+                    options.Add(($"its span missed the note on its {name}", () =>
+                    {
+                        foreach (var e in single.Where(f => f.Tuplet == 0 && f.IsRest == n.IsRest && f.Stem == n.Stem && Math.Abs(f.X - n.X) < 1).Append(n).ToList())
+                        { e.Ticks = e.Ticks * scale.Num / scale.Den; e.Scale = scale; e.Tuplet = id; }
+                    }));
+                }
+                else if (n.Tuplet > 0 && n.Tuplet != id && n.Scale == scale)
+                {
+                    int other = n.Tuplet;
+                    if (!Lasts(g.Concat(evs.Where(e => e.Tuplet == other)).ToList())) continue;
+                    options.Add(($"one number with the group on its {name}", () => { foreach (var e in evs.Concat(single).Where(e => e.Tuplet == other)) e.Tuplet = id; }));
+                }
+            }
+            // (and a group of the same scale among its notes: the number's span split in two that interleave --
+            // Holmes's Melodies No.2 bar 53, the voice's a' and c'' one group, b' another)
+            foreach (int other in evs.Where(e => e.Tuplet > 0 && e.Tuplet != id && e.Scale == scale && e.X > g[0].X && e.X < g[^1].X).Select(e => e.Tuplet).Distinct().ToList())
+                if (Lasts(g.Concat(evs.Where(e => e.Tuplet == other)).ToList()))
+                    options.Add(("one number with the group among its notes", () => { foreach (var e in evs.Concat(single).Where(e => e.Tuplet == other)) e.Tuplet = id; }));
+            int pick = 0;
+            if (barTicks > 0 && options.Count > 1)
+            {
+                var was = evs.Concat(single).ToDictionary(e => e, e => (e.Ticks, e.Scale, e.Tuplet));
+                void Restore() { foreach (var (e, (t, sc, tu)) in was) { e.Ticks = t; e.Scale = sc; e.Tuplet = tu; } }
+                pick = Math.Max(0, options.FindIndex(o => { o.Apply(); bool fills = Fills(evs, barTicks); Restore(); return fills; }));
+            }
+            if (Symbols.DebugAt == (0, 0)) Console.WriteLine($"off-grid tuplet {scale}: {Shown()} -- {options[pick].Name}{(options.Count > 1 ? $" (of {options.Count})" : "")}");
+            options[pick].Apply();
+        }
     }
 
     /// <summary>
