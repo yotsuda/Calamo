@@ -355,7 +355,13 @@ static partial class Symbols
                     var by = ps.Heads.Where(hd => hd.St == o.St && Math.Abs(hd.X - c.Cx) < 1.8 * s
                                                   && Math.Min(Math.Abs(hd.Y - c.Cy), hd.HasStem ? Math.Abs(hd.Tip - c.Cy) : double.MaxValue) < 3 * s).ToList();
                     double lo = Math.Min(x0, by.Select(hd => hd.L - 0.1 * s).DefaultIfEmpty(x0).Min()), hi = Math.Max(x1, by.Select(hd => hd.R + 0.1 * s).DefaultIfEmpty(x1).Max());
-                    if (Columns(lo, hi) < 2) { if (TupletVerbose) Console.WriteLine($"      -> over x {x0:F0}-{x1:F0}, one note: none"); o.Class = "?"; continue; }
+                    if (Columns(lo, hi) < 2)
+                    {
+                        if (TupletVerbose) Console.WriteLine($"      -> over x {x0:F0}-{x1:F0}, one note: none");
+                        o.Class = "?";
+                        ps.LooseTuplets.Add((o.St, c.Cx, c.Cy, value));
+                        continue;
+                    }
                     x0 = lo; x1 = hi;
                 }
             }

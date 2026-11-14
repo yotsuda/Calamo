@@ -626,8 +626,105 @@ static class Reader
             RestsBeforeSixteenths(ms.Evs[p], ms.Single[p], ms.BarTicks);
             if (UnprintedTriplets(ms.Evs[p], ms.Single[p], ms.BarTicks, time, st: st) is { } changed) sym.Unprinted[(b, p)] = (st, changed);
             else MixedThrees(ms.Evs[p], ms.Single[p], ms.BarTicks, time);
+            ThreesInLines(ms.Evs[p], ms.Single[p], ms.BarTicks, time, sym.LooseTuplets.Any(t => t.St == st && t.Value == 3 && t.X > x0 && t.X < x1));
         }
         return ms;
+    }
+
+    /// <summary>
+    /// Triplets with no number after a numbered one in the bar, of any values (an engraver numbers the first
+    /// group only: kinkel19-1's bar 8, gen-mix), in a bar that does not fill as read. Each voice too long is
+    /// read again note by note: a note as written, or a run from it that is a triplet -- its written values
+    /// three quarters, eighths or sixteenths in all, on the grid of what it plays, cutting no beam, not rests
+    /// alone. The readings that make the voice last the bar, the fewest groups first, choose (the grammar's
+    /// hard constraint: a voice's length is the bar's); of two alike, the one with fewer notes off their
+    /// value's beat; still alike, none. ROADMAP section 0's (A), step 3b of docs/assembly-inference.md.
+    /// </summary>
+    /// <param name="loose">a 3 FindTuplets left over one note's column stands in the bar (Bohemian's eighth and quarter under a 3,
+    /// gen-mix's first groups of unlike values): a printed number, its notes for the bar's length to say</param>
+    static void ThreesInLines(List<Ev> evs, List<Ev> single, int barTicks, string time, bool loose = false)
+    {
+        int den = int.Parse(time.Split('/')[1]), beat = Dur.Whole / den;
+        if (NoUnprinted || den is not (2 or 4) || barTicks <= 0 || evs.Count < 3 || Fills(evs, barTicks)) return;
+        if (Symbols.TupletVerbose)
+            Console.WriteLine($"    threes in lines? bar at x {evs.Min(e => e.X):F0}: {string.Join(" ", evs.OrderBy(e => e.X).Select(e => $"{e.Show()}{(e.Stem > 0 ? "^" : e.Stem < 0 ? "_" : "")}#{e.Beam}{(e.Tuplet != 0 ? $"t{e.Tuplet}" : "")}"))}");
+        if (!loose && !evs.Any(e => e.Tuplet > 0 && e.Scale == (2, 3))) return;
+        var copies = evs.Select(e => e.Copy()).ToList();
+        var original = copies.Select((c, i) => (c, i)).ToDictionary(x => x.c, x => evs[x.i]);
+        var lines = Voices.Separate(copies, barTicks, 0).Select(v => v.OrderBy(e => e.X).ToList()).ToList();
+        // (a bar of one line: one voice, its stems each way with its notes' height)
+        if (lines.Any(v => v.Sum(e => e.Ticks) != barTicks) && OneLine(evs)) lines = new() { copies.OrderBy(e => e.X).ToList() };
+        var plan = new List<List<Ev>>();
+        foreach (var line in lines)
+        {
+            if (line.Sum(e => e.Ticks) <= barTicks) continue;
+            var best = new List<(List<(int From, int To)> Runs, int Off)>();
+            int fewest = int.MaxValue, nodes = 0;
+            var runs = new List<(int, int)>();
+            // (a note's beat: its value's, a beat at most)
+            int OffBeat(Ev e, int at) => e.Scale == (1, 1) && Dur.Text(e.Ticks) is string t && int.TryParse(t.TrimEnd('.'), out int basis) && at % Math.Min(Dur.Whole / basis, beat) != 0 ? 1 : 0;
+            void Walk(int i, int at, int off)
+            {
+                if (++nodes > 20000 || at > barTicks || runs.Count > fewest) return;
+                if (i == line.Count)
+                {
+                    if (at != barTicks || runs.Count == 0) return;
+                    if (runs.Count < fewest) { fewest = runs.Count; best.Clear(); }
+                    best.Add((runs.ToList(), off));
+                    return;
+                }
+                Walk(i + 1, at + line[i].Ticks, off + OffBeat(line[i], at));
+                int written = 0;
+                for (int j = i; j < line.Count; j++)
+                {
+                    var e = line[j];
+                    if (e.Scale != (1, 1) || e.FullBar || e.Cue) break;
+                    written += e.Ticks;
+                    if (written > Dur.Of(4, 0) * 3) break;
+                    if (written != 3 * Dur.Of(4, 0) && written != 3 * Dur.Of(8, 0) && written != 3 * Dur.Of(16, 0)) continue;
+                    int plays = written * 2 / 3;
+                    if (at % plays != 0 || j == i) continue;
+                    var run = line.GetRange(i, j - i + 1);
+                    // (a note at either end: a run opening or closing on a rest filled a bar too long by another misreading --
+                    // gen-scan-fill's slurs006, "r16 d4 r16" taken for a triplet)
+                    if (run[0].IsRest || run[^1].IsRest) continue;
+                    // (each note starting on the grid of half the group's unit: "e'16 f'16 bes16 a16 g4 a4" is no triplet of quarters)
+                    int half = written / 6, into = 0;
+                    if (run.Any(x => { bool on = into % half == 0; into += x.Ticks; return !on; })) continue;
+                    // (no beam cut: a beam's notes on this side all in the run or none)
+                    if (run.Any(x => x.Beam != 0 && line.Any(o => o.Beam == x.Beam && o.Stem == x.Stem && !run.Contains(o)))) continue;
+                    runs.Add((i, j));
+                    Walk(j + 1, at + plays, off);
+                    runs.RemoveAt(runs.Count - 1);
+                }
+            }
+            Walk(0, 0, 0);
+            if (best.Count == 0 || nodes > 20000) continue;
+            var order = best.OrderBy(b => b.Off).ToList();
+            if (order.Count > 1 && order[0].Off == order[1].Off) continue;
+            plan.AddRange(order[0].Runs.Select(r => line.GetRange(r.From, r.To - r.From + 1).Select(c => original[c]).ToList()));
+        }
+        if (plan.Count == 0) return;
+        var was = evs.Concat(single).ToDictionary(e => e, e => (e.Ticks, e.Scale, e.Tuplet));
+        foreach (var run in plan)
+        {
+            int id = -1_600_000_000 - (int)run[0].X;
+            var mine = run.Concat(single.Where(f => run.Any(e => e.IsRest == f.IsRest && e.Stem == f.Stem && Math.Abs(e.X - f.X) < 1))).Distinct().ToList();
+            foreach (var e in mine)
+            {
+                e.Ticks = e.Ticks * 2 / 3;
+                e.Scale = (2, 3);
+                e.Tuplet = id;
+            }
+        }
+        // (the voices as separated again: the reading stands only where the whole bar fills)
+        if (!Fills(evs, barTicks) && !(OneLine(evs) && evs.Sum(e => e.Ticks) == barTicks))
+        {
+            foreach (var (e, (t, sc, tu)) in was) { e.Ticks = t; e.Scale = sc; e.Tuplet = tu; }
+            return;
+        }
+        if (Symbols.DebugAt == (0, 0))
+            Console.WriteLine($"threes in lines: the bar at x {evs.Min(e => e.X):F0}: {string.Join(" | ", plan.Select(r => string.Join(" ", r.Select(e => e.Show()))))} read as triplets");
     }
 
     /// <summary>

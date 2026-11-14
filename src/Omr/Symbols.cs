@@ -84,6 +84,7 @@ sealed class PageSymbols
     public List<Other> Others = new();
     public List<Sig> Sigs = new();
     public List<Other> Tuplets = new();  // the tuplet numbers taken, with their staff (a detected one may be no piece of Others)
+    public List<(Staff St, double X, double Y, int Value)> LooseTuplets = new();   // numbers FindTuplets left over one note's column: candidates for the bar's length to weigh (Reader.ThreesInLines)
     public Dictionary<(int Bar, int Part), (Staff St, List<Ev> Evs)> Unprinted = new();   // the triplets read from a bar's length, no number printed: their events (Reader.UnprintedTriplets)
     public List<Detection> Detections;   // what the learnt detector found (--detector), or null
     public List<SystemInfo> Systems;     // the page's systems with their bar lines as the layout found them (Layout.FindBars; Reader checks them further)
