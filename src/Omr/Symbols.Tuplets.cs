@@ -191,11 +191,17 @@ static partial class Symbols
             // number is thin, and its hook with the line an L of little ink in its box
             // A letter on the number's baseline is one too, lower-case or set apart: a serif face's
             // Fsus4, its s 0.6 spaces off the F; maj7, its a 0.8 spaces off the 7 past the j
+            // A bracket's two halves either side of it are no letters: a short group's hooks are about as tall as
+            // they are wide and end on its baseline (gen-mix's lied001, bar 22's left hand, a,8 g,4 under a 3)
+            // (a hook's own shape, not only BracketHalves' thin piece: a lyric's n or u passes that, kinkel19-5's verses)
+            var (left, right) = BracketHalves(ps, d, o, s);
+            bool hooks = left != null && right != null && IsHook(d, left.C, true, c.Cy < o.St.Top, s) && IsHook(d, right.C, false, c.Cy < o.St.Top, s);
             if (!det && ps.Others.Any(q =>
                 {
                     // (any staff's: a lyric's tall f between two staves is the upper one's, its
                     // short neighbours the lower one's; the rows overlap below)
                     if (q.C == c || q.C.W > 2.0 * s || q.C.Fill < 0.2) return false;
+                    if (hooks && (q == left || q == right)) return false;
                     if (q.C.MinX >= c.MinX && q.C.MaxX <= c.MaxX) return false;    // (a piece of the number itself, cut by a line)
                     // (a letter's shape: a bracket's half, its line and hook, ends on the baseline too)
                     bool line = Math.Abs(q.C.MaxY - c.MaxY) < 0.12 * s && q.C.W <= 1.5 * q.C.H;
@@ -235,7 +241,6 @@ static partial class Symbols
                 : holes.Any(hl => hl.W > 0.15 * s && hl.H > 0.2 * s && own.Any(p => hl.MinX >= p.MinX && hl.MaxX <= p.MaxX && hl.MinY >= p.MinY && hl.MaxY <= p.MaxY)) && !det ? 4
                 : IsTwo(d, own, s) ? 2 : 3;
             o.Class = "tuplet" + value;
-            var (left, right) = BracketHalves(ps, d, o, s);
             double x0, x1;
             bool? up = null;    // a number by a beam group: its voice's stems (another voice under it keeps its time)
             bool? bracketAbove = null;
@@ -516,6 +521,32 @@ static partial class Symbols
             y = at;
         }
         return true;
+    }
+
+    /// <summary>
+    /// A bracket's half as drawn: its line along the edge away from the notes (the top over the staff, the
+    /// bottom under it) inked nearly end to end, and the hook at its outer end only -- the box's half
+    /// towards the number empty off the line. A letter (n, u, m) has strokes down both sides.
+    /// </summary>
+    static bool IsHook(Img d, Comp b, bool leftHalf, bool above, double s)
+    {
+        int band = Math.Max(1, (int)(0.25 * s));
+        int y0 = above ? b.MinY : b.MaxY - band + 1, y1 = y0 + band - 1;
+        int along = 0;
+        for (int x = b.MinX; x <= b.MaxX; x++)
+        {
+            bool ink = false;
+            for (int y = y0; y <= y1 && !ink; y++) ink = d[x, y];
+            if (ink) along++;
+        }
+        if (along < 0.85 * (b.MaxX - b.MinX + 1)) return false;
+        // the inner half, off the line
+        int xa = leftHalf ? (b.MinX + b.MaxX) / 2 : b.MinX, xb = leftHalf ? b.MaxX : (b.MinX + b.MaxX) / 2;
+        int ya = above ? y1 + 1 : b.MinY, yb = above ? b.MaxY : y0 - 1;
+        int ink2 = 0, all = 0;
+        for (int x = xa; x <= xb; x++)
+            for (int y = ya; y <= yb; y++) { all++; if (d[x, y]) ink2++; }
+        return all == 0 || ink2 <= 0.05 * all;
     }
 
     /// <summary>The two halves of a tuplet bracket either side of a number (null where there is none).</summary>

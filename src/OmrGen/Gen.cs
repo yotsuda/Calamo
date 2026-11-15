@@ -176,7 +176,9 @@ static class Gen
         double low = rng.NextDouble(), share = rng.NextDouble(), plainUp = rng.NextDouble();
         // 0: the right hand's lower voice, 1: the left hand, 2: one staff, 3: two against three,
         // 4: the right hand's, falling to the left hand's staff (--fall), 5: a plain line falling to it in a beam of its own (--detach)
-        int mode = DetachFall ? 5 : FallStaff ? 4 : CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
+        // 6: no triplets at all, 3/4's six plain eighths in the left hand (--broken)
+        if (BrokenSix) p.Time = "3/4";
+        int mode = BrokenSix ? 6 : DetachFall ? 5 : FallStaff ? 4 : CrossStaff ? 1 : FlipLine ? 0 : shape < 0.35 ? 0 : shape < 0.6 ? 1 : shape < 0.85 ? 2 : 3;
         // (--knee, --fall, --detach: eighths, as 2/2's six to a half under one beam are Op.27-2's own)
         int value = KneeBeams || FlipLine || FallStaff || DetachFall ? 240 : p.Time == "2/2" ? 480 : unit < 0.7 ? 240 : 120;
         bool restOpens = rests < 0.2 && !CrossStaff && !FlipLine;
@@ -474,6 +476,33 @@ static class Gen
                 rh.Bars.Add(new() { upper });
                 lh.Bars.Add(new() { lower });
             }
+            else if (mode == 6)
+            {
+                // (--broken: the waltz's accompaniment, plain eighths three to a half bar's chord, beamed three and three
+                // or all six as 3/4 beams them, under the right hand's melody; the shape that reads as two unnumbered
+                // triplets when the time is printed 2/4 (make-retime.ps1), and the melody's three beats the sign's error)
+                var left = new List<GEv>();
+                for (int h = 0; h < 2; h++)
+                    foreach (var t in Tones(2 * b + h, low < 0.5 ? 17 : 21))
+                        left.Add(new GEv { Ticks = 240, Pitches = new() { t } });
+                if (share < 0.6)
+                    for (int g = 0; g < 6; g += 3) { left[g].Marks = "[" + left[g].Marks; left[g + 2].Marks += "]"; }
+                // (in some pieces the accompaniment alone for the first bars, nothing in them but what reads as two
+                // triplets under a 2/4; in some the melody in quarters and halves only, no dotted figure to give 3/4 away)
+                if (b < 2 + (int)(4 * low) && rests < 0.5) rh.Bars.Add(new() { new() { new GEv { Ticks = p.BarTicks, Measure = true } } });
+                else if (plainUp < 0.5)
+                {
+                    var melody = new List<GEv>();
+                    foreach (int v in Pick(rng, new[] { new[] { 480, 480, 480 }, new[] { 960, 480 }, new[] { 480, 960 }, new[] { 1440 } }))
+                    {
+                        cur = Math.Clamp(cur + rng.Next(-2, 3), 33, 40);
+                        melody.Add(new GEv { Ticks = v, Pitches = new() { At(cur) } });
+                    }
+                    rh.Bars.Add(new() { melody });
+                }
+                else rh.Bars.Add(new() { Melody(b, 33, 40) });
+                lh.Bars.Add(new() { left });
+            }
             else if (mode == 4)
             {
                 // (--fall: the right hand's triplets run down, each group's last note or two drawn on the left hand's staff
@@ -582,6 +611,8 @@ static class Gen
     public static bool DetachFall;
     // OmrGen --handover: the same with a melody stems up, and bars the left hand starts and the right hand ends
     public static bool HandOver;
+    // OmrGen --broken: 3/4, the left hand's plain eighths broken three and three (no triplets) under a melody
+    public static bool BrokenSix;
     // OmrGen --flip: the right hand's line of triplets with its stems turning in mid bar (Op.27-2's bars 37, 40 and 42)
     public static bool FlipLine;
 

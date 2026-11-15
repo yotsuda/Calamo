@@ -265,6 +265,14 @@ $genRt = "$root\out\gen-retime"; $genRtS = "$root\out\gen-retime-scan"
 if ($Fresh -or -not (Test-Path "$genRt\retime.txt") -or -not (Test-Path "$genRtS\retime.txt")) { & "$PSScriptRoot\make-retime.ps1" -From $gen -Out $genRt -ScanOut $genRtS | Out-Null }
 & "$PSScriptRoot\run-gen.ps1" -Out $genRt -Reuse -OmrArgs $omrArgs | Out-Null
 & "$PSScriptRoot\run-gen.ps1" -Out $genRtS -Reuse -OmrArgs $omrArgs | Out-Null
+# the same for 3/4 with the left hand's plain eighths broken three and three under a melody, the first bars now and then
+# the accompaniment alone (OmrGen threes --broken), printed 2/4: the six eighths read as two unnumbered triplets would
+# fill a 2/4 (the shape guessed for Schirmer's Bargiel, which this did not bring out, 2026-11-15); clean and printed and scanned
+$genBr0 = "$root\out\gen-broken"; $genBr = "$root\out\gen-broken-rt"; $genBrS = "$root\out\gen-broken-rt-scan"
+if ($Fresh -or -not (Test-Path "$genBr0\batch.txt")) { & "$PSScriptRoot\run-gen.ps1" -Out $genBr0 -Suite threes -Count 10 -Seed 7 -GenArgs @('--broken') | Out-Null }
+if ($Fresh -or -not (Test-Path "$genBr\retime.txt") -or -not (Test-Path "$genBrS\retime.txt")) { & "$PSScriptRoot\make-retime.ps1" -From $genBr0 -Out $genBr -Suites threes -ScanOut $genBrS | Out-Null }
+& "$PSScriptRoot\run-gen.ps1" -Out $genBr -Reuse -OmrArgs $omrArgs | Out-Null
+& "$PSScriptRoot\run-gen.ps1" -Out $genBrS -Reuse -OmrArgs $omrArgs | Out-Null
 $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'genLo7'; Sym = 'symLo7' }, @{ Dir = $genLo10; Tag = 'genLo10'; Sym = 'symLo10' }, @{ Dir = $gen3; Tag = 'gen3'; Sym = 'sym3' }, @{ Dir = $genS; Tag = 'genS'; Sym = 'symS' }, @{ Dir = $genL; Tag = 'genL'; Sym = 'symL' },
           @{ Dir = $genA; Tag = 'genA'; Sym = 'symA' }, @{ Dir = $genR; Tag = 'genR'; Sym = 'symR' }, @{ Dir = $genRS; Tag = 'genRS'; Sym = 'symRS' },
           @{ Dir = $genT; Tag = 'genT'; Sym = 'symT' }, @{ Dir = $genTS; Tag = 'genTS'; Sym = 'symTS' }, @{ Dir = $genO; Tag = 'genO'; Sym = 'symO' }, @{ Dir = $genOS; Tag = 'genOS'; Sym = 'symOS' },
@@ -278,7 +286,8 @@ $sets =@(@{ Dir = $gen; Tag = 'gen'; Sym = 'sym' }, @{ Dir = $genLo7; Tag = 'gen
            @{ Dir = $genZ; Tag = 'genZ'; Sym = 'symZ' }, @{ Dir = $genZS; Tag = 'genZS'; Sym = 'symZS' },
            @{ Dir = $genU; Tag = 'genU'; Sym = 'symU' }, @{ Dir = $genUS; Tag = 'genUS'; Sym = 'symUS' },
            @{ Dir = $genE; Tag = 'genE'; Sym = 'symE' }, @{ Dir = $genES; Tag = 'genES'; Sym = 'symES' }, @{ Dir = $genE2; Tag = 'genE2'; Sym = 'symE2' }, @{ Dir = $genCr; Tag = 'genCr'; Sym = 'symCr' }, @{ Dir = $genCrS; Tag = 'genCrS'; Sym = 'symCrS' }, @{ Dir = $genKn; Tag = 'genKn'; Sym = 'symKn' }, @{ Dir = $genKnS; Tag = 'genKnS'; Sym = 'symKnS' }, @{ Dir = $genHd; Tag = 'genHd'; Sym = 'symHd' }, @{ Dir = $genHdS; Tag = 'genHdS'; Sym = 'symHdS' }, @{ Dir = $genFa; Tag = 'genFa'; Sym = 'symFa' }, @{ Dir = $genFaS; Tag = 'genFaS'; Sym = 'symFaS' }, @{ Dir = $genDe; Tag = 'genDe'; Sym = 'symDe' }, @{ Dir = $genDeS; Tag = 'genDeS'; Sym = 'symDeS' },@{ Dir = $genMx; Tag = 'genMx'; Sym = 'symMx' }, @{ Dir = $genMxS; Tag = 'genMxS'; Sym = 'symMxS' }, @{ Dir = $genFl; Tag = 'genFl'; Sym = 'symFl' }, @{ Dir = $genFlS; Tag = 'genFlS'; Sym = 'symFlS' }, @{ Dir = $genQ; Tag = 'genQ'; Sym = 'symQ' }, @{ Dir = $genFg; Tag = 'genFg'; Sym = 'symFg' }, @{ Dir = $genFgS; Tag = 'genFgS'; Sym = 'symFgS' },
-           @{ Dir = $genRt; Tag = 'genRt'; Sym = 'symRt' }, @{ Dir = $genRtS; Tag = 'genRtS'; Sym = 'symRtS' })
+           @{ Dir = $genRt; Tag = 'genRt'; Sym = 'symRt' }, @{ Dir = $genRtS; Tag = 'genRtS'; Sym = 'symRtS' },
+           @{ Dir = $genBr; Tag = 'genBr'; Sym = 'symBr' }, @{ Dir = $genBrS; Tag = 'genBrS'; Sym = 'symBrS' })
 if ($Detector) {
     # printed with toner that thins inside a head (OmrDegrade --fill, as the real scans are): the
     # rules read a tenth of it, so only the detector is measured on it

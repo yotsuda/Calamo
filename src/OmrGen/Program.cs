@@ -89,6 +89,8 @@ static class Program
         Gen.FallStaff = opt.ContainsKey("fall");
         // --detach: a plain line of eighths falling to the left hand's staff in a beam of its own under a slur from high on the upper staff
         Gen.DetachFall = opt.ContainsKey("detach");
+        // --broken: no triplets: 3/4 with the left hand's plain eighths, the chord broken six to a bar, under a melody
+        Gen.BrokenSix = opt.ContainsKey("broken");
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams || Gen.FallStaff;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
