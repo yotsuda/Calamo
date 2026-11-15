@@ -11,6 +11,8 @@ param(
                         # (not a set made before 2026-10-28: its .lys is in the old octaves, a bare c as C4; make it again)
     [switch]$Degrade,   # make the pages look printed and scanned (OmrDegrade) before reading them
     [string]$DegradeArgs = '--scale 0.5 --blur 0.9 --ink 0.15 --paper 0.15 --noise 10 --specks 0.0003',
+    [double]$SwellShare = 0,    # -DegradeArgs random: this share of the pages also get their black heads swollen (OmrDegrade
+                        # --swell 8-12 --swell-core 14 --swell-boxes), an old print's seconds in a chord run together (S65)
     [switch]$NoNumbers, # take the tuplet numbers off the pages (as an engraver that prints the first few only), before -Degrade
     [switch]$Verify,    # the redraw check (omr --verify): the .lys engraved again and compared with the page, bar by bar
     [string[]]$OmrArgs = @(),   # more arguments for omr (e.g. '--detector')
@@ -50,7 +52,7 @@ if (-not $Reuse) {
     $deg = "$root\src\OmrDegrade\bin\Release\net10.0-windows\OmrDegrade.exe"
     # the glyphs' places from the SVG truth (a first reading's --export-boxes, omr\boxes-pNN.tsv): for -NoNumbers,
     # and for a {boxes} in -DegradeArgs (OmrDegrade --swell-boxes {boxes})
-    $needBoxes = $NoNumbers -or ($Degrade -and $DegradeArgs -match '\{boxes\}')
+    $needBoxes = $NoNumbers -or ($Degrade -and ($DegradeArgs -match '\{boxes\}' -or ($DegradeArgs -eq 'random' -and $SwellShare -gt 0)))
     if ($needBoxes) {
         Get-ChildItem $Out -Recurse -Filter *.lys | Where-Object { $_.Directory.Name -ne 'omr' } | ForEach-Object -ThrottleLimit ([Environment]::ProcessorCount) -Parallel {
             $dir = $_.DirectoryName; $name = $_.BaseName
@@ -66,6 +68,8 @@ if (-not $Reuse) {
     if ($Degrade) {
         $n = 0
         $rng = [Random]::new(1234)
+        # (its own draws, so that a set made without -SwellShare stays the same pages)
+        $swellRng = [Random]::new(4321)
         foreach ($png in Get-ChildItem $Out -Recurse -Filter 'p??.png') {
             # (a different seed per page, stable across runs)
             $n++
@@ -80,6 +84,12 @@ if (-not $Reuse) {
                 if ($rng.NextDouble() -lt 0.33) { $args += @('--binarize-auto', ('{0:F2}' -f (-0.2 + 0.3 * $rng.NextDouble()))) }
                 # (most printers lay the toner unevenly inside a head or a beam: the real scans do)
                 if ($rng.NextDouble() -lt 0.7) { $args += @('--fill', ('{0:F2}' -f (0.2 + 0.6 * $rng.NextDouble())), '--fill-edge', ('{0:F1}' -f (2.5 + 3 * $rng.NextDouble()))) }
+                # (an old print's black heads run together, the seconds of a chord one blot: S65's gen-clusters-bheads12.
+                # 12 at most: at 16 heads a third apart merge too, and clefs and pitches break as no real scan does)
+                if ($SwellShare -gt 0 -and $swellRng.NextDouble() -lt $SwellShare) {
+                    $args += @('--swell', ('{0:F0}' -f (8 + 4 * $swellRng.NextDouble())), '--swell-core', '14',
+                               '--swell-boxes', (Join-Path $png.DirectoryName ('omr\boxes-{0}.tsv' -f $png.BaseName)))
+                }
             } else { $args = @($DegradeArgs -split ' ' | ForEach-Object { $_.Replace('{boxes}', (Join-Path $png.DirectoryName ('omr\boxes-{0}.tsv' -f $png.BaseName))) }) }
             & $deg --in $png.FullName --out $png.FullName @args --seed $n | Out-Null
         }

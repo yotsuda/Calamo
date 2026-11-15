@@ -2,6 +2,33 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S60 (c): `Detector.Threshold` と `Weak*` の掃きを**走らせた（結果はまだ）**。待ち時間に S65 (a): `run-gen.ps1 -SwellShare`（random の汚しの一部の頁で黒い符頭を太らせる、学習のセットのための口）を足した（2026-11-16 朝、前の節の次の一手 1 (c)・2）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s97/check-head.log`）。**`out/s97/sweep.ps1` が走っている**（06:27 開始、20 回 × 約 12 分で 10 時半ごろ終わる見込み。`out/s97/sweep.log` が `all done` になるまで**読み手をビルドしない・開発用の台と評価台と check を回さない**）。
+
+**変更の種類**: 読み手は変えていない。生成器（`tools/run-gen.ps1` の `-SwellShare`。S65 の再現のための型を学習のセットに入れる口。§0「本線の順番」が待ち時間に許す範囲）。
+
+**掃きの中身**（`out/s97/sweep.ps1`、開発用の台 `-Dev -Reuse -Verify`、42・49 の両方、1 つずつ動かす）: `Detector.Threshold` 0.4・0.6、`WeakKey` 0.35、`WeakDot` 0.3、`WeakGrace` 0.35、`WeakHalf` 0.35、`WeakSlur` 0.3、`WeakRest` 0.4、`WeakNatural` 0.4、`WeakClef` 0.2（どれも今の値 +0.1）。印にしか効かない `WeakHairpin`・`WeakPedal`・`WeakOttava` と、開発用の台に出ない記号（cross・percent・tab・whole・slash・segno・trill）は外した。基準は `out/s96/dev-42.tsv`・`dev-49.tsv`（HEAD ae6f075、35102・35074）を `sweep-none-*.tsv` に写したもの。読むのは `pwsh out/s97/summarize.ps1`（s91 のものの写し）。
+
+**`-SwellShare`**（`-DegradeArgs random` のときだけ効く。既定 0）: その割合の頁に `--swell 8〜12 --swell-core 14 --swell-boxes {その頁の箱}` を足す。乱数は別の種（4321）なので、0 のときは今までの学習セットと同じ頁のまま（箱も作らない）。箱の名前は書体によらず `noteheads.s2`（Bravura でも同じ）。
+- 試し（chords × 2、種 7、`--clusters 0.5`、検出器つき。scratchpad）: random の汚しだけ Emmentaler 99.3・Bravura 100 → `-SwellShare 1` で **85.7・94.7**。s94 の bheads12（標準の汚し＋太らせ 12）の 99.4 より強く効く。random の縮小・二値化・塗りむらと重なるため（絵の太らせ方は bheads12 と同じ）。
+- 規則だけで読むと 11%・9% に崩れる（検出器が無いと太った和音を読めない。学習のセットの読みには関係しない）。
+
+**正直に書いておくこと**:
+1. 学習のセットはまだ作っていない。どの割合で、どのセット（新しい `train-swell-scan` か、既存の `-scan` を描き直すか）に入れるかは、S60 のあとの学習し直しで決める。85.7% は実譜の和音の中の 2 度の取りこぼし（約 1.2／1,000 音）よりずっと強いので、割合は小さめ（0.2〜0.3）から。
+2. `-SwellShare 0` で頁が変わらないことはコードで確かめただけで、バイト単位の比較はしていない。
+3. check は回していない（`run-gen.ps1` の既定の動きは変わらず、掃きと同時に走らせないため）。
+
+**次の一手**（ROADMAP §0「本線の順番」の言葉で）:
+1. **S60**: `out/s97/sweep.log` が `all done` になったら `pwsh out/s97/summarize.ps1`。崖が 42 だけ・49 だけに出るものを、前の節と同じく構造の確かめ（門 2）で埋める。そのあと学習し直し（セットに `fingers.npz*2`、memmap、種違い 2 つ、§7 の 4。`-SwellShare` で作った太らせのセットを入れるかもここで決める）。
+2. **S65 の続き**: 前々々節の次の一手 2 の (b)〜(d)。
+3. **S66**: 公平な台を増やす（オーナーの曲選び待ち）。
+4. オーナーへの問い（前の節のまま）: (a) Release の lysc を作り直して z 形の休符を使ってよいか、(b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ。
+
+**読めない型の記録**: 前の節のまま。
+
+**check の記録**: `out/s97/check-head.log`: OK（0 better・nothing worse）。そのあとは回していない（上の 3）。
+
 ## S60: `TrustClef`・`TrustKey` の崖を構造の確かめで埋めた（門 2）。**0.5 の読みは 42・49 とも全台同じ**（35102・35074）。**42 を `TrustClef`・`TrustKey` とも 0.6 で読んでも 35102 のまま**（前は −18・−17）。49 も 0.6 で 35074 のまま（全台同じ）（2026-11-16 未明、前の節の次の一手 1 (b)）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s96/check-head.log`）。
