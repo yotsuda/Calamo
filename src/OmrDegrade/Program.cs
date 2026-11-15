@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--erase boxes.tsv [--erase-names prefix]] [--paste "src.png|box|box;..."] [--keystone k] [--shear a] [--bend b] [--seed n]
+// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--spread px] [--swell px [--swell-core px]] [--erase boxes.tsv [--erase-names prefix]] [--paste "src.png|box|box;..."] [--keystone k] [--shear a] [--bend b] [--seed n]
 //
 // Makes a clean engraving look printed and scanned: a lower resolution (scale), ink that bleeds
 // (blur) and is not quite black (ink), paper that is not quite white and not evenly lit (paper),
@@ -43,6 +43,19 @@ static class Program
         // --paste "src.png|sl,st,sr,sb|dl,dt,dr,db[;...]": a glyph drawn on another page put in place of one on this
         // page (a time signature's upper figure printed other than the measures hold: tools/make-retime.ps1)
         if (opt.TryGetValue("paste", out var pastes)) Paste(w, h, g, pastes);
+        // --spread px: ink that spreads on soft paper or a worn plate, every stroke grown by px pixels of the
+        // input (a disc), so that close glyphs fuse: the two heads of a second either side of a stem in an old print
+        double spread = P("spread", 0);
+        if (spread > 0) g = Morph(w, h, g, spread, darken: true);
+        // --swell px [--swell-core px]: only the solid glyphs grow (heads, beams; what is left of the ink after
+        // strokes thinner than twice the core are opened away), the staff lines and stems keep their weight --
+        // an old print's heads, large and fused in a second while its lines stay fine
+        double swell = P("swell", 0), swellCore = P("swell-core", 6);
+        if (swell > 0)
+        {
+            var solid = Morph(w, h, Morph(w, h, g, swellCore, darken: false), swellCore + swell, darken: true);
+            for (int i = 0; i < g.Length; i++) g[i] = Math.Min(g[i], solid[i]);
+        }
         if (fill > 0) g = Unfill(w, h, g, fill, fillEdge, rng);
         // --keystone k: the corners' columns moved by k of the page's width, inward at the top and outward
         // at the bottom (the page narrows away from the camera); --shear a: every upright line leaning a
@@ -74,6 +87,39 @@ static class Program
         if (binarize >= 0) for (int i = 0; i < g.Length; i++) g[i] = g[i] < binarize ? 0 : 1;
         Save(outPath, w, h, g);
         return 0;
+    }
+
+    /// <summary>
+    /// The page's darkest (darken) or lightest value within about r pixels of every pixel: the ink grown or
+    /// shrunk by r, the antialiased rim kept. An octagon (r steps of 3x3, cross and square in turn), so that
+    /// the large radii --swell needs stay quick on a full-size page.
+    /// </summary>
+    static double[] Morph(int w, int h, double[] g, double r, bool darken)
+    {
+        var cross = new (int dx, int dy)[] { (0, 0), (1, 0), (-1, 0), (0, 1), (0, -1) };
+        var square = new (int dx, int dy)[] { (0, 0), (1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1) };
+        int steps = Math.Max(1, (int)Math.Round(r));
+        for (int k = 0; k < steps; k++)
+        {
+            var offs = k % 2 == 0 ? cross : square;
+            var src = g;
+            var o = new double[g.Length];
+            Parallel.For(0, h, y =>
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    double m = src[y * w + x];
+                    foreach (var (dx, dy) in offs)
+                    {
+                        int xx = x + dx, yy = y + dy;
+                        if ((uint)xx < (uint)w && (uint)yy < (uint)h && (darken ? src[yy * w + xx] < m : src[yy * w + xx] > m)) m = src[yy * w + xx];
+                    }
+                    o[y * w + x] = m;
+                }
+            });
+            g = o;
+        }
+        return g;
     }
 
     /// <summary>
