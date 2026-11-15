@@ -93,6 +93,8 @@ static class Program
         Gen.BrokenSix = opt.ContainsKey("broken");
         // --partial <share>: of the two-voice bars, the share where one voice enters or stops on a beat (spacers the rest)
         if (opt.TryGetValue("partial", out var pv)) Gen.Partial = double.Parse(pv, CultureInfo.InvariantCulture);
+        // --clusters <share>: of the chords, the share of three or four notes with a second inside (heads both sides of the stem)
+        if (opt.TryGetValue("clusters", out var cv)) Gen.Clusters = double.Parse(cv, CultureInfo.InvariantCulture);
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams || Gen.FallStaff;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)

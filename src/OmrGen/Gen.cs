@@ -1469,6 +1469,12 @@ static class Gen
     // the bar is the real pages' voice error -- Schumann 25-9's 8th bar -- and the suites' two voices ran bar-long)
     public static double Partial;
 
+    // OmrGen --clusters <share>: of the chords Line draws, this share is three or four notes with a second inside
+    // (C E F, C D F, C E F A ...), heads on both sides of the stem (S65: the real pages' most common missed note is
+    // one of such a chord -- Schumann 25-1's bar 20, Kinkel 19-5's -- and Line's only second was a two-note chord)
+    public static double Clusters;
+    static readonly int[][] ClusterShapes = { new[] { 2, 3 }, new[] { 1, 3 }, new[] { 1, 4 }, new[] { 3, 4 }, new[] { 2, 3, 5 }, new[] { 1, 3, 5 } };
+
     /// <summary>One of a two-voice bar's voices cut to the bar's start or end at a beat where a note of its starts, spacers for the rest.</summary>
     static void PartVoice(GPiece pb, Random rng, List<List<GEv>> bar, int mid)
     {
@@ -1558,6 +1564,8 @@ static class Gen
                     // (a piano's: octaves, a third or sixth inside one, four notes)
                     ? (c < 0.25 ? new[] { 7 } : c < 0.4 ? new[] { 2, 7 } : c < 0.55 ? new[] { 4, 7 } : c < 0.7 ? new[] { 2, 4, 7 } : c < 0.85 ? new[] { 2, 4 } : new[] { 2, 5 })
                     : c < 0.45 ? new[] { 2 } : c < 0.8 ? new[] { 2, 4 } : new[] { 1 };
+                // (drawn only when asked: without --clusters the draws stay as they were)
+                if (Clusters > 0 && rng.NextDouble() < Clusters) adds = ClusterShapes[rng.Next(ClusterShapes.Length)];
                 foreach (int add in adds)
                 {
                     int d = cur + add;
