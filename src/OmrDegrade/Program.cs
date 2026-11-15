@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--spread px] [--swell px [--swell-core px]] [--erase boxes.tsv [--erase-names prefix]] [--paste "src.png|box|box;..."] [--keystone k] [--shear a] [--bend b] [--seed n]
+// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--spread px] [--swell px [--swell-core px] [--swell-boxes tsv [--swell-names prefixes]]] [--erase boxes.tsv [--erase-names prefix]] [--paste "src.png|box|box;..."] [--keystone k] [--shear a] [--bend b] [--seed n]
 //
 // Makes a clean engraving look printed and scanned: a lower resolution (scale), ink that bleeds
 // (blur) and is not quite black (ink), paper that is not quite white and not evenly lit (paper),
@@ -47,13 +47,20 @@ static class Program
         // input (a disc), so that close glyphs fuse: the two heads of a second either side of a stem in an old print
         double spread = P("spread", 0);
         if (spread > 0) g = Morph(w, h, g, spread, darken: true);
-        // --swell px [--swell-core px]: only the solid glyphs grow (heads, beams; what is left of the ink after
-        // strokes thinner than twice the core are opened away), the staff lines and stems keep their weight --
-        // an old print's heads, large and fused in a second while its lines stay fine
+        // --swell px [--swell-core px]: only the solid glyphs grow (heads, beams): the ink is eroded by the core,
+        // which takes every stroke thinner than twice the core away, and what is left grown by core + px over the
+        // page, so the staff lines and stems keep their weight -- an old print's heads, large and fused in a second
+        // while its lines stay fine
+        // --swell-boxes tsv [--swell-names prefixes]: only the glyphs of these names grow (the boxes of the page's
+        // SVG truth, an --export-boxes reading; names by comma-separated prefixes, the black heads by default): of
+        // what is left of the ink, a piece whose centre is in none of their boxes is dropped -- a whole note's
+        // ring, as thick as a head at its sides, and a beam keep their weight
         double swell = P("swell", 0), swellCore = P("swell-core", 6);
         if (swell > 0)
         {
-            var solid = Morph(w, h, Morph(w, h, g, swellCore, darken: false), swellCore + swell, darken: true);
+            var core = Morph(w, h, g, swellCore, darken: false);
+            if (opt.TryGetValue("swell-boxes", out var swellBoxes)) KeepInBoxes(w, h, core, swellBoxes, opt.GetValueOrDefault("swell-names", "noteheads.s2").Split(','));
+            var solid = Morph(w, h, core, swellCore + swell, darken: true);
             for (int i = 0; i < g.Length; i++) g[i] = Math.Min(g[i], solid[i]);
         }
         if (fill > 0) g = Unfill(w, h, g, fill, fillEdge, rng);
@@ -123,7 +130,55 @@ static class Program
     }
 
     /// <summary>
-    /// Toner that thins out inside a solid area: the ink's darkness, from half the edge width in,
+    /// Whitens, in core (the ink eroded for --swell), every piece (8-connected, below half grey) whose centre
+    /// is in none of the boxes (kind glyph) named by one of the prefixes, and every grey pixel more than two
+    /// pixels from a piece kept (a dropped piece's antialiased rim).
+    /// </summary>
+    static void KeepInBoxes(int w, int h, double[] core, string tsv, string[] prefixes)
+    {
+        var boxes = new List<(double l, double t, double r, double b)>();
+        foreach (var line in File.ReadLines(tsv).Skip(1))
+        {
+            var f = line.Split('\t');
+            if (f.Length < 6 || f[0] != "glyph" || !prefixes.Any(p => f[1].StartsWith(p))) continue;
+            boxes.Add((double.Parse(f[2], CultureInfo.InvariantCulture), double.Parse(f[3], CultureInfo.InvariantCulture),
+                       double.Parse(f[4], CultureInfo.InvariantCulture), double.Parse(f[5], CultureInfo.InvariantCulture)));
+        }
+        var label = new int[w * h];
+        var kept = new List<bool> { false };
+        var stack = new Stack<int>();
+        for (int start = 0; start < core.Length; start++)
+        {
+            if (core[start] >= 0.5 || label[start] != 0) continue;
+            int id = kept.Count;
+            double sx = 0, sy = 0; int n = 0;
+            label[start] = id; stack.Push(start);
+            while (stack.Count > 0)
+            {
+                int i = stack.Pop(), x = i % w, y = i / w;
+                sx += x; sy += y; n++;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        int xx = x + dx, yy = y + dy;
+                        if ((uint)xx >= (uint)w || (uint)yy >= (uint)h) continue;
+                        int j = yy * w + xx;
+                        if (core[j] < 0.5 && label[j] == 0) { label[j] = id; stack.Push(j); }
+                    }
+            }
+            double cx = sx / n, cy = sy / n;
+            kept.Add(boxes.Any(b => cx >= b.l && cx <= b.r && cy >= b.t && cy <= b.b));
+        }
+        var near = new double[w * h];
+        for (int i = 0; i < near.Length; i++) near[i] = kept[label[i]] ? 0 : 1;
+        near = Morph(w, h, near, 2, darken: true);
+        for (int i = 0; i < core.Length; i++) if (label[i] == 0 ? near[i] >= 0.5 : !kept[label[i]]) core[i] = 1;
+    }
+
+
+
+    /// <summary>
+    /// Toner that thins out inside a solid area:the ink's darkness, from half the edge width in,
     /// is cut by up to 'fill' times a mottle (a random field with a period of a few pixels), so a
     /// head's or a beam's inside goes grey and patchy while its rim, a stem and a staff line keep
     /// their black. (What a laser print looks like under a scanner: see data/print.)

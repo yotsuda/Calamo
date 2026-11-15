@@ -48,16 +48,19 @@ if (-not $Reuse) {
         for ($i = 0; $i -lt $pngs.Count; $i++) { Move-Item -Force $pngs[$i].FullName (Join-Path $dir ('p{0:D2}.png' -f ($i + 1))) }
     }
     $deg = "$root\src\OmrDegrade\bin\Release\net10.0-windows\OmrDegrade.exe"
-    if ($NoNumbers) {
-        # the numbers' places from the SVG truth (a first reading's --export-boxes), their ink whited out
+    # the glyphs' places from the SVG truth (a first reading's --export-boxes, omr\boxes-pNN.tsv): for -NoNumbers,
+    # and for a {boxes} in -DegradeArgs (OmrDegrade --swell-boxes {boxes})
+    $needBoxes = $NoNumbers -or ($Degrade -and $DegradeArgs -match '\{boxes\}')
+    if ($needBoxes) {
         Get-ChildItem $Out -Recurse -Filter *.lys | Where-Object { $_.Directory.Name -ne 'omr' } | ForEach-Object -ThrottleLimit ([Environment]::ProcessorCount) -Parallel {
             $dir = $_.DirectoryName; $name = $_.BaseName
             $pages = @(Get-ChildItem $dir -Filter 'p??.png').Count
             & $using:omr --config "$dir\$name.score" --pages $dir --from 1 --to $pages --out "$dir\omr" --svg "$dir\$name{page}.svg" --export-boxes --threads 1 | Out-Null
-            for ($i = 1; $i -le $pages; $i++) {
+            # -NoNumbers: the numbers' ink whited out
+            if ($using:NoNumbers) { for ($i = 1; $i -le $pages; $i++) {
                 $png = Join-Path $dir ('p{0:D2}.png' -f $i)
                 & $using:deg --in $png --out $png --erase (Join-Path "$dir\omr" ('boxes-p{0:D2}.tsv' -f $i)) --blur 0 --ink 0 --paper 0 --noise 0 --specks 0 | Out-Null
-            }
+            } }
         }
     }
     if ($Degrade) {
@@ -77,7 +80,7 @@ if (-not $Reuse) {
                 if ($rng.NextDouble() -lt 0.33) { $args += @('--binarize-auto', ('{0:F2}' -f (-0.2 + 0.3 * $rng.NextDouble()))) }
                 # (most printers lay the toner unevenly inside a head or a beam: the real scans do)
                 if ($rng.NextDouble() -lt 0.7) { $args += @('--fill', ('{0:F2}' -f (0.2 + 0.6 * $rng.NextDouble())), '--fill-edge', ('{0:F1}' -f (2.5 + 3 * $rng.NextDouble()))) }
-            } else { $args = @($DegradeArgs -split ' ') }
+            } else { $args = @($DegradeArgs -split ' ' | ForEach-Object { $_.Replace('{boxes}', (Join-Path $png.DirectoryName ('omr\boxes-{0}.tsv' -f $png.BaseName))) }) }
             & $deg --in $png.FullName --out $png.FullName @args --seed $n | Out-Null
         }
     }
