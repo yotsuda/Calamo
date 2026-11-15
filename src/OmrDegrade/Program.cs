@@ -3,7 +3,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
-// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--erase boxes.tsv [--erase-names prefix]] [--keystone k] [--shear a] [--bend b] [--seed n]
+// OmrDegrade --in <png> --out <png> [--scale f] [--blur r] [--ink k] [--paper a] [--noise s] [--specks p] [--gamma g] [--binarize t | --binarize-auto o] [--fill f] [--fill-edge px] [--erase boxes.tsv [--erase-names prefix]] [--paste "src.png|box|box;..."] [--keystone k] [--shear a] [--bend b] [--seed n]
 //
 // Makes a clean engraving look printed and scanned: a lower resolution (scale), ink that bleeds
 // (blur) and is not quite black (ink), paper that is not quite white and not evenly lit (paper),
@@ -40,6 +40,9 @@ static class Program
         // --erase boxes.tsv: take the glyphs named --erase-names (a prefix, tuplet. by default) off the
         // page, as an engraver that leaves them unprinted would (a triplet's 3 after the first few)
         if (opt.TryGetValue("erase", out var boxes)) Erase(w, h, g, boxes, opt.GetValueOrDefault("erase-names", "tuplet."));
+        // --paste "src.png|sl,st,sr,sb|dl,dt,dr,db[;...]": a glyph drawn on another page put in place of one on this
+        // page (a time signature's upper figure printed other than the measures hold: tools/make-retime.ps1)
+        if (opt.TryGetValue("paste", out var pastes)) Paste(w, h, g, pastes);
         if (fill > 0) g = Unfill(w, h, g, fill, fillEdge, rng);
         // --keystone k: the corners' columns moved by k of the page's width, inward at the top and outward
         // at the bottom (the page narrows away from the camera); --shear a: every upright line leaning a
@@ -363,6 +366,35 @@ static class Program
             }
         }
         return (nw, nh, o);
+    }
+
+    /// <summary>
+    /// Puts the glyphs of other pages in place of glyphs on this one. Each paste names a page and a
+    /// box on it, and a box on this page; the source box is moved to the destination's centre column
+    /// and top row (a time signature's figure stands on the staff's top or middle line, so its staff
+    /// lines fall on this page's), and the band two pixels round the larger of the two is taken over
+    /// from the source page, staff lines and all.
+    /// </summary>
+    static void Paste(int w, int h, double[] g, string pastes)
+    {
+        var pages = new Dictionary<string, (int W, int H, double[] G)>();
+        foreach (var one in pastes.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var f = one.Split('|');
+            static double[] Box(string s) => s.Split(',').Select(v => double.Parse(v, CultureInfo.InvariantCulture)).ToArray();
+            if (!pages.TryGetValue(f[0], out var src)) pages[f[0]] = src = Load(f[0]);
+            double[] sb = Box(f[1]), db = Box(f[2]);
+            int dx = (int)Math.Round((db[0] + db[2]) / 2 - (sb[0] + sb[2]) / 2), dy = (int)Math.Round(db[1] - sb[1]);
+            double half = Math.Max(sb[2] - sb[0], db[2] - db[0]) / 2 + 2, mid = (db[0] + db[2]) / 2;
+            int l = (int)Math.Floor(mid - half), r = (int)Math.Ceiling(mid + half);
+            int t = (int)Math.Floor(Math.Min(db[1], sb[1] + dy)) - 2, b = (int)Math.Ceiling(Math.Max(db[3], sb[3] + dy)) + 2;
+            for (int y = Math.Max(0, t); y <= Math.Min(h - 1, b); y++)
+                for (int x = Math.Max(0, l); x <= Math.Min(w - 1, r); x++)
+                {
+                    int sx = x - dx, sy = y - dy;
+                    g[y * w + x] = sx >= 0 && sx < src.W && sy >= 0 && sy < src.H ? src.G[sy * src.W + sx] : 1;
+                }
+        }
     }
 
     static (int, int, double[]) Load(string path)

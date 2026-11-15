@@ -319,7 +319,7 @@ static class Reader
             // the count and one bar to the print. Every number printed from here on is one behind the count
             // (a time signature's upper number, against the measures it governs: before any measure of
             // the system is built, a trial one too -- a repeat's thick line read as 1/1 must be gone)
-            CheckTimes(res, page, sys, sym, s, state);
+            CheckTimes(res, page, sys, sym, s, state, systems);
             bool splitHead = false;
             if (tail != null && sys.Measures > 0 && Short(tail) && !EndsOpen(d, tailSys, s))
             {
@@ -2218,7 +2218,7 @@ static class Reader
         return evs.Select(Measured).ToList();
     }
 
-    static void CheckTimes(PageResult res, int page, SystemInfo sys, PageSymbols sym, double s, ReaderState state)
+    static void CheckTimes(PageResult res, int page, SystemInfo sys, PageSymbols sym, double s, ReaderState state, List<SystemInfo> systems)
     {
         var sigs = sym.Sigs.Where(g => g.Time != null && sys.Staves.Contains(g.St)).OrderBy(g => g.X).ToList();
         if (sys.Measures < 1) { sym.Sigs.RemoveAll(g => sigs.Contains(g) && g.Time.StartsWith('?')); return; }
@@ -2244,6 +2244,17 @@ static class Reader
             {
                 res.Notes.Add($"page {page} system {sys.Index + 1}: no time signature read; {Fill(best)} of {filling.Count} staff-measures fill {best}/4: {best}/4 taken");
                 sym.Sigs.Add(new Sig { St = sys.Staves[0], X = sys.Bars[0] + 0.1 * s, Time = $"{best}/4", Guessed = true });
+                return;
+            }
+            // (no length in quarters filling them: an odd number of eighths may -- a 3/8 or 5/8 sign the rules
+            // could not read on a scan, gen-retime-scan's basic009, taken for 4/4 and every measure short)
+            int eighth = Dur.Whole / 8, odd = 0;
+            int FillE(int k) => filling.Count(evs => Fills(evs, k * eighth));
+            for (int k = 3; k <= 15; k += 2) if (FillE(k) > (odd == 0 ? 0 : FillE(odd))) odd = k;
+            if (filling.Count >= 2 && odd > 0 && 2 * FillE(odd) >= filling.Count && FillE(odd) > Fill(4))
+            {
+                res.Notes.Add($"page {page} system {sys.Index + 1}: no time signature read; {FillE(odd)} of {filling.Count} staff-measures fill {odd}/8: {odd}/8 taken");
+                sym.Sigs.Add(new Sig { St = sys.Staves[0], X = sys.Bars[0] + 0.1 * s, Time = $"{odd}/8", Guessed = true });
             }
             return;
         }
@@ -2281,6 +2292,23 @@ static class Reader
                 {
                     if (evs.Count == 0 || (evs.Count == 1 && evs[0].IsRest && evs[0].Ticks == Dur.Whole)) continue;
                     contents.Add(evs);
+                }
+            // (a sign the system's last, with too little after it on the system to tell by: the time it sets
+            // governs the systems after too, up to one with a sign of its own, and their measures tell as well.
+            // gen-retime's meters009, one 9/4 bar on its first system under a 6/4 sign, kept the 6/4 for the piece.
+            // Only then: a system's own measures, one bar on three staves, are the time's first witnesses --
+            // schumann96-2's 2/4 read for 3/4 on page 2, the next system's bars outvoting them, lost 7 notes)
+            if (j == sigs.Count && contents.Count < 2)
+                for (int k = systems.IndexOf(sys) + 1; k > 0 && k < systems.Count && contents.Count < 2; k++)
+                {
+                    var next = systems[k];
+                    if (sym.Sigs.Any(g => g.Time != null && next.Staves.Contains(g.St))) break;
+                    for (int m = 0; m < next.Measures && contents.Count < 2; m++)
+                        foreach (var evs in StaffMeasures(sym, next, m, s))
+                        {
+                            if (evs.Count == 0 || (evs.Count == 1 && evs[0].IsRest && evs[0].Ticks == Dur.Whole)) continue;
+                            contents.Add(evs);
+                        }
                 }
             if (contents.Count < 2) continue;
             int Filled(int ticks) => contents.Count(evs => Fills(evs, ticks));
