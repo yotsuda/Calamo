@@ -2,6 +2,40 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S60: `TrustScore` を 10 の使い道に分けた（読みは同じ）。42・49 の掃きは**背景で走っていて、結果はまだ**。S65 第 1 歩: 生成器の再現度を測る道具 `tools/fidelity.ps1` と、声部の誤りを再現する生成器の型 `OmrGen --partial`（**gen-partial-scan の voice 23.8／1,000 音、実譜 8.3、今までの台は 0.0〜1.4**）（2026-11-15 夕、前の節の次の一手 1・2）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0 better・nothing worse、`out/s91/check-head.log`。`gate:` は作業ツリーを触っていたためで、走ったのは HEAD の exe）。**`out/s91/sweep.ps1` が背景で走っている**（17:28 開始、1 回 12〜14 分 × 22 回、22 時ごろ終わる見込み。`out/s91/sweep.log` の最後が `all done` になるまで、**ビルドしない・開発用の台と評価台を回さない**。ビルドすると走っている読み手の exe が変わり、`out/audiveris` も同じ場所に書く。止めるなら `pwsh tools/stop-run.ps1 -List` で見てから）。
+
+**変更の種類**: (1) 読み手は変えていない（`TrustScore` を名前つきの 10 の閾値に分けただけ。規則 check 0 better・nothing worse、開発用の台 42 = 35102 で docs と同じ）。check の `gate:` の警告はこれ（読みの変わらない書き換え。門 2 ではない）。(2) `道具・採点・正解`（`tools/fidelity.ps1`）と生成器（`OmrGen --partial`、S65 の再現のための型。§0「本線の順番」が待ち時間に許す範囲）。
+
+**やったこと**:
+- **S60**: `Symbols.TrustScore`（50 か所余り）を使い道ごとに `TrustHead`（符幹・加線のない符頭を残す、譜表から遠い符頭、斜線の符頭）・`TrustStem`（符幹の先 `stem_N`、装飾音の斜線）・`TrustClef`（譜表の始まりを動かす音部記号・調号・拍子、規則の見つけない音部記号）・`TrustBar`（符幹と読んだ線の小節線、タイの間の小節線）・`TrustKey`・`TrustSign`（臨時記号）・`TrustRest`・`TrustDot`（付点、付点を含む重嬰）・`TrustCurve`（タイ・スラーの端、松葉の端、フェルマータ）・`TrustRepeat`（小節の反復記号、TAB の 4）に分けた。全部 0.5、`--trust` は `SetTrust` で 10 個とも。コミット `5cb34bf`。
+- 掃きの台本 `out/s91/sweep.ps1`（`none` と各 `Trust*=0.6`、42・49、開発用の台の表の引数）とまとめ `out/s91/summarize.ps1`（基準は `sweep-none-<m>.tsv`）。**今の読み手で 42 = 35102、49 = 35074（差 −28）**、`TrustHead` 0.6 の 42 = 35098（−4）。残りは走っている。
+- **S65 の道具** `tools/fidelity.ps1`: 実譜（`docs/dev-sets.tsv`・`eval-sets.tsv` の `c_*`。評価台はスキャンときれいに分ける）と生成譜（各曲の `omr/causes.txt`、同じ Scorer）の誤りの型を、1,000 音あたりと誤りの内訳（%）で並べ、実譜の上位 5 つの型ごとにいちばん近い生成譜の台を出す。生成譜は `out/fidelity/<台>` に写して検出器つきで読む（check の台は check の最後の読み方で上書きされ、実譜の表は検出器つきなので）。`-Read` で読み直す。
+- **分かったこと**（`out/s91/fidelity3.log`）: 1,000 音あたりの誤りは実譜が開発用の台 42.8・評価台のスキャン 90.1・きれい 44.2、**標準の汚し込みの台は gen-scan 0.8・gen-scan-fill 3.3**（15〜50 分の 1）。gen-mix-scan は 42.4 だが内訳は lost・tuplet・extra に偏る。低解像度の gen-s25-scan は 159.7 で、44% が lost（小節ごと落とす）。**voice は実譜の誤りの 8〜28% なのに、どの台でも 1.4 以下**だった。
+- **voice の型**（開発用の台、`dev-schumann25-9-ms` の 8・24 小節ほか）: 右手の上の声部が前半は和音だけ（相手の声部なし）で、後半に下の声部が入る。読み手は前半の和音を下の声部に入れる。生成器の 2 声の小節は、どちらの声部も必ず小節全体を埋めていた。
+- **`OmrGen --partial <share>`**（`Gen.PartVoice`）: 2 声の小節のうちこの割合で、片方の声部を拍の境目（その声部の音が始まる拍）で切り、小節の頭か終わりまでをスペーサーにする。**残った方の声部の、相手のいない区間の音の符幹を高さで決める**（上の声部で中央の線より上なら `@stemDown`、下の声部で下なら `@stemUp`）。最初の版（スペーサーだけ）は voices2・piano とも inVoice 99.7〜100 で**再現しなかった**。符幹の向きを足すと voices2 94.4〜94.7・piano 97.6 になり、誤り方も実譜と同じ（独りの区間の音が相手の声部に入る、下向きの符幹で相手の音と和音にまとめられる）。台は `out/gen-partial`・`gen-partial-scan`（voices2・piano × 10、種 7、`--partial 0.6`、台本 `out/s91/make-partial.ps1`）。check にはまだ入れていない。
+- **missed の型**（開発用の台の `evidence-notes.tsv`、11-14 の読み）: 取りこぼし 486 のうち休符 155、休符で最多は **4 分休符 96**（holmes2-scan 49・holmes4-scan 18・kinkel19 の scan）。holmes2-scan の頁で確かめると、左手の下の声部の終わりの**古い刷りの z 形の 4 分休符**（REQUESTS 26）。生成器で出すには `restStyle z` を持つ lysc（`c18f49198` 以降）が要るが、Release の lysc は 11-12 のビルドのまま（作り直すかはオーナーか Lily# 側の判断、前々節から残っている）。音の取りこぼしは 8 分 72・16 分 39 ほかで、まだ型に分けていない。
+
+**数字**: 規則 check（分けた版、`out/s91/check-split.log`）**OK（0 better・nothing worse）**。開発用の台（`-Dev -Reuse -Verify`、分けた版）42 = 35102（docs と同じ）、49 = 35074。fidelity の表は上。
+
+**正直に書いておくこと**:
+1. S65 の目安（実譜の上位 5 つの型がどれかの台で実譜の半分以上）は字面では 5 つとも通る（`out/s91/fidelity3.log` の最後）が、missed・value・extra を通しているのは gen-s25-scan の壊れ方（低解像度で小節ごと落とす）で、実譜の誤り方ではない。**標準の解像度の汚し込みの台で出るのは voice（gen-partial）と tuplet（gen-mix-scan）だけ**。目安を「標準の解像度の台で」と読むなら、まだ 2 / 5。
+2. gen-partial の voices2 の 3 曲で、印刷は 6/8 なのに読み手が **`time 11/8`** と読む（音はすべて正しい、signatures 90%）。片方の声部が途中で消える小節を短い小節と見て `CheckTimes` が拍子を選び直したと思われる。§0「本線の順番」に従い直していない（下の「読めない型の記録」）。
+3. missed の内訳は 11-14 の読みの `evidence-notes.tsv`（`--evidence` で読んだもの）。今の読みとは少し違う。
+4. fidelity の生成譜の側は検出器つき・`--verify` なし。実譜の表は `-Verify` つき（読みは同じはずだが確かめていない）。
+
+**次の一手**（ROADMAP §0「本線の順番」の言葉で）:
+1. **S60: 掃きの結果を読む**。`out/s91/sweep.log` が `all done` になったら `pwsh out/s91/summarize.ps1`。42 と 49 で向きが割れる使い道（片方だけ下がる、差が大きく縮む）を、`SureTuplet` のときと同じく構造の確かめに置き換える候補にする。割れなければ、`Detector.Threshold`（クラスごとの `Weak*`）を同じやり方で。そのあと学習し直し（セットに `fingers.npz*2`、memmap、種違い 2 つ、§7 の 4）。
+2. **S65 の続き**: (a) gen-partial を check に入れるか決める（入れるなら HEAD の読み手で基準を取ってから）。(b) 標準の台で missed・value・extra を出す型を探す（missed の音の内訳、value は holmes2-scan の「タイでつながった 2 分＋4 分を付点 2 分に読む」型が目立つ）。(c) z 形の休符はオーナーの判断待ち。
+3. **S66**: 公平な台を増やす（オーナーの曲選び待ち）。
+4. オーナーへの問い: (a) **Release の lysc を作り直して z 形の休符（`restStyle z`）を生成器と学習で使ってよいか**（S65 の missed の休符の最多の型、S60 の学習し直しのセットにも入れたい）、(b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ。
+
+**読めない型の記録**: 前の節までのものに加えて、**片方の声部が小節の途中で消える 6/8 を 11/8 と読む**（`out/gen-partial/voices2/voices2002`・2005・2010。門 1 の台はもうある。`CheckTimes` の直しは S60・S65 の後）。
+
+**check の記録**: 頭の規則 check OK（0・nothing worse）、分けた版の規則 check OK（0・nothing worse）。どちらも `gate:` の警告（上の「変更の種類」）。検出器の check は回していない（読みが変わらないため）。生成器の変更は `--partial` を付けたときだけ効き、既存の台は作り直していない。
+
+
 ## (A) Schirmer の型（3/4 の 8 分 6 つの伴奏を 2/4 と刷る）を門 1 で試し、**再現しなかった**（読み手は直さず、台は check に残した）。あわせて前の節の次の一手 3: 短い 3 連符の括弧の半分を「横の文字」と取って数字を捨てる型を直した。**gen-mix 97.93 → 98.05、gen-mix-scan 95.78 → 95.94**（2026-11-15 午後、前の節の次の一手 1・3）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は 6 つとも triage 済み。頭の規則 check は OK（0 better・nothing worse、`out/s90/check-head.log`）。
