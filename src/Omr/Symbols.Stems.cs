@@ -782,8 +782,8 @@ static partial class Symbols
     /// </summary>
     static void GraceStems(Img ink, PageSymbols ps, double s)
     {
-        var tips = ps.Detections.Where(t => t.Class.StartsWith("stem_") && t.Score >= TrustScore).ToList();
-        var slashes = ps.Detections.Where(t => t.Class == "grace_slash" && t.Score >= TrustScore).ToList();
+        var tips = ps.Detections.Where(t => t.Class.StartsWith("stem_") && t.Score >= TrustStem).ToList();
+        var slashes = ps.Detections.Where(t => t.Class == "grace_slash" && t.Score >= TrustStem).ToList();
         // the detector's tips first, for every grace note: a group's member with none takes a neighbour's
         var marked = new Dictionary<Head, Detection>();
         foreach (var g in ps.Graces)

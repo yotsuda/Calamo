@@ -2407,14 +2407,14 @@ static class Reader
             int p = st.Part;
             if (ms.Evs[p].Any(e => !e.IsRest)) continue;
             // (a two-bar sign the detector is unsure of counts on the barline itself, on the staff's middle line)
-            bool OnStaff(Detection d) => d.Score >= Symbols.TrustScore && Math.Abs(d.Y - st.Mid) < 2 * s
+            bool OnStaff(Detection d) => d.Score >= Symbols.TrustRepeat && Math.Abs(d.Y - st.Mid) < 2 * s
                                          || d.Class == "percent_2" && d.Score > Detector.WeakPercent && Math.Abs(d.Y - st.Mid) < 1.0 * s
                                             && (Math.Abs(d.X - x0) < 1.0 * s || Math.Abs(d.X - x1) < 1.0 * s);
             int back = 0;
             // (a two-bar sign across a system break stands at the second system's start, past its
             // clef and key: the first measure there, and the last one of the system before)
             var next = m + 1 == sys.Measures ? res.Systems.FirstOrDefault(x => x.Index == sys.Index + 1) : null;
-            bool Opening(Detection d, SystemInfo x, Staff on) => d.Class == "percent_2" && d.Score >= Symbols.TrustScore && Math.Abs(d.Y - on.Mid) < 2 * s
+            bool Opening(Detection d, SystemInfo x, Staff on) => d.Class == "percent_2" && d.Score >= Symbols.TrustRepeat && Math.Abs(d.Y - on.Mid) < 2 * s
                                                                 && d.X > x.Bars[0] && d.X < x.Bars[1];
             // (a sign the detector is unsure of counts where a one-bar sign stands: the measure's
             // middle third, on the staff's middle line -- Fantasy's drums' sign at 0.35)
@@ -2431,7 +2431,7 @@ static class Reader
             bool Strokes(Staff on, double xb) => sym.Detections.Any(d => (d.Class.StartsWith("percent_") || d.Class.StartsWith("slash_")) && d.Score > Detector.WeakPercent
                                                                          && Math.Abs(d.X - xb) < 2.5 * s && Math.Abs(d.Y - on.Mid) < 1.5 * s);
             bool Four(double xb) => Strokes(st, xb) && sys.Staves.Any(o => Strokes(o, xb)
-                && sym.Detections.Any(d => d.Class is "tab_4" or "digit_4" && d.Score >= Symbols.TrustScore && Math.Abs(d.X - xb) < 1.0 * s
+                && sym.Detections.Any(d => d.Class is "tab_4" or "digit_4" && d.Score >= Symbols.TrustRepeat && Math.Abs(d.X - xb) < 1.0 * s
                                            && d.Y < o.Mid - 2.3 * s && d.Y > o.Mid - 6 * s));
             if (Enumerable.Range(m - 1, 4).Any(j => j >= 1 && j < sys.Measures && Four(sys.Bars[j]))) back = 4;
             else if (signs.Any(d => d.Class == "percent_1" && (OnStaff(d) && d.X > x0 && d.X < x1 || Centred(d)))) back = 1;

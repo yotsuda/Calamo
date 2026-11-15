@@ -17,7 +17,7 @@ static partial class Symbols
         var added = new List<Head>();
         var gone = new HashSet<Head>();
         // (the stem hangs from the chord's beam: a tip with no beam is a rhythm slash's own stem, a half's)
-        foreach (var t in ps.Detections.Where(t => t.Class.StartsWith("stem_") && t.Class != "stem_0" && t.Score >= TrustScore).OrderBy(t => t.X))
+        foreach (var t in ps.Detections.Where(t => t.Class.StartsWith("stem_") && t.Class != "stem_0" && t.Score >= TrustStem).OrderBy(t => t.X))
         {
             var heads = ps.Heads.Concat(added).Where(h => !Loose(h) && h.HasStem).ToList();
             if (heads.Any(h => Math.Abs(h.StemX - t.X) < 0.5 * s && Math.Abs(h.Tip - t.Y) < 1.5 * s)) continue;
@@ -46,7 +46,7 @@ static partial class Symbols
             // (a head the detector is sure of at the foot is the stem's own, missed above; so is a slash it
             // sees at its threshold: a rhythm slash's, the repeat's thin slash seen under it -- detector47 sees
             // the band suite's dotted guitar slash at 0.84 and its beam's end as a tip at 0.50, band002 bar 7)
-            if (ps.Heads.Any(h => (!Loose(h) || h.Slash && h.Score >= TrustScore) && h.St == near.St && Math.Abs(h.X - bestX) < 1.2 * s && Math.Abs(h.Y - foot) < 1.2 * s)) continue;
+            if (ps.Heads.Any(h => (!Loose(h) || h.Slash && h.Score >= TrustHead) && h.St == near.St && Math.Abs(h.X - bestX) < 1.2 * s && Math.Abs(h.Y - foot) < 1.2 * s)) continue;
             int beams = t.Class[5] - '0';
             // (removing the staff lines cuts the slash from its stem: its pieces read as a triplet's 3)
             ps.RepeatSlashes.Add((Math.Min(bestX, end.X) - 0.3 * s, Math.Min(foot, end.Y) - 0.3 * s, Math.Max(bestX, end.X) + 0.3 * s, Math.Max(foot, end.Y) + 0.3 * s));
@@ -254,7 +254,7 @@ static partial class Symbols
                 if (among != null)
                 { if (dbg) Console.WriteLine($"beat repeat? x {l}-{r}: the head at {among.X:F0},{among.Y:F0} among them ({among.Score:F2}{(among.HasStem ? $", stem at {among.StemX:F0} tip {among.Tip:F0}" : "")})"); continue; }
                 // (nor a rest the detector sees: an eighth rest's stem leans so, and two may stand close)
-                if (ps.Detections != null && ps.Detections.Any(d => d.Class.StartsWith("rest_") && d.Score >= TrustScore && d.X > l && d.X < r && d.Y > t && d.Y < b))
+                if (ps.Detections != null && ps.Detections.Any(d => d.Class.StartsWith("rest_") && d.Score >= TrustRest && d.X > l && d.X < r && d.Y > t && d.Y < b))
                 { if (dbg) Console.WriteLine($"beat repeat? x {l}-{r}: a rest the detector sees"); continue; }
                 if (dbg) Console.WriteLine($"beat repeat at x {l}-{r} y {t}-{b}: {n} strokes");
                 ps.BeatRepeats.Add(new BeatRepeat(st, l, r, n));
@@ -325,7 +325,7 @@ static partial class Symbols
     static void DetectedRests(PageSymbols ps, Img page, double s)
     {
         var staves = ps.Heads.Select(h => h.St).Concat(ps.Rests.Select(r => r.St)).Concat(ps.Others.Select(o => o.St)).Distinct().ToList();
-        foreach (var t in ps.Detections.Where(t => t.Score >= TrustScore))
+        foreach (var t in ps.Detections.Where(t => t.Score >= TrustRest))
         {
             var st = Nearest(staves, t.Y, s);
             if (st == null || Math.Abs(st.Pos(t.Y)) > 8) continue;
@@ -347,7 +347,7 @@ static partial class Symbols
                 // N, passes the rules' sixteenth rest test (seen at 0.87-0.98 as a quarter)
                 if (t.Class != "rest_long" && ruled.Kind is RestKind.Quarter or RestKind.Eighth or RestKind.Sixteenth
                     && ruled.Kind != kind
-                    && !ps.Detections.Any(u => u.Class == RestClass(ruled.Kind) && u.Score >= TrustScore && Math.Abs(u.X - ruled.X) < s && Math.Abs(u.Y - ruled.Y) < 1.5 * s))
+                    && !ps.Detections.Any(u => u.Class == RestClass(ruled.Kind) && u.Score >= TrustRest && Math.Abs(u.X - ruled.X) < s && Math.Abs(u.Y - ruled.Y) < 1.5 * s))
                 {
                     if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 2 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                         Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}) over the rules' {ruled.Kind} rest");
@@ -495,7 +495,7 @@ static partial class Symbols
     /// </summary>
     static void DetectedAccidentals(PageSymbols ps, double s)
     {
-        foreach (var t in ps.Detections.Where(t => t.Score >= TrustScore).OrderByDescending(t => t.X))
+        foreach (var t in ps.Detections.Where(t => t.Score >= TrustSign).OrderByDescending(t => t.X))
         {
             int alt;
             double halfW;
@@ -521,7 +521,7 @@ static partial class Symbols
             double atGrace = alt < 0 ? t.Y + 0.42 * s : t.Y;
             double AtOf(Head hd) => ps.Graces.Contains(hd) ? atGrace : at;
             var st = Nearest(ps.Heads.Select(h => h.St).Distinct().ToList(), t.Y, s);
-            bool restSeen = owner != null && ps.Detections.Any(u => u.Class.StartsWith("rest_") && u.Score >= TrustScore && owner.C.MinX <= u.X && u.X <= owner.C.MaxX && owner.C.MinY <= u.Y && u.Y <= owner.C.MaxY);
+            bool restSeen = owner != null && ps.Detections.Any(u => u.Class.StartsWith("rest_") && u.Score >= TrustRest && owner.C.MinX <= u.X && u.X <= owner.C.MaxX && owner.C.MinY <= u.Y && u.Y <= owner.C.MaxY);
             // (or a grace note's small sign: a rest to the rules, or a sign named by the classifier
             // that no note claimed (the grace head is no note of theirs), with the grace head nearer
             // right of it than any note -- chords005's and chords010's naturals, seen at 0.8, one of
@@ -674,7 +674,7 @@ static partial class Symbols
     /// (piano006's lower voice's gis8., at 0.31 under the chord's two at 0.77 and 0.89).
     /// </summary>
     public static List<Detection> ColumnDots(PageSymbols ps, double s) =>
-        ps.WeakDots.Where(w => ps.Detections != null && ps.Detections.Any(t => t.Class == "dot" && t.Score >= TrustScore
+        ps.WeakDots.Where(w => ps.Detections != null && ps.Detections.Any(t => t.Class == "dot" && t.Score >= TrustDot
             && Math.Abs(t.X - w.X) < 0.3 * s && Math.Abs(t.Y - w.Y) > 0.7 * s && Math.Abs(t.Y - w.Y) < 3.2 * s)).ToList();
 
     /// <summary>
@@ -690,13 +690,13 @@ static partial class Symbols
     {
         // (a dot inside a double sharp the detector is surer of is one of its four lobes: Gonville's,
         // in pieces, the lower left seen as a dot at 0.64 and given to the note before -- piano007)
-        var crosses = ps.Detections.Where(t => t.Class == "dsharp" && t.Score >= TrustScore).ToList();
+        var crosses = ps.Detections.Where(t => t.Class == "dsharp" && t.Score >= TrustDot).ToList();
         bool InCross(double x, double y, double score) => crosses.Any(t => t.Score > score && Math.Abs(t.X - x) < 0.6 * s && Math.Abs(t.Y - y) < 0.6 * s);
         // (nor is a dot one where the detector is surer of a staccato or a staccatissimo: S15; or a portato,
         // whose dot stands 0.4 space from its centre)
         var staccatos = ps.Detections.Where(t => t.Class is "art_staccato" or "art_staccatissimo" or "art_portato" && t.Score > Detector.Threshold).ToList();
         bool Staccato(double x, double y, double score) => staccatos.Any(t => t.Score > score && Math.Abs(t.X - x) < 0.4 * s && Math.Abs(t.Y - y) < 0.5 * s);
-        var seen = ps.Detections.Where(t => t.Class == "dot" && t.Score >= TrustScore).Concat(ColumnDots(ps, s)).Where(t => !InCross(t.X, t.Y, t.Score) && !Staccato(t.X, t.Y, t.Score)).ToList();
+        var seen = ps.Detections.Where(t => t.Class == "dot" && t.Score >= TrustDot).Concat(ColumnDots(ps, s)).Where(t => !InCross(t.X, t.Y, t.Score) && !Staccato(t.X, t.Y, t.Score)).ToList();
         rules = rules.Where(d => !InCross(d.X, d.Y, seen.Where(t => Math.Abs(t.X - d.X) < 0.4 * s && Math.Abs(t.Y - d.Y) < 0.4 * s).Select(t => t.Score).DefaultIfEmpty(0).Max())).ToList();
         bool Near(double x, double y, Detection t) => Math.Abs(t.X - x) < 0.4 * s && Math.Abs(t.Y - y) < 0.4 * s;
         // A rule's dot the detector does not see is kept when the detector sees nothing at all on
@@ -754,7 +754,7 @@ static partial class Symbols
     /// </summary>
     static void DropUnseenRests(PageSymbols ps, double s)
     {
-        var seen = ps.Detections.Where(t => t.Class.StartsWith("rest_") && t.Score >= TrustScore).ToList();
+        var seen = ps.Detections.Where(t => t.Class.StartsWith("rest_") && t.Score >= TrustRest).ToList();
         foreach (var r in ps.Rests.ToList())
         {
             // (on a one-line staff, imagined five lines wide, the words under the voice's staff above

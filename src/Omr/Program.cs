@@ -31,8 +31,8 @@ if (opt.TryGetValue("detector", out var detPath) && !(detPath == "true" && Detec
         int.Parse(opt.GetValueOrDefault("threads", "0")));
 // --sure <score>: a detected head this sure stays whatever the rules say (2 = the rules decide every head)
 if (opt.TryGetValue("sure", out var sure)) Symbols.SetSure(double.Parse(sure, CultureInfo.InvariantCulture));
-// --trust <score>: a detection this sure fills in where the rules read nothing (see Symbols.TrustScore)
-if (opt.TryGetValue("trust", out var trust)) Symbols.TrustScore = double.Parse(trust, CultureInfo.InvariantCulture);
+// --trust <score>: a detection this sure fills in where the rules read nothing (see Symbols.SetTrust)
+if (opt.TryGetValue("trust", out var trust)) Symbols.SetTrust(double.Parse(trust, CultureInfo.InvariantCulture));
 // (OMR_TUNE: a threshold set for a measurement, S60; Tune)
 Tune.Apply(Environment.GetEnvironmentVariable("OMR_TUNE"));
 // --knn-test <samples.tsv>: how well the classifier labels samples it was not trained on

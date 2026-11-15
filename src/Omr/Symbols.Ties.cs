@@ -230,8 +230,8 @@ static partial class Symbols
     /// </summary>
     static void DetectedTies(PageSymbols ps, Img d, double s)
     {
-        var lefts = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= TrustScore).ToList();
-        var rights = ps.Detections.Where(t => t.Class == "tie_r" && t.Score >= TrustScore).ToList();
+        var lefts = ps.Detections.Where(t => t.Class == "tie_l" && t.Score >= TrustCurve).ToList();
+        var rights = ps.Detections.Where(t => t.Class == "tie_r" && t.Score >= TrustCurve).ToList();
         // The head each end stands at. Lily# starts a tie 0.2-1.8 spaces right of its head's centre
         // (past a dot), within a space and a quarter of its height, and ends it as far left of the
         // next. A chord's ties stack, one to a head, and an inner one lies between two heads, nearer
@@ -312,7 +312,7 @@ static partial class Symbols
                 // the staff clear of the two notes' stems)
                 double mid = (st.Lines[0].Top + st.Lines[^1].Bot) / 2.0;
                 bool barBetween = ps.Systems?.Any(sys => sys.Staves.Contains(st) && sys.Bars.Any(x => x > a.R && x < b.L)) == true
-                    || ps.Detections.Any(u => u.Class == "barline" && u.Score >= TrustScore && u.X > a.R && u.X < b.L && Math.Abs(u.Y - mid) < 3 * s)
+                    || ps.Detections.Any(u => u.Class == "barline" && u.Score >= TrustBar && u.X > a.R && u.X < b.L && Math.Abs(u.Y - mid) < 3 * s)
                     || Enumerable.Range((int)(a.R + 0.6 * s), Math.Max(0, (int)(b.L - 0.6 * s) - (int)(a.R + 0.6 * s))).Any(x =>
                        {
                            int top = st.Lines[0].Top, bot = st.Lines[^1].Bot, dark = 0;
@@ -321,7 +321,7 @@ static partial class Symbols
                        });
                 bool nextNote = !ps.Heads.Any(o => o.St == st && o.X > a.X + 1.5 * s && o.X < b.X - 1.5 * s);
                 if (!tied && barBetween && nextNote
-                    && !ps.Detections.Any(u => u.Class == "slur_r" && u.Score >= TrustScore && Math.Abs(u.X - b.X) < 1.5 * s && Math.Abs(u.Y - b.Y) < 4 * s))
+                    && !ps.Detections.Any(u => u.Class == "slur_r" && u.Score >= TrustCurve && Math.Abs(u.X - b.X) < 1.5 * s && Math.Abs(u.Y - b.Y) < 4 * s))
                 {
                     tied = true;
                     why += ", but it is the next note and no slur ends there";
@@ -332,7 +332,7 @@ static partial class Symbols
                 // Brandt's song: a'4.~ a'8)
                 else if (!tied && nextNote && !barBetween)
                 {
-                    var u = ps.Detections.Where(u => u.Class == "slur_r" && u.Score >= TrustScore && u.X > a.R && u.X < b.X + 0.3 * s
+                    var u = ps.Detections.Where(u => u.Class == "slur_r" && u.Score >= TrustCurve && u.X > a.R && u.X < b.X + 0.3 * s
                                                      && b.X - u.X < 2.0 * s && Math.Abs(u.Y - b.Y) <= 2.0 * s && Math.Sign(u.Y - b.Y) == Math.Sign(t.Y - a.Y))
                                       .OrderByDescending(u => u.Score).FirstOrDefault();
                     if (u != null)
@@ -433,7 +433,7 @@ static partial class Symbols
         // (a slur_r DetectedTies took for a tie's end ends no slur; a weak end, 0.2 up, only pairs with
         // a sure one)
         var ends = ps.Detections.Where(t => (t.Class == "slur_l" || t.Class == "slur_r") && t.Score >= Detector.WeakSlur && !ps.TieEndsAsSlur.Contains(t)).ToList();
-        bool Sure(Detection t) => t.Score >= TrustScore;
+        bool Sure(Detection t) => t.Score >= TrustCurve;
         // a tie's start that tied nothing (DetectedTies: no head at its place after it, or a slur's
         // end there) is a slur's start the detector took for a tie: the short arc from a chord's top
         // note down to the next note, tabi's 8th bar. It starts a slur only to an end found for it
@@ -453,7 +453,7 @@ static partial class Symbols
         // kinkel19-2's right hand, bar 26, the open end itself at 0.71; the upper one, under the chord,
         // started a slur to the next bar's end. Within 1.2 spaces of the hairpin's end only: a slur's true
         // end 1.3 spaces under a hairpin's, slur_r 0.30 ending the arc over kinkel19-2's left hand, bar 50)
-        var pinEnds = ps.Detections.Where(t => t.Class is "hairpin_tip" or "hairpin_open" && t.Score >= TrustScore).ToList();
+        var pinEnds = ps.Detections.Where(t => t.Class is "hairpin_tip" or "hairpin_open" && t.Score >= TrustCurve).ToList();
         ends.RemoveAll(t => !Sure(t) && pinEnds.FirstOrDefault(h => Math.Abs(h.X - t.X) < 0.7 * s && Math.Abs(h.Y - t.Y) < 1.2 * s) is Detection pin
                             && (!Debug(t) || Log($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}): a line's end of the {pin.Class} at {pin.X:F0},{pin.Y:F0} ({pin.Score:F2}), dropped")));
         static bool Log(string line) { Console.WriteLine(line); return true; }
@@ -769,7 +769,7 @@ static partial class Symbols
             // middle under the arc, on the notes' side)
             bool Fermata(Detection l, Detection r)
             {
-                bool seen = ps.Detections.Any(u => u.Class == "fermata" && u.Score >= TrustScore
+                bool seen = ps.Detections.Any(u => u.Class == "fermata" && u.Score >= TrustCurve
                     && Math.Abs(u.X - l.X) < 2.2 * s && Math.Abs(u.X - r.X) < 2.2 * s && Math.Abs(u.Y - l.Y) < 1.2 * s && Math.Abs(u.Y - r.Y) < 1.2 * s);
                 if (seen && (Debug(l) || Debug(r))) Console.WriteLine($"fermata detected between the ends {l.X:F0},{l.Y:F0} and {r.X:F0},{r.Y:F0}: no slur");
                 if (seen) return true;

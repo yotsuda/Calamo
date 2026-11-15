@@ -41,8 +41,8 @@ static partial class Symbols
                 // rest just left of a head passes for a double flat (DetectedRests names it); so does
                 // Petaluma's between a beam's heads, seen at 0.90 (no sign seen there is enough)
                 if (best != null && ps.Detections != null
-                    && ps.Detections.Any(t => t.Class.StartsWith("rest_") && t.Score >= TrustScore && Inside(t))
-                    && !ps.Detections.Any(t => t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && t.Score >= TrustScore && Inside(t)))
+                    && ps.Detections.Any(t => t.Class.StartsWith("rest_") && t.Score >= TrustRest && Inside(t))
+                    && !ps.Detections.Any(t => t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && t.Score >= TrustSign && Inside(t)))
                     best = null;
                 bool Inside(Detection t) => c.MinX <= t.X && t.X <= c.MaxX && c.MinY <= t.Y && t.Y <= c.MaxY;
                 // a sign by a chord reaches several heads: the detector's kind tells where its note
@@ -50,7 +50,7 @@ static partial class Symbols
                 // at the middle) and names it (by the nearest head the rules read Leland's flat by a
                 // chord's middle head as a sharp)
                 var sign = best == null || ps.Detections == null ? null
-                    : ps.Detections.Where(t => t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && t.Score >= TrustScore && Inside(t)).OrderByDescending(t => t.Score).FirstOrDefault();
+                    : ps.Detections.Where(t => t.Class is "sharp" or "flat" or "natural" or "dsharp" or "dflat" && t.Score >= TrustSign && Inside(t)).OrderByDescending(t => t.Score).FirstOrDefault();
                 if (sign != null)
                 {
                     // (a sharp's or natural's own centre: its ink box may run on into a stroke beside it,
@@ -97,7 +97,7 @@ static partial class Symbols
                 // <b, d fis>16~ <b, d fis>8, the lower tie read as a whole rest; the ends lie up to a
                 // space off the arc's middle, ties004's over 16ths' heads)
                 bool unseen = ps.Detections != null
-                    && !ps.Detections.Any(t => t.Class == "rest_long" && t.Score >= TrustScore && Math.Abs(t.X - c.Cx) < s && Math.Abs(t.Y - c.Cy) < s);
+                    && !ps.Detections.Any(t => t.Class == "rest_long" && t.Score >= TrustRest && Math.Abs(t.X - c.Cx) < s && Math.Abs(t.Y - c.Cy) < s);
                 if (unseen
                     && ps.Detections.Any(t => t.Class is "tie_l" or "slur_l" && t.Score > Detector.Threshold && t.X < c.Cx && c.Cx - t.X < 2.5 * s && Math.Abs(t.Y - c.Cy) < 1.2 * s)
                     && ps.Detections.Any(t => t.Class is "tie_r" or "slur_r" && t.Score > Detector.Threshold && t.X > c.Cx && t.X - c.Cx < 2.5 * s && Math.Abs(t.Y - c.Cy) < 1.2 * s))
@@ -134,7 +134,7 @@ static partial class Symbols
         // sees no rest, goes
         if (ps.Graces.Count > 0)
             ps.Rests.RemoveAll(r => ps.Graces.Any(g => g.St == r.St && r.X > g.X && r.X < ps.Heads.Where(h => h.St == g.St && h.X > g.X).Select(h => h.X).DefaultIfEmpty(g.X + 8 * s).Min() + 0.3 * s && Math.Abs(r.Y - g.Y) < 5 * s)
-                && !(ps.Detections?.Any(t => t.Class.StartsWith("rest_") && t.Score >= TrustScore && Math.Abs(t.X - r.X) < 0.7 * s && Math.Abs(t.Y - r.Y) < s) == true));
+                && !(ps.Detections?.Any(t => t.Class.StartsWith("rest_") && t.Score >= TrustRest && Math.Abs(t.X - r.X) < 0.7 * s && Math.Abs(t.Y - r.Y) < s) == true));
         // an arpeggio's wavy line left of a chord: no rest read in it (a quarter rest's zigzag to the
         // rules and the detector), whatever the detector says
         ps.Arpeggios = Arpeggios.Find(ink, ps.Heads, s, ps.Detections);
@@ -415,7 +415,7 @@ static partial class Symbols
             if (h.Acc == null)
             {
                 // (a sign that the rules named is a key's or another note's)
-                if (mine == null || mine.Score >= TrustScore) continue;
+                if (mine == null || mine.Score >= TrustSign) continue;
                 var owner = PieceAt(ps, mine.X, mine.Y);
                 if (owner != null && owner.Class is not ("?" or "dot")) continue;
                 if (ps.Heads.Any(o => o != h && o.St == h.St && o.Acc == Signs[mine.Class].Alt && Math.Abs(o.Y - h.Y) < 0.3 * s && o.L > mine.X && o.L < h.L)) continue;
@@ -429,7 +429,7 @@ static partial class Symbols
                 // (any sign a little off its height: a chord's column of signs, a sign the detector placed loosely)
                 if (signs.Any(t => t.X < h.L && h.L - t.X < 3.6 * s && Math.Abs(At(t) - h.Y) < 0.8 * s)) continue;
                 // (or a sure sign over its head or just right of it: DetectedAccidentals' crowded column)
-                if (signs.Any(t => t.Score >= TrustScore && h.X - t.X >= -2.2 * s && h.X - t.X <= 1.0 * s && Math.Abs(At(t) - h.Y) <= 0.3 * s
+                if (signs.Any(t => t.Score >= TrustSign && h.X - t.X >= -2.2 * s && h.X - t.X <= 1.0 * s && Math.Abs(At(t) - h.Y) <= 0.3 * s
                                    && !ps.Heads.Any(o => o != h && o.St == h.St && o.L > t.X && o.L - t.X <= 3.0 * s && Math.Abs(o.Y - At(t)) <= 0.3 * s))) continue;
                 h.Acc = null;
             }
@@ -440,7 +440,7 @@ static partial class Symbols
             else if (Signs[mine.Class].Alt != h.Acc)
                 Add(h, new HeadAlt($"{Glyph(h.Acc)} read, the detector sees {Signs[mine.Class].Glyph} ({mine.Score:F2})", true, Signs[mine.Class].Alt, 0, mine.Score));
         }
-        var dots = ps.Detections.Where(t => t.Class == "dot" && t.Score >= WeakSign && t.Score < TrustScore).ToList();
+        var dots = ps.Detections.Where(t => t.Class == "dot" && t.Score >= WeakSign && t.Score < TrustDot).ToList();
         foreach (var t in dots)
         {
             // the head left of it, as a dot is given (Classify), when that head has no dot

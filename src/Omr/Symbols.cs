@@ -155,7 +155,18 @@ static partial class Symbols
     public static double SureOttava = 0.9;   // an octave line's letters taken on their side of the staff
     public static double SureTab = 0.9;      // a tab number moved off its string
     public static void SetSure(double v) => SureHead = SureSlash = SureFlag = SureClef = SureKey = SureSign = SureTupletPage = SureTupletAlone = SureBar = SureOttava = SureTab = v;
-    public static double TrustScore = 0.5;
+    // TrustScore is split the same way (S60, 2026-11-15), all 0.5 when split:
+    public static double TrustHead = 0.5;    // a head the rules would drop for no stem or ledger, or far off its staff; a slash head by its stem
+    public static double TrustStem = 0.5;    // a stem's tip (stem_N) or a grace note's slash taken from the detector
+    public static double TrustClef = 0.5;    // a clef, key or time sign that moves a staff's start, or a clef the rules did not find
+    public static double TrustBar = 0.5;     // a barline the detector sees where the rules read a stem, or between a tie's ends
+    public static double TrustKey = 0.5;     // the signs of a key the detector reads
+    public static double TrustSign = 0.5;    // an accidental the detector names where the rules name another or none
+    public static double TrustRest = 0.5;    // a rest the detector finds, or one that keeps the rules from reading a sign
+    public static double TrustDot = 0.5;     // a dot (or a double sharp that holds one) the detector sees
+    public static double TrustCurve = 0.5;   // a tie's or slur's end, a hairpin's end, a fermata
+    public static double TrustRepeat = 0.5;  // a bar repeat's sign or a tab staff's 4
+    public static void SetTrust(double v) => TrustHead = TrustStem = TrustClef = TrustBar = TrustKey = TrustSign = TrustRest = TrustDot = TrustCurve = TrustRepeat = v;
     // A slur's weak end (Detector.WeakSlur up) pairs with a sure one this far away, in spaces, on the
     // detector's word alone; farther, only along the arc's ink (DetectedSlurs' Joined)
     public static double FarSlur = 25;
@@ -232,7 +243,7 @@ static partial class Symbols
             // a slur's end: 0.49, the tip 0.81)
             if (weakHalves?.Count > 0)
             {
-                var tips0 = ps.Detections.Where(t => t.Class == "stem_0" && t.Score >= TrustScore).ToList();
+                var tips0 = ps.Detections.Where(t => t.Class == "stem_0" && t.Score >= TrustStem).ToList();
                 bool Stemmed(Detection u) => tips0.Any(t =>
                 {
                     double dy = t.Y - u.Y, dx = t.X - u.X;
@@ -561,7 +572,7 @@ static partial class Symbols
             if (ps.Heads.Count < before) drops.Add($"{why} {before - ps.Heads.Count}");
         }
         // a black head needs a stem; a hollow one is a half (stem) or a whole (wide, no stem)
-        Drop("no stem", h => !h.HasStem && (!h.Hollow || (!h.WholeShape && h.OuterW < 1.3 * s)), TrustScore);
+        Drop("no stem", h => !h.HasStem && (!h.Hollow || (!h.WholeShape && h.OuterW < 1.3 * s)), TrustHead);
         // an old print's custos (Trautwein, kinkel19-1's scan): a "w" with a tail at the very end of a staff
         // whose system ends open, telling the next system's first pitch. The detector has no class for it and
         // sees a cross, at 0.45 (detector42) or 0.54 (49, a quarter note too many in the bar split across the
@@ -589,12 +600,12 @@ static partial class Symbols
         // and a loop that is another whole note the detector trusts, as this one, is a chord's (b d' f'').
         // Nor is a loop among a stemmed chord's black heads, the white left between heads a third
         // apart, a digit's: a second voice's whole note under a chord (gen-lied-all lied001 bar 2 lh)
-        bool OffStaff(Head h, double y) => h.Score >= TrustScore && Math.Abs(h.St.Pos(y)) > 5;
+        bool OffStaff(Head h, double y) => h.Score >= TrustHead && Math.Abs(h.St.Pos(y)) > 5;
         Drop("digit", h => !h.HasStem && !OffStaff(h, h.Y) && inkHoles.Any(o =>
             o.W > 0.3 * s && Math.Abs(o.Cx - h.X) < 0.5 * s && Math.Abs(o.Cy - h.Y) > 1.2 * s && Math.Abs(o.Cy - h.Y) < 3.0 * s
             && !OffStaff(h, o.Cy)
-            && !ps.Heads.Any(q => q.HasStem && !q.Hollow && q.Score >= TrustScore && Math.Abs(q.X - o.Cx) < 0.8 * s && Math.Abs(q.Y - o.Cy) < 0.8 * s)
-            && !(h.Score >= TrustScore && ps.Heads.Any(q => q != h && q.Hollow && !q.HasStem && q.Score >= TrustScore
+            && !ps.Heads.Any(q => q.HasStem && !q.Hollow && q.Score >= TrustHead && Math.Abs(q.X - o.Cx) < 0.8 * s && Math.Abs(q.Y - o.Cy) < 0.8 * s)
+            && !(h.Score >= TrustHead && ps.Heads.Any(q => q != h && q.Hollow && !q.HasStem && q.Score >= TrustHead
                                                             && Math.Abs(q.X - o.Cx) < 0.4 * s && Math.Abs(q.Y - o.Cy) < 0.4 * s))));
         // a whole note stands clear of other notes: a white patch shut in between an accidental
         // and the head it belongs to, or between two voices' heads, is no whole note
@@ -602,7 +613,7 @@ static partial class Symbols
             && Math.Min(o.R, h.R) - Math.Max(o.L, h.L) > 0.3 * s && Math.Abs(o.Y - h.Y) < 1.0 * s));
         // a head beyond the staff stands on ledger lines; the notes of a metronome mark do not
         // (the rules' hollow heads added beside the detector's: their ledger lines run out past them)
-        Drop("no ledger", h => !roots.Contains(h) && !HasLedgers(d, h, s, wider: ps.Detections != null && h.Score == 0), TrustScore);
+        Drop("no ledger", h => !roots.Contains(h) && !HasLedgers(d, h, s, wider: ps.Detections != null && h.Score == 0), TrustHead);
         // (a head that far out, however sure, only on its seven ledger lines and more: a metronome
         // mark's note over the staff is a head too. Not the wider test: a head on a ledger line
         // has its edges read along that line, out past it)

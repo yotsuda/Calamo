@@ -72,7 +72,7 @@ static partial class Layout
             // but the toner hollows them out (ledger010 on fill: a bar 0.1 space left of the clef's
             // centre, an empty first measure, every bar after it one off). Where the detector sees
             // no barline and does see a clef on the line, the line is the clef's.
-            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Symbols.TrustScore
+            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Symbols.TrustClef
                                        && sys.Staves.Any(st => Math.Abs(t.Y - st.Mid) < 2.5 * s)).ToList();
             bool OnClef(double c) => !seen.Any(t => Math.Abs(t.X - c) < 1.0 * s) && clefs.Any(t => Math.Abs(t.X - c) < 0.8 * s);
             if (Signatures.Verbose)
@@ -122,7 +122,7 @@ static partial class Layout
                     // a stem from a head inside the staff covers only part of it)
                     bool Spanned(Staff st) => onStaves.Count >= 2 && Dark(st);
                     bool stemInstead = sys.Staves.Where(st => !onStaves.Contains(st)).Any(st => tips.Any(p => p.St == st && Math.Abs(p.T.X - x) < 0.5 * s) && !Spanned(st));
-                    if (group.Max(t => t.Score) < Symbols.TrustScore || stemInstead) continue;
+                    if (group.Max(t => t.Score) < Symbols.TrustBar || stemInstead) continue;
                     // (nor is a wavy line: an arpeggio's wave, up a chord's left, is no barline)
                     if (onStaves.Any(st => Arpeggios.IsWave(d, st, x, s)))
                     {

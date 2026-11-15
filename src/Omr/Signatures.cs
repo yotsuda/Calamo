@@ -52,7 +52,7 @@ static class Signatures
                 // 0.94, and the key went, with every F and C of the piece)
                 if (ps.Detections != null)
                 {
-                    var dk = DetectedKey(ps, st, clef?.Sig.X ?? after, s, out var signs, Symbols.TrustScore, clef: clef?.Sig.Clef);
+                    var dk = DetectedKey(ps, st, clef?.Sig.X ?? after, s, out var signs, Symbols.TrustKey, clef: clef?.Sig.Clef);
                     // (more signs than the rules counted: taken when the rules' signs are among them --
                     // the detector then extends the rules' reading rather than contradicting it (basic010's
                     // one sharp of five on a scan) -- or when it is sure of every sign)
@@ -511,7 +511,7 @@ static class Signatures
     {
         // (the leftmost clef near the staff's start; the start may be found too far left, at
         // an instrument name at the staff's height, so the window is wide)
-        var clefs = ps.Detections.Where(t => (t.Class == "clef_g" || t.Class == "clef_f" || t.Class == "clef_c") && t.Score >= Symbols.TrustScore
+        var clefs = ps.Detections.Where(t => (t.Class == "clef_g" || t.Class == "clef_f" || t.Class == "clef_c") && t.Score >= Symbols.TrustClef
                                              && t.X > st.Left - 0.5 * s && t.X < st.Left + 12 * s && t.Y > st.Top - 3 * s && t.Y < st.Bottom + 3 * s)
                                  .OrderBy(t => t.X).ToList();
         if (Verbose) Console.WriteLine($"    clefs the detector sees, staff {st.System + 1}/{st.Part} (left {st.Left}): {string.Join(" ", ps.Detections.Where(d => d.Class.StartsWith("clef_") && d.X > st.Left - 0.5 * s && d.X < st.Left + 12 * s && d.Y > st.Top - 3 * s && d.Y < st.Bottom + 3 * s).Select(d => $"{d.Class}@{d.X:F0},{d.Y:F0}({d.Score:F2})"))}");

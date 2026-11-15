@@ -71,7 +71,7 @@ static partial class Symbols
             // MuseScore's fonts: 0.60, 1.2 spaces right of and 1.6 above the slur's start). (Not
             // the middle line: Fantasy's guitar sets its slashes in the staff's lower half.)
             if (slash && t.Score < SureSlash
-                && det.Any(u => u.Class is "slur_l" or "slur_r" && u.Score >= TrustScore && Math.Abs(u.X - t.X) < 2 * s && Math.Abs(u.Y - t.Y) < 2 * s))
+                && det.Any(u => u.Class is "slur_l" or "slur_r" && u.Score >= TrustCurve && Math.Abs(u.X - t.X) < 2 * s && Math.Abs(u.Y - t.Y) < 2 * s))
             {
                 if (DebugAt.HasValue && Math.Abs(t.X - DebugAt.Value.X) < 2 * s && Math.Abs(t.Y - DebugAt.Value.Y) < 3 * s)
                     Console.WriteLine($"detected {t.Class} at {t.X:F0},{t.Y:F0} ({t.Score:F2}) by a slur's end: dropped");

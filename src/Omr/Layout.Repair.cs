@@ -296,7 +296,7 @@ static partial class Layout
         var lefts = staves.Select(o => o.Left).ToList();
         foreach (var st in staves)
         {
-            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Symbols.TrustScore && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Right).ToList();
+            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Symbols.TrustClef && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Right).ToList();
             // a degraded page's noise is seen as a clef at 0.52-0.53: a "clef" left of every other
             // staff's edge on the page, in the margin, is taken only when sure (the noise about
             // the part's names, Gonville band007's first page and Bravura band003's last drum
@@ -315,7 +315,7 @@ static partial class Layout
         foreach (var st in staves)
         {
             var sign = det.Where(t => t.Class is "flat" or "sharp" or "timesig_c" || t.Class.StartsWith("digit_"))
-                          .Where(t => t.Score >= Symbols.TrustScore && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Left && t.X > st.Left - 8 * s)
+                          .Where(t => t.Score >= Symbols.TrustClef && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Left && t.X > st.Left - 8 * s)
                           .OrderBy(t => t.X).FirstOrDefault();
             if (sign == null) continue;
             var next = staves.Where(o => o != st && o.Kind == st.Kind && Math.Abs(o.Mid - st.Mid) < 14 * s && o.Left < sign.X - 2.5 * s && o.Left > sign.X - 6 * s)

@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Omr;
 
 /// <summary>
-/// A development knob (S60): OMR_TUNE="Detector.WeakDot=0.3,Symbols.TrustScore=0.6" sets those static
+/// A development knob (S60): OMR_TUNE="Detector.WeakDot=0.3,Symbols.TrustRest=0.6" sets those static
 /// double fields before the reading, to measure what one threshold does without a build. A name without
 /// its class is taken when exactly one class has such a field. An environment variable rather than an
 /// argument, so that every reader a batch script starts (check.ps1, run-audiveris.ps1) gets it.
