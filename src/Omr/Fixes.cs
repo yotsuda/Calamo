@@ -94,7 +94,11 @@ static class Fixes
                 if (st == null) continue;
                 var (chords, single, x0, x1) = state.Played[(b, p)];
                 var cands = Candidates(res, st, chords, barTicks, x0, x1, s, dets, staves);
-                var fitting = cands.Where(c => Voices.Separate(c.Trial, barTicks, st.Mid, st.S).All(v => v.Sum(e => e.Ticks) == barTicks)).ToList();
+                // (the piece's first bar, short on the other staves alike: a pickup, which this staff fills as they do --
+                // kinkel19-1's scan, f'8 g'16 over the piano's r4, the dot seen at 0.51)
+                int pickup = b == 1 ? PickupOf(res, state, b, p) : 0;
+                var fitting = cands.Where(c => Voices.Separate(c.Trial, barTicks, st.Mid, st.S) is var vs
+                                               && (vs.All(v => v.Sum(e => e.Ticks) == barTicks) || pickup > 0 && vs.All(v => v.Sum(e => e.Ticks) == pickup))).ToList();
                 // (two rests half seen that fill the bar together, against one of them a value longer that fills it
                 // alone: the two, each a rest the detector sees -- kinkel19-1's scan, bar 3's right hand, an old print's
                 // two 16th rests seen at 0.45-0.49, one of them as an eighth's too)
@@ -122,6 +126,22 @@ static class Fixes
         return fixes;
     }
 
+    /// <summary>
+    /// The length the parts other than <paramref name="part"/> fill alike in bar <paramref name="bar"/>, every voice
+    /// of each, when it is short of the bar's time (a pickup); 0 when they part, or fill the time, or none has music.
+    /// </summary>
+    static int PickupOf(PageResult res, ReaderState state, int bar, int part)
+    {
+        int full = state.BarTime.TryGetValue(bar, out var time) ? Dur.OfTime(time) : 0;
+        var lengths = new HashSet<int>();
+        foreach (var ((b, p), vs) in res.Voices.Where(kv => kv.Key.Bar == bar && kv.Key.Part != part))
+        {
+            if (!state.Played.TryGetValue((b, p), out var played) || played.Evs.Count == 0 || played.Evs.All(e => e.FullBar) || played.Evs.Any(e => e.Blank || e.Slash)) continue;
+            foreach (var v in vs.Where(v => v.Count > 0)) lengths.Add(v.Sum(e => e.Ticks));
+        }
+        return lengths.Count == 1 && lengths.First() is int l && l > 0 && l < full ? l : 0;
+    }
+
     // the other readings of the bar, one event changed each
     static List<Cand> Candidates(PageResult res, Staff st, List<Ev> chords, int barTicks, double x0, double x1, double s, List<Detection> dets, List<Staff> staves)
     {
@@ -134,6 +154,17 @@ static class Fixes
         // short, gave a chord a dot -- kinkel7-4's MuseScore page, <e, b, e>2. at 0.35)
         double BestDot(double x, double y, double dx, double dy, bool weak) =>
             (weak && res.Sym.Scan ? dets.Concat(res.Sym.WeakDots) : dets).Where(t => t.Class == "dot" && Math.Abs(t.X - x) < dx && Math.Abs(t.Y - y) < dy).Select(t => t.Score).DefaultIfEmpty(0).Max();
+        // a second dot in the window: the best detected dot apart from the one the note has, the piece given to it
+        // ("dot*"), or, read from the detector alone, its surest dot there (kinkel7-5's MuseScore page: bar 4, the
+        // given piece first and the second seen at 0.57; bar 12, the given piece second and the first seen at 0.51)
+        double SecondDot(double x, double y, double dx, double dy, bool weak)
+        {
+            var inWindow = (weak && res.Sym.Scan ? dets.Concat(res.Sym.WeakDots) : dets).Where(t => t.Class == "dot" && Math.Abs(t.X - x) < dx && Math.Abs(t.Y - y) < dy).ToList();
+            var had = res.Sym.Others.Where(o => o.Class == "dot*" && Math.Abs(o.C.Cx - x) < dx && Math.Abs(o.C.Cy - y) < dy).Select(o => o.C.Cx).ToList();
+            if (had.Count == 0 && inWindow.Count > 0) had.Add(inWindow.MaxBy(t => t.Score).X);
+            if (Verbose) Console.WriteLine($"      second dot: detected {string.Join(" ", inWindow.Select(t => $"{t.X:F0},{t.Y:F0}:{t.Score:F2}"))}; the note's at {string.Join(" ", had.Select(p => $"{p:F0}"))}");
+            return inWindow.Where(t => had.All(h => Math.Abs(t.X - h) > 0.3 * s)).Select(t => t.Score).DefaultIfEmpty(0).Max();
+        }
         List<Head> HeadsOf(Ev e) => res.Sym.Heads.Where(h => h.St == st && !h.Grace && (e.Stem != 0 ? Math.Abs(h.StemX - e.StemX) < 0.3 * s && h.HasStem && h.Up == (e.Stem > 0) : Math.Abs(h.X - e.X) < 0.35 * s) && Math.Abs(h.X - e.X) < 1.5 * s).ToList();
         static int BeamsOf(int basis) => basis switch { 8 => 1, 16 => 2, 32 => 3, >= 64 => 3, _ => 0 };
         static string RestClass(int basis) => basis switch { 4 => "rest_4", 8 => "rest_8", 16 => "rest_16", _ => null };
@@ -163,8 +194,10 @@ static class Fixes
             // the value a step longer or shorter, the dots one more or fewer
             foreach (var (nb, nd, why) in new[] { (basis * 2, dots, "a value shorter"), (basis / 2, dots, "a value longer"), (basis, dots + 1, "a dot more"), (basis, dots - 1, "a dot fewer") })
             {
-                // (no second dot: a double-dotted note is rare, a staccato dot or a speck beyond the dot is not)
-                if (nb < 1 || nb > 64 || nd < 0 || nd > 1) continue;
+                // (a second dot only as a dot more, on the detector's second dot beyond the first: a double-dotted
+                // note is rare, a staccato dot or a speck beyond the dot is not, and the bar must want it -- kinkel7-5's
+                // MuseScore page, a'2.. ais'8, the second dot seen at 0.51-0.60)
+                if (nb < 1 || nb > 64 || nd < 0 || nd > 2 || nd == 2 && dots != 1) continue;
                 if (nb != basis && (nb == 1 || basis == 1)) continue;   // (whole notes: a shape of their own, left alone)
                 double evidence;
                 if (nd != dots)
@@ -179,8 +212,9 @@ static class Fixes
                     // (the dots under the threshold only for a dot more: a dot taken away stands on the sure ones, as
                     // before -- kinkel7-1's and 7-5's scans, dots read on specks taken away rightly)
                     bool weak = nd > dots;
-                    double sDot = e.IsRest ? BestDot((hr + far) / 2, hy - 0.25 * s, (far - hr) / 2, 1.2 * s, weak)
-                        : heads.Max(h => BestDot((hr + far) / 2, h.Y - 0.25 * s, (far - hr) / 2, 0.9 * s, weak));
+                    Func<double, double, double, double, bool, double> dot = nd == 2 ? SecondDot : BestDot;
+                    double sDot = e.IsRest ? dot((hr + far) / 2, hy - 0.25 * s, (far - hr) / 2, 1.2 * s, weak)
+                        : heads.Max(h => dot((hr + far) / 2, h.Y - 0.25 * s, (far - hr) / 2, 0.9 * s, weak));
                     evidence = nd > dots ? sDot : 0.5 - sDot;
                     if (Verbose) Console.WriteLine($"      dots of {e.Show()} at {e.X:F0}: heads {string.Join(" ", heads.Select(h => $"{h.X:F0},{h.Y:F0}"))}, dot window x {hr:F0}-{far:F0}, best dot {sDot:F2}");
                     if (nd > dots && sDot < 0.15) continue;
