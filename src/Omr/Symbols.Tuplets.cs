@@ -86,6 +86,15 @@ static partial class Symbols
             static int ValueOf(Detection t) => int.Parse(t.Class[7..]);
             foreach (var o in numbers)
                 if (seen.Where(t => On(o, t)).OrderByDescending(t => t.Score).FirstOrDefault() is Detection on) { sure.Add(o); detValue[o] = ValueOf(on); }
+            // (a piece the detector reads as a fingering's digit, and as no tuplet's number, is the fingering's
+            // whatever its shape: a 3 by a note's head the rules hold for a number, gen-fing)
+            if (ps.Fingers.Count > 0)
+            {
+                if (TupletVerbose)
+                    foreach (var o in numbers.Where(o => !sure.Contains(o) && ps.Fingers.Any(f => On(o, f))))
+                        Console.WriteLine($"    tuplet? piece at {o.C.Cx:F0},{o.C.Cy:F0}: a fingering's digit, dropped");
+                numbers.RemoveAll(o => !sure.Contains(o) && ps.Fingers.Any(f => On(o, f)));
+            }
             var staves = ps.Heads.Select(h => h.St).Distinct().ToList();
             // (one sure number made a page competent; one seed sees Holmes 2's scan's page 2 at 0.92, another
             // at 0.76 and keeps 140 false numbers there. The detector agreeing with the rules on several

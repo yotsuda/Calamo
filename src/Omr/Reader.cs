@@ -115,6 +115,8 @@ static class Reader
         var faint = det != null ? Detector.Faint : new List<Detection>();
         // (a head seen at two sizes, as a black head and as a grace note's, each under the threshold: one head)
         if (det != null) { Detector.JoinSizes(det, s); det.RemoveAll(Detector.IsWeakHollowGrace); }
+        // (a fingering's digits: kept apart, and a tuplet's number under one is the fingering's, Detector.TakeFingerings)
+        var fingers = det != null ? Detector.TakeFingerings(det, faint, s) : new List<Detection>();
         // (TAB digits under the threshold are only the TAB's: rivals to a fret's other reading, Tab.Apply)
         var weakTabs = det?.Where(Detector.IsWeakTab).ToList() ?? new List<Detection>();
         det?.RemoveAll(Detector.IsWeakTab);
@@ -165,7 +167,7 @@ static class Reader
         // (a system that hides the staves of parts that rest: its staves' parts, told by their clefs)
         var sym = Symbols.Find(d, ink, staves, systems, s, det, systems.Any(x => x.Staves.Count < cfg.Parts.Count)
             ? ps => Layout.AssignParts(d, systems, ps.Sigs, s, cfg.Parts.Count, p => state.Clefs[p] ?? cfg.Parts[p].Clef, state.SharedBars, groupNotes)
-            : null, weakDots, weakHeads, weakSlashes, weakOttavas, weakClefs, weakHalves, weakNaturals);
+            : null, weakDots, weakHeads, weakSlashes, weakOttavas, weakClefs, weakHalves, weakNaturals, fingers);
         sym.WeakHairpins = weakHairpins;
         sym.WeakPedals = weakPedals;
         sym.WeakOttavas = weakOttavas;

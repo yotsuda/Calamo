@@ -82,7 +82,11 @@ CLASSES = ['none', 'head_black', 'head_half', 'head_whole', 'rest_long', 'rest_4
            # whole note, the stem telling which, as slash_hollow's does. Its black head is grace_head. The
            # ink of a small head's middle told them apart before, and a printer's uneven toner hollows a
            # black one (gen-cue-scan's ledger005 and tuplets002 with detector41, cue eighths read as halves)
-           'grace_hollow']
+           'grace_hollow',
+           # a fingering's digit by its value (section 0's (B), OmrGen --fingers): the music font's fattened
+           # digit at half size, by a note. The detector, never having met one, took it for a tuplet's number
+           # (gen-fing, Bargiel's Schirmer print). No set made before has any
+           'finger_1', 'finger_2', 'finger_3', 'finger_4', 'finger_5']
 # the classes a page the reader read teaches (pseudo.py), by the kind of region: a bar read right (0)
 # teaches its notes, rests, signs, dots, stems' tips, barlines and clefs; a system's start before its
 # first note (1) its clef, key and time. A region of kind 2 teaches nothing (a mark the reader did not
@@ -139,6 +143,8 @@ def class_of(name):
         return CLASSES.index('barline')
     if name.startswith('tuplet.') and 'tuplet_' + name[7:] in CLASSES:
         return CLASSES.index('tuplet_' + name[7:])
+    if name.startswith('finger.'):
+        return CLASSES.index('finger_' + name[7:])
     if name.startswith('tab.'):
         return CLASSES.index('tab_' + name[4:])
     # (niente's n is too rare to learn: not a class)

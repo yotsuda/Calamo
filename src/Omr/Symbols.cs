@@ -103,6 +103,7 @@ sealed class PageSymbols
     public bool Scan;                              // the page is a scan, grainy or bowed (Img.Raw, Img.Bowed): Fixes weighs the detector's weak dots only there
     public List<Detection> WeakRests = new();      // its rests under Detector.Threshold: only as a bar's one reading that fills every voice (Fixes)
     public List<Detection> WeakTrills = new();     // its trills' "tr"s under Detector.Threshold: only where a trill line's wave follows (Articulations)
+    public List<Detection> Fingers = new();        // a fingering's digits (finger_N, Detector.TakeFingerings): only to say a piece is no tuplet number (FindTuplets)
     public List<Detection> WeakTuplets = new();    // its tuplet numbers under Detector.Threshold (WeakTupletNumber up): only to tell a tuplet's arc from a slur (DetectedSlurs)
     public List<Detection> Faint = new();          // its stems' tips and tuplet numbers under their thresholds (Detector.Faint): no reading takes them (S61, ValueEvidence)
     public List<Detection> WeakClefs = new();      // its clefs under Detector.Threshold: only inside a staff, on a clef's shape in the ink (Signatures.MidClefs)
@@ -196,7 +197,7 @@ static partial class Symbols
     /// <param name="weakSlashes">the detector's rhythm slashes under its threshold (Detector.WeakSlash): only on a one-line rhythm staff, alone, leaning as a slash, or null</param>
     /// <param name="weakOttavas">the detector's octave line signs under its threshold (Detector.WeakOttava): their letters hold no heads where their dashes run on, or null</param>
     /// <param name="weakHalves">the detector's half heads under its threshold (Detector.WeakHalf): only rivals to a black head seen about as surely, or half notes whose stem's tip it sees, or null</param>
-    public static PageSymbols Find(Img d, Img ink, List<Staff> staves, List<SystemInfo> systems, double s, List<Detection> det, Action<PageSymbols> clefsRead = null, List<Detection> weakDots = null, List<Detection> weakHeads = null, List<Detection> weakSlashes = null, List<Detection> weakOttavas = null, List<Detection> weakClefs = null, List<Detection> weakHalves = null, List<Detection> weakNaturals = null)
+    public static PageSymbols Find(Img d, Img ink, List<Staff> staves, List<SystemInfo> systems, double s, List<Detection> det, Action<PageSymbols> clefsRead = null, List<Detection> weakDots = null, List<Detection> weakHeads = null, List<Detection> weakSlashes = null, List<Detection> weakOttavas = null, List<Detection> weakClefs = null, List<Detection> weakHalves = null, List<Detection> weakNaturals = null, List<Detection> fingers = null)
     {
         var ps = new PageSymbols();
         ps.Systems = systems;
@@ -204,6 +205,7 @@ static partial class Symbols
         if (weakDots != null) ps.WeakDots = weakDots;
         if (weakClefs != null) ps.WeakClefs = weakClefs;
         if (weakNaturals != null) ps.WeakNaturals = weakNaturals;
+        if (fingers != null) ps.Fingers = fingers;
         var (labels, comps) = Components.Label(ink.W, ink.H, i => ink.D[i], eight: true);
         ps.Labels = labels; ps.LabelW = ink.W;
         var inkHoles = Components.Holes(ink);

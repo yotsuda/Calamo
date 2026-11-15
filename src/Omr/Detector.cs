@@ -67,6 +67,9 @@ static class Detector
         // a cue's hollow head (cue { }, OmrGen --cues): a small half or whole note, the stem telling
         // which, as slash_hollow's does; a cue's black head is grace_head like a grace note's
         "grace_hollow",
+        // a fingering's digit by its value (section 0's (B), OmrGen --fingers): the music font's fattened
+        // digit at half size, by a note; a tuplet's number the detector sees there is the fingering's
+        "finger_1", "finger_2", "finger_3", "finger_4", "finger_5",
     };
     public static double Threshold = 0.5;
     // A cross head is found down to this score, and kept under Threshold only when a stem is found
@@ -194,6 +197,25 @@ static class Detector
     /// detector42, taught cues at 0.63-0.82, where detector39 saw a black head at 0.80). The two readings
     /// count as one, its kind the larger's; a half head and a cue's hollow head likewise.
     /// </summary>
+    /// <summary>
+    /// A fingering's digits (finger_N), taken out of the page's detections and kept apart (PageSymbols.Fingers:
+    /// no other symbol, only a rival to a tuplet's number). A tuplet's number seen at the same spot less surely
+    /// than the digit is the fingering's, and goes too, from the faint peaks as well (section 0's (B): the
+    /// detector before the class took gen-fing's and Bargiel's Schirmer print's fingerings for triplets).
+    /// </summary>
+    public static List<Detection> TakeFingerings(List<Detection> det, List<Detection> faint, double s)
+    {
+        static bool Finger(Detection t) => t.Class.StartsWith("finger_");
+        var fingers = det.Where(Finger).ToList();
+        det.RemoveAll(Finger);
+        faint.RemoveAll(Finger);
+        bool Under(Detection t) => t.Class.StartsWith("tuplet_")
+            && fingers.Any(f => f.Score > t.Score && Math.Abs(f.X - t.X) < 0.6 * s && Math.Abs(f.Y - t.Y) < 0.6 * s);
+        det.RemoveAll(Under);
+        faint.RemoveAll(Under);
+        return fingers;
+    }
+
     public static void JoinSizes(List<Detection> det, double s)
     {
         var pairs = new[] { ("head_black", "grace_head"), ("head_half", "grace_hollow") };

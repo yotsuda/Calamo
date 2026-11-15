@@ -136,7 +136,7 @@ def load(npz):
     for one in npz.split(','):
         one, _, times = one.partition('*')
         d = np.load(one, allow_pickle=True)
-        im, tg, nm = list(d['images']), list(d['targets']), list(d['names'])
+        im, tg, nm = pages_of(one, d), list(d['targets']), list(d['names'])
         # (a page the reader read, pseudo.py: its regions, which say where the loss looks; others are taught everywhere)
         rg = list(d['regions']) if 'regions' in d.files else [None] * len(im)
         # (the same arrays listed again, not read again: a npz is decompressed afresh at every access)
@@ -146,6 +146,36 @@ def load(npz):
 
 
 REGIONS = []      # per page loaded, its regions (pseudo.py) or None, in load's order
+
+# The pages' pixels are read from a flat file beside the npz, mapped from disk (a file's mapping is not the machine's
+# commit charge): held in memory, 42's sets took 55 GB and the machine's commit peaked at 103 of 106.6 GB, and two
+# trainings were stopped as other work on the machine took the rest (2026-11-15). Made once per npz, from the npz
+# (rebuilt when the npz is newer); the pixels and their order are the npz's, so a training reads the same windows
+PAGES = 'C:/MyProj/Calamo/out/npz-pages'
+
+
+def pages_of(npz, d):
+    import os
+    os.makedirs(PAGES, exist_ok=True)
+    base = os.path.join(PAGES, os.path.basename(npz))
+    flat, idx = base + '.u8', base + '.idx.npy'
+    if not (os.path.exists(idx) and os.path.getmtime(idx) >= os.path.getmtime(npz)):
+        ims = d['images']
+        shapes = np.array([im.shape for im in ims], dtype=np.int64).reshape(-1, 2)
+        with open(flat, 'wb') as f:
+            for im in ims:
+                f.write(np.ascontiguousarray(im, dtype=np.uint8).tobytes())
+        del ims
+        np.save(idx, shapes)
+    shapes = np.load(idx)
+    if len(shapes) == 0:
+        return []
+    mm = np.memmap(flat, dtype=np.uint8, mode='r')
+    out, off = [], 0
+    for h, w in shapes:
+        out.append(mm[off:off + h * w].reshape(int(h), int(w)))
+        off += int(h * w)
+    return out
 
 
 def crops(images, targets, rng, batch):

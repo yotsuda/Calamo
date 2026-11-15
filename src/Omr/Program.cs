@@ -421,6 +421,19 @@ for (int page = from; page <= to; page++)
                 // (the stem tells which), their accidentals, dots and rests the same signs
                 foreach (var g in svg.Glyphs.Where(g => g.Small && (g.Name.StartsWith("noteheads.") || g.Name.StartsWith("accidentals.") || g.Name.StartsWith("dots.") || g.Name.StartsWith("rests."))))
                     tsv.Append("glyph\t").Append(g.Name is "noteheads.s0" or "noteheads.s1" ? "grace.hollow" : g.Name.StartsWith("noteheads.") ? "grace.head" : g.Name).Append('\t').Append(F(g.L)).Append('\t').Append(F(g.T)).Append('\t').Append(F(g.R)).Append('\t').Append(F(g.B)).Append('\t').Append(g.Src).Append('\n');
+                // a fingering's digit (finger.1 ... finger.5: section 0's (B), OmrGen --fingers): the music font's
+                // fattened digit, each its own box: Emmentaler's set at about half size (Emmentaler-11 at 0.56), a
+                // SMuFL font's fingering digits at full size (drawn small; Bravura's ED12, named fattened.two by its
+                // box table). The detector took them for tuplet numbers, never having met one (gen-fing, Bargiel's
+                // Schirmer print)
+                foreach (var g in svg.Glyphs.Where(g => g.Name.StartsWith("fattened.")))
+                {
+                    // (fattened.one, fattened.four.alt, fattened.fixedwidth.five: the word is the digit)
+                    int d = Array.IndexOf(new[] { "zero", "one", "two", "three", "four", "five" },
+                                          g.Name.Replace("fattened.", "").Replace("fixedwidth.", "").Replace(".alt", ""));
+                    if (d is >= 1 and <= 5)
+                        tsv.Append("glyph\tfinger.").Append(d).Append('\t').Append(F(g.L)).Append('\t').Append(F(g.T)).Append('\t').Append(F(g.R)).Append('\t').Append(F(g.B)).Append('\t').Append(g.Src).Append('\n');
+                }
                 double hs = 0.5 * res.S;
                 foreach (var (x, y, n) in SymEval.StemTails(svg, res.S).Concat(SymEval.StemTails(svg, res.S, graces: true)))
                     tsv.Append("glyph\tstem.").Append(n).Append('\t').Append(F(x - hs)).Append('\t').Append(F(y - hs)).Append('\t').Append(F(x + hs)).Append('\t').Append(F(y + hs)).Append("\t-1\n");
