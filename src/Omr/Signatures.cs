@@ -147,7 +147,11 @@ static class Signatures
             }
         }
         clefsRead?.Invoke();
-        if (ps.Detections != null) { AgreeClefsAcrossSystems(ps, systems, s); AgreeWithinSystems(ps, systems, s); AgreeAcrossSystems(ps, systems, s); }
+        // (within the systems again once the systems agree: a staff the systems' agreement gave the key
+        // makes a majority of the system it lacked before -- kinkel7-1's scan, the second system's voice
+        // and left hand both read with no key, the voice given the part's flat across the systems, the
+        // left hand's flat at 0.49 then standing among two staves of one flat)
+        if (ps.Detections != null) { AgreeClefsAcrossSystems(ps, systems, s); AgreeWithinSystems(ps, systems, s); AgreeAcrossSystems(ps, systems, s); AgreeWithinSystems(ps, systems, s); }
     }
 
     /// <summary>
@@ -511,7 +515,10 @@ static class Signatures
     {
         // (the leftmost clef near the staff's start; the start may be found too far left, at
         // an instrument name at the staff's height, so the window is wide)
-        var clefs = ps.Detections.Where(t => (t.Class == "clef_g" || t.Class == "clef_f" || t.Class == "clef_c") && t.Score >= Symbols.TrustClef
+        // (where the rules read none, every system restates its clef there: the detector's own threshold
+        // is enough -- kinkel19-6's scan, the right hand's opening F clef at 0.56 among systems of treble)
+        double least = rules == null ? Detector.Threshold : Symbols.TrustClef;
+        var clefs = ps.Detections.Where(t => (t.Class == "clef_g" || t.Class == "clef_f" || t.Class == "clef_c") && t.Score >= least
                                              && t.X > st.Left - 0.5 * s && t.X < st.Left + 12 * s && t.Y > st.Top - 3 * s && t.Y < st.Bottom + 3 * s)
                                  .OrderBy(t => t.X).ToList();
         if (Verbose) Console.WriteLine($"    clefs the detector sees, staff {st.System + 1}/{st.Part} (left {st.Left}): {string.Join(" ", ps.Detections.Where(d => d.Class.StartsWith("clef_") && d.X > st.Left - 0.5 * s && d.X < st.Left + 12 * s && d.Y > st.Top - 3 * s && d.Y < st.Bottom + 3 * s).Select(d => $"{d.Class}@{d.X:F0},{d.Y:F0}({d.Score:F2})"))}");

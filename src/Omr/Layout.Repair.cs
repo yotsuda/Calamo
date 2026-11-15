@@ -296,7 +296,15 @@ static partial class Layout
         var lefts = staves.Select(o => o.Left).ToList();
         foreach (var st in staves)
         {
-            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Symbols.TrustClef && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Right).ToList();
+            // (a clef under the trust score is taken where it stands as far into the staff as a clef does
+            // from the start of the staff next above or below: a page's staves start in one column, but
+            // the first system's indent -- kinkel19-6's scan, both piano staves found starting past their
+            // F clefs at 0.56 and 0.58, the voice's G clef above at 0.92 and the right hand's moved before)
+            // (the staves next above and below: none stands between)
+            bool Aligned(Detection t) => staves.Where(o => o != st && !staves.Any(x => x != st && x != o && (x.Mid - st.Mid) * (x.Mid - o.Mid) < 0))
+                                               .Any(o => o.Left > t.X - 3.5 * s && o.Left < t.X - 0.5 * s);
+            var clefs = det.Where(t => t.Class.StartsWith("clef_") && t.Score >= Detector.Threshold && (t.Score >= Symbols.TrustClef || Aligned(t))
+                                       && Math.Abs(t.Y - st.Mid) < 2.5 * s && t.X < st.Right).ToList();
             // a degraded page's noise is seen as a clef at 0.52-0.53: a "clef" left of every other
             // staff's edge on the page, in the margin, is taken only when sure (the noise about
             // the part's names, Gonville band007's first page and Bravura band003's last drum
