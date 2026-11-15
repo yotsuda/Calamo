@@ -1416,6 +1416,7 @@ static class Gen
             {
                 bar.Add(Line(pb, rng, keyAlt, ref upper, mid, mid + width, chords * 0.5, triplets, leaps, restP: 0.1, full));
                 bar.Add(Line(pb, rng, keyAlt, ref lower, mid - width, mid - 1, chords * 0.5, triplets, leaps, restP: 0.1, full));
+                if (Partial > 0 && rng.NextDouble() < Partial) PartVoice(pb, rng, bar, mid);
             }
             else bar.Add(Line(pb, rng, keyAlt, ref cur, mid - width, mid + width, chords, triplets, leaps, restP: 0.12, full));
             part.Bars.Add(bar);
@@ -1461,6 +1462,51 @@ static class Gen
                 }
         }
         return part;
+    }
+
+    // OmrGen --partial <share>: of the two-voice bars, this share has one voice for part of the bar only: it
+    // enters on a beat or stops on one, a spacer the rest of the bar (S65: a voice that comes and goes within
+    // the bar is the real pages' voice error -- Schumann 25-9's 8th bar -- and the suites' two voices ran bar-long)
+    public static double Partial;
+
+    /// <summary>One of a two-voice bar's voices cut to the bar's start or end at a beat where a note of its starts, spacers for the rest.</summary>
+    static void PartVoice(GPiece pb, Random rng, List<List<GEv>> bar, int mid)
+    {
+        int beat = 1920 / int.Parse(pb.Time.Split('/')[1]), whole = pb.BarTicks;
+        if (whole / beat < 2) return;
+        var v = bar[rng.Next(2)];
+        var starts = new List<double>();
+        double t = 0;
+        foreach (var e in v) { starts.Add(t); t += e.Sounding; }
+        var cuts = Enumerable.Range(1, whole / beat - 1).Select(k => k * beat).Where(k => starts.Contains(k)).ToList();
+        if (cuts.Count == 0) return;
+        int cut = cuts[rng.Next(cuts.Count)], i = starts.IndexOf(cut);
+        bool enters = rng.NextDouble() < 0.5;
+        var kept = enters ? v.Skip(i).ToList() : v.Take(i).ToList();
+        if (kept.All(e => e.IsRest)) return;
+        var space = Enumerable.Range(0, (enters ? cut : whole - cut) / beat).Select(_ => new GEv { Ticks = beat, Space = true }).ToList();
+        v.Clear();
+        if (enters) { v.AddRange(space); v.AddRange(kept); }
+        else { v.AddRange(kept); v.AddRange(space); }
+        // the other voice, alone where this one is not, stems as a single voice's do: by its height, the
+        // upper voice's notes over the middle line down, the lower voice's under it up -- as an engraving
+        // sets a voice alone (Schumann 25-9's 8th bar: the upper voice's chords alone, stems down, before
+        // the lower voice comes in), so that the stem no longer tells the voices apart
+        var other = bar[0] == v ? bar[1] : bar[0];
+        bool upper = other == bar[0];
+        double from = enters ? 0 : cut, to = enters ? cut : whole;
+        t = 0;
+        foreach (var e in other)
+        {
+            double end = t + e.Sounding;
+            if (!e.IsRest && t >= from && end <= to && !e.Marks.Contains("@stem"))
+            {
+                double h = e.Pitches.Average(q => q.Dia);
+                if (upper && h > mid) e.Marks += "@stemDown";
+                else if (!upper && h < mid) e.Marks += "@stemUp";
+            }
+            t = end;
+        }
     }
 
     internal static int[] KeyAlterations(int fifths)

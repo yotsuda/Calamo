@@ -91,6 +91,8 @@ static class Program
         Gen.DetachFall = opt.ContainsKey("detach");
         // --broken: no triplets: 3/4 with the left hand's plain eighths, the chord broken six to a bar, under a melody
         Gen.BrokenSix = opt.ContainsKey("broken");
+        // --partial <share>: of the two-voice bars, the share where one voice enters or stops on a beat (spacers the rest)
+        if (opt.TryGetValue("partial", out var pv)) Gen.Partial = double.Parse(pv, CultureInfo.InvariantCulture);
         Gen.KneeBeams = opt.ContainsKey("knee") || Gen.HandOver;
         Gen.CrossStaff = opt.ContainsKey("cross") || Gen.KneeBeams || Gen.FallStaff;
         // --figures: runs of four sixteenths (or eighths) now and then opened by a rest (r16 c16 d16 e16)
