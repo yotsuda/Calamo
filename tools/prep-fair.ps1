@@ -31,6 +31,27 @@ $sets = @(
        Note = 'Bargiel, Woldemar/Op.41-1 Tempo di Menuetto, Oeuvres choisis No.55. G. Schirmer, New York (IMSLP #07475).' }
     @{ Piece = 'lacombe28-1'; Ed = 'hamelle'; File = 'IMSLP958979'; Pages = '4,5'; Dpi = 0; Title = 'Esquisses et souvenirs I'; Parts = $piano
        Note = 'Lacombe, Paul/Esquisses et souvenirs Op.28/1. J. Hamelle, Paris (IMSLP #958979).' }
+    # (S66, 2026-11-16: the fair set made larger, data/fair/DOWNLOAD.md)
+    @{ Piece = 'kuecken47-3'; Ed = 'kistner'; File = 'IMSLP574387'; Pages = '2,3,4,5,6,7'; Dpi = 0; Title = 'Die stille Wasserrose'; Parts = $voice
+       Note = 'Kuecken, Friedrich Wilhelm/4 Lieder Op.47/3 Die stille Wasserrose (low voice). Fr. Kistner, Leipzig, 1849 (IMSLP #574387).' }
+    @{ Piece = 'hildach9-1'; Ed = 'heinrichshofen'; File = 'IMSLP706241'; Pages = '2,3,4,5'; Dpi = 300; Title = 'Auf dem Dorf in den Spinnstuben'; Parts = $voice
+       Note = 'Hildach, Eugen/3 Lieder Op.9/1 Auf dem Dorf in den Spinnstuben (high voice). Heinrichshofen, Magdeburg, 1891 (IMSLP #706241). Its pages are strips of images: rendered at 300 dpi.' }
+    @{ Piece = 'taubert76-2'; Ed = 'schirmer'; File = 'IMSLP110522'; Pages = '2,3,4,5'; Dpi = 0; Title = 'Oh gently sleep'; Parts = $voice
+       Note = 'Taubert, Wilhelm/6 Lieder Op.76/2 Oh gently sleep (Wenn du im Traum). G. Schirmer, New York, 1870 (IMSLP #110522).' }
+    @{ Piece = 'wuerst52-3'; Ed = 'bote'; File = 'IMSLP413040'; Pages = '2,3,4,5'; Dpi = 0; Title = 'Wers nur verstaende'; Parts = $voice
+       Note = 'Wuerst, Richard/4 Lieder Op.52/3 Wers nur verstaende. Bote & Bock, Berlin, 1870 (IMSLP #413040).' }
+    @{ Piece = 'puget-heure'; Ed = 'hamelle'; File = 'IMSLP94633'; Pages = '1,2,3,4,5'; Dpi = 0; Title = 'L heure tendre'; Parts = $voice
+       Note = 'Puget, Paul/L heure tendre (Les frissons No.18). J. Hamelle, Paris, 1905 (IMSLP #94633).' }
+    @{ Piece = 'buck67-5'; Ed = 'ditson'; File = 'IMSLP185781'; Pages = '3,4,5,6,7'; Dpi = 0; Title = 'When the Heart is Young'; Parts = $voice
+       Note = 'Buck, Dudley/5 Songs Op.67/5 When the Heart is Young (high voice). Oliver Ditson, Boston, 1902 (IMSLP #185781).' }
+    @{ Piece = 'taubert136-1'; Ed = 'senff'; File = 'IMSLP104910'; Pages = '3,4,5'; Dpi = 0; Title = 'Kaetzchen im Schnee'; Parts = $piano
+       Note = 'Taubert, Wilhelm/6 Kinderstuecke Op.136/1 Kaetzchen im Schnee. Bartholf Senff, Leipzig, 1862 (IMSLP #104910).' }
+    @{ Piece = 'taubert136-2'; Ed = 'senff'; File = 'IMSLP104910'; Pages = '6,7'; Dpi = 0; Title = 'Haenschen auf der Jagd'; Parts = $piano
+       Note = 'Taubert, Wilhelm/6 Kinderstuecke Op.136/2 Haenschen auf der Jagd. Bartholf Senff, Leipzig, 1862 (IMSLP #104910).' }
+    @{ Piece = 'krause10-1'; Ed = 'gutheil'; File = 'IMSLP295293'; Pages = '3,4,5,6,7,8'; Dpi = 0; Title = 'Sonatine'; Parts = $piano
+       Note = 'Krause, Anton/2 Sonatinen Op.10/1, first movement. A. Gutheil, Moscow (IMSLP #295293).' }
+    @{ Piece = 'lack148'; Ed = 'heugel'; File = 'IMSLP45177'; Pages = '2,3,4'; Dpi = 0; Title = 'Myosotis'; Parts = $piano
+       Note = 'Lack, Theodore/Myosotis Op.148. Heugel, Paris, 1890 (IMSLP #45177).' }
 )
 # (the embedded image of each page, grey; a page with no single image, or Dpi set, rendered instead)
 $extract = @'
