@@ -4,7 +4,7 @@
 
 ## S60 (c): `Detector.Threshold` と `Weak*` の掃きの結果。**42 と 49 で向きが割れるのは `WeakClef` 0.2（49 だけ −32、kinkel19-6-scan）と `Threshold` 0.4（42 +16・49 −3）、小さく `WeakNatural` 0.4（49 だけ −5）**。待ち時間に S65 (a): `run-gen.ps1 -SwellShare`（random の汚しの一部の頁で黒い符頭を太らせる、学習のセットのための口）を足した（2026-11-16 朝、前の節の次の一手 1 (c)・2）
 
-**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s97/check-head.log`）。**`out/s97/sweep.ps1` が走っている**（06:27 開始、20 回 × 約 12 分で 10 時半ごろ終わる見込み。`out/s97/sweep.log` が `all done` になるまで**読み手をビルドしない・開発用の台と評価台と check を回さない**）。
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s97/check-head.log`）。`out/s97/sweep.ps1` は 09:41 に `all done`（ビルド・開発用の台・評価台・check の制限は解けた）。
 
 **変更の種類**: 読み手は変えていない。生成器（`tools/run-gen.ps1` の `-SwellShare`。S65 の再現のための型を学習のセットに入れる口。§0「本線の順番」が待ち時間に許す範囲）。
 
