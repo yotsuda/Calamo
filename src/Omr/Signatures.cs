@@ -75,7 +75,7 @@ static class Signatures
                 if (time != null) { ps.Sigs.Add(time); opening[st] = time; }
                 // (the clefs inside the staff, named before the bars' keys and times are read so that
                 // their pieces are not taken for signs or digits)
-                MidClefs(ps, mine, st, after, s);
+                MidClefs(ps, mine, ink, st, after, s);
                 for (int b = 1; b < sys.Bars.Count - 1; b++)
                 {
                     double start = sys.Bars[b];
@@ -566,7 +566,7 @@ static class Signatures
     /// after one read by it (Reader.StaffEvents), the staff's opening clef unchanged. The clef's pieces
     /// are named, and any head read on them dropped.
     /// </summary>
-    static void MidClefs(PageSymbols ps, List<Other> mine, Staff st, double after, double s)
+    static void MidClefs(PageSymbols ps, List<Other> mine, Img ink, Staff st, double after, double s)
     {
         if (ps.Detections == null) return;
         bool IsClef(Detection t) => t.Class is "clef_g" or "clef_f" or "clef_c";
@@ -773,6 +773,7 @@ static class Signatures
             }
             return (x0, x1, y0, y1);
         }
+        List<Arpeggios.Arp> waves = null;
         foreach (var (t, sure) in seen)
         {
             if (t.X - lastX < 2 * s) continue;   // (one clef, seen twice)
@@ -792,6 +793,16 @@ static class Signatures
             if (mark != null)
             {
                 if (Verbose) Console.WriteLine($"    clef {kind} inside staff {st.System + 1}/{st.Part} at x {t.X:F0} ({t.Score:F2}, weak): on the beat repeat at x {mark.L:F0}-{mark.R:F0}, no clef");
+                continue;
+            }
+            // (nor on an arpeggio's wave up a chord's left, measured as Symbols.Classify will (Arpeggios.Find): the wave
+            // run into the chord's stem and heads has a G clef's reach -- kinkel19-6's and kinkel10-5's scans, the left
+            // hand's waves seen as G clefs at 0.07-0.08. A clef the detector is sure of there makes no wave (Arp.Sign))
+            waves ??= Arpeggios.Find(ink, ps.Heads.Where(h => h.St == st).ToList(), s, ps.Detections).Where(a => !a.Sign).ToList();
+            var wave = sure ? null : waves.FirstOrDefault(a => t.X > a.L - 0.5 * s && t.X < a.R + 0.5 * s && t.Y > a.Top - 3 * s && t.Y < a.Bottom + 3 * s);
+            if (wave != null)
+            {
+                if (Verbose) Console.WriteLine($"    clef {kind} inside staff {st.System + 1}/{st.Part} at x {t.X:F0} ({t.Score:F2}, weak): on the arpeggio's wave at x {wave.L:F0}-{wave.R:F0}, no clef");
                 continue;
             }
             // the body: a tall piece under the detection, no wider than a clef

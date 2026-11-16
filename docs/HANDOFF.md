@@ -2,6 +2,44 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## S60 (a) の残り: アルペッジョの波線の上の半分見えた音部を門 2 で止めた。**49 の `WeakClef` 0.05 の崩れ −60 → −47**（kinkel19-6-scan −9 → 0、kinkel10-5-scan −4 → 0）、**42 の 0.05 も −10 → −6**。0.1 の読みは 42・49 とも全台同じ（35115・35076）（2026-11-16 深夜〜11-17、前の節の次の一手 1 (a)）
+
+**現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s100/check-head.log`）。
+
+**変更の種類**: 門 2 文法の制約（`src/Omr/Signatures.cs` の `MidClefs`）。check に `gate:` の警告が出た（生成譜に better なし）。門 2 としての説明: 前の節の拍の反復と同じ「1 つの場所には 1 つの記号」。和音の左のアルペッジョの波線（`Arpeggios.Find`、`Symbols.Classify` があとで読むのと同じ測り方。検出器が 0.5 以上で音部と見た所は `Arp.Sign` で波線にならない）の上には、半分見えた（`Detector.Threshold` 未満の）音部を採らない。確かな音部の道は変えていない。`MidClefs` に `ink` を渡し、譜表ごとに 1 回だけ波線を測る。
+
+**中身**（49・`WeakClef` 0.05 で増えていた偽の音部、`out/s100/one.ps1`・`--sigs`、絵は `out/s100/k196-p1.png`・`k105-p2.png`）:
+1. kinkel19-6-scan 1 頁 1 段目の中の譜表、和音の前の波線（符幹・符頭とインクでつながる）を G 音部 0.08 と見ていた。
+2. kinkel10-5-scan 2 頁 3 段目の左手、同じく和音の前の波線を G 音部 0.07 と見ていた。
+- どちらも止まり、ほかに 5 か所（0.05〜0.10）の候補も波線の上として止まった（`run.txt` の「on the arpeggio's wave」）。
+
+**数字**（開発用の台 `-Dev -Reuse -Verify`。`out/s100/dev-*.tsv`、`pwsh out/s100/compare.ps1`、基準は `out/s99/dev-none-*.tsv`）:
+
+| | 前 | 今 |
+|---|---|---|
+| 42（0.1） | 35115 | **35115**（全台同じ。`docs/dev-sets.tsv` と同じ） |
+| 49（0.1） | 35076 | **35076**（全台同じ） |
+| 42 `WeakClef` 0.05 | 0.1 より −10 | **−6**（holmes-melodies2-scan −1、holmes-melodies4-scan −2、kinkel10-2-scan −3。kinkel19-6-scan −4 → 0） |
+| 49 `WeakClef` 0.05 | 0.1 より −60 | **−47**（kinkel10-4-scan −45、holmes-melodies4-scan −2） |
+
+**正直に書いておくこと**:
+1. 0.1 の読みは変えていないので、開発用の台・評価台の数字は動かない。効くのは 0.05 の向きの崖がなだらかになる分だけ。
+2. 49 の残り −45 は kinkel10-4-scan 1 頁の拍の反復 1 か所（前の節の「読めない型の記録」。門 1 の側で、§0「本線の順番」の間は直さない）。これがある限り `WeakClef` は 0.1 より下げられない。**`WeakClef` は 0.1 のまま (a) を閉じる**。
+3. 42 の −6・49 の holmes-melodies4-scan −2 は `missed` で、音部の誤りではない（0.05 で拾った何かが音を食う型）。中身は見ていない。
+4. 評価台・公平な台は回していない（§0 の区切りではないため）。
+5. 波線の測り方は `Arpeggios.Find` のまま。波線と測れてしまう本物の小さな音部（`Find` のコメントにある kinkel19-2 の 20 小節・kinkel10-6 の 15 小節）は、どちらも検出器が 0.5 以上で見ていて `Sign` になるので、この直しでは落ちない。半分見えた本物の小さな音部が和音のすぐ左にあって波線と測れる刷りがあれば落とす。開発用の台・check には出ていない。
+
+**次の一手**（ROADMAP §0「本線の順番」の言葉で）:
+1. **S60**: (b) `Threshold` 0.4 の残り（49 の holmes-melodies2-scan −10、kinkel10-4-scan +8）を `out/s100/one.ps1 -Set … -Tune Detector.Threshold=0.4` で中身を見て、構造で埋められるか。(c) そのあと学習し直し（セットに `fingers.npz*2`、memmap、種違い 2 つ、§7 の 4。`-SwellShare` の太らせのセットを入れるかもここで決める）。
+2. **S65 の続き**: 前の節と同じ（前々々々々々節の次の一手 2 の (b)〜(d)）。
+3. **S66**: 8f500c5 で置いた 10 台の正解を起こす（S59 と同じ手順。`tools/prep-fair.ps1` で切り出し済みかを先に確かめる）。S60 の学習の待ち時間に進めてよい。
+4. オーナーへの問い（前の節のまま）: (a) Release の lysc を作り直して z 形の休符を使ってよいか、(b) Lang の正解を git に入れないでよいか、(c) クラウドの AI との突き合わせ。
+
+**読めない型の記録**: 前の節のまま。
+
+**check の記録**: `out/s100/check-head.log`: OK。`out/s100/check-fix.log`: OK（0 better・nothing worse）。`gate:` の警告あり（上の「変更の種類」）。基準値は更新していない（変わっていない）。
+- 作業の注意: check を背景で走らせている間に `dotnet build` すると、check の読み手（`calamo.exe`）を掴まれて MSB3027 で失敗する（今回 1 度。dll は差し替わっておらず check は汚れていない）。check の終わりは `out/sNN/check-*.log` の `check:` の行で見る（前の `out/s99/check-head.log` を読み違えないこと）。
+
 ## S60 (a): 半分見えた音部（`WeakClef`）の偽物 2 つの型を門 2 で止めた（拍の反復の斜線の上、譜表の上下どちらにも 3 間を超えて伸びるインク）。**49 の `WeakClef` 0.05 の崩れ −130 → −60**（kinkel10-4-scan −93 → −45、lang36-3-ms −15 → 0）。0.1 の読みは 42・49 とも全台同じ（35115・35076）（2026-11-16 夜、前の節の次の一手 1 (a)）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s99/check-head.log`）。直前のコミット 8f500c5 で S66 の公平な台の候補 10 ファイル（9 曲・10 台、`data/fair/DOWNLOAD.md`）を `data/fair/` に置いた。**正解はまだない**（HANDOFF には前のセッションで書いていなかったのでここに書く）。
