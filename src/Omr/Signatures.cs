@@ -650,6 +650,11 @@ static class Signatures
         {
             double top = st.Pos(minY), bottom = st.Pos(maxY), w = (maxX - minX + 1) / s, h = (maxY - minY + 1) / s;
             double reach = cut ? 4.2 : 4.5;
+            // (a clef is its staff's own sign, its ends within two spaces or so of the staff: ink running three spaces past
+            // it both above and below, on toward the staves either side, is a sign across the staves -- lang36-3's MuseScore
+            // page, the arpeggio's wave through both hands, pos 10.3..-11, seen as a G clef at 0.06. One way only may be
+            // the clef run into a note's ledgers or stem: kinkel19-6's scan, the small G clef, its ink cut out to pos 4.1..-10.8)
+            if (top > 10 && bottom < -10) return $"past a clef's reach both ways (pos {top:F1}..{bottom:F1})";
             // (its top worn a little short where its tail reaches well down: an old print's, kinkel19-6's scan, pos 4.1..-5.3)
             if (kind == "treble") return (top > reach && bottom < -reach || top > 4 && bottom < -5) && w >= (cut ? 1.6 : 1.2) ? null : $"no G clef's shape (pos {top:F1}..{bottom:F1}, {w:F1} wide)";
             if (kind != "bass") return "a C clef half seen";
@@ -778,6 +783,15 @@ static class Signatures
             if (other != null)
             {
                 if (Verbose) Console.WriteLine($"    clef {kind} inside staff {st.System + 1}/{st.Part} at x {t.X:F0} ({t.Score:F2}, weak): the detector is sure of a {other.Class} there ({other.Score:F2}), no clef");
+                continue;
+            }
+            // (nor where the staff's ink is already one sign, a beat repeat read from its strokes (Symbols.BeatRepeats):
+            // its slashes, cut out of the ink about them, have an F clef's reach and a stroke for a dot -- kinkel10-4's
+            // scan, the "///" after each group of 32nds in the right hand, seen as F clefs at 0.05-0.06)
+            var mark = sure ? null : ps.BeatRepeats.FirstOrDefault(b => b.St == st && t.X > b.L - 0.5 * s && t.X < b.R + 0.5 * s);
+            if (mark != null)
+            {
+                if (Verbose) Console.WriteLine($"    clef {kind} inside staff {st.System + 1}/{st.Part} at x {t.X:F0} ({t.Score:F2}, weak): on the beat repeat at x {mark.L:F0}-{mark.R:F0}, no clef");
                 continue;
             }
             // the body: a tall piece under the detection, no wider than a clef
