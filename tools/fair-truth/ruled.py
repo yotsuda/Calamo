@@ -26,7 +26,8 @@ def find_staves(cx0, cx1):  # in the window cx0..cx1: rows dark across half of i
 wins = [(im.width * a // 20, im.width * a // 20 + 300) for a in (2, 6, 10, 14, 17)]
 found = [find_staves(a, b) for a, b in wins]; xs = [(a + b) / 2 for a, b in wins]
 staves = []
-for st in found[2]:
+# (the window that found the most staves leads: one window can lose a staff to a hairpin or a run of chords)
+for st in max(found, key=len):
     pts = []
     for f, x in zip(found, xs):
         near = [s for s in f if abs(s[0] - st[0]) < 2 * (st[4] - st[0]) / 4 * 3]
