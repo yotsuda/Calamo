@@ -2,13 +2,31 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
-## S60 (c): `Detector.Threshold` と `Weak*` の掃きを**走らせた（結果はまだ）**。待ち時間に S65 (a): `run-gen.ps1 -SwellShare`（random の汚しの一部の頁で黒い符頭を太らせる、学習のセットのための口）を足した（2026-11-16 朝、前の節の次の一手 1 (c)・2）
+## S60 (c): `Detector.Threshold` と `Weak*` の掃きの結果。**42 と 49 で向きが割れるのは `WeakClef` 0.2（49 だけ −32、kinkel19-6-scan）と `Threshold` 0.4（42 +16・49 −3）、小さく `WeakNatural` 0.4（49 だけ −5）**。待ち時間に S65 (a): `run-gen.ps1 -SwellShare`（random の汚しの一部の頁で黒い符頭を太らせる、学習のセットのための口）を足した（2026-11-16 朝、前の節の次の一手 1 (c)・2）
 
 **現在地**: 検出器は detector42 のまま。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s97/check-head.log`）。**`out/s97/sweep.ps1` が走っている**（06:27 開始、20 回 × 約 12 分で 10 時半ごろ終わる見込み。`out/s97/sweep.log` が `all done` になるまで**読み手をビルドしない・開発用の台と評価台と check を回さない**）。
 
 **変更の種類**: 読み手は変えていない。生成器（`tools/run-gen.ps1` の `-SwellShare`。S65 の再現のための型を学習のセットに入れる口。§0「本線の順番」が待ち時間に許す範囲）。
 
 **掃きの中身**（`out/s97/sweep.ps1`、開発用の台 `-Dev -Reuse -Verify`、42・49 の両方、1 つずつ動かす）: `Detector.Threshold` 0.4・0.6、`WeakKey` 0.35、`WeakDot` 0.3、`WeakGrace` 0.35、`WeakHalf` 0.35、`WeakSlur` 0.3、`WeakRest` 0.4、`WeakNatural` 0.4、`WeakClef` 0.2（どれも今の値 +0.1）。印にしか効かない `WeakHairpin`・`WeakPedal`・`WeakOttava` と、開発用の台に出ない記号（cross・percent・tab・whole・slash・segno・trill）は外した。基準は `out/s96/dev-42.tsv`・`dev-49.tsv`（HEAD ae6f075、35102・35074）を `sweep-none-*.tsv` に写したもの。読むのは `pwsh out/s97/summarize.ps1`（s91 のものの写し）。
+
+**結果**（09:41 に `all done`。`pwsh out/s97/summarize.ps1`、基準 42 = 35102・49 = 35074）:
+
+| 閾値 | 42 | 49 | 読み方 |
+|---|---|---|---|
+| `Threshold` 0.4 | **+16**（kinkel19-6-scan +13、kinkel10-4-scan +4、ほか ±1〜3） | −3（holmes-melodies2-scan −10、kinkel10-4-scan +8） | 割れる。42 は下げると良い |
+| `Threshold` 0.6 | −151 | −153 | 両方同じ向き（0.5 が良い） |
+| `WeakClef` 0.2 | 0 | **−32**（kinkel19-6-scan −34、clef +36） | 49 だけ。コメントにある小さな G 音部（49 で 0.19）の崖 |
+| `WeakRest` 0.4 | −51（holmes4-scan −28、holmes2-scan −15） | −28 | 両方同じ向き（0.3 が良い） |
+| `WeakNatural` 0.4 | 0 | −5（kinkel10-2・10-5-scan） | 49 だけ、小さい |
+| `WeakGrace` 0.35 | −4 | −1 | 小さい |
+| `WeakDot` 0.3 | −2 | +2 | 小さい |
+| `WeakHalf` 0.35 | 0 | −1 | 効かない |
+| `WeakKey`・`WeakSlur` | 0 | 0 | 効かない |
+
+次に埋める候補（門 2 で構造の確かめにできるか）: (1) `WeakClef` の kinkel19-6-scan の小さな G 音部（段の中の音部の替わりを、前後の音域や段どうしの続きで確かめる）、(2) `Threshold` 0.4 で 42 だけ良くなる kinkel19-6-scan +13 の中身（causes の clef +13 と found +13 が食い違って見えるので、まず台の diffs で何が変わったかを見る）。
+
+
 
 **`-SwellShare`**（`-DegradeArgs random` のときだけ効く。既定 0）: その割合の頁に `--swell 8〜12 --swell-core 14 --swell-boxes {その頁の箱}` を足す。乱数は別の種（4321）なので、0 のときは今までの学習セットと同じ頁のまま（箱も作らない）。箱の名前は書体によらず `noteheads.s2`（Bravura でも同じ）。
 - 試し（chords × 2、種 7、`--clusters 0.5`、検出器つき。scratchpad）: random の汚しだけ Emmentaler 99.3・Bravura 100 → `-SwellShare 1` で **85.7・94.7**。s94 の bheads12（標準の汚し＋太らせ 12）の 99.4 より強く効く。random の縮小・二値化・塗りむらと重なるため（絵の太らせ方は bheads12 と同じ）。
