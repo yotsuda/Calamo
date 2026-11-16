@@ -1119,6 +1119,44 @@ static partial class Symbols
             for (int k = 0; k < 0.5 * s; k++, y += dir) if (y >= 0 && y < ink.H && ink[x, y]) return false;
             return true;
         }
+        // the ink the detector marks a tip at: one piece, joined to nothing (not the stem, not a line crossing it),
+        // its box no more than 0.6 of a space either way, round and wider than a stem -- a dot's (the staccato over
+        // an up stem's tip stands in the stem's column, white between)
+        bool DotAtMark(Detection t)
+        {
+            int reach = (int)(1.5 * s), cx = (int)Math.Round(t.X), cy = (int)Math.Round(t.Y), seedX = -1, seedY = -1;
+            // (the seed: the ink nearest the mark)
+            for (int r = 0; r <= (int)(0.4 * s) && seedX < 0; r++)
+                for (int dy = -r; dy <= r && seedX < 0; dy++)
+                    for (int dx = -r; dx <= r && seedX < 0; dx++)
+                    {
+                        int px = cx + dx, py = cy + dy;
+                        if (px >= 0 && px < ink.W && py >= 0 && py < ink.H && ink[px, py]) { seedX = px; seedY = py; }
+                    }
+            if (seedX < 0) return false;
+            var seen = new HashSet<(int, int)> { (seedX, seedY) };
+            var todo = new Stack<(int X, int Y)>();
+            todo.Push((seedX, seedY));
+            int x0 = seedX, x1 = seedX, y0 = seedY, y1 = seedY;
+            while (todo.Count > 0)
+            {
+                var (px, py) = todo.Pop();
+                if (Math.Abs(px - cx) >= reach || Math.Abs(py - cy) >= reach) return false;   // running on
+                x0 = Math.Min(x0, px); x1 = Math.Max(x1, px); y0 = Math.Min(y0, py); y1 = Math.Max(y1, py);
+                if (x1 - x0 + 1 > 0.6 * s || y1 - y0 + 1 > 0.6 * s) return false;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        int nx = px + dx, ny = py + dy;
+                        if (nx < 0 || nx >= ink.W || ny < 0 || ny >= ink.H || !ink[nx, ny] || !seen.Add((nx, ny))) continue;
+                        todo.Push((nx, ny));
+                    }
+            }
+            // (round, and wider than a stem: a stem's tip broken off above a gap is a sliver of the stem's own width --
+            // kinkel10-1's scan, bar 8's eighth, its flag joined below the break)
+            int w = x1 - x0 + 1, ht = y1 - y0 + 1;
+            return w >= 0.3 * s && w <= 1.6 * ht && ht <= 1.6 * w;
+        }
         // a thin stroke runs through the stem's tip to its left over half a space (within 0.6 space of the tip's
         // row): a slur or a tie. A beam runs left too, but is 0.4 space thick and more, a stroke under 0.3
         // (genF's broken beams, their ink left of the stem no other stem's piece, were taken for strokes)
@@ -1218,6 +1256,15 @@ static partial class Symbols
             {
                 if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
                     Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: a stroke crosses the tip to the left, no flag's: the rules' 0 stands");
+                continue;
+            }
+            // (and where the ink at the mark is a dot: one sign to a place. A flag grows out of the stem at its tip;
+            // a piece of its own at the tip, not joined to the stem and no bigger than a dot, is a staccato's
+            // -- holmes-melodies2's scan, bar 20's left-hand chord, its staccato by the up stem's tip marked stem_1 0.44)
+            if (n == 1 && h.Beams == 0 && best.Score < SureFlag && ink != null && DotAtMark(best))
+            {
+                if (DebugAt.HasValue && Math.Abs(h.X - DebugAt.Value.X) < s && Math.Abs(h.Y - DebugAt.Value.Y) < s)
+                    Console.WriteLine($"stem tip for head {h.X:F0},{h.Y:F0}: the mark's ink a dot of its own, no flag's: the rules' 0 stands");
                 continue;
             }
             // (an old print's eighth flag, a filled wedge, the detector less than sure calls two: where
