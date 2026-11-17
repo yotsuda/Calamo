@@ -55,10 +55,38 @@ for x, y, bw, bh in sorted(out):
     cx = x + bw / 2
     si = force if force is not None else min(range(len(staves)), key=lambda i: abs(y - (at(staves[i][0], cx) + at(staves[i][4], cx)) / 2))
     s = staves[si]; t0, t4 = at(s[0], cx), at(s[4], cx); half = (t4 - t0) / 8
+    # the fitted lines can drift a step on a staff whose tilt was fitted wrong (Taubert Op.136-1 page 1, staff 1: 4.7
+    # px/1000 against -1 for the rest): the five lines moved together by the shift that is darkest in the columns
+    # 30-90 px either side of the head (a whole space away is out of range, so it cannot slip onto the next line)
+    def score(d):
+        return sum(1 for li in range(5) for xx in list(range(int(cx) - 90, int(cx) - 30, 2)) + list(range(int(cx) + 30, int(cx) + 90, 2))
+                   if 0 <= xx < im.width and px[xx, int(round(at(s[li], xx) + d))] < 160)
+    shift = max(range(-15, 16), key=lambda d: (score(d), -abs(d)))
+    t0 += shift; t4 += shift
     n = int(round(bh / (2 * half)))  # heads stacked in the blob (seconds)
     k = (y - t0) / half
-    if n <= 1: tag = step_name(top[clefs[si]] - round(k))
+    led = ''
+    if n <= 1 and (k < -1.2 or k > 9.2):
+        # off the staff: name the head by counting the ledger lines (rows dark just beyond both sides of the head),
+        # not by its centre (heads above a ledger line are engraved high in old prints)
+        xl, xr = int(x) - 2, int(x + bw) + 1
+        lo, hi = (int(y - bh / 2) - 2, int(t0) - 3) if k < 0 else (int(t4) + 3, int(y + bh / 2) + 2)
+        rows = [yy for yy in range(lo, hi) if sum(px[xx, yy] < 160 for xx in range(xl - 6, xl)) >= 3
+                and sum(px[xx, yy] < 160 for xx in range(xr, xr + 6)) >= 3]
+        ls = []
+        for yy in rows:
+            if ls and yy - ls[-1][-1] <= 2: ls[-1].append(yy)
+            else: ls.append([yy])
+        lk = [2 * round((sum(l) / len(l) - t0) / half / 2) for l in ls if len(l) <= 5]
+        through = [v for v, l in zip(lk, ls) if abs(sum(l) / len(l) - y) < bh * 0.25]
+        if through: kh = through[0]
+        elif k < 0: kh = (min(lk) if lk else 0) - 1
+        else: kh = (max(lk) if lk else 8) + 1
+        led = f'  ledgers {len(lk)}{" through" if through else ""}'
+        if abs(kh - k) > 1.6: led += f' ? (centre k {k:.1f})'
+        k = kh
+    if n <= 1: tag = f'{step_name(top[clefs[si]] - round(k))} (other clef {step_name(top["b" if clefs[si] == "t" else "t"] - round(k))}){led}'
     else:  # a cluster: name its top and bottom head
         kt = (y - bh / 2 + half - t0) / half; kb = (y + bh / 2 - half - t0) / half
         tag = f'{step_name(top[clefs[si]] - round(kt))}..{step_name(top[clefs[si]] - round(kb))} ({n} high)'
-    print(f'x {int(cx):5d} y {int(y):5d} staff {si} k {k:5.1f}  {tag}' + (f'  w{bw / sp:.1f}' if bw > 1.6 * sp else ''))
+    print(f'x {int(cx):5d} y {int(y):5d} staff {si} k {k:5.1f}  {tag}' + (f'  w{bw / sp:.1f}' if bw > 1.6 * sp else '') + (f'  shift{shift:+d}' if shift else ''))

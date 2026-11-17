@@ -8,10 +8,11 @@ from PIL import Image, ImageDraw, ImageFont
 page, prefix, clefs = sys.argv[1], sys.argv[2], sys.argv[3]
 x0, x1, zoom = int(sys.argv[4]), int(sys.argv[5]), float(sys.argv[6]); pieces = int(sys.argv[7]) if len(sys.argv) > 7 else 2
 im = Image.open(page).convert('RGB'); g = im.convert('L'); px = g.load()
+dark = int(os.environ.get('RULED_DARK', '128'))  # a pale print (Taubert Op.136-1 page 2) needs a lighter cut, e.g. 175
 def find_staves(cx0, cx1):  # in the window cx0..cx1: rows dark across half of it, merged, then runs of five evenly spaced
     w = cx1 - cx0; rows = []
     for y in range(im.height):
-        if sum(1 for x in range(cx0, cx1, 2) if px[x, y] < 128) > 0.25 * w: rows.append(y)
+        if sum(1 for x in range(cx0, cx1, 2) if px[x, y] < dark) > 0.25 * w: rows.append(y)
     lines = []
     for y in rows:
         if lines and y - lines[-1][-1] <= 3: lines[-1].append(y)
