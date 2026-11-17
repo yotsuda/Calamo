@@ -1,0 +1,225 @@
+// The truth of the fair set (S66) for Wilhelm Taubert, 6 Lieder Op.76 No.2, Oh gently sleep (Wenn du im Traum
+// wirst fragen): written from the Schirmer print (1870, IMSLP #110522, data/fair/taubert76-2/schirmer), bar by bar.
+// Never to debug the reader on. Heads off the staves named by counting the ledger lines (zoomed; in this print a head
+// on a ledger line sits high, the line crossing its lower half).
+// As the print has them: bars 4-29 are repeated (||: before bar 4, :|| after bar 29); the voice's staff is not
+// printed in the first system (removeEmpty all). The right hand's broken chords that run down into the left hand's
+// staff (bars 13-14 and their returns) are written where their heads are printed: those on the lower staff as a
+// voice of the left hand.
+title "Oh gently sleep."
+subtitle "(Wenn du im Traum wirst fragen.)"
+composer "W. Taubert."
+tempo "Andantino con moto."
+octave absolute
+paper { breaksOnly }
+time 2/4
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section Intro {
+  voice_ {
+    R2 |
+    R2 |
+    R2 | break
+  }
+  rh {
+    r16 g'16@pp fis'16 a'16 c''16 dis''16 fis''16 a''16 |
+    c'''16 dis'''16 e'''16 c'''16 g''16 e''16 grace { e''8 } d''16 c''16 |
+    c''16 b'16 r16 b'16 g''16( b'16) r16 b'16 |
+  }
+  lh {
+    e'16 c'16 dis'16 c'16 <dis' fis'>16 c'16 <dis' fis'>16 c'16 |
+    <dis' fis'>16 c'16 <e' g'>16 c'16 <e' g'>16 c'16 <e' g'>16 c'16 |
+    <d' f' g'>16 c'16 <d' f' g'>16 c'16 <d' f' g'>16 c'16 <d' f' g'>16 c'16 |
+  }
+}
+
+section Verse {
+  voice_ {
+    r4 r8 g'8 |
+    a'8 ais'8 b'8 g'8 |
+    d''8 c''8 r8 b'8 |
+    e''8 b'8 e''8 b'8 | break
+    e''4. e''8 |
+    d''8 cis''8 d''8 b'8 |
+    a'8 g'8 r8 d''8 |
+    g'8 d''8 g'8 d''8 | pageBreak
+    g''4. g'8 |
+    e''4. dis''8 |
+    e''8 c''8 c''8 b'8 |
+    d''2 |
+    r4 r8 g'8 | break
+    e''4. dis''8 |
+    e''8 c''8 c''8 b'8 |
+    d''2 |
+    R2 |
+    c''4. g'8 | break
+    a'4 r4 |
+    d''4. e''8 |
+    g''8( f''4) d''16( a''16) |
+    c''2~ | break
+    c''8 grace { d''16 } b'16 c''16 d''8.@fermata b'16 |
+    c''4 r4 |
+    R2 |
+    R2 | pageBreak
+  }
+  rh {
+    g''16 c''16 r16 clef bass g16 e'16 g16 e'16 g16 |
+    <cis' e'>16 g16 <cis' e'>16 g16 <d' f'>16 g16 <d' f'>16 g16 |
+    <b f'>16 g16 <d' f'>16 g16 <d' f'>16 g16 <b g'>16 g16 |
+    <b g'>16 g16 b16 g16 <b g'>16 g16 b16 g16 | break
+    voice { g'4. g'8 } { b16 g16 b16 g16 b16 g16 b16 g16 } |
+    voice { g'2 } { s4 f'4 } { f'16 g16 f'16 g16 f'16 g16 d'16 g16 } |
+    voice { <f' g'>2 } { c'16 g16 b16 g16 b16 g16 b16 g16 } |
+    voice { <f' g'>2 } { c'16 g16 b16 g16 b16 g16 b16 g16 } clef treble | pageBreak
+    voice { <f' g'>2 } { b16 g16 b16 g16 b16 g16 b16 g16 } |
+    r16 s16 s16 e'16 g'16 s16 fis'16 s16 |
+    g'16 s16 c'16 s16 c'16 s16 s16 s16 |
+    s4 d'16 f'16 aes'16 g'16 |
+    d''16( f''16 aes''16 g''16 d'''16 b''16 g''16 f'') clef bass | break
+    r16 g16 c'16 e'16 g'16 g16 fis'16 a16 |
+    g'16 g16 c'16 e16 c'16 e16 b16 d16 |
+    r16@pp f16 aes16 g16 d'16 f'16 aes'16 g'16 clef treble |
+    d''16 f''16 aes''16 g''16 d'''16 b''16 g''16 f''16 |
+    r16 bes16 e'16 g'16 c''16 g'16 e'16 bes16 | break
+    r16 a16 c'16 f'16 a'16 f'16 c'16 a16 |
+    r16 d'16( f'16 a'16 d''16 bes'16 g'16 d'16 |
+    d'16 f'16 a'16 d''16 f''16 d''16 a'16 f'16) clef bass |
+    r16 e16 g16 c'16 g'8 r8 | break
+    r16 f16 g16 g16( <f' g'>8) r8 clef treble |
+    r16 g'16@pp fis'16 a'16 c''16 dis''16 fis''16 a''16 |
+    c'''16 dis'''16 e'''16 c'''16 g''16 e''16 grace { e''8 } d''16 c''16 |
+    c''16 b'16 r16 b'16 g''16 b'16 r16 b'16 |
+  }
+  lh {
+    <e' g'>16 c'16 <e' g'>16 r16 r4 |
+    R2 |
+    r4 r8 e,8@staccato |
+    e,8@staccato r8 e,8@staccato r8 | break
+    e,2 |
+    g,2~ |
+    g,2 |
+    g,8@staccato r8 g,8@staccato r8 | pageBreak
+    g,2 |
+    voice { s16 g16 c'16 s16 s16 g16 s16 a16 } { c,2~ } |
+    voice { s16 g16 s16 e16 s16 e16 b16 d16 } { c,4. r8 } |
+    voice { r16@pp f16 aes16 g16 s4 } { g,2~ } |
+    voice { b2 } { g,2 } | break
+    c,2~ |
+    c,4. r8 |
+    g,2 |
+    voice { b2 } { g,2 } |
+    voice { c2 } { c,2 } | break
+    <f, f>4 r4 |
+    voice { d2~ } { d,2~ } |
+    voice { d2 } { d,2 } |
+    g,2~ | break
+    <g,, g,>2 |
+    e'16 c'16 dis'16 c'16 <dis' fis'>16 c'16 <dis' fis'>16 c'16 |
+    <dis' fis'>16 c'16 <e' g'>16 c'16 <e' g'>16 c'16 <e' g'>16 c'16 |
+    <d' f' g'>16 c'16 <d' f' g'>16 c'16 <d' f' g'>16 c'16 <d' f' g'>16 c'16 |
+  }
+}
+
+section Last {
+  voice_ {
+    r4 r8 g'8 |
+    a'8 ais'8 b'8 g'8 |
+    d''8 c''8 r8 b'8 |
+    e''8 b'8 e''8 b'8 | break
+    e''4. e''8 |
+    d''8 cis''8 d''8 b'8 |
+    a'8 g'8 r8 d''8 |
+    g'8. d''16 g'8 d''8 | break
+    g''4 g'16 g'16 g'8 |
+    e''4. dis''8 |
+    e''8 c''8 c''8 b'8 |
+    d''2 | pageBreak
+    r4 r8 g'8 |
+    e''4. dis''8 |
+    e''8 c''8 c''8 b'8 |
+    d''2 |
+    R2 | break
+    c''4. g'8 |
+    a'4 r4 |
+    d''4. e''8 |
+    g''8( f''4) d''16( a''16) |
+    c''2~ | break
+    c''8 grace { d''16 } b'16 c''16 d''8.@fermata b'16 |
+    c''4 r4 |
+    R2 |
+    R2 |
+    R2 |]
+  }
+  rh {
+    g''16( c''16) r16 clef bass g16 e'16 g16 e'16 g16 |
+    <cis' e'>16 g16 <cis' e'>16 g16 <d' f'>16 g16 <d' f'>16 g16 |
+    <b f'>16 g16 <d' f'>16 g16 <d' f'>16 g16 <b g'>16 g16 |
+    <b g'>16 g16 b16 g16 <b g'>16 g16 b16 g16 | break
+    voice { g'4. g'8 } { b16 g16 b16 g16 b16 g16 b16 g16 } |
+    voice { g'2 } { s4 f'4 } { f'16 g16 f'16 g16 f'16 g16 d'16 g16 } |
+    voice { <f' g'>2 } { c'16 g16 b16 g16 b16 g16 b16 g16 } |
+    voice { <f' g'>2 } { c'16 g16 b16 g16 b16 g16 b16 g16 } | break
+    voice { <f' g'>2 } { b16 g16 b16 g16 b16 g16 b16 g16 } |
+    r16 g16 c'16 e'16 g'16 g16 fis'16 a16 |
+    g'16 g16 c'16 e16 c'16 e16 b16 d16 |
+    r16@pp f16 aes16 g16 d'16 f'16 aes'16 g'16 clef treble | pageBreak
+    d''16 f''16 aes''16 g''16 d'''16 b''16 g''16 f''16 clef bass |
+    r16 g16 c'16 e'16 g'16 g16 fis'16 a16 |
+    g'16 g16 c'16 e16 c'16 e16 b16 d16 |
+    r16@pp f16 aes16 g16 d'16 f'16 aes'16 g'16 clef treble |
+    d''16 f''16 aes''16 g''16 d'''16 b''16 g''16 f''16 | break
+    r16 bes16 e'16 g'16 c''16 g'16 e'16 bes16 |
+    r16 a16 c'16 f'16 a'16 f'16 c'16 a16 |
+    r16 d'16( f'16 a'16 d''16 bes'16 g'16 d'16 |
+    d'16 f'16 a'16 d''16 f''16 d''16 a'16 f'16) |
+    s4 g'8 r8 | break
+    s4 <f' g'>8 r8 clef bass |
+    r16@pp e16( dis16 fis16 a16 c'16 dis'16 fis'16 clef treble |
+    a'16 c''16 dis''16 fis''16 a''16 c'''16 dis'''16 fis'''16 |
+    c''''8) r8 c'8 r8 |
+    c'2 |]
+  }
+  lh {
+    <e' g'>16 c'16 <e' g'>16 r16 r4 |
+    R2 |
+    r4 r8 e,8@staccato |
+    e,8@staccato r8 e,8@staccato r8 | break
+    e,2 |
+    g,2~ |
+    g,2 |
+    g,8@staccato r8 g,8@staccato r8 | break
+    g,2 |
+    c,2~ |
+    c,4. r8 |
+    g,2 | pageBreak
+    voice { b2 } { g,2 } |
+    c,2~ |
+    c,4. r8 |
+    g,2 |
+    voice { b2 } { g,2 } | break
+    voice { c2 } { c,2 } |
+    <f, f>4 r4 |
+    voice { d2~ } { d,2~ } |
+    voice { d2 } { d,2 } |
+    voice { r16 e16 g16 c'16 s4 } { g,2~ } | break
+    voice { r16 f16 g16 g16 s4 } { <g,, g,>2 } |
+    c,8 r16 c16 <dis fis>16 c16 <dis fis>16 c16 |
+    <dis fis>16 c16 <dis fis>16 c16 <dis fis>16 c16 <dis fis>16 c16 |
+    repeat tremolo 4 { <e g>16 c16 } |
+    <c e g>2 |]
+  }
+}
+
+form { ~Intro |: ~Verse :| ~Last }
+
+score {
+  staff voice_ "Voice" as removeEmpty all
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
+
