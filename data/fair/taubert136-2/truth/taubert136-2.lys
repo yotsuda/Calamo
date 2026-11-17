@@ -1,0 +1,207 @@
+// The truth of the fair set (S66) for Wilhelm Taubert, 6 Kinderstuecke Op.136 No.2, Haenschen auf der Jagd: written
+// from the Senff print (1862, IMSLP #104910, data/fair/taubert136-2/senff), bar by bar. Never to debug the reader on.
+// As the print has them: bars 29-32 are repeated (||: before bar 29, :|| after bar 32), the right hand in the bass
+// clef there; bars 33-48 in C major, the rest in A major; heads on and above ledger lines named by counting the ledger
+// lines (tools/fair-truth/ledger.py), not by the head's measured centre (heads above a ledger line are engraved high);
+// the grace notes (bars 13, 17, 29, 30, 34, 38, 57, 61) are not scored.
+title "Hänschen auf der Jagd"
+tempo "Allegro molto giojoso."
+octave absolute
+paper { breaksOnly }
+time 6/8
+
+part rh { clef treble }
+part lh { clef bass pedal text }
+
+section A {
+  key a major
+  rh {
+    a'4@mf b'8 cis''8 d''8 e''8 |
+    e''4 a''8 e''4. |
+    a'4 b'8 cis''8 b'8 a'8 |
+    <gis' e''>4.~ <gis' e''>4 tuplet 3/2 { e'16 fis'16 gis'16 } |
+    a'4@f e'8 a'8 e'8 b'8 |
+    cis''8 a'8 fis''8 e''4. |
+    e''16@accent( fis''16 e''8) cis''8 d''16@accent( e''16 d''8) b'8 | break
+    cis''16@accent( d''16 cis''8) a'8 b'16@accent( cis''16 b'8) e'8 |
+    a'4 e'8 a'8 e'8 b'8 |
+    cis''8 a'8 fis''8 e''4. |
+    e''16 fis''16 e''8 cis''8 d''16 e''16 d''8 b'8 |
+    a'8 cis'8 e'8 a4 gis'16 b'16 |
+    e''8@p <gis' e''>8 <gis' e''>8 grace { fis''8 } <gis' e''>8 <gis' dis''>8 <gis' e''>8 |
+    <gis' gis''>4.( <gis' e''>4) r8 | break
+    cis''8( <dis' fis'>8) <dis' fis'>8 a'8 gis'8 <dis' fis'>8 |
+    cis''8( <dis' fis'>8) <dis' fis'>8 a'8 gis'8 <dis' fis'>8 |
+    r8 <gis' e''>8 <gis' e''>8 grace { fis''8 } <gis' e''>8 <gis' dis''>8 <gis' e''>8 |
+    <gis' gis''>4.( <gis' e''>4) r8 |
+    cis''8( <dis' fis'>8) <dis' fis'>8 cis''8( <dis' fis'>8) <dis' fis'>8 |
+    a'8 gis'8 <dis' fis'>8 e'4 tuplet 3/2 { e'16 fis'16 gis'16 } |
+    a'4@f e'8 a'8 e'8 b'8 | break
+    cis''8 a'8 fis''8 e''4. |
+    e''16@accent( fis''16 e''8) cis''8 d''16@accent( e''16 d''8) b'8 |
+    cis''16@accent( d''16 cis''8) a'8 b'16@accent( cis''16 b'8) e'8 |
+    a'4 e'8 a'8 e'8 b'8 |
+    cis''8 a'8 fis''8 e''4. |
+    e''16 fis''16 e''8 cis''8 d''16 e''16 d''8 b'8 |
+    a'8 cis'8 e'8 a4 r8 || break
+  }
+  lh {
+    clef treble cis'4 e'8 a'8 b'8 cis''8 |
+    cis''2. |
+    cis'4 e'8 a'8 e'8 cis'8 clef bass |
+    <e b>4.~ <e b>4 r8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <e, e>4 e8 |
+    <a, e>8 cis8 e8 a,4 r8 |
+    e8 b8 b8 e8 b8 b8 |
+    e8 b8 b8 e8 b8 b8 |
+    b,8( a8) a8 fis8 gis8 a8 |
+    b,8( a8) a8 fis8 gis8 a8 |
+    e8 b8 b8 e8 b8 b8 |
+    e8 b8 b8 e8 b8 b8 |
+    b,8( a8) a8 b,8( a8) a8 |
+    fis8 gis8 <b, a>8 <e gis>4 r8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8 |
+    voice { <a, e>8 a8 g8 fis4 f8 } { s4. a,4. } |
+    voice { e4. dis4 d8 } { a,4. a,4. } |
+    <a, cis>4 e8 a8 e8 b8 |
+    cis'8 a8 fis'8 e'4. |
+    <a, e>4 e8 <e, e>4 e8 |
+    <a, e>8 cis8 e8 a,4 r8 ||
+  }
+}
+
+section B {
+  key a major
+  rh {
+    clef bass <e e'>4.@f <e e'>4. |
+    <e e'>4. <e e'>4. |
+    <e e'>4. <e e'>4. |
+    <e e'>4 <dis dis'>8 <e e'>4 r8 |
+  }
+  lh {
+    a,8 a,8 b,8 grace { a,32( b,32 } c4) b,8 |
+    a,8 a,8 b,8 grace { a,32( b,32 } c4) b,8 |
+    a,8 a,8 b,8 c8 b,8 a,8 |
+    g,8( a,8) f,8 e,4 r8 |
+  }
+}
+
+section C {
+  key c major
+  rh {
+    clef treble <e' c''>4@f <g' d''>8 <c'' e''>8 <d'' f''>8 <e'' g''>8 |
+    <e'' g''>4. grace { c'''8 } <e'' g''>4. | pageBreak
+    <e' c''>4 <g' d''>8 <c'' e''>8 <g' d''>8 c''8 |
+    <b' g''>2. |
+    <f' d''>4 <a' e''>8 <d'' f''>8 <e'' g''>8 <f'' a''>8 |
+    <f'' a''>4. grace { d'''8 } <f'' a''>4. |
+    <f' d''>4 <a' e''>8 <d'' f''>8 <a' e''>8 d''8 |
+    <gis' e''>2. |
+    <c' a'>4 b'8 c''8 d''8 e''8 | break
+    e''4 a''8 e''4. |
+    a'4 b'8 c''8 b'8 a'8 |
+    <gis' e''>2. |
+    a'4@p b'8 cis''8 d''8 e''8 |
+    e''4 a''8 e''4. |
+    a'4 b'8 cis''8 b'8 a'8 |
+    <gis' e''>2. || break
+  }
+  lh {
+    <c, g,>8@sustain <c, g,>8 <c, g,>8 <c, g,>4 <c, g,>8 |
+    <c, g,>8 <c, g,>8 <c, g,>8 <c, g,>4 <c, g,>8 |
+    <c, g,>8 <c, g,>8 <c, g,>8 <c, g,>4 <c, g,>8@!sustain |
+    r8 <g, d>8 <g, d>8 <g, d>4 <g, d>8 |
+    <d, a,>8@sustain <d, a,>8 <d, a,>8 <d, a,>4 <d, a,>8 |
+    <d, a,>8 <d, a,>8 <d, a,>8 <d, a,>4 <d, a,>8 |
+    <d, a,>8 <d, a,>8 <d, a,>8 <d, a,>4 <d, a,>8@!sustain |
+    r8 <e, b,>8 <e, b,>8 <e, b,>4 <e, b,>8 |
+    <a, e>4 r8 clef treble a'8 b'8 c''8 |
+    c''4. a8 b8 c'8 |
+    c'4 e'8 a'8 e'8 c'8 clef bass |
+    r8 <e b>8 <e b>8 <e b>4 <e b>8 clef treble |
+    cis'4 e'8 a'8 b'8 cis''8 |
+    cis''4. a8 b8 cis'8 |
+    cis'4 e'8 a'8 e'8 cis'8 clef bass |
+    r8 <e b>8 <e b>8 <e b>4 <e b>8 ||
+  }
+}
+
+section D {
+  key a major
+  rh {
+    voice { e''4 cis''8 cis''8 d''8 e''8 } { fisis'2.@pp } |
+    <gis' d''>4. b'4 r8 |
+    voice { e''4 cis''8 cis''8 d''8 e''8 } { fisis'2. } |
+    <gis' d''>4. b'4 r8 |
+    cis''8@text("cresc.") r8 a'8 a'8 r8 r8 |
+    e''2.@trillSpan |
+    e''2.@!trillSpan | break
+    e''4.@trill dis''16 e''16 eis''16 fis''16 fisis''16 gis''16 |
+    a''8 <cis'' a''>8 <cis'' a''>8 grace { b''8 } <cis'' a''>8 <cis'' gis''>8 <cis'' a''>8 |
+    <cis'' cis'''>4.( <cis'' a''>4) r8 |
+    fis''8( <gis' b'>8) <gis' b'>8 d''8 cis''8 <gis' b'>8 |
+    fis''8( <gis' b'>8) <gis' b'>8 d''8 cis''8 <gis' b'>8 |
+    r8 <cis'' a''>8 <cis'' a''>8 grace { b''8 } <cis'' a''>8 <cis'' gis''>8 <cis'' a''>8 |
+    <cis'' cis'''>4.( <cis'' a''>4) r8 | break
+    fis''8@p( <gis' b'>8) <gis' b'>8 fis''8@text("cresc.")( <gis' b'>8) <gis' b'>8 |
+    d''8 cis''8 <gis' b'>8 d''8 cis''8 <gis' b'>8 |
+    <a' a''>4@ff e''8 a''8 e''8 b''8 |
+    cis'''8 a''8 fis'''8 e'''4. |
+    e'''16 fis'''16 e'''8 cis'''8 d'''16 e'''16 d'''8 b''8 |
+    cis'''16 d'''16 cis'''8 a''8 b''16 cis'''16 b''8 e''8 |
+    a''4 e'8 a'8 e'8 b'8 | break
+    cis''8 a'8 fis''8 e''4. |
+    e''16( fis''16 e''8) cis''8 <d'' gis''>16 e''16 d''8 b'8 |
+    <cis'' a''>8 a'8 fis''8 e''16( fis''16 e''8 e''8) |
+    e''16( fis''16 e''8) cis''8 <d'' gis''>16 e''16 d''8 b'8 |
+    <cis'' a''>8 a'8 fis''8 e''16( fis''16 e''8 e''8) |
+    e''16( fis''16 e''8) cis''8 <d'' gis''>16 e''16 d''8 b'8 |
+    <a' a''>8@fp@staccato cis''8@staccato e''8@staccato a'4@staccato r8 |.
+  }
+  lh {
+    <e ais>2. |
+    <e b>4 b8 d'8 cis'8 b8 |
+    <e ais>2. |
+    <e b>4 b8 d'8 cis'8 b8 |
+    a8 r8 cis'8 cis'8 r8 clef treble <a' cis''>8 |
+    <e' b'>8@f r8 clef bass <e, e>8 <e, e>8 r8 clef treble <e' b'>8 |
+    <a' cis''>8@f r8 clef bass <a, a>8 <a, a>8 r8 clef treble <a' cis''>8 |
+    <e' b'>8@f r8 clef bass <e, e>8 <e, e>8 r8 r8 |
+    a8@f e'8 e'8 a8 e'8 e'8 |
+    a8 e'8 e'8 a8 e'8 e'8 |
+    e8@p( d'8) d'8 b8 cis'8 d'8 |
+    e8( d'8) d'8 b8 cis'8 d'8 |
+    a8@f e'8 e'8 a8 e'8 e'8 |
+    a8 e'8 e'8 a8 e'8 e'8 |
+    e8( d'8) d'8 e8( d'8) d'8 |
+    b8 cis'8 <e d'>8 b8 cis'8 <e d'>8 |
+    a,4@sustain e8 <a, e>4 e8 |
+    <a, e>4 e8 <a, e>4 e8@!sustain |
+    voice { <a, e>8 a8 g8 fis4 f8 } { s4. a,4. } |
+    voice { e4. dis4 d8 } { a,4. a,4. } |
+    <a, cis>4 e8 a8 e8 b8 |
+    cis'8 a8 fis'8 e'4. |
+    r4 r8 <e e'>4 r8 |
+    <a, a>4 r8 e'16( fis'16 e'8 e'8) |
+    e'16( fis'16 e'8) r8 <e e'>4 r8 |
+    <a, a>4 r8 e'16( fis'16 e'8 e'8) |
+    e'16( fis'16 e'8) r8 <e, e>4 r8 |
+    <a,, a,>8@staccato cis,8@staccato e,8@staccato a,,4@staccato r8 |.
+  }
+}
+
+form { ~A |: ~B :| ~C ~D }
+
+score {
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
