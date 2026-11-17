@@ -9,7 +9,8 @@ param(
     [switch]$NoAlign,                       # (-Eval, -Dev, -Fair) score the measures in the order read, not matched with the truth's bars (--align)
     [string[]]$OmrArgs = @(),               # more arguments for this reader's own reading (e.g. '--no-unprinted', to tell what a step does)
     [switch]$Verify,                        # this reader's reading with the redraw check (--verify): its todos as Lily# gets them (tools/todo-quality.ps1)
-    [string]$Homr = ''                      # also score homr's MusicXML, <Homr>\<set>\pNN.musicxml (run as a program elsewhere: C:\MyProj\omr-compare\scripts\run-homr-fair.ps1)
+    [string]$Homr = '',                     # also score homr's MusicXML, <Homr>\<set>\pNN.musicxml (run as a program elsewhere: C:\MyProj\omr-compare\scripts\run-homr-fair.ps1)
+    [switch]$Reserve                        # (-Fair) the reserve sets instead (data/fair/<piece>/RESERVE.md): Audiveris and homr only, never this reader
 )
 # Audiveris against this reader on the real-score benchmarks (run-real.ps1's), page for page. Both
 # read the same pages, scaled down to fit Audiveris's limit; Audiveris's MusicXML is scored by
@@ -17,6 +18,7 @@ param(
 # run as a program only (AGPL): its output is the one thing taken from it.
 Add-Type -AssemblyName System.Drawing
 $Sets = @($Sets | ForEach-Object { $_ -split ',' })   # (pwsh -File passes a list as one string)
+if ($Reserve -and -not $Fair) { throw '-Reserve goes with -Fair' }
 $root = Resolve-Path "$PSScriptRoot\.."
 # a folder's pages, p01.png on (not the page images Lily# leaves beside a page it read, p01.omr-p01.png:
 # one in tchaikovsky39-5's scan made it a page of two from 2026-10-28, and its row fell out of the table)
@@ -93,11 +95,19 @@ if ($Fair) {
     $benches = [ordered]@{}
     foreach ($d in Get-ChildItem "$root\data\fair" -Directory | Sort-Object Name) {
         $n = $d.Name
+        # (a reserve set is kept unseen by this reader -- its truth is checked against Audiveris and homr alone --
+        # so that it can tell later whether the reader has been fitted to the fair sets: -Fair leaves it out,
+        # -Fair -Reserve runs it without this reader, and before its truth is written only makes its pages and
+        # Audiveris's reading, for homr to read the same pages)
+        if ([bool](Test-Path "$($d.FullName)\RESERVE.md") -ne [bool]$Reserve) { continue }
         foreach ($ed in Get-ChildItem $d.FullName -Directory | Where-Object { Test-Path "$($_.FullName)\$n.score" } | Sort-Object Name) {
             $truth = if (Test-Path "$($d.FullName)\truth-$($ed.Name)\$n.lys") { "$($d.FullName)\truth-$($ed.Name)" } else { "$($d.FullName)\truth" }
-            if (-not (Test-Path "$truth\$n.lys")) { continue }
             $name = "fair-$n-$($ed.Name)"
             if ($Sets.Count -gt 0 -and $Sets -notcontains $name) { continue }
+            if (-not (Test-Path "$truth\$n.lys")) {
+                if ($Reserve) { $benches[$name] = @{ Pages = $ed.FullName; To = (PageCount $ed.FullName); NoTruth = $true } }
+                continue
+            }
             $xml = "$out\$name-truth"
             New-Item -ItemType Directory -Force $xml | Out-Null
             $said = & $lysc xml "$truth\$n.lys" -d $xml 2>&1 | Out-String
@@ -152,6 +162,7 @@ foreach ($name in $benches.Keys) {
         $m = @(Get-ChildItem "$dir\aud" -Filter "$stem*.mxl" | Sort-Object Name)
         if ($m.Count -eq 0) { $preds += '-'; $notes += "$stem none" } else { $preds += ($m.FullName -join '+'); if ($m.Count -gt 1) { $notes += "$stem $($m.Count) movements" } }
     }
+    if ($b.NoTruth) { "{0,-16} pages and Audiveris's reading made ({1:F1}s); no truth yet" -f $name, $audSec; continue }
     $common = $b.Args + @('--pages', $pages, '--from', '1', '--to', "$($b.To)")
     # (held out: both readers' measures matched with the truth's bars in order -- a page read as
     # nothing or a movement split in two would otherwise put every bar after it off by one)
@@ -163,6 +174,15 @@ foreach ($name in $benches.Keys) {
         $hp = foreach ($f in $files) { $x = "$Homr\$name\$([IO.Path]::GetFileNameWithoutExtension($f)).musicxml"; if (Test-Path $x) { $x } else { '-' } }
         $homrText = & $omr @($common + @('--out', "$dir\scored-homr", '--pred', ($hp -join ','))) 2>&1 | Out-String
     }
+    $pick = { param($text) (($text -split "`n" | Where-Object { $_ -match $pattern } | ForEach-Object { $_.Trim() }) -join ' | ') }
+    if ($Reserve) {
+        "{0,-16} audiveris ({1,5:F1}s{2}): {3}" -f $name, $audSec, $(if ($notes) { '; ' + ($notes -join ', ') } else { '' }), (& $pick $audText)
+        if ($Homr) { "{0,-16} homr             : {1}" -f '', (& $pick $homrText) }
+        foreach ($k in @(@('audiveris', $audText), @('homr', $homrText))) {
+            if ($k[1] -match 'truth (\d+), omr \d+; pitch\+duration found (\d+)') { $total[$k[0]][0] += [int]$Matches[2]; $total[$k[0]][1] += [int]$Matches[1] }
+        }
+        continue
+    }
     $t.Restart()
     # (held out: this reader's measures too are scored in the order read, as Audiveris's are -- the
     # printed bar numbers it goes by leave out a pickup the truth counts)
@@ -170,7 +190,6 @@ foreach ($name in $benches.Keys) {
     $ownSec = $t.Elapsed.TotalSeconds
     # (its whole output kept: the part-bars scored, the redraw check's summary)
     $ownText | Out-File "$dir\scored-own\run.txt" -Encoding utf8
-    $pick = { param($text) (($text -split "`n" | Where-Object { $_ -match $pattern } | ForEach-Object { $_.Trim() }) -join ' | ') }
     "{0,-16} audiveris ({1,5:F1}s{2}): {3}" -f $name, $audSec, $(if ($notes) { '; ' + ($notes -join ', ') } else { '' }), (& $pick $audText)
     if ($Homr) { "{0,-16} homr             : {1}" -f '', (& $pick $homrText) }
     "{0,-16} this      ({1,5:F1}s): {2}" -f '', $ownSec, (& $pick $ownText)

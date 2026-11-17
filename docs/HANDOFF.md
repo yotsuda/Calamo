@@ -2,6 +2,47 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 予備の台（S66 で取っておいた 3 台）の 1 台目: Krause Op.10-1 の正解を起こした。**今の読み手では一度も読まず**、Audiveris と homr の食い違いだけで確かめた。1,759 音で **homr 1735（98.6%）**、Audiveris 1136（64.6%）。あわせて予備の台を今の読み手から切り離す口を足した（`run-audiveris.ps1 -Fair -Reserve`、`suspects.ps1 -Reserve`、`data/fair/<piece>/RESERVE.md`）（2026-11-17 深夜、前の節の次の一手 0 (b)）
+
+**現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。公平な台 15 台の正解・`docs/fair-sets.tsv` も変えていない。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s111/check-head.log`）。
+
+**変更の種類**: 道具・採点・正解（予備の台の正解 `data/fair/krause10-1/truth/krause10-1.lys`、`run-audiveris.ps1 -Reserve`、`suspects.ps1 -Reserve`）。読み手は変えていない。
+
+**やったこと**:
+- **予備の台の切り離し**: `data/fair/<piece>/RESERVE.md` のある曲（krause10-1・kuecken47-3・wuerst52-3）は、`run-audiveris.ps1 -Fair` が飛ばし、`-Fair -Reserve` だけが読む。`-Reserve` は**今の読み手を走らせない**（`scored-own` を作らない。表 `fair-sets.tsv` にも行を書かない）。正解がまだ無い曲は頁の縮小と Audiveris の読みだけ作る（homr が同じ頁を読むため）。`suspects.ps1 -Reserve` は「Audiveris と homr の**両方**が正解と割れる小節」を挙げる（`readersAgree` = 2 つが同じ高さを読んだ所を先に）。`-Fair`（`-Reserve` なし）が予備の台を飛ばすのはコードの条件で確かめただけで、`-Fair` を通しでは走らせていない（次に `-Fair` を回したとき、表が 15 台のまま `new` 行が出ないことを見る）。予備の台の `out/audiveris/fair-*/scored-own` が無いことは確かめた。
+- **Krause の正解**: 原本（A. Gutheil、A.G. 1582、6 頁・122 小節（反復の前の 5/8 の小節と弱起を含む）、6/8、ハ長調 → 57 小節から変ホ長調 → 81 小節からハ長調、ピアノ）から 1 小節ずつ。叩き台は使っていない。`lysc check` エラーなし。描き直し（`out/fair-truth/krause10-1-truth/`）は原本と頁・段の切れ目まで同じ（6 頁、段の頭も同じ）。`ruled.py` が全頁で譜表を 10 本そろえ、`heads.py`・`col.py`・`ledger.py` と拡大で決めた。加線の上の頭は「加線が頭の中ほどを貫く＝その線の上、縁に触れるだけ＝外側の間」で決めた（55〜59・97・105〜107 小節の高い和音）。
+- **確かめ**: Audiveris と homr で採点（`out/s111/` の走り、最終は `run-audiveris.ps1 -Fair -Reserve -Reuse -Sets fair-krause10-1-gutheil -Homr C:\MyProj\omr-compare\homr-out-72fdfa8`）。両方が割れた 7 か所と homr だけが割れた 15 か所を原本の拡大で見て、**正解の誤りを 6 つ直した**（homr 1727 → 1735）: 42 小節の左手の最後（`f` でなく `fis`、同じ小節の前の ♯ が続く）、96 小節の左手の最後の和音（`<gis' d''>`、同じ）、49 小節の右手の最初の和音（`<aes' c''>`。頭は B4 の線の下）、63 小節の右手の最後の和音（`<d' f' bes'>`）、98・99 小節の左手の和音（`<g cis' e'>`。♯ は真ん中の頭、A7）、25 小節の左手の上の頭（`fis'` でなく `eis'`。26 小節の `fis'` より 12 px 低く、♯ もその高さ。gis 上の減七）。**2 つは今回も「前の臨時記号が続く」の取り違え**（前の節までと同じ自分の側の型）。
+- 残した食い違い（正解のまま）: 55 小節の最初の音（8va の線の鉤がこの音の後ろで終わるので `ees''''`。homr は `ees'''`）、homr だけの臨時記号の足し（`des''`・`ces'`・`aes` など、刷られていない）、Audiveris の 95・96 小節の音部の取り違え。
+
+**数字**（符頭 + 休符、`--poly`。今の読み手は読んでいない）:
+
+| 台 | 正解 | homr | Audiveris |
+|---|---|---|---|
+| fair-krause10-1-gutheil（予備） | 1759 | **1735（98.6%**、精度 98.4%） | 1136（64.6%、精度 76.2%） |
+
+**判断したこと**（正解の書き方）:
+1. 34 小節（反復の前）は 5/8 の短い小節（`partial 8*5`）、反復は `form { |: A :| B C D }`。Tempo I の弱起は B の頭の `partial 8`。最後の 122 小節も 5/8（冒頭の弱起と合わせて 1 小節）。採点の小節数は 124（短い小節と弱起を 1 つずつ数える）。
+2. 50〜58 小節の左手の下の声（付点 4 分）は `voice { } { }` で書いた。50→51 小節の下の声は `ees'`→`d'`（54→55 小節の `bes`→`a` と同じ半音下がるスラー。タイではない）。
+3. 121 小節の右手は刷られた休符が足りない（`c'8` と休符 4 つ）。残りは `s16 s8` で埋めた。122 小節の右手は何も刷られていないので `s`。
+4. 強弱・スラー・ペダルは書いていない。スタッカート・アクセントは最初の頁の一部だけ。
+
+**正直に書いておくこと**:
+1. 正解は今回も 1 人（自分）の目と画素の測りから。確かめたのは Audiveris と homr が割れた所だけ。homr が 98.6% で一致したので、残りの誤りは 2 つの読み手と自分が同じ誤りをする型（加線の上の高い和音など）に限られるはず。
+2. 音価は確かめていない（homr とは音価もほぼ一致した: 高さだけなら 1737、高さ + 音価で 1735）。
+3. **Wuerst は Audiveris が読めない**: 画像が幅 1500 px（線の間隔 10 px）で、Audiveris が「interline too low」で頁を捨てた（`out/audiveris/fair-wuerst52-3-bote/aud/run.log`）。homr が読めるかは未確認。Audiveris に読ませるには頁を 2〜3 倍に拡大した版を作る口が要る（`run-audiveris.ps1` の縮小の逆。`MaxPixels` の範囲で拡大）。
+4. `run-audiveris.ps1` が Krause の 1 頁で `Bitmap` の作成に失敗した（"Parameter is not valid"、GDI+）。`Remove-Item` して作り直すと通った。原因は追っていない（同時に check が走っていてメモリが足りなかった可能性）。
+5. 開発用の台・評価台・終わりの check は回していない（読み手・生成器を変えていない）。
+
+**次の一手**（ROADMAP §0「本線の順番」の言葉で）:
+0. **予備の台の続き**（オーナーの「3 台に丁寧に正解を作って」の (b)）: **Kücken Op.47-3（6 頁、歌 + ピアノ）**。homr は Kücken の頁を背景で読んでいた（`C:\MyProj\omr-compare\homr-out-72fdfa8\fair-kuecken47-3-kistner\`、`run.log` で残りを確かめ、足りなければ `run-homr-fair.ps1` をもう一度）。正解を起こしたら `run-audiveris.ps1 -Fair -Reserve -Reuse -Sets fair-kuecken47-3-kistner -Homr …` と `suspects.ps1 -Reserve` で確かめる。**今の読み手では読まない**（`-Reserve` を付け忘れない）。そのあと Wuerst（上の 3 のとおり Audiveris 用の拡大が先）。
+1. 前の節の次の一手 1（種違いの検出器 42・49 で公平な台を読み、台を 1 つずつ外しても差の符号が変わらないか）はまだ。
+2. ROADMAP §0 の本線の 4（(A) S61 の歩 4〜6 と (B) の学習の幅）。予備の台は、(A)・(B) の直しが公平な台に合わせ込んでいないかを最後に確かめる台として、今の読み手で読むのは区切りのときだけにする（読んだら「予備」でなくなるので、読む前にオーナーに聞く）。
+3. S60 の学習の採否のやり方・S65 の続き・オーナーへの問いは前の節のまま。
+
+**読めない型の記録**: 前の節のまま。
+
+**check の記録**: `out/s111/check-head.log`: OK（0 better・nothing worse）。終わりの check は回していない（読み手・生成器を変えていない）。
+
 ## 公平な台 15 台の正解を、独立した読み手 2 つ（Audiveris・homr）で検証した。**今の読み手が正解と一致し、Audiveris か homr が正解と割れる小節のうち疑いの濃い約 50 か所を原本の拡大で確かめ、正解の誤りは 0**。あわせて homr を新しい 7 台でも測った: **homr は 15 台で 13070/13999（93.4%）**、今の読み手 12513（89.4%）（2026-11-17 夜、前の節の次の一手 0 (a)・2）
 
 **現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。正解も変えていない（`docs/fair-sets.tsv` は 15 台とも同じ）。REQUESTS に `fixed` なし、種は全部 triage 済み。頭の check は OK（0 better・nothing worse、`out/s110/check-head.log`）。

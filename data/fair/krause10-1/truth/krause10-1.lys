@@ -1,0 +1,305 @@
+// The truth of the reserve set for Anton Krause, 2 Sonatinen Op.10 No.1, first movement: written from the A. Gutheil
+// print (Moscow, A.G. 1582, IMSLP #295293, data/fair/krause10-1/gutheil), bar by bar. A RESERVE set
+// (data/fair/krause10-1/RESERVE.md): never read by this reader, the truth checked against Audiveris and homr only.
+// Heads named by measuring them against their own staff lines (ruled.py, heads.py, col.py, zoomed).
+title "Sonatine"
+composer "A. Krause. Op.10. No 1."
+tempo "Allegro moderato, quasi Allegretto."
+octave absolute
+paper { breaksOnly }
+time 6/8
+
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  key c major
+  partial 8
+  rh {
+    <e' g'>8@staccato |
+    <e' g'>8@accent r8 <e' g'>8@staccato <e' g'>8@accent r8 <e' g'>8@staccato |
+    <e' g'>8@accent r8 <e' g'>8@staccato <e' g'>8@accent r8 <e' g'>8@staccato |
+    <e' g'>8@staccato c'8 b8 c'8 d'8 e'8 |
+    f'8 g'8 a'8 b'8 c''8 d''8 | break
+    e''4. e''4. |
+    e''4.@accent e''4 d''8@staccato |
+    d''4 c''8@staccato acciaccatura { d''8 } c''4 b'8 |
+    c''4. c''4 b'8 |
+    a'4. a'4. | break
+    f''4. aes'4. |
+    g'4. g'8 e'8 f'8 |
+    g'8 a'8 b'8 c''8 d''8 dis''8 |
+    e''4. e''4. |
+    e''4. e''4 d''8 | break
+    d''4 c''8@staccato acciaccatura { d''8 } c''4 b'8 |
+    c''4. c''8 b'8 a'8 |
+    g'4 c''8 e''4 a''8 |
+    g''4. b'4. |
+    c''8@staccato r8 e''8@accent gis'8@accent r16 a'16 b'8@staccato | pageBreak
+    c''8 r16 b'16 a'8 gis'8 r16 a'16 b'8 |
+    c''8 r16 b'16 a'8 gis'8 r16 a'16 b'8 |
+    c''8 r16 d''16 e''8 dis''8 r16 e''16 fis''8 |
+    e''8 r8 b''8 dis''8 r16 e''16 fis''8 | break
+    g''8 r16 fis''16 e''8 dis''8 r16 e''16 fis''8 |
+    g''8 r16 fis''16 e''8 d''8 r16 cis''16 b'8 |
+    a'8 r16 d''16 fis''8 a''8 r16 b'16 cis''8 |
+    d''8 r8 r8 <e' g' a'>8 r8 <e' g' a'>8 | break
+    <d' fis' a'>8 r8 <d' fis' a'>8 <e' g' a'>8 r8 <e' g' a'>8 |
+    <d' fis' a'>8 r8 r8 <a e' g'>8 r8 <a e' g'>8 |
+    <a d' fis'>8 r8 <a d' fis'>8 <a e' g'>8 r8 <a e' g'>8 |
+    <a d' fis'>8 r16 d'16 a8 d'8 r8 r8 | break
+    r8 r16 <d' f'>16 a8 <d' f'>8 r8 r8 |
+    r8 r16 <f' b'>16 d'8 <f' b'>8 r16 <b' d''>16 f'8 |
+    partial 8*5 <b' d''>8 r16 g''16 g'8 g''8 r8 |
+  }
+  lh {
+    r8 |
+    R2. |
+    c4. g,4. |
+    c,8 r8 r8 r4 r8 |
+    R2. | break
+    c8 e8 g8 c8 e8 g8 |
+    c8 f8 g8 c8 f8 g8 |
+    c8 e8 g8 c8 e8 g8 |
+    c8 e8 g8 c8 e8 g8 |
+    c8 f8 a8 c8 f8 a8 | break
+    c8 f8 aes8 c8 f8 aes8 |
+    c8 e8 g8 c8 e8 g8 |
+    c8 e8 g8 c8 f8 g8 |
+    c8 e8 g8 c'8 e'8 g'8 |
+    b8 e'8 gis'8 b8 e'8 gis'8 | break
+    clef treble a8 e'8 a'8 a8 e'8 a'8 |
+    a8 c'8 e'8 clef bass fis8 c'8 dis'8 |
+    g8 c'8 e'8 g8 c'8 e'8 |
+    g8 d'8 f'8 g8 d'8 f'8 |
+    <c' e'>8@staccato r8 r8 <e d'>8@staccato r8 <e d'>8@staccato | pageBreak
+    <a c'>8 r8 <a c'>8 <e d'>8 r8 <e d'>8 |
+    <a c'>8 r8 r8 <e d'>8 r8 <e d'>8 |
+    <a c'>8 r8 r8 clef treble <b a'>8 r8 <b a'>8 |
+    <e' g'>8 r8 r8 <b a'>8 r8 <b a'>8 | break
+    <e' g'>8 r8 <e' g'>8 <b a'>8 r8 <b a'>8 |
+    clef bass <e' g'>8 r8 r8 <gis d' eis'>4. |
+    <a d' fis'>8 r8 <a d' fis'>8 <a cis' g'>8 r8 <a e' g'>8 |
+    <d' fis'>8 r8 a8 a,8 r16 b,16 cis8 | break
+    d8 r16 cis16 b,8 a,8 r16 b,16 cis8 |
+    d8 r8 a,8 a,,8 r16 b,,16 cis,8 |
+    d,8 r16 cis,16 b,,8 a,,8 r16 b,,16 cis,8 |
+    d,8 r8 r8 r8 r16 d16 a,8 | break
+    d8 r8 r8 r8 r16 d16 g,8 |
+    d8 r8 r8 r4 <g, g>8 |
+    partial 8*5 <g, g>8 r8 r8 r4 |
+  }
+}
+
+section B {
+  partial 8
+  rh {
+    <e' g'>8 |
+    <e' g'>8 r8 <e' g'>8 <e' g'>8 r8 r8 |
+    c''4. g''4. |
+    c'''8 r8 r8 r4 r8 |
+    R2. | pageBreak
+    r4 <c' e'>8 <c' e'>8 r8 r8 |
+    a'4. e''4. |
+    a''8 r8 r8 r4 r8 |
+    R2. |
+    r4 <c' e'>8 <c' e'>8 r8 r8 | break
+    g'4. c''4. |
+    g''4. gis''4. |
+    a''4. g''4. |
+    c''8 r8 r8 <bes' c''>8 r8 <bes' c''>8 | break
+    <bes' c''>8 r8 <bes' c''>8 <bes' c''>8 r8 <bes' c''>8 |
+    <aes' c''>8 r16 f''16 g''8 aes''8 r16 bes''16 c'''8 |
+    d'''8 r16 ees'''16 f'''8 g'''8 r16 aes'''16 f'''8 |
+    bes'''8 r8 r8 <aes' bes'>8 r8 <aes' bes'>8 | break
+    <aes' bes'>8 r8 <aes' bes'>8 <aes' bes'>8 r8 <aes' bes'>8 |
+    <ges' bes'>8 r16 ees''16 f''8 ges''8 r16 aes''16 bes''8 |
+    c'''8@8va r16 d'''16 ees'''8 f'''8 r16 ges'''16 ees'''8 |
+    ees''''8@!8va r16 ges''16 ees''8 ees'''8 r16 ges''16 ees''8 | break
+    ees'''8 r16 ges''16 ees''8 ees'''8 r16 ges''16 ees''8 |
+  }
+  lh {
+    r8 |
+    r4 r8 r4 <e' g'>8 |
+    <e' g'>8 r8 <e' g'>8 <e' g'>8 r8 <e' g'>8 |
+    <e' g'>8 c8 b,8 c8 d8 e8 |
+    f8 g8 a8 b8 c'8 d'8 | pageBreak
+    e'8 r8 r8 r4 <c' e'>8 |
+    <c' e'>8 r8 <c' e'>8 <c' e'>8 r8 <c' e'>8 |
+    <c' e'>8 a,8 gis,8 a,8 b,8 c8 |
+    d8 e8 fis8 gis8 a8 fis8 |
+    g8 r8 r8 r4 <g c' e'>8 | break
+    <g c' e'>8 r8 <g c' e'>8 <g c' e'>8 r8 <g c' e'>8 |
+    <g c' d'>8 r8 <g c' d'>8 <g c' d'>8 r8 <g c' d'>8 |
+    <g b d'>8 r8 <g b d'>8 <g b d'>8 r8 <g b d'>8 |
+    <c' e'>8 r16 c16 d8 e8 r16 f16 g8 | break
+    aes8 r16 bes16 c'8 d'8 r16 e'16 c'8 |
+    f'8 r8 clef treble <f' aes'>8 <f' aes'>8 r8 <f' aes'>8 |
+    voice { <f' aes'>8 r8 <f' aes'>8 <f' aes'>8 r8 <f' aes'>8 } { r4 r8 ees'4. } |
+    voice { <f' aes'>8 r8 clef bass bes,16 c16 d8 r16 ees16 f8 } { d'8 s4 s4. } | break
+    ges8 r16 aes16 bes8 c'8 r16 d'16 bes8 |
+    ees'8 r8 clef treble <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 |
+    voice { <ees' ges'>8 r8 <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 } { r4 r8 bes4. } |
+    voice { <ees' ges'>8 r8 <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 } { a4. bes4. } | break
+    voice { <ees' ges'>8 r8 <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 } { ces'4. bes4. } |
+  }
+}
+
+section C {
+  key ees major
+  rh {
+    ees'''8 r16 ees'''16 ges''8 ges'''8 r16 ees'''16 ges''8 |
+    ges'''8 r16 ees'''16 ges''8 ges'''8 r16 ees'''16 ges''8 |
+    <f'' d'''>8 r8 r8 <c''' ees'''>8 r8 <c''' ees'''>8 | pageBreak
+    <bes'' d'''>8 r8 <bes'' d'''>8 <c''' ees'''>8 r8 <c''' ees'''>8 |
+    <bes'' d'''>8 r16 ges''16 f''8 a'8 r16 ges''16 f''8 |
+    bes'8 r16 ges''16 f''8 a'8 r16 ges''16 f''8 |
+    bes'8 r8 r8 <d' f' bes'>8 r8 r8 | break
+    <d' f' bes'>8 r8 r8 <d' f' bes'>8 r8 r8 |
+    <d' f' bes'>8 r16 c''16 bes'8 bes'8 c''8 bes'8 |
+    bes'8 c''8 bes'8 bes'8 c''8 bes'8 |
+    tempo "Tempo I." <g' bes'>4. <g' bes'>4. | break
+    acciaccatura { bes'8 } g''4. g''4 f''8 |
+    f''4 ees''8 acciaccatura { f''8 } ees''4 d''8 |
+    ees''4. ees''4 d''8 |
+    c''4. c''4. |
+    aes''4. ces''4. | break
+    bes'4. bes'8 g'8 aes'8 |
+    bes'8 c''8 d''8 ees''8 f''8 fis''8 |
+    g''4. g''4. |
+    g''4. g''4 f''8 | break
+    f''4 ees''8 acciaccatura { f''8 } ees''4 d''8 |
+    ees''4. ees''4 d''8 |
+    c''4. c''4. |
+    c''4 b'8 c''4 d''8 | pageBreak
+  }
+  lh {
+    clef treble voice { <ees' ges'>8 r8 <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 } { a4. bes4. } |
+    voice { <ees' ges'>8 r8 <ees' ges'>8 <ees' ges'>8 r8 <ees' ges'>8 } { ces'4. a4. } |
+    <bes d' f'>8 r16 ges'16 f'8 a8 r16 ges'16 f'8 | pageBreak
+    bes8 r16 ges'16 f'8 a8 r16 ges'16 f'8 |
+    bes8 r8 r8 <c' ees'>8 r8 <c' ees'>8 |
+    <bes d'>8 r8 <bes d'>8 <c' ees'>8 r8 <ees' ges'>8 |
+    clef bass <bes d'>8 r16 ces'16 bes8 bes,8 r16 ces'16 bes8 | break
+    bes,8 r16 ces'16 bes8 bes,8 r16 ces'16 bes8 |
+    bes,8 r8 r8 <f' aes'>4. |
+    <ees' g'>4. <bes f'>4. |
+    ees8 g8 bes8 ees8 g8 bes8 | break
+    ees8 g8 bes8 ees8 g8 bes8 |
+    ees8 g8 bes8 ees8 g8 bes8 |
+    ees8 g8 bes8 ees8 g8 bes8 |
+    ees8 aes8 c'8 ees8 aes8 c'8 |
+    ees8 aes8 ces'8 ees8 aes8 ces'8 | break
+    ees8 g8 bes8 ees8 g8 bes8 |
+    ees8 g8 bes8 ees8 aes8 bes8 |
+    ees8 g8 bes8 clef treble ees'8 g'8 bes'8 |
+    d'8 g'8 b'8 d'8 g'8 b'8 | break
+    c'8 g'8 c''8 c'8 g'8 c''8 |
+    c'8 ees'8 g'8 aes8 d'8 fis'8 |
+    clef bass g8 e'8 g'8 g8 c'8 e'8 |
+    g8 d'8 f'8 g8 b8 f'8 | pageBreak
+  }
+}
+
+section D {
+  key c major
+  tempo "Poco più mosso."
+  rh {
+    c''8 r8 g''8 b'8 r16 c''16 d''8 |
+    e''8 r16 d''16 c''8 b'8 r16 c''16 d''8 |
+    e''8 r16 d''16 c''8 b'8 r16 c''16 d''8 |
+    e''8 r16 f''16 g''8 a''8 r16 b''16 g''8 | break
+    c'''8 r8 g''8 b'8 r16 c''16 d''8 |
+    e''8 r16 d''16 c''8 b'8 r16 a'16 b'8 |
+    c''8 r16 b'16 a'8 g'8 r16 f'16 e'8 |
+    f'8 r16 a'16 d''8 e''8 r16 g''16 f''8 | break
+    e''8 r8 r8 <d' f' g'>8 r8 <d' f' g'>8 |
+    <c' e' g'>8 r8 <c' e' g'>8 <d' f' g'>8 r8 <d' f' g'>8 |
+    <c' e' g'>8 r8 r8 <g d' f'>8 r8 <g d' f'>8 |
+    <g c' e'>8 r8 <g c' e'>8 <g d' f'>8 r8 <g d' f'>8 | break
+    <g c' e'>8 r8 g'8 g8 r16 a16 b8 |
+    c'8 r16 d'16 e'8 f'8 r16 g'16 a'8 |
+    b'8 c''8 d''8 e''8 f''8 g''8 |
+    a''8 r8 <f'' b''>8 <e'' c'''>8 r8 <f'' b''>8 | break
+    <e'' c'''>8 r8 <c''' d'''>8 <c''' e'''>8 r8 <c''' f'''>8 |
+    voice { <c''' g'''>8 r8 r8 a''4.~ } { s4. a'4. } |
+    voice { a''8 g''8 f''8 e''8 f''8 d''8 } { b'8 r8 r8 r4 r8 } |
+    c''8 r16 e''16 g'8 g'8 r8 <e' c''>8 |
+    <d' b'>4 <f' d''>8 <d' b'>4 <f' d''>8 | pageBreak
+    <e' c''>8 r16 g''16 g'8 g'8 r8 <c'' e''>8 |
+    <d'' f''>4 <c'' e''>8 <d'' f''>4 <b' d''>8 |
+    c''8 r16 e'''16 g''8 g''8 r8 <e'' c'''>8 |
+    <d'' b''>4 <f'' d'''>8 <d'' b''>4 <f'' d'''>8 | break
+    <e'' c'''>8 r16 g'''16 g''8 g''8 r8 <c''' e'''>8 |
+    <d''' f'''>4 <c''' e'''>8 <d''' f'''>4 <b'' d'''>8 |
+    <c''' e'''>8 r16 g''16 g'8 g'8 r8 <c'' e''>8 |
+    <d'' f''>4 <c'' e''>8 <d'' f''>4 <b' d''>8 | break
+    <c'' e''>8 r16 g'16 g8 g8 r8 g8 |
+    aes4 g8 aes4 g8 |
+    aes8 g8 a8 g8 ais8 g8 |
+    b8 g8 c'8 g8 cis'8 g8 | break
+    d'8 g8 b8 d'8 dis'8 e'8 |
+    f'8 fis'8 g'8 a'8 b'8 g'8 |
+    c''8 r8 <g' b' d''>8 <g' c'' e''>8 r8 <g' b' d''>8 |
+    <g' c'' e''>8 r8 <b' d'' g''>8 <c'' e'' g''>8 r8 <b' d'' g''>8 | break
+    <c'' e'' g''>8 r8 <d'' g'' b''>8 <e'' g'' c'''>8 r8 <d'' g'' b''>8 |
+    <e'' g'' c'''>8 r8 <d'' g'' b''>8 <e'' g'' c'''>8 r8 <d'' g'' b''>8 |
+    <e'' g'' c'''>8 r8 r8 r8 r16 a16 g8 |
+    c'8 r8 r8 r8 r16 s16 s8 |
+    partial 8*5 s4 s4 s8 |.
+  }
+  lh {
+    <c' e'>8 r8 r8 <g f'>8 r8 <g f'>8 |
+    <c' e'>8 r8 <c' e'>8 <g f'>8 r8 <g f'>8 |
+    <c' e'>8 r8 r8 <g f'>8 r8 <g f'>8 |
+    <c' e'>8 r8 <c' e'>8 <g f'>8 r8 <g f'>8 | break
+    <c' e'>8 r8 r8 <g f'>8 r8 <g f'>8 |
+    <c' e'>8 r8 <c' e'>8 <e d'>8 r8 <e d'>8 |
+    <a c'>8 r8 r8 <cis bes>8 r8 <cis bes>8 |
+    <d a>8 r8 <f a>8 <g b>8 r8 <g d'>8 | break
+    <c' e'>8 r8 g8 g,8 r16 a,16 b,8 |
+    c8 r16 b,16 a,8 g,8 r16 a,16 b,8 |
+    c8 r8 g,8 g,,8 r16 a,,16 b,,8 |
+    c,8 r16 b,,16 a,,8 g,,8 r16 a,,16 b,,8 | break
+    c,8 r8 g8 g,8 r16 a,16 b,8 |
+    c8 r16 d16 e8 f8 r16 g16 a8 |
+    d,8 e,8 f,8 g,8 a,8 b,8 |
+    clef treble a'8 r8 <gis' d''>8 <a' c''>8 r8 <gis' d''>8 | break
+    <a' c''>8 r8 <fis' a'>8 g'8 r8 <f' a'>8 |
+    <e' g'>8 r8 r8 clef bass <g cis' e'>4.~ |
+    <g cis' e'>8 r8 r8 r4 r8 |
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 aes8 b8 c8 aes8 b8 | pageBreak
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 aes8 b8 c8 aes8 b8 | break
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 g8 c'8 c8 g8 c'8 |
+    c8 g8 c'8 c8 g8 c'8 | break
+    c8 g8 r8 r8 g,,8 g,8 |
+    aes,4 g,8 aes,4 g,8 |
+    aes,8 g,8 a,8 g,8 ais,8 g,8 |
+    b,8 g,8 c8 g,8 cis8 g,8 | break
+    d8 g,8 b,8 d8 dis8 e8 |
+    f8 fis8 g8 a8 b8 g8 |
+    c'8 r8 g8 c8 r8 g8 |
+    c8 r8 g8 c8 r8 g8 | break
+    c8 r8 g,8 c8 r8 g,8 |
+    c8 r8 g,8 c8 r8 g,8 |
+    c8 r8 r8 r8 r16 a,16 g,8 |
+    c8 r8 r8 r8 r16 voice { a,16 g,8 } { a,,16 g,,8 } |
+    partial 8*5 voice { c8 r8 r8 r4 } { c,8 r8 r8 r4 } |.
+  }
+}
+
+form { |: A :| B C D }
+
+score {
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
+
