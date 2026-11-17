@@ -1,0 +1,272 @@
+// The truth of the fair set (S66) for Eugen Hildach, 3 Lieder Op.9 No.1, Auf dem Dorf in den Spinnstuben (high
+// voice): written from the Heinrichshofen print (Magdeburg 1891, IMSLP #706241, data/fair/hildach9-1/heinrichshofen),
+// bar by bar. Never to debug the reader on. Heads named with tools/fair-truth/heads.py and settled by zoom.
+// A head shared by two voices (one stem up, one stem down) is written in both voices, as in the earlier truths.
+title "Auf dem Dorf in den Spinnstuben."
+subtitle "At the village loom spinning."
+composer "Eugen Hildach, Op.9 No 1."
+tempo "Ruhig, aber nicht zu langsam."
+octave absolute
+paper { breaksOnly }
+time 3/4
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  key g minor
+  voice_ {
+    R2. |
+    R2. |
+    R2. |
+    R2. | break
+    R2. |
+    R2. |
+    R2. |
+    r4 r4 d''8@mf d''8 | break
+    d''4 d''4 d''4 |
+    g''4 d''8( d''8) d''4 |
+    ees''4 c''8 d''8 ees''4 |
+    d''4 g'4 r8 d''8 | break
+    c''4. ees''8 d''8 c''8 |
+    bes'4 g'8( a'8) bes'4 |
+    a'4 a'4. a'8 | pageBreak
+    a'4 d'4 r8 d''8 |
+    d''4 d''4 d''4 |
+    g''4 d''4 d''8 d''8 |
+    ees''4 c''8 d''8 ees''4 | break
+    d''4 r4 d''4 |
+    g''8 f''8 ees''8 d''8 c''8 bes'8 |
+    a'8 bes'8 c''4 ees''4 |
+    d''4 fis'4. g'8 || break
+  }
+  rh {
+    <bes' d''>8@mf <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 |
+    <c'' ees''>8 <bes' d''>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 fis'8 |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 | break
+    voice { c''8 b'8 c''8 ees''8 d''8 c''8 } { r4 g'2~ } |
+    voice { bes'8 a'8 g'8 a'8 bes'8 g'8 } { g'4 g'2 } |
+    a'8 g'8 ees'8 a8 <e' g' a'>8 a8 |
+    voice { <d' fis' a'>4~ <d' fis' a'>4. r8 } { d'8 a8~ a4. s8 } | break
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 |
+    <c'' ees''>8 <bes' d''>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 fis'8 |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 | break
+    c''8 b'8 <g' c''>8 ees''8 d''8 c''8 |
+    bes'8 a'8 g'8 a'8 bes'8 g'8 |
+    voice { a'2 a'4 } { r8 <ees' g'>4 <ees' g'>4 <e' g'>8 } | pageBreak
+    voice { a'4. <ees' c''>8 <d' bes'>8 <c' a'>8 } { r8 <d' fis'>4~ fis'4. } |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 |
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 |
+    <c'' ees''>8 <bes' d''>8 <a' c''>8 <bes' d''>8 <c'' ees''>8 fis'8 | break
+    <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 |
+    s2 g'8( c''8~ |
+    <g' c'' g''>2) r4 |
+    voice { s4 fis'8 d''8~ <fis' d''>4 } { r8 c'8 c'4~ c'4 } || break
+  }
+  lh {
+    voice { r4 d2 } { g,2. } |
+    voice { r4 d2 } { g,2. } |
+    voice { r4 ees2 } { g,2. } |
+    voice { r4 d2 } { g,2. } | break
+    c4 <g c' ees'>2 |
+    d4 <g bes d'>2 |
+    c2 cis4 |
+    d4 d,4. r8 | break
+    voice { r4 d2 } { g,2. } |
+    voice { r4 d2 } { g,2. } |
+    voice { r4 ees2 } { g,2. } |
+    voice { r4 d2 } { g,2. } | break
+    c4 <g c' ees'>2 |
+    d4 <g bes d'>2 |
+    c2 cis4 | pageBreak
+    d4 d,2 |
+    voice { r4 d2 } { g,2. } |
+    voice { r4 d2 } { g,2. } |
+    voice { r4 ees2 } { g,2. } | break
+    voice { r4 d2 } { g,2. } |
+    c8( g8 c'8 ees'8) s4 |
+    <c g c' ees'>2 r4 |
+    r4 grace { d,8 } d2 || break
+  }
+}
+
+section B {
+  key g major
+  tempo "nicht langsamer"
+  voice_ {
+    g'2 r4 |
+    R2. |
+    R2. |
+    R2. | break
+    R2. |
+    R2. |
+    R2. |
+    r4 r4@fermata b'8 b'8 | pageBreak
+    b'2 b'8 b'8 |
+    e''4 b'4 r4 |
+    c''4. c''8 a'8 c''8 |
+    b'4 b'4 r8 b'8 |
+    b'4 a'4 r8 a'8 | break
+    g'4 g'4 g'8 g'8 |
+    fis'4. a'8 g'8 fis'8 |
+    fis'4 e'4 b'8 b'8 |
+    b'4 b'4 b'4 |
+    e''4 b'4 r4 | break
+    c''2 tuplet 3/2 { a'8( b'8 c''8) } |
+    b'2 b'4 |
+    g''4 fis''4. e''8 |
+    e''4 ais'4 r8 ais'8 | break
+    b'4. c''8 b'4 |
+    b'2 r4 |
+    R2. |
+    R2. |
+    r4 r4@fermata d''8 d''8 || pageBreak
+  }
+  rh {
+    voice { d''8 d''8~ d''2 } { <b g'>2. } |
+    voice { d''2. } { <c' fis' a'>4 <d' fis' b'>4 <e' fis' c''>4 } |
+    voice { r8 d''8~@pp d''2 } { <d' g' b'>2 g'4 } |
+    voice { d''2. } { s2 s8 a'8 } { <c' e'>4 <d' fis'>4. c'8 } | break
+    voice { r8 d''8~@pp d''2 } { <b d'>2. } |
+    voice { d''2 d''8@pp d''8~ } { ees'4 f'2 } { <c' ees'>2. } { s2 d'4 } |
+    voice { d''2 d''4@pp } { <b d' g'>2. } |
+    <b d' g' d''>2@fermata r4 | pageBreak
+    s2. |
+    s2. |
+    s2. |
+    s2. |
+    s2. | break
+    s2. |
+    s2. |
+    s2. |
+    s2. |
+    s2. | break
+    s2. |
+    s2. |
+    s4 e'8( ais'8 g'8 e'8 |
+    ais'2.) | break
+    s2. |
+    s2. |
+    s2. |
+    s2. |
+    s2 r4 || pageBreak
+  }
+  lh {
+    voice { r8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } | break
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d2 r4 } { g,2@fermata s4 } | pageBreak
+    voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } |
+    voice { r8 g8~ <g b>8 g'8 fis'8 cis'8 } { s4 g4 a4 } { <e, b,>2. } |
+    voice { r8 a8 dis'8 a'8 fis'8 dis'8 } { s4 a2 } { <e, c>2. } |
+    voice { r8 g8~ <g b>8 g'8 fis'8 e'8 } { s4 g4 s4 } { <e, b,>2. } |
+    voice { r8 a8 c'8 fis'8 e'8 c'8 } { <d, c>2. } | break
+    voice { r8 e8 g8 c'8 b8 g8 } { <b,, b,>2. } |
+    voice { r8 fis8 a8 c'8 b8 a8 } { <b,, b,>2. } |
+    voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } |
+    voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } |
+    voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } | break
+    voice { r8 a8 dis'8 a'8 fis'8 dis'8 } { s8 a2~ a8 } { <e, c>2. } |
+    voice { r8 g8 b8 g'8 fis'8 e'8 } { s4 <g b>2 } { <e, b,>2. } |
+    voice { r8 ais8 s2 } { <c, c>2. } |
+    voice { r8 ais8 e'8 g'8 fis'8 e'8 } { <c, c>2. } | break
+    voice { r8 a8 dis'8 a'8 g'8 fis'8 } { s4 <a dis'>2 } { <b,, b,>2. } |
+    voice { r8 gis8 d'8 f'8 e'8 d'8 } { s4 gis2 } { e,2. } |
+    voice { r8 e8 b8 d'8 <a c'>4~ } { gis,2 a,8 g,8 } |
+    voice { <a c'>8 c'8~ <a c'>4. c'8 } { s2 g4 } { fis,4 ees,2 } |
+    <d, fis c'>2@fermata r4 || pageBreak
+  }
+}
+
+section C {
+  key g minor
+  tempo "langsam"
+  voice_ {
+    d''4@p d''4 d''4 |
+    g''4 d''8( d''8) d''4 |
+    ees''4 c''8 d''8 ees''4 |
+    d''4 g'4 r8 d''8 | break
+    c''4. ees''8 d''8 c''8 |
+    bes'4 g'8( a'8) bes'4 |
+    a'4 a'4. a'8 |
+    a'4 d'4 d''8@p d''8 || break
+  }
+  rh {
+    s2. |
+    s2. |
+    s2. |
+    s2. | break
+    s2. |
+    s2. |
+    r8 a8 ees'8 g'8 <a e'>8 g'8 |
+    <a d' fis'>4 r8 <e' fis' c''>8 <d' fis' b'>8 <c' fis' a'>8 || break
+  }
+  lh {
+    voice { <bes d'>8@p <a c'>8 <g bes>8 <a c'>8 <bes d'>8 <c' ees'>8 } { r4 d2 } { g,2. } |
+    voice { <bes d'>8 <a c'>8 <g bes>8 <a c'>8 <bes d'>8 g8 } { r4 d2 } { g,2. } |
+    voice { <c' ees'>8 <bes d'>8 <a c'>8 <bes d'>8 <c' ees'>8 fis8 } { r4 ees2 } { g,2. } |
+    voice { <bes d'>8 <a c'>8 <g bes>8 <a c'>8 <bes d'>8 g8 } { r4 d2 } { g,2. } | break
+    voice { c'8 b8 c'8 ees'8 d'8 c'8 } { c,4 <c ees g>2 } |
+    voice { bes8 a8 g8 a8 bes8 g8 } { d,4 <bes, d>2 } |
+    c2 cis4 |
+    d4 d,2 || break
+  }
+}
+
+section D {
+  key g major
+  tempo "nach und nach langsamer"
+  voice_ {
+    d''4 d''4 d''4 |
+    g''4 d''4 r4 |
+    d''2 tuplet 3/2 { d''8 d''8 d''8 } |
+    d''2 d''4 |
+    d''4 d''4 d''4 | break
+    d''8 e''8 d''4 r8 d'8@p |
+    d'4 d'4. d'8 |
+    g'2.~ |
+    g'4 r4 r4 |
+    R2.@fermata |]
+  }
+  rh {
+    <b d' g'>2@p tuplet 3/2 { <c' fis' a'>8( <d' fis' b'>8 <e' fis' c''>8) } |
+    <d' g' b'>2 g'4 |
+    voice { <c' e'>4 <d' fis'>4. a'8 } { c'2 c'4 } |
+    <b d'>2. |
+    <c' fis' a'>4 <d' fis' b'>4 <e' fis' c''>4 | break
+    <d' g' b'>2 g'4 |
+    voice { <c' e'>4 <d' fis'>4. g'8~ } { s2 c'4 } |
+    voice { g'2 e'4 } { b2 c'8 a8 } |
+    voice { g'2~ g'8 g'8 } { b4 c'4 a4 } |
+    <b g' d''>2.@arpeggio@fermata |]
+  }
+  lh {
+    voice { r8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } | break
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d4 d4 d8~ } { g,2. } |
+    voice { d8 d8 ees4 c4 } { g,2. } |
+    <g, d>2.@arpeggio@fermata |]
+  }
+}
+
+form { ~A ~B ~C ~D }
+
+score {
+  staff voice_ "Voice"
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
