@@ -1,0 +1,195 @@
+// The truth of the reserve set for Friedrich Wilhelm Kücken, 4 Lieder Op.47 No.3, Die stille Wasserrose (low voice):
+// written from the Fr. Kistner print (Leipzig 1849, plate 1711, IMSLP #574387, data/fair/kuecken47-3/kistner), bar by
+// bar. A RESERVE set (data/fair/kuecken47-3/RESERVE.md): never read by this reader, the truth checked against Audiveris
+// and homr only. Heads named against their own staff lines and ledger lines (zoomed); this print draws the first ledger
+// line above a staff high, and heads on ledger lines sit high on them. The voice's staff is not printed in the first
+// two systems (removeEmpty all; it also hides the voice's staff on page 3's last system, where the print keeps it with
+// rests -- removeEmpty cannot choose systems). Dynamics, pedalling, slurs and most articulations are not written.
+// IN PROGRESS (2026-11-17): pages 1-4 (bars 1-49) written; pages 5-6 (bars 50 to the end) not yet. Not checked against
+// Audiveris or homr yet -- do not score it until it is finished.
+title "Die stille Wasserrose"
+composer "Fr. Kücken Op.47 No 3."
+tempo "Andante non troppo."
+octave absolute
+paper { breaksOnly }
+time 6/8
+key d major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  voice_ {
+    R2. | R2. | R2. | R2. | R2. | break
+    R2. | R2. | R2. | R2. | R2. | R2. | break
+    r4 r8 r4 fis'8 |
+    fis'4 fis'8 b'4 cis''8 |
+    d''4. b'4 r8 | break
+    b'8 b'8 b'8 a'4( g'8) |
+    fis'4.~ fis'8 r8 fis'8 |
+    fis'4 fis'8 b'8 b'8 cis''8 | pageBreak
+    d''4.~ d''8 cis''8 b'8 |
+    a'4 a'8 a'4 a'8 |
+    a'4.~ a'8 r8 d''8 | break
+    d''4 cis''8 fis'4 cis''8 |
+    cis''4. b'4 r8 |
+    e''8 b'8 b'8 acciaccatura { d''8 } b'8 ais'8 b'8 | break
+    cis''4.~ cis''4 fis'8 |
+  }
+  rh {
+    clef bass fis4.~ fis8( acciaccatura { a8 } g8 fis8) |
+    b4.~ b8( ais8 b8) |
+    e'4.~ e'8( d'8 cis'8) |
+    d'4.~ d'8( ais8 b8) |
+    fis4.~ fis8( g8 gis8) | break
+    a4.~ a8( gis8 a8) |
+    g'4( fis'8) fis'8. e'16 d'16 a16 |
+    fis'4.~ fis'8( cis'8 d'8) |
+    fis'4.~ fis'8( e'8 cis'8) |
+    d'4.~ d'8( ais8 b8) |
+    e4. eis4. | break
+    clef bass fis4. r4 clef treble r8 |
+    fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 |
+    fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 | break
+    g''32 e''32 b'32 g'32 g''32 e''32 b'32 g'32 g''32 e''32 b'32 g'32 g''32 e''32 b'32 g'32 g''32 e''32 b'32 g'32 g''32 cis''32 b'32 g'32 |
+    fis''32 cis''32 ais'32 fis'32 fis''32 cis''32 ais'32 fis'32 fis''32 cis''32 ais'32 fis'32 fis''32 cis''32 ais'32 fis'32 fis''32 cis''32 ais'32 fis'32 fis''32 cis''32 ais'32 fis'32 |
+    fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 fis''32 d''32 b'32 fis'32 | pageBreak
+    b''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 |
+    a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 |
+    a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 a''32 fis''32 d''32 a'32 | break
+    ais''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 |
+    b''32 fis''32 d''32 b'32 b''32 fis''32 d''32 b'32 b''32 fis''32 d''32 b'32 b''32 fis''32 d''32 b'32 b''32 fis''32 d''32 b'32 b''32 fis''32 d''32 b'32 |
+    b''32 g''32 e''32 b'32 b''32 g''32 e''32 b'32 b''32 g''32 e''32 b'32 b''32 g''32 e''32 b'32 b''32 g''32 e''32 b'32 b''32 g''32 e''32 b'32 | break
+    cis'''32 ais''32 fis''32 cis''32 cis'''32 ais''32 fis''32 cis''32 cis'''32 ais''32 fis''32 cis''32 cis'''32 ais''32 fis''32 cis''32 cis'''32 ais''32 fis''32 cis''32 cis'''32 ais''32 fis''32 cis''32 |
+  }
+  lh {
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 |
+    <b,, b,>8 <g b e'>8 <fis b d'>8 <e g cis'>8 r8 r8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 | break
+    <a,, a,>8 <a d' fis'>8 <g a cis' e'>8 <fis a d'>8 r8 r8 |
+    <a,, a,>8 <a cis' g'>8 <g ais cis'>8 <a cis' e'>8 r8 r8 |
+    <d, d>8 <a d' fis'>8 <g a cis' e'>8 <fis a d'>8 r8 r8 |
+    <fis,, fis,>8 <fis ais e'>8 <fis b d'>8 <e g cis'>8 r8 r8 |
+    <fis,, fis,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 |
+    <g,, g,>8 <e g b>8 <b, e g>8 <g,, g,>8 <eis gis b d'>8 <d b>8 | break
+    <fis,, fis,>8 <fis ais>8 <ais cis'>8 <cis' fis'>8 <ais cis'>8 <fis ais>8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 | break
+    <b,, b,>8 <g b e'>8 <fis b d'>8 <e b cis'>8 r8 e,8 |
+    fis,8 <cis fis ais>8 <fis ais cis'>8 grace { fis16 cis'16 } fis'8 r8 r8 |
+    <b,, b,>8 <fis b d'>8 <e g cis'>8 <d fis b>8 r8 r8 | pageBreak
+    <gis,, gis,>8 <d eis gis b>8 <eis gis b d'>8 <gis b d' eis'>8 r8 r8 |
+    <a,, a,>8 <d' fis'>8 a8 <a,, a,>8 <cis' e' g'>8 a8 |
+    <d, d>8 <a d' fis'>8 <g a cis' e'>8 <fis a d'>8 r8 r8 | break
+    <fis,, fis,>8 <e fis>8 <fis ais>8 <fis ais cis'>8 r8 r8 |
+    <b,, b,>8 <d fis>8 <fis b>8 <fis b d'>8 r8 r8 |
+    <g,, g,>8 <e g>8 <g b>8 <g b e'>8 r8 r8 | break
+    <fis,, fis,>8 <fis ais>8 <ais cis'>8 <ais cis' fis'>8 r8 r8 |
+  }
+}
+
+section B {
+  key b major
+  voice_ {
+    fis'4 fis'8 b'4 dis''8 | break
+    fis''4. gis''8 fis''8 dis''8 |
+    b'4 b'8 b'4 cis''8 | pageBreak
+    dis''4.~ dis''8 cis''8 fis'8 |
+    fis'4 fis'8 b'4 dis''8 | break
+    fis''8 gis''8 fis''8 e''8 dis''8 cis''8 |
+    cis''4 b'8 b'4. | break
+    b'8 acciaccatura { cis''8 } ais'8 b'8 dis''4 cis''8 |
+    b'4 r8 r4 r8 | break
+    R2. |
+  }
+  rh {
+    dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 | break
+    dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 dis'''32 b''32 fis''32 dis''32 |
+    gis'''32 dis'''32 b''32 gis''32 gis'''32 dis'''32 b''32 gis''32 gis'''32 dis'''32 b''32 gis''32 gis'''32 e'''32 b''32 gis''32 gis'''32 e'''32 b''32 gis''32 gis'''32 e'''32 cis'''32 ais''32 | pageBreak
+    fisis'''32 dis'''32 ais''32 fisis''32 fisis'''32 dis'''32 ais''32 fisis''32 fisis'''32 dis'''32 ais''32 fisis''32 fis'''32 e'''32 ais''32 fis''32 fis'''32 e'''32 ais''32 fis''32 fis'''32 e'''32 ais''32 fis''32 |
+    fis'''32 dis'''32 b''32 fis''32 fis'''32 dis'''32 b''32 fis''32 fis'''32 dis'''32 b''32 fis''32 fis'''32 dis'''32 b''32 fis''32 fis'''32 dis'''32 b''32 fis''32 fis'''32 dis'''32 b''32 fis''32 | break
+    fis'''32 dis'''32 bis''32 gis''32 gis'''32 dis'''32 bis''32 gis''32 fis'''32 dis'''32 bis''32 gis''32 e'''32 cis'''32 gis''32 e''32 dis'''32 bis''32 gis''32 fis''32 cis'''32 gis''32 e''32 cis''32 |
+    r32 b'32 dis''32 fis''32 gis''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 r32 b'32 d''32 eis''32 gis''32 eis''32 d''32 b'32 b''32 eis''32 d''32 b'32 | break
+    r32 b'32 dis''32 fis''32 gis''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 r32 ais'32 e''32 fis''32 gis''32 fis''32 e''32 ais'32 ais''32 fis''32 e''32 ais'32 |
+    b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 | break
+    b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 b''32 fis''32 dis''32 b'32 |
+  }
+  lh {
+    <b,, b,>8 <b dis' fis'>8 <e gis cis'>8 <fis b dis'>8 r8 r8 | break
+    <b,, b,>8 <b dis' fis'>8 <e gis cis'>8 <fis b dis'>8 r8 r8 |
+    <gis, gis>8 <b dis' gis'>8 r8 <e, e>8 <b e' gis'>8 r8 | pageBreak
+    <dis, dis>8 <ais dis' fisis'>8 <dis, dis>8 <e, fis>8 <fis ais e'>8 <fis, fis>8 |
+    <b,, b,>8 <b dis' fis'>8 <e gis cis'>8 <fis b dis'>8 r8 r8 | break
+    <gis, gis>8 <gis bis dis' fis'>8 gis8 cis8 dis8 e8 |
+    <fis, fis>8 <b d'>8 fis8 <eis, eis>8 <gis d'>8 eis8 | break
+    <fis, fis>8 <b dis'>8 fis8 <fis, fis>8 <ais e'>8 fis8 |
+    voice { b,8 r8 fis'8( gis'4 fis'8) } { b,,2.~ } | break
+    voice { dis'4 fis8( gis8 fis8 dis8) } { b,,2. } |
+  }
+}
+
+section C {
+  key d major
+  voice_ {
+    R2. |
+    R2. | pageBreak
+    R2. |
+    r4 r8 r4 fis'8 |
+    fis'4 fis'8 b'4 cis''8 |
+    d''4. b'4 r8 | break
+    b'8. b'16 b'8 a'4 g'8 |
+    fis'4.~ fis'8 r8 fis'8 |
+    fis'8. fis'16 fis'8 b'4 cis''8 | break
+    d''4.~ d''8 cis''8 b'8 |
+    a'4 a'8 a'4 a'8 |
+    a'4.~ a'8 r8 d''8 | break
+    d''4 cis''8 fis'4 cis''8 |
+    cis''4. b'4 b'8 |
+    e''4. b'8 b'8 acciaccatura { ais'8 } b'8 | pageBreak
+  }
+  rh {
+    clef bass voice { fis4.~ fis8( acciaccatura { a8 } g8 fis8) } { r16 <b, d>16 r16 <b, d>16 r16 <b, d>16 r16 <b, d>16 r16 <b, d>16 r16 <b, d>16 } |
+    voice { b4.~ b8( ais8 b8) } { r16 <d fis>16 r16 <d fis>16 r16 <d fis>16 r16 <d fis>16 r16 <d fis>16 r16 <d fis>16 } | pageBreak
+    voice { g'4.( g'8 d'8 e'8) } { r16 <b d'>16 r16 <b d'>16 r16 <b d'>16 r16 <b d'>16 r16 <g b>16 r16 <a cis'>16 } |
+    voice { g'2. } { r16 <ais cis'>16 r16 <ais cis'>16 r16 <ais cis'>16 r16 <ais cis'>16 <ais cis'>16 <ais cis'>16 <ais cis'>16 <ais cis'>16 } |
+    voice { g'2. } { r16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>4.:16 } |
+    voice { g'2. } { r16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>4.:16 } | break
+    voice { g'2. } { r16 <b e'>16 <b e'>16 <b e'>16 <b e'>16 <b e'>16 <b e'>16 <b cis' e'>16 <b cis' e'>16 <b cis' e'>16 <b cis'>16 <b cis'>16 } |
+    voice { g'2. } { r16 <ais cis'>16 <ais cis'>16 <ais cis'>16 <ais cis'>16 <ais cis'>16 <ais cis'>4.:16 } |
+    voice { g'2. } { r16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>16 <b d'>4.:16 } clef treble | break
+    voice { b'4.( b'4.) } { r16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 <d' f'>16 r16 <d' f'>16 } |
+    voice { b'8( d''8 cis''8) e''4 eis''8 } { r16 <fis' a'>16 r16 <fis' a'>16 r16 <fis' a'>16 r16 <g' a'>16 <g' a'>16 <g' a'>16 r16 <g' a'>16 } |
+    voice { fis''4.~ fis''8 r8 r8 } { r16 <d' fis' a'>16 <d' fis' a'>16 <d' fis' a'>16 <d' fis' a'>16 <d' fis' a'>16 <d' fis' a'>4.:16 } | break
+    r16 <ais e' fis'>16 <ais e' fis'>16 <ais e' fis'>16 <ais e' fis'>16 <ais e' fis'>16 <ais e' fis' cis''>4. |
+    r16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 r16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 <ais cis' e' fis'>16 |
+    voice { b'4.~ b'8 r8 r8 } { r16 <g b e'>16 <g b e'>16 <g b e'>16 <g b e'>16 <g b e'>16 <g b e'>4.:16 } | pageBreak
+  }
+  lh {
+    b,,8 acciaccatura { eis,8 } fis,8 acciaccatura { cis,8 } d,8 acciaccatura { ais,,8 } b,,4. |
+    b,,8 acciaccatura { eis,8 } fis,8 acciaccatura { cis,8 } d,8 acciaccatura { ais,,8 } b,,4. | pageBreak
+    r8 acciaccatura { fis,8 } g,8 acciaccatura { cis,8 } d,8 acciaccatura { fis,,8 } g,,4. |
+    r8 acciaccatura { eis,8 } fis,16 r16 acciaccatura { gis,8 } ais,16 r16 acciaccatura { e8 } fis4. |
+    voice { r8 r16 eis32 fis32 g32 fis32 cis32 d32 b,8 r8 r8 } { b,,2. } |
+    voice { r8 r16 b,32 cis32 d32 dis32 e32 eis32 fis8 r8 r8 } { b,,2. } | break
+    voice { r8 r16 fis32 g32 a32 g32 e32 g32 b,8 r8 r8 } { b,,4. b,,8 r8 d,16 r16 } |
+    voice { r8 r16 b,32 cis32 d32 cis32 ais,32 fis,32 fis8 r8 r8 } { fis,2. } |
+    voice { r8 r16 eis32 fis32 g32 fis32 cis32 d32 b,8 r8 r8 } { b,,2. } | break
+    voice { r8 r16 cis'16 d'16 cis'16 c'32 b32 ais32 a32 gis8 r8 } { gis,,4. gis,,8 r8 gis,,16 r16 } |
+    a,,8 a,8 <d fis>8 a,,8 a,8 <cis g>8 |
+    voice { r8 r16 gis32 a32 b32 a32 fis32 a32 d8 r8 r8 } { d,2. } | break
+    voice { r8 r16 ais,32 cis32 d32 cis32 ais,32 fis,32 fis8 r8 clef treble g''16 fis''16 clef bass } { fis,2. } |
+    voice { r8 r16 e32 cis32 d32 e32 d32 b,32 fis8 r8 clef treble g''16 fis''16 clef bass } { fis,2. } |
+    voice { r8 r16 dis32 e32 fis32 e32 b,32 e32 b,8 r8 r8 } { g,4.~ g,8 r8 g,8 } | pageBreak
+  }
+}
+
+score {
+  staff voice_ "Voice" as removeEmpty all
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
