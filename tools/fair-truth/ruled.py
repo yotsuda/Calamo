@@ -16,18 +16,24 @@ def find_staves(cx0, cx1):  # in the window cx0..cx1: rows dark across half of i
     for y in rows:
         if lines and y - lines[-1][-1] <= 3: lines[-1].append(y)
         else: lines.append([y])
-    ys = [sum(l) / len(l) for l in lines]; out = []; i = 0
+    ys = [sum(l) / len(l) for l in lines]; hs = [len(l) for l in lines]; out = []; i = 0
     while i + 4 < len(ys):
         g = [ys[i + k + 1] - ys[i + k] for k in range(4)]
-        if 12 < min(g) and max(g) < 1.25 * min(g): out.append(ys[i:i + 5]); i += 5
+        h = sorted(hs[i:i + 5])  # a beam across the window is a row run several lines thick: not a staff line
+        if 6 < min(g) and max(g) < 1.25 * min(g) and h[4] <= 2 * h[2] + 1: out.append(ys[i:i + 5]); i += 5
         else: i += 1
     return out
 # a tilted or bowed page: the staves found in five windows, matched to the middle one's, each line fitted along x
-wins = [(im.width * a // 20, im.width * a // 20 + 300) for a in (2, 6, 10, 14, 17)]
+wins = [(im.width * a // 20, min(im.width, im.width * a // 20 + 300)) for a in (2, 6, 10, 14, 17)]
 found = [find_staves(a, b) for a, b in wins]; xs = [(a + b) / 2 for a, b in wins]
 staves = []
-# (the window that found the most staves leads: one window can lose a staff to a hairpin or a run of chords)
-for st in max(found, key=len):
+# the staves of all windows pooled by y lead: any window can lose a staff to a hairpin, a beam or a run of chords, and
+# on a crowded page no single window finds them all (Lack's page 2: 6, 7, 7, 8, 4 of 10)
+leads = []
+for s in sorted((s for f in found for s in f), key=lambda s: s[0]):
+    if leads and s[0] - leads[-1][-1][0] < 0.75 * (s[4] - s[0]): leads[-1].append(s)
+    else: leads.append([s])
+for st in (g[len(g) // 2] for g in leads):
     pts = []
     for f, x in zip(found, xs):
         near = [s for s in f if abs(s[0] - st[0]) < 2 * (st[4] - st[0]) / 4 * 3]
