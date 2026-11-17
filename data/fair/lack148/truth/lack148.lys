@@ -1,0 +1,165 @@
+// The truth of the fair set (S66) for Theodore Lack, Myosotis (Feuillet d'album) Op.148: written from the Heugel print
+// (1890, IMSLP #45177, data/fair/lack148/heugel), bar by bar. Never to debug the reader on.
+// As the print has them: heads on and above ledger lines named by counting the ledger lines (a line through the head
+// or under it; tools/fair-truth/ledger.py), not by the head's measured centre; bars 60-61 under an 8va line (written
+// here as they sound); the "M.G." grace runs and chords of bars 56, 67 and 68 written in the staff they are printed in
+// (grace notes are not scored); bars 41-44 have A-flat, not D-flat, under the left hand (unlike bars 1-16).
+title "Myosotis"
+tempo "Andantino moderato."
+octave absolute
+paper { breaksOnly }
+time 3/4
+key des major
+
+part rh { clef treble }
+part lh { clef bass }
+
+section Piece {
+  rh {
+    R2. |
+    R2. |
+    R2. |
+    R2. |
+    r8 aes'4@p@text("Esitando.") bes'4 des''8 | break
+    c''8 bes''8 aes''8 f''8 ges''8 ees''8 |
+    r8 aes'4 bes'4 des''8 |
+    c''8( bes''8 aes''8 f''8 ges''8 ees''8) |
+    r8 des''4@cresc f''4 des'''8 |
+    c'''8 bes''8 f''8 des''8 bes'8@!cresc f''8 | break
+    c''8@decresc( des''8 bes'8 g'8 e'8 aes'8) |
+    voice { f'8@text("Poco riten.")( bes'8 ges'8@!decresc ees'8 c'8 f'8) } { s4 bes4( c'4) } |
+    r8 aes'4@p bes'4 des''8 |
+    c''8( bes''8 aes''8 f''8 ges''8 ees''8) |
+    r8 aes'4 bes'4 des''8 | break
+    c''8( bes''8 aes''8 f''8 ges''8 ees''8) |
+    r8 des''4( f''4@cresc des'''8 |
+    c'''8@!cresc bes''8 f''8 aes''8 ges''8 ees''8) |
+    c''8@text("rallentando")( des''8@decresc aes'8 f'8) tuplet 3/2 { des'8( ees'8@!decresc ges'8 } |
+    voice { f'4)~ f'8 ees'8 des'4 } { des'4 <ges c'>4( f4) } || clef bass pageBreak
+    r8 d4@p ees4 e8 |
+    f8( aes8 c'8 g'8) <g des' f'>4 |
+    r8 d4 ees4 e8@cresc~ |
+    e8( f8 aes8 c'8 <g des' g'>8 g'8@!cresc) clef treble |
+    r8 d'8@text("crescendo")( ees'8 g'8 <c' f' bes'>8 aes'8) | break
+    r8 fis'8@text("poco riten.")( g'8 c''8 <f' cis''>8 d''8) clef bass |
+    r8 fis4 g4 gis8 clef treble |
+    a8( c'8 e'8 b'8) <b f' a'>4 clef bass |
+    r8 fis4 g4@cresc gis8~ |
+    gis8 clef treble a8( c'8 e'8 <b f' b'>8 a'8@!cresc) | break
+    r8 fis'8( g'8 b'8 <e' a' d''>8 c''8) |
+    r8 ais'8@text("poco riten.")( b'8 e''8 grace { a'16 eis''16 b''16 } e''8 fis''8) |
+    voice { r8 b'4@p cis''4 dis''8 } { r4 gis'4 <gis' b'>4 } |
+    voice { r8 e''4@text("molto crescendo ed animato") fis''4 gis''8 } { r4 <gis' b'>4 <gis' b'>4 } |
+    voice { r8 gis'4 ais'4 bis'8 } { r4 e'4 <e' gis'>4 } | break
+    voice { r8 cis''4 dis''4 e''8 } { r4 <e' gis'>4 <e' gis'>4 } |
+    r8 eis'8( fis'8 ais'8 cis''8 e''8) |
+    r8 eis''8( fis''8 ais''8 cis'''8 e'''8) |
+    r8 fis'8@f@text("rallentando.")( g'8 cis''8 e''8 g''8) |
+    r8 fis''8( g''8 cis'''8 e'''8 g'''8) | break
+    r8 g'4@p aes'4 bes'8 |
+    des''8( c''8 bes''8 aes''8 ges''8 ees''8) |
+    r8 g'4 aes'4 bes'8 |
+    des''8( c''8 bes''8 aes''8 ges''8 ees''8) |
+    r8 des''4 f''4 des'''8 | pageBreak
+    c'''8( bes''8 f''8 des''8 bes'8 f''8) |
+    c''8@decresc( des''8 bes'8 g'8 e'8 aes'8) |
+    voice { tuplet 3/2 { f'8@text("poco riten.")( bes'8 aes'8@!decresc } tuplet 3/2 { ges'8 bes8 ees'8 } tuplet 3/2 { c'8 f'8 aes8) } } { s4 tuplet 3/2 { s8 bes4 } tuplet 3/2 { c'4 aes8 } } |
+    voice { s8 aes''2@accent~ aes''8~ } { r8 aes'4 bes'4 des''8 } |
+    voice { aes''8 a''8( c'''8 bes''8 ges''8 ees''8) } { c''2. } | break
+    voice { s8 aes''2@accent~ aes''8~ } { r8 aes'4 bes'4 des''8 } |
+    voice { aes''8 a''8( c'''8 bes''8 ges''8 ees''8) } { c''2. } |
+    r8 des''8( ees''8@cresc f''8 ees'''8 des'''8@!cresc) ||
+    tuplet 3/2 { c'''8@f( bes''8 a''8 } tuplet 3/2 { c'''8@decresc bes''8 f''8 } tuplet 3/2 { aes''8 ges''8 ees''8@!decresc) } | break
+    c''16@text("poco a poco rallentando.")@decresc des''16 ees''16 des''16 f''16 des''16 aes'16 f'16 des'16 ees'16 e'16 f'16@!decresc |
+    voice { <d' f'>4@p bes'4~ bes'8 c''8 } { s4 grace { g16 des'16 f'16 } <g des' f'>4 <ges c' f'>8 <aes c' ees'>8 } |
+    voice { r8 des''4@p ees''4 f''8 } { r4 <f' aes'>4 <f' aes'>4 } |
+    voice { r8 aes''4 bes''4 ces'''8 } { r4 <des'' f''>4 <des'' f''>4 } | break
+    voice { r8 des'''4 ees'''4 f'''8 } { r4 <ges'' bes''>4 <ges'' bes''>4 } |
+    voice { r8 ges'''4@8va@text("ésitando.") beses'''4 des''''8 } { r4 <beses'' des'''>4@8va <beses'' des''' ges'''>4 } |
+    voice { s2 beses''8@!8va( aes''8) } { r8 <f''' aes''' des'''' f''''>8@arpeggio r8 r8 f''4@!8va } |
+    voice { s2 beses'8( aes'8) } { s2 f'4 } clef bass |
+    voice { r4 beses8( aes8) s4 } { s4 f4 s4 } | break
+    voice { beses,8( aes,8) r4@text("rallent.") r4 } { f,4 s2 } clef treble |
+    r8 <d' g'>4@text("ésitando.")@cresc <d' aes'>4 <des' a'>8@!cresc |
+    <c' ges' bes'>8@arpeggio@decresc f''8 ees''8 ges'8 bes'8 <ges c'>8@!decresc |
+    voice { des''2 ees''4 } { grace { bes16 des'16 ges'16 bes'16 } <bes des' ges' bes'>4@cresc <beses des' ges' beses'>2@!cresc } |
+    tempo "Lento." grace { aes8 des'8 f'8 aes'8 } <des'' f''>2.@fermata@pp |.
+  }
+  lh {
+    voice { r4@p <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } | break
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>2 } { f,4 aes4( a4) } |
+    voice { r4 f'4( g'4) } { bes,4 <bes des'>2 } | break
+    voice { r4 c'4( bes4 } { c,4 c2 } |
+    voice { <f aes>4) ees4( ges4) } { s4 aes,2 } |
+    voice { r4 <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>4 <des' f'>4 } { <des, aes,>2.~ } | break
+    voice { <ees' ges'>4 aes2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>2 } { f,4 aes4( a4) } |
+    ges,4 <bes des' ees'>2 |
+    aes,4( f4 bes4 |
+    b4) <aes,, aes,>4 <des,, des,>4 || pageBreak
+    voice { s4 c'4 ces'4 } { <aes,, aes,>4 aes2~ } |
+    voice { s2. } { <aes b des'>4 bes,4 <ees, ees>4 } |
+    voice { s4 c'4 ces'4 } { <aes,, aes,>4 aes2~ } |
+    voice { s2. } { <aes b des'>4 bes,4 <ees, ees>4 } |
+    <c, c>4 <ees aes>4 <f, f>4 | break
+    <g,, g,>4 <g a>4 <g b>4 |
+    voice { s4 e'4 ees'4 } { <c, c>4 c'2~ } |
+    voice { s2. } { <c' d' fis'>4 d4 <g, g>4 } |
+    voice { s4 e'4 ees'4 } { <c, c>4 c'2~ } |
+    voice { s2. } { <c' d' fis'>4 d4 <g, g>4 } | break
+    <e, e>4 <g c'>4 <a, a>4 |
+    <b,, b,>4 <b cis'>4 <b dis'>4 |
+    e,8( b,8 e8 gis8 b8 e'8) |
+    <dis, dis>4 <e b e'>4 <e b e'>4 |
+    cis,8( gis,8 cis8 e8 gis8 cis'8) | break
+    <b,, b,>4 <cis gis cis'>4 <cis gis cis'>4 |
+    <ais,, ais,>4 <fis cis' e'>4 <fis cis' e'>4 clef treble |
+    <fis' cis'' e''>8@arpeggio r8 r4 r4 clef bass |
+    <a,, a,>4 <g cis' e'>4 <g cis' e'>4 clef treble |
+    <g' cis'' e''>8@arpeggio r8 r4 r4 clef bass | break
+    voice { r4 <des' f'>4( <des' fes' g'>4) } { <aes,, aes,>2.~ } |
+    voice { <ees' ges'>4 <aes aes'>2 } { <aes,, aes,>2. } |
+    voice { r4 <des' f'>4( <des' fes' g'>4) } { <aes,, aes,>2.~ } |
+    voice { <ees' ges'>4 <aes aes'>2 } { <aes,, aes,>2. } |
+    voice { r4 <des' f'>2 } { f,4 aes4( a4) } | pageBreak
+    voice { r4 f'4( g'4) } { bes,4 <bes des'>2 } |
+    voice { r4 c'4( bes4 } { c,4 c2 } |
+    voice { <f aes>4) ees4( ges4) } { s4 aes,2 } |
+    voice { r4 f8( aes8 des'8 f'8) } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 <aes aes'>2@accent } { <des, aes,>2. } | break
+    voice { r4 f8( aes8 des'8 f'8) } { <des, aes,>2.~ } |
+    voice { <ees' ges'>4 <aes aes'>2 } { <des, aes,>2. } |
+    voice { r4 <des' f'>2 } { f,4 aes4( a4) } ||
+    ges,4 <bes des' f'>4 <ees bes des' ges'>4@arpeggio | break
+    voice { r4 aes2@accent~ } { s2 ces4 } |
+    voice { aes4 s2 } { bes,4 grace { ees,16 ees16 } <ees, ees>4 <aes,, aes,>4 } |
+    des,8( aes,8 des8 f8 aes8 des'8) |
+    voice { r8 <des' f'>4 <des' f'>4 <des' f'>8 } { ces'4 bes4 aes4 } | break
+    des8( bes8 des'8 clef treble ges'8 bes'8 des''8) |
+    voice { r8 <des'' ees''>4 <beses' des'' ees''>4 <beses' des'' ges''>8 } { beses'4 ges'4 ees'4 } |
+    des'8( ges'8 des''8 ees''8) r4 clef bass |
+    des8( aes8 des'8 ees'8) r4 |
+    eeses'8( des'8) r4 eeses8( des8) | break
+    r4 eeses,8@staccato( des,8@staccato des,8@staccato b,,8@staccato) |
+    voice { r8 <ces f>4 <bes, f>4 <ees g>8 } { ces,4 bes,,4 ees,4 } |
+    <aes, ees aes>8@arpeggio r8 r4 r8 <aes,, aes,>8 |
+    grace { des,16 des16 des16 ges16 } s2. |
+    grace { des,,8 aes,8 des8 f8 } s2. |.
+  }
+}
+
+score {
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
