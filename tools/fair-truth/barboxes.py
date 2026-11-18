@@ -17,6 +17,8 @@ from staves import staves as find_staves, at
 # on that bar's page}; a todo without a box is framed by its bar's box (its part's, or the whole system's bar without one).
 # --add-staff PAGE:Y adds a staff staves.py missed on that page (Y = its top line's y at the page's middle; the spacing and
 # tilt are taken from the nearest staff found).
+# --add-bar PAGE:SYSTEM:X adds a barline the search missed (a faint scan's thin line broken up: Wuerst Op.52-3), X about
+# where it is (by eye, within a space and a half); it is moved to the darkest column there down all the system's staves.
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--pages', nargs='+', required=True)
@@ -27,6 +29,7 @@ ap.add_argument('--expect', default='')
 ap.add_argument('--todos', default='')
 ap.add_argument('--draw', default='')
 ap.add_argument('--add-staff', nargs='*', default=[])
+ap.add_argument('--add-bar', nargs='*', default=[])
 ap.add_argument('--truth', default='', help="the truth's .lys: --expect from its breaks (bars per system per page)")
 ap.add_argument('--truth-part', default='', help='the part whose breaks count (default: the last of --parts)')
 a = ap.parse_args()
@@ -165,6 +168,9 @@ if a.truth:
 adds = {}
 for s in a.add_staff:
     p, y = s.split(':'); adds.setdefault(int(p), []).append(float(y))
+add_bars = {}
+for s in a.add_bar:
+    p, si, x = s.split(':'); add_bars.setdefault((int(p), int(si)), []).append(int(x))
 
 side = {'version': 1, 'pages': [], 'measures': [], 'todos': []}
 outdir = os.path.dirname(os.path.abspath(a.out))
@@ -209,6 +215,14 @@ for pi, path in enumerate(a.pages, start=1):
         # system's edge, not a barline
         while bl and bl[0][0] <= left + 3 * sp:
             left = bl[0][1]; bl = bl[1:]
+        for x_eye in add_bars.get((pi, si + 1), []):  # --add-bar: to the darkest column near where the eye put it
+            r_ = int(1.5 * sp)
+            x_ = max(range(x_eye - r_, x_eye + r_ + 1),
+                     key=lambda x: sum(column_fill(px, W, H, x, at(s[0], x), at(s[4], x)) for s in ss))
+            if any(abs(x_ - b[0]) <= 1.5 * sp or abs(x_ - b[1]) <= 1.5 * sp for b in bl):
+                problems.append(f'page {pi} system {si + 1}: --add-bar {x_eye} is at a barline already found')
+            else:
+                bl = sorted(bl + [[x_, x_]])
         edges = [(left, left)] + [tuple(b) for b in bl]
         if right - edges[-1][1] > 2 * sp: edges.append((right, right))  # a system that ends without a barline
         nbars = len(edges) - 1; counts.append(nbars)
