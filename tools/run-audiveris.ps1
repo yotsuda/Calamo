@@ -10,7 +10,10 @@ param(
     [string[]]$OmrArgs = @(),               # more arguments for this reader's own reading (e.g. '--no-unprinted', to tell what a step does)
     [switch]$Verify,                        # this reader's reading with the redraw check (--verify): its todos as Lily# gets them (tools/todo-quality.ps1)
     [string]$Homr = '',                     # also score homr's MusicXML, <Homr>\<set>\pNN.musicxml (run as a program elsewhere: C:\MyProj\omr-compare\scripts\run-homr-fair.ps1)
-    [switch]$Reserve                        # (-Fair) the reserve sets instead (data/fair/<piece>/RESERVE.md): Audiveris and homr only, never this reader
+    [switch]$Reserve,                       # (-Fair) the reserve sets instead (data/fair/<piece>/RESERVE.md): Audiveris and homr only, never this reader
+    [double]$Upscale = 1.0                  # scale the pages up to this, as far as -MaxPixels allows: Audiveris drops a page whose staff
+                                            # spacing is about 10 px ("interline too low", Wuerst's 1500 px wide scan) -- 2.5 makes it 25.
+                                            # (pages already made stay as they were under -Reuse: run without it once)
 )
 # Audiveris against this reader on the real-score benchmarks (run-real.ps1's), page for page. Both
 # read the same pages, scaled down to fit Audiveris's limit; Audiveris's MusicXML is scored by
@@ -139,7 +142,7 @@ foreach ($name in $benches.Keys) {
         $files += $dst
         if (Test-Path $dst) { continue }
         $img = [Drawing.Bitmap]::new(("$($b.Pages)\p{0:D2}.png" -f $i))
-        $k = [Math]::Min(1.0, [Math]::Sqrt($MaxPixels / ($img.Width * $img.Height)))
+        $k = [Math]::Min($Upscale, [Math]::Sqrt($MaxPixels / ($img.Width * $img.Height)))
         $w = [int]($img.Width * $k); $h = [int]($img.Height * $k)
         $small = [Drawing.Bitmap]::new($w, $h)
         $g = [Drawing.Graphics]::FromImage($small)

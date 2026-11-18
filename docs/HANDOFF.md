@@ -34,7 +34,7 @@
 3. 開発用の台・評価台・終わりの check は回していない（読み手・生成器を変えていない）。
 
 **次の一手**（ROADMAP §0「本線の順番」の言葉で）:
-0. **オーナーの返事を Kücken の正解に移す**（4 か所）。そのあと予備の台の 3 台目 **Wuerst**（Audiveris が「interline too low」で頁を捨てるので、頁を 2〜3 倍に拡大する口を `run-audiveris.ps1` に足すのが先。homr が読めるかも未確認）。正解は `barboxes.py` で箱を作り（`--truth` で小節数を突き合わせ）、突き合わせは `cropbar.py <side file>` で切り出して見る。
+0. **オーナーの返事を Kücken の正解に移す**（4 か所）。そのあと予備の台の 3 台目 **Wuerst**。拡大する口は足した（`run-audiveris.ps1 -Upscale 2.5`、interline 10 → 24 px。2026-11-18 続き）が、**Audiveris が読めるのは p01 だけ**: p02〜p04 は 2.0・2.5・2.8 倍、右端のスキャンの縁を白くしても、Audiveris の中で落ちる（StackRhythm の NullPointerException、"measure1 is null"）。p02〜p04 の突き合わせは homr だけになる（homr は 4 頁とも読んだ: 10・12・15・14 小節、譜表は 2 本ずつしか出ていない＝歌か伴奏の片方を落としている見込み、未確認）。以後 Wuerst を回すときは `-Fair -Reserve -Sets fair-wuerst52-3-bote -Upscale 2.5`（`-Reuse` なら作った頁のまま）。正解は `barboxes.py` で箱を作り（`--truth` で小節数を突き合わせ）、突き合わせは `cropbar.py <side file>` で切り出して見る。
 1. 公平な台 15 台にも、上の「正直に書いておくこと」1 の型（加線の近くの和音、同じ形と決めた小節）が残っていないかを、homr の差分を高さだけで比べて洗い直すか、オーナーに聞く（今の読み手の数字が変わるので、採否の区切りの前にやる価値がある）。
 2〜3. 前の節のまま（種違いの検出器 42・49 で公平な台、ROADMAP §0 の本線の 4）。
 
