@@ -1,0 +1,16 @@
+// Repro (2026-11-19): a beat repeat -- a figure shorter than a bar, repeated within the bar by a sign -- cannot be written
+// in .lys (GRAMMAR.md: "A body shorter than a bar -- LilyPond's beat repeat -- cannot be written: write the notes out").
+// Kuecken Op.47-3 bar 66, left hand (Fr. Kistner 1711, page 6): fis16, the 64th group written twice, then three signs
+// that each repeat the group (a sixteenth), then a two-note tremolo. Here the three repetitions are written out.
+octave absolute
+time 6/8
+key b major
+part lh { clef bass }
+
+section A {
+  lh {
+    fis16 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 repeat tremolo 12 { <fis b>64 dis'64 } |
+  }
+}
+
+score { staff lh }
