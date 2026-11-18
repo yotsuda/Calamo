@@ -1,56 +1,17 @@
 import sys, os
 from PIL import Image, ImageDraw, ImageFont
+from staves import staves as find_page_staves, at
 # ruled.py <page.png> <out-prefix> <clefs> <x0> <x1> <zoom> [pieces]: each system of a page (staves found in five
-# windows across the page and each line fitted along x, so a tilted scan is named right; grouped by <clefs>, e.g. "tTb" =
-# voice treble, piano treble, piano bass), cut x0..x1 into pieces, enlarged, with the pitch of every line and space
-# written in red every 330 px along each staff -- to name heads by eye when writing the truth. A narrow x0..x1 with a
-# large zoom is the way to settle one head. The page is held out: for the truth, never to debug the reader.
+# windows across the page and each line fitted along x, so a tilted scan is named right -- staves.py; grouped by <clefs>,
+# e.g. "tTb" = voice treble, piano treble, piano bass), cut x0..x1 into pieces, enlarged, with the pitch of every line and
+# space written in red every 330 px along each staff -- to name heads by eye when writing the truth. A narrow x0..x1 with
+# a large zoom is the way to settle one head. The page is held out: for the truth, never to debug the reader.
+# RULED_DARK: a pale print (Taubert Op.136-1 page 2) needs a lighter cut, e.g. 175.
 page, prefix, clefs = sys.argv[1], sys.argv[2], sys.argv[3]
 x0, x1, zoom = int(sys.argv[4]), int(sys.argv[5]), float(sys.argv[6]); pieces = int(sys.argv[7]) if len(sys.argv) > 7 else 2
-im = Image.open(page).convert('RGB'); g = im.convert('L'); px = g.load()
-dark = int(os.environ.get('RULED_DARK', '128'))  # a pale print (Taubert Op.136-1 page 2) needs a lighter cut, e.g. 175
-def find_staves(cx0, cx1):  # in the window cx0..cx1: rows dark across half of it, merged, then runs of five evenly spaced
-    w = cx1 - cx0; rows = []
-    for y in range(im.height):
-        if sum(1 for x in range(cx0, cx1, 2) if px[x, y] < dark) > 0.25 * w: rows.append(y)
-    lines = []
-    for y in rows:
-        if lines and y - lines[-1][-1] <= 3: lines[-1].append(y)
-        else: lines.append([y])
-    ys = [sum(l) / len(l) for l in lines]; hs = [len(l) for l in lines]; out = []; i = 0
-    while i + 4 < len(ys):
-        g = [ys[i + k + 1] - ys[i + k] for k in range(4)]
-        h = sorted(hs[i:i + 5])  # a beam across the window is a row run several lines thick: not a staff line
-        if 6 < min(g) and max(g) < 1.25 * min(g) and h[4] <= 2 * h[2] + 1: out.append(ys[i:i + 5]); i += 5
-        else: i += 1
-    return out
-# a tilted or bowed page: the staves found in five windows, matched to the middle one's, each line fitted along x
-wins = [(im.width * a // 20, min(im.width, im.width * a // 20 + 300)) for a in (2, 6, 10, 14, 17)]
-found = [find_staves(a, b) for a, b in wins]; xs = [(a + b) / 2 for a, b in wins]
-staves = []
-# the staves of all windows pooled by y lead: any window can lose a staff to a hairpin, a beam or a run of chords, and
-# on a crowded page no single window finds them all (Lack's page 2: 6, 7, 7, 8, 4 of 10)
-leads = []
-for s in sorted((s for f in found for s in f), key=lambda s: s[0]):
-    if leads and s[0] - leads[-1][-1][0] < 0.75 * (s[4] - s[0]): leads[-1].append(s)
-    else: leads.append([s])
-for st in (g[len(g) // 2] for g in leads):
-    pts = []
-    for f, x in zip(found, xs):
-        near = [s for s in f if abs(s[0] - st[0]) < 2 * (st[4] - st[0]) / 4 * 3]
-        if near: pts.append((x, min(near, key=lambda s: abs(s[0] - st[0]))))
-    # robust to a window that caught the wrong rows: the median of the pairwise slopes of the middle line, then
-    # each line's intercept the median over the windows
-    pair = sorted((b[1][2] - a[1][2]) / (b[0] - a[0]) for i, a in enumerate(pts) for b in pts[i + 1:])
-    sl = pair[len(pair) // 2] if pair else 0.0
-    def fit(k):
-        c = sorted(s[k] - sl * x for x, s in pts); return (c[len(c) // 2], sl)
-    staves.append(([fit(k) for k in range(5)], len(pts)))
-# a staff seen in fewer than three windows (words, beams, chords over its lines) takes the page's median tilt
-med = sorted(st[0][0][1] for st in staves if st[1] >= 3)[len([s for s in staves if s[1] >= 3]) // 2]
-staves = [lines if n >= 3 else [(y + (sl - med) * xs[2], med) for y, sl in lines] for lines, n in staves]
+im = Image.open(page).convert('RGB'); g = im.convert('L')
+staves = find_page_staves(g)
 print('staves', len(staves), 'tilt px/1000:', ' '.join(f'{s[0][1] * 1000:.1f}' for s in staves))
-def at(line, x): return line[0] + line[1] * x
 names = 'CDEFGAB'
 def step_name(s):  # s: diatonic step, 0 = c' (middle C)
     o = s // 7; n = names[s % 7]
