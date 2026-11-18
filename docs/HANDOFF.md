@@ -22,7 +22,7 @@
 5. 65 小節の右手の和音の中声（2〜4 つ目 `dis'`・`e'`・`b`）。
 
 **次の一手**（ROADMAP §0「本線の順番」の言葉で）:
-0. **Kücken の続き**: 6 頁の 66 小節から終わりまで（段の頭は 62・67・73・78 小節あたり、4 段目は 78〜84 の 7 小節で最後に 2 小節の全休符）。66 小節は歌 `cis''4 b'8 ais'4 b'8`、右手 `<b dis'>16 r16 r8 <b' b''>8 <ais' ais''>4 <b' b''>8`（♮ は bis の取り消し）まで読んだ。**左手は 64 分の音形（fis・<fis b>・dis' の繰り返し）を「||||」で省略した書き方**で、どう `.lys` に起こすか（省略を展開して書く）を決めてから進める。終わったら `run-audiveris.ps1 -Fair -Reserve -Reuse -Sets fair-kuecken47-3-kistner -Homr C:\MyProj\omr-compare\homr-out-72fdfa8` と `suspects.ps1 -Reserve`。**今の読み手では読まない**。正解が途中のうちは `-Reserve` を回さない。そのあと Wuerst。
+0. **Kücken の続き**: 6 頁の 66 小節から終わりまで（段の頭は 62・67・73・78 小節あたり、4 段目は 78〜84 の 7 小節で最後に 2 小節の全休符）。66 小節は歌 `cis''4 b'8 ais'4 b'8`、右手 `<b dis'>16 r16 r8 <b' b''>8 <ais' ais''>4 <b' b''>8`（♮ は bis の取り消し）まで読んだ。**左手は 64 分の音形（fis・<fis b>・dis' の繰り返し）を「||||」で省略した書き方**で、どう `.lys` に起こすか（省略を展開して書く）を決めてから進める。終わったら `run-audiveris.ps1 -Fair -Reserve -Reuse -Sets fair-kuecken47-3-kistner -Homr C:\MyProj\omr-compare\homr-out-72fdfa8` と `suspects.ps1 -Reserve`。**今の読み手では読まない**。正解が途中のうちは `-Reserve` を回さない。突き合わせで片づかなかった所は、ROADMAP §0「正解の台の作り方」（2026-11-18 オーナー決定）に従って `docs/truth-review/kuecken47-3.md` にまとめ（10 か所ほどまで、原本と描き直しの切り抜きつき）、オーナーに見てもらう。上の「自信が低い所」がその候補。急がず丁寧に（1 セッションで終わらなくてよい）。そのあと Wuerst（Audiveris 用の頁の拡大の口が先）。
 1〜3. 前の節のまま。
 
 **読めない型の記録**: 前の節のまま。
