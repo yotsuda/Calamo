@@ -1,18 +1,19 @@
-import sys
+import sys, os
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
+from staves import staves as find_page_staves, at
 # heads.py <page.png> <clefs> <x0> <y0> <x1> <y1> [staff]: the note heads in a box of a page, each named by the staff it
 # is nearest to (or by staff number <staff>, 0-based on the page, for a head on ledger lines between two staves) in the
 # clef given for it in <clefs> (one letter per staff of the page, t or b). Small holes filled (half notes), opened with a
 # square about half a space wide (stems, lines, slurs gone), blobs of a head's size kept; heads a second apart come out
 # as one tall blob, named top..bottom. For the truth only: to settle a head by its measured y instead of by eye.
+# RULED_DARK / RULED_ROW (as staves.py): the ink cut and the staff-line row share, for a pale or faint print.
 args = sys.argv[1:]
-src = open(__file__.replace('heads.py', 'ruled.py'), encoding='utf-8').read().split('def at(line, x)')[0]
-sys.argv = ['ruled', args[0], 'x', 't', '0', '1', '1']
-exec(src)  # -> staves: per staff five (intercept, slope) lines (and its own x0, x1: read ours after)
 page, clefs = args[0], args[1]
 x0, y0, x1, y1 = (int(v) for v in args[2:6]); force = int(args[6]) if len(args) > 6 else None
-def at(line, x): return line[0] + line[1] * x
+im = Image.open(page).convert('L'); g = im; px = g.load()
+staves = find_page_staves(g)  # per staff five (intercept, slope) lines
+dark = int(os.environ.get('RULED_DARK', '128'))
 def blobs(b):  # 4-connected components of a bool array: lists of (y, x)
     h, w = b.shape; seen = np.zeros_like(b); res = []
     for yy, xx in zip(*np.nonzero(b)):
@@ -25,7 +26,7 @@ def blobs(b):  # 4-connected components of a bool array: lists of (y, x)
         res.append(pts)
     return res
 mid = staves[0]; sp = (at(mid[4], (x0 + x1) / 2) - at(mid[0], (x0 + x1) / 2)) / 4  # a space in px
-box = g.crop((x0, y0, x1, y1)).point(lambda v: 0 if v < 128 else 255)
+box = g.crop((x0, y0, x1, y1)).point(lambda v: 0 if v < dark else 255)
 filled = Image.new('L', (box.width + 2, box.height + 2), 255); filled.paste(box, (1, 1))  # a white rim to flood from
 ImageDraw.floodfill(filled, (0, 0), 128); a = np.array(filled)[1:-1, 1:-1]
 black = a == 0

@@ -1,0 +1,126 @@
+// The truth of the reserve set for Richard Wüerst, 4 Lieder Op.52 No.3, Wer's nur verstände! (Reinick): written from
+// the Ed. Bote & G. Bock print (Berlin, plate 9000, IMSLP #413040, data/fair/wuerst52-3/bote), bar by bar. A RESERVE set
+// (data/fair/wuerst52-3/RESERVE.md): never read by this reader, the truth checked against Audiveris and homr only.
+// Heads named against their own staff lines and ledger lines (zoomed; the scan is 1500 px wide with thin, faint staff
+// lines: staves.py needs RULED_DARK=200 RULED_ROW=0.12). This print puts the dot of a head on a line in the space
+// below as often as above, so the dots do not settle a head's step. Lyrics, dynamics, slurs and articulations are not
+// written. A head two voices share is written once (in the voice whose stem the beam or flag belongs to).
+// UNFINISHED (2026-11-18): bars 0-18 (pages 1 and 2's first three systems) written; page 2's last system and pages 3-4
+// are not. While it is unfinished, do not run run-audiveris.ps1 -Fair -Reserve on this piece (the file would be scored).
+title "Wer's nur verstände!"
+composer "R. Wüerst, Op.52 Nº 3."
+tempo "Allegro con moto."
+octave absolute
+paper { breaksOnly }
+time 9/8
+key ees major
+
+part voice_ { clef treble }
+part rh { clef treble }
+part lh { clef bass }
+
+section A {
+  partial 8*3
+  voice_ {
+    r4 r8 |
+    r2. f'8 f'8 g'8 |
+    aes'4. r2. |
+    r2. bes'8 bes'8 c''8 |
+    des''4. r2. | break
+    R8*9 |
+    r2. r4 g'8 ||
+  }
+  rh {
+    voice { g''8 ees''8 g'8 } { g'4 s8 } |
+    voice { c''4. bes'4. r4 r8 } { aes'2. s4. } |
+    voice { r2. aes''8 f''8 d''8 } { s2. bes'4. } |
+    <f' f''>4. <e' e''>4. r4 r8 |
+    voice { r2. bes''8 g''8 e''8 } { s2. bes'4. } | break
+    c'''8 b''8 d'''8 c'''8 aes''8 f''8 c''8 aes'8 f'8 |
+    ees'4. d'4. r4 r8 ||
+  }
+  lh {
+    <ees bes ees'>4. |
+    <f bes d'>2. r4 r8 |
+    r2. <f bes d'>4. |
+    <g bes des'>2. r4 r8 |
+    r2. <g bes des' e'>4. | break
+    <aes c' f'>2. r4 r8 |
+    <bes, f aes>2. r4 r8 ||
+  }
+}
+
+section B {
+  time 12/8
+  voice_ {
+    g'8. g'16 g'8 g'4 g'8 aes'8. bes'16 c''8 f'4 aes'8 | break
+    aes'8. aes'16 aes'8 a'8 a'8 a'8 bes'4 ees''8 bes'4 g'8 |
+    c''8. c''16 c''8 bes'8. g'16 g'8 fis'4 aes'8 g'4 g'8 | pageBreak
+    ees''8. d''16 c''8 bes'8. a'16 g'8 d''4 aes'8 bes'4 bes'8 |
+    c''4 c''8 c''8 c''8 c''8 f''4 c''8 c''8 c''8 ces''8 | break
+    bes'4 bes'8 bes'8 bes'8 bes'8 ees''4 bes'8 bes'8 bes'8 r8 |
+    r4 a'8 a'8. bes'16 c''8 d''2. ||
+  }
+  rh {
+    <g ees' g'>4. <g des' g'>4. <aes d' aes'>2. | break
+    <aes d' aes'>4. <a ees' a'>4. <bes ees' bes'>2. |
+    voice { <a' c''>4. bes'4 g'8 <aes d' fis'>4. <g ees' g'>4 r8 } { ees'2. s2. } | pageBreak
+    voice { <ees' ees''>4. <d' d''>4. <fis' a'>4. <g' bes'>4 r8 } { g'2. s2. } |
+    voice { <f' aes' c''>2. c''4. c''4 ces''8 } { s2. <f' aes'>2. } | break
+    <f' aes' bes'>2. <ees' g' bes'>4. <ees' g' bes'>4 <ees' g' bes'>8 |
+    <ees' g' a'>2. <g' d''>4 <g' bes'>8 <fis' a'>8. <g' bes'>16 <a' c''>8 ||
+  }
+  lh {
+    voice { bes,2. bes,2. } { ees,4. e,4. f,2. } | break
+    voice { bes,2. ees2. } { f,4. fis,4. g,2. } |
+    voice { ees2. bes,4. bes,4 r8 } { fis,4. g,4. bes,,4. ees,4 s8 } | pageBreak
+    voice { g4 a8 bes4. c'4. d'4 r8 } { c4. d4. d4. g4 s8 } |
+    ees'2. ees'2. | break
+    d'2. d'4. d'4 d'8 |
+    voice { c'2. d'2. } { s2. bes4. <a c'>4. } ||
+  }
+}
+
+section C {
+  time 6/8
+  voice_ {
+    bes'4 r8 r4 a'8 | break
+  }
+  rh {
+    voice { <bes' d''>4 bes'8 a'8. bes'16 c''8 } { s4. g'4. } | break
+  }
+  lh {
+    <g bes d'>4 r8 c4. | break
+  }
+}
+
+section D {
+  time 12/8
+  voice_ {
+    d''2. g'2. |
+    g'8 c''8 bes'8 f'4. r2. |
+    bes'8 f''8 ees''8 bes'4. r2. |
+    b'4. c''4 c''8 ees''4. d''4 r8 | break
+  }
+  rh {
+    <d' g' b' d''>2.~ <d' g' b' d''>4 r8 r4 r8 |
+    voice { g'4. f'4. g''8 c'''8 bes''8 f''4. } { <bes d'>4. aes4. d''2. } |
+    voice { <g ees' g'>2. bes''8 f'''8 ees'''8 bes''4. } { s2. g''2. } |
+    voice { <f' aes' b'>4. <f' aes' c''>4 <f' aes' c''>8 ees''4. d''4. } { s2. <f' aes'>2. } | break
+  }
+  lh {
+    <g, d b>2.~ <g, d b>4 r8 r4 r8 |
+    voice { <bes,, bes,>2. clef treble bes'4. aes'4. } { s2. bes2. } |
+    clef bass <ees, bes, ees>2. clef treble <ees' bes' ees''>2. |
+    clef bass d'4. c'4 c'8 ces'2. | break
+  }
+}
+
+score {
+  staff voice_ "Gesang"
+  grandStaff {
+    staff rh "Piano right"
+    staff lh "Piano left"
+  }
+}
+
