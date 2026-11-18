@@ -14,12 +14,15 @@ def staves(g, dark=None):
     a lighter one, e.g. 175 for Taubert Op.136-1 page 2)."""
     if dark is None:
         dark = int(os.environ.get('RULED_DARK', '128'))
+    # the share of a window's width a staff line's row must be dark over, counted every other pixel (so 0.25 is half
+    # the samples). RULED_ROW: a thin, broken print needs less (Wuerst Op.52-3's 1500 px wide scan: 0.18 with dark 175)
+    row = float(os.environ.get('RULED_ROW', '0.25'))
     px = g.load(); W, H = g.size
 
     def find_staves(cx0, cx1):  # in the window cx0..cx1: rows dark across a quarter of it, merged, then runs of five evenly spaced
         w = cx1 - cx0; rows = []
         for y in range(H):
-            if sum(1 for x in range(cx0, cx1, 2) if px[x, y] < dark) > 0.25 * w: rows.append(y)
+            if sum(1 for x in range(cx0, cx1, 2) if px[x, y] < dark) > row * w: rows.append(y)
         lines = []
         for y in rows:
             if lines and y - lines[-1][-1] <= 3: lines[-1].append(y)

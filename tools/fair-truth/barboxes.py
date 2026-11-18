@@ -31,7 +31,9 @@ ap.add_argument('--truth', default='', help="the truth's .lys: --expect from its
 ap.add_argument('--truth-part', default='', help='the part whose breaks count (default: the last of --parts)')
 a = ap.parse_args()
 
-def dark_at(px, W, H, x, y, cut=128):
+CUT = int(os.environ.get('RULED_DARK', '128'))  # the cut for a dark pixel, the same as staves.py's (a pale print needs more)
+
+def dark_at(px, W, H, x, y, cut=CUT):
     x, y = int(round(x)), int(round(y))
     return 0 <= x < W and 0 <= y < H and px[x, y] < cut
 
@@ -176,6 +178,12 @@ for pi, path in enumerate(a.pages, start=1):
         sl = near[0][1]; spc = (at(near[4], W / 2) - at(near[0], W / 2)) / 4
         st.append([(y + k * spc - sl * W / 2, sl) for k in range(5)])
         st.sort(key=lambda s: at(s[0], W / 2))
+    # a cue-sized staff (an ossia above a system, Wuerst Op.52-3 page 4: spacing 7.8 among 9.6-9.9) has no bars of the
+    # truth's parts: dropped
+    spc = sorted((at(s[4], W / 2) - at(s[0], W / 2)) / 4 for s in st)
+    if spc:
+        med = spc[len(spc) // 2]
+        st = [s for s in st if (at(s[4], W / 2) - at(s[0], W / 2)) / 4 > 0.85 * med]
     ends = [staff_ends(px, W, H, s) for s in st]
     sps = [(at(s[4], W / 2) - at(s[0], W / 2)) / 4 for s in st]
     # systems: staves joined at their left end
