@@ -1,0 +1,15 @@
+// Repro (2026-11-19): a two-note tremolo with its beams joined to both stems, as old prints engrave it (Kuecken Op.47-3,
+// Fr. Kistner 1711, bars 60-72: page 6 bar 66's left hand, <fis b> and dis' a dotted quarter's worth). lysc and LilyPond's
+// default keep the beams off the stems; LilyPond's \override Beam.gap = #0 joins them.
+octave absolute
+time 6/8
+key b major
+part lh { clef bass }
+
+section A {
+  lh {
+    repeat tremolo 12 { <fis b>64 dis'64 } repeat tremolo 12 { <fis b>64 dis'64 } |
+  }
+}
+
+score { staff lh }
