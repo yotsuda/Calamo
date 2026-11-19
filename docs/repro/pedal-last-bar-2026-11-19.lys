@@ -1,0 +1,17 @@
+// Repro (2026-11-19): a pedal bracket whose release is an empty chord at the very end of the piece ('<>@!sustain' as the
+// last thing, or 'repeat tremolo N { ... }@!sustain' in the last bar, which reads the same) is not drawn at all.
+// With one more bar after it, the bracket is drawn and closes at that bar's head. LilyPond draws it to the final barline.
+// Same with the Release lysc of 2026-11-18 and with 145df3333.
+// The real case (Kuecken Op.47-3 bar 66, left hand) as the last bar:
+//   <fis fis,>16@stemDown@sustain <fis b>64[ dis'64 <fis b>64 dis'64] { <fis b>64[ dis'64 <fis b>64 dis'64] } % % % repeat tremolo 12 { <fis b>64 dis'64 }@!sustain |
+octave absolute
+time 6/8
+part lh { clef bass }
+
+section A {
+  lh {
+    fis4.@sustain b4. <>@!sustain |
+  }
+}
+
+score { staff lh }
