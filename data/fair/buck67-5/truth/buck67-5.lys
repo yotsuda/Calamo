@@ -163,7 +163,7 @@ section A {
     tuplet 3/2 bare { r8 <g' bes'>8 <ees' g'>8 } tuplet 3/2 bare { r8 <g' bes'>8 <ees' g'>8 } tuplet 3/2 bare { r8 <d' f'>8 <d' bes'>8 } tuplet 3/2 bare { r8 <ees' bes'>8 <bes' ees''>8 } | break
     tuplet 3/2 bare { r8 <aes' bes' d''>8 <d' aes'>8 } tuplet 3/2 bare { r8 <aes' bes' d''>8 <d' aes'>8 } tuplet 3/2 bare { r8 <aes' bes' d''>8 <d' aes'>8 } tuplet 3/2 bare { r8 <f' c''>8 <d' f'>8 } |
     tuplet 3/2 bare { r8 <ees' bes'>8 bes8 } tuplet 3/2 bare { r8 <d' aes' bes'>8 <d' aes'>8 } tuplet 3/2 bare { r8 <g' bes'>8 <ees' g'>8 } tuplet 3/2 bare { r8 <f' c''>8 <f' bes'>8 } |
-    tuplet 3/2 bare { r8 <g' ees''>8 <ees' g'>8 } tuplet 3/2 bare { r8 <d' fis' d''>8 <d' fis' c''>8 } tuplet 3/2 bare { r8 <d' g' bes'>8 <d' g'>8 } tuplet 3/2 bare { r8 <ees' c''>8 <ees' bes'>8 } |
+    tuplet 3/2 bare { r8 <g' ees''>8 <ees' g'>8 } tuplet 3/2 bare { r8 <d' fis' d''>8 <d' fis' c''>8 } tuplet 3/2 bare { r8 <d' g' bes'>8 <d' g'>8 } tuplet 3/2 bare { r8 <e' c''>8 <e' bes'>8 } |
     tuplet 3/2 bare { r8 <f' d''>8 <d' bes'>8 } tuplet 3/2 bare { r8 <ees' a'>8 <ees' c''>8 } tuplet 3/2 bare { r8 <d' bes'>8 <d' bes'>8 } tuplet 3/2 bare { <d' f' bes'>8 <d' f' bes'>8 <d' f' bes'>8 } | pageBreak
     <ees' aes' c''>2@mf tuplet 3/2 bare { <d' aes' bes'>8 <d' aes' bes'>8 <d' aes' bes'>8 } tuplet 3/2 bare { <d' aes' bes'>8 <d' aes' bes'>8 <d' aes' bes'>8 } |
     tuplet 3/2 bare { <ees' g' ees''>8 <ees' g' ees''>8 <ees' g' ees''>8 } tuplet 3/2 bare { <ees' g' ees''>8 <ees' g' ees''>8 <ees' g' ees''>8 } tuplet 3/2 bare { <ees' aes' ees''>8 <ees' aes' ees''>8 <ees' aes' ees''>8 } tuplet 3/2 bare { <f' aes' ees''>8 <f' aes' ees''>8 <f' aes' ees''>8 } |

@@ -46,4 +46,4 @@ Kücken Op.47-3（Fr. Kistner 1711、6 頁）66 小節の左手、6/8、ロ長�
 
 ## 状態
 
-open（REQUESTS.md の 27 の行）
+done（2026-11-19。REQUESTS.md の 27 の行）

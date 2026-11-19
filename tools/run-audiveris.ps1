@@ -11,6 +11,8 @@ param(
     [switch]$Verify,                        # this reader's reading with the redraw check (--verify): its todos as Lily# gets them (tools/todo-quality.ps1)
     [string]$Homr = '',                     # also score homr's MusicXML, <Homr>\<set>\pNN.musicxml (run as a program elsewhere: C:\MyProj\omr-compare\scripts\run-homr-fair.ps1)
     [switch]$Reserve,                       # (-Fair) the reserve sets instead (data/fair/<piece>/RESERVE.md): Audiveris and homr only, never this reader
+    [string]$Lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe', # turns the truth into MusicXML (and draws for -Verify);
+                                            # a newer build when a truth uses what the Release one cannot read yet (Kuecken's beat repeat, 2026-11-19)
     [double]$Upscale = 1.0                  # scale the pages up to this, as far as -MaxPixels allows: Audiveris drops a page whose staff
                                             # spacing is about 10 px ("interline too low", Wuerst's 1500 px wide scan) -- 2.5 makes it 25.
                                             # (pages already made stay as they were under -Reuse: run without it once)
@@ -28,7 +30,6 @@ $root = Resolve-Path "$PSScriptRoot\.."
 function PageCount($dir) { @(Get-ChildItem "$dir\p*.png" | Where-Object Name -match '^p\d+\.png$').Count }
 $omr ="$root\src\Omr\bin\Release\net10.0-windows10.0.19041.0\calamo.exe"
 $out = "$root\out\audiveris"
-$lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe'
 if ($Verify) { $OmrArgs += '--verify', $lysc }
 $benches = [ordered]@{
     'bohemian'   = @{ Pages = 'C:\MyProj\LilySharp-Lab\sessions\p661\bohemian\hi4'; To = 19; Args = @('--config', "$root\data\bohemian\bohemian.score", '--truth', "$root\data\bohemian\truth.md") }

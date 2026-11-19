@@ -39,4 +39,4 @@ Kücken の形（`lysc ly` の出力）も同じ（`…-kuecken-lp.cropped.png`�
 
 ## 状態
 
-open（REQUESTS.md の 30 の行）
+done（2026-11-19。REQUESTS.md の 30 の行）

@@ -80,7 +80,7 @@ section Piece {
     r4 <bes' bes''>4 <bes' bes''>4 | break
     r4 <aes' aes''>4@textSpan("dim. ritard.") <aes' aes''>4 |
     r4 <g' g''>4 <g' g''>4 |
-    r4 <bes d'>2@!textSpan( | break
+    r4 <aes d'>2@!textSpan( | break
     tempo "a tempo" <g ees'>8) <g' g''>8@p <g' g''>8 <bes' bes''>8 <f' f''>4 |
     r8 <g' g''>8 <g' g''>8 <bes' bes''>8 <f' f''>4 |
     r8 <g' g''>8 <d'' d'''>8 <c'' c'''>8 <bes' bes''>8 <f' f''>16 <g' g''>16 |

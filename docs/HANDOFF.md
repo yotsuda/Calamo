@@ -2,6 +2,50 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## 公平な台の正解を 3 つの手がかりで洗い直し、**正解の誤りを 11 か所直した**（Puget 7・Hildach 2・Buck 1・Lassen 1）。公平な台は今の読み手 12516 → **12522/13999（89.4%）**、homr 13074 → **13085（93.5%）**。オーナーの返事 2 件（Wuerst t1・Kücken t1）を移し、REQUESTS 30 を `done` に（2026-11-19 午後、前の節の次の一手 0〜2）
+
+**現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。正解と道具と表（`docs/fair-sets.tsv`）だけ。**Kücken はオーナーが写しを見直し中**（「kuecken47-3.lys の見直しが完了していないので、待って」）。t1 の返事は正解 `data/fair/kuecken47-3/truth/kuecken47-3.lys` と `docs/truth-review/kuecken47-3.md` に移したが、**この 2 つはコミットしていない**（見直しの結果と合わせてから）。写し `out/truth-review/kuecken47-3/` の 283 行（66 小節左手）と side file・`todos.json`（t1 を外し t2〜t4）も作り直した。オーナーが開いたまま編集中なら食い違うので、見直しの返事が来たら写しと正解を突き合わせ直すこと。
+
+**変更の種類**: 道具・採点・正解（読み手は変えていない）。
+
+**やったこと**:
+- **REQUESTS**: 今朝の別のセッションが 27〜30 を出していた（27 は done、HANDOFF は書かれていなかった）。30（曲の最後の空の和音のペダルの離し）は Lily# が fixed にしていたので、Lily# `057fe425e` を `git archive` で scratch に出して Release でビルドした lysc で確かめて **done**。`beat-repeat`・`pedal-last-bar` の md の「状態」も done に。
+- **オーナーの返事**は種として届いていた（Lily# の Report Misread を truth-review の写しから使ったもの）: Wuerst t1 = 誤報（d' のまま、正解は変えず）、Kücken t1 = 拍の繰り返し `{ … } % % %` と頭の `<fis fis,>16@stemDown`。種 2 つに `omr-triage.json`（`cause: truth-review`）を書いた。
+- **`tools/seeds.ps1`**: truth-review の写しから来た種（`lysWas` が `out\truth-review\`）を飛ばす。**飛ばさないと予備の台・公平な台の頁を今の読み手で読んでしまう**（§0 違反）。
+- **`tools/run-audiveris.ps1 -Lysc`**: 正解を MusicXML にする lysc を渡す口（既定は今までの Release）。Kücken の拍の繰り返しは 11-18 の Release の lysc では読めない（`b3dce0d24` から）。Kücken は `-Lysc <scratch の lysc>` で採点して正解 2478 → 2494 音、homr 2204（88.4%）。
+- **正解の洗い直し**（`docs/truth-review/fair-recheck-2026-11-19.md` に 1 か所 1 行で）: ⑴ `tools/fair-truth/cancels.py`（正解の MusicXML から、同じ小節・譜表・段で前の音と変化が違う所＝打ち消しの記号が要る所を全部）を homr の差分で絞る、`tools/fair-truth/carry-suspects.ps1`（homr が同じ段の別の変化で読み、その音が正解の同じ小節にある所）→ 臨時記号の続きの誤り 3 か所。⑵ homr が同じ高さを 2 分と読み正解が 4 分の所 → 白い頭の誤り 2 か所。⑶ **Audiveris と homr が同じ高さの組を読んで正解と割れる小節**で高さだけ割れる 10 小節 → 6 か所。どれも原本の 3〜4 倍の拡大で線と加線に対して頭を測り、和声で確かめた。
+- 頭の check: `out/s117/check-head.log` **OK（0 better・nothing worse）**。
+
+**数字**（公平な台 15 台、符頭 + 休符、`-Fair -Reuse -Verify -OmrArgs --read-lyrics -Homr …`、`out/s117/fair3.log`）:
+
+| | 前（11-17） | 今 |
+|---|---|---|
+| 正解 | 13999 | 13999（Puget +1 の c'、Hildach −1 の重なった g） |
+| 今の読み手 | 12513（89.4%） | **12522（89.4%）** |
+| homr | 13070（93.4%） | **13085（93.5%）** |
+| Audiveris | 9065（64.8%） | 9078（64.8%） |
+
+台ごと: Puget 1035 → 1043、Hildach 926 → 928、Lassen（Bosworth）506 → 505（今の読み手は旧正解と同じ `bes` と読んでいた）、Hildach のタイの印 2 つ WORSE（35 小節で声部をまたぐタイを 34 小節の書き方に揃えて外した）。Taubert 136-2 の装飾音の印 1 つ better は正解を変えていない台で、正解を MusicXML にする lysc が 11-18 にビルドし直された影響と見ている。
+
+**正直に書いておくこと**:
+1. **自分の誤りで `out/audiveris/fair-*/scored-{audiveris,homr}/diffs.txt` を 2 回消した**。差分を読む一時の関数を `RD` と名付けたが、PowerShell では別名が関数より先に引かれ、`rd` は `Remove-Item`。消えたのは生成物だけで、`run-audiveris.ps1` を回し直して同じ数字に戻した（予備の台 Krause・Wuerst も `-Reserve` で回し直した、`out/s117/reserve-*.log`、Krause homr 1735/1759・Wuerst 1036/1055 で前と同じ）。memory にも残した。
+2. 手がかりは 3 つとも「homr か Audiveris のどちらかが正解と割れる」所だけを見る。**読み手 2 つと正解が一緒に誤っている所は見つからない**。⑴ の 318 か所のうち、homr が打ち消しを読んだ所は見ていない。
+3. 公平な台 15 台にまだ残っていそうな型: 2 声が共有する頭の書き方（下の未解決の疑問 3）、加線の近くの和音の高さ（⑶ は音の数が同じ小節だけ見た。数が違う 26 小節は見ていない）。
+
+**次の一手**（ROADMAP §0「本線の順番」の言葉で）:
+0. **Kücken の見直しの返事を待つ**。来たら写し（オーナーの版）と正解を突き合わせ、t1〜t4 を正解に移して `docs/truth-review/kuecken47-3.md` に書き、正解と md をコミットする。そのあと Kücken にも今回の 3 つの手がかりを当てる（`cancels.py` は Kücken で 32 か所出ている）。
+1. ⑶ の残り 26 小節（音の数が違う所）。共有する頭の書き方が決まってから。
+2. 前の節の 3 のまま（種違いの検出器 42・49 で公平な台、ROADMAP §0 の本線の 4）。
+
+**未解決の疑問**:
+1. 前の節の 1・2 のまま（2 音トレモロの音価の数え方、Wuerst の最後の頁の lysc の描き直しの縦線）。
+2. Lily# の Release の lysc（`LilySharp.Cli\bin\Release\net10.0`）は 11-18 のビルドで、拍の繰り返しと REQUESTS 30 の直しが入っていない。check と採点の既定はこれを使う。Lily# 側が Release をビルドし直すと、生成譜の絵が変わって check に WORSE が出る見込み（`[engraving]` の 2 つ）。
+3. **2 声が共有する頭（同じ高さの同時の音）を正解に 1 回書くか 2 回書くか**。予備の台は「1 回」で揃えたが、公平な台の初めの方は 2 回の所がある（Hildach 32・33・39・40 の左手、Bargiel 38・46、Buck の同じ和音の続きなど。Audiveris と homr はどちらも 1 回と数える）。揃えるならオーナーに確かめてから。
+
+**読めない型の記録**: 前の節のまま。
+
+**check の記録**: 頭 `out/s117/check-head.log` OK（14:39〜14:58、`Start-Process` で切り離し）。読み手・生成器・基準値は変えていないので終わりの check は回していない。
+
 ## 予備の台の 3 台目 Wuerst Op.52-3 の正解を最後（弱起 + 50 小節、4 頁）まで起こし、homr と突き合わせて**正解の誤りを 12 か所直した**。homr 1009 → **1036/1055（95.6 → 98.2%、高さだけなら 97.3 → 99.7%）**。残る 1 か所をオーナーに依頼する写しと side file を `out/truth-review/wuerst52-3/` に置いた。`barboxes.py` に `--add-bar`。頭の check は一度、機械の不具合（新しい PowerShell が起動しない）で止まり、直ってから回して **OK**（2026-11-18 夜、前の節の次の一手 0）
 
 **現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。公平な台 15 台の正解・`docs/fair-sets.tsv` も変えていない。REQUESTS に `fixed` なし、種は全部 triage 済み。Wuerst は**今の読み手で一度も読んでいない**（`-Reserve` だけ）。予備の台 3 台（Krause・Kücken・Wuerst）の正解がそろった。オーナーの返事待ちは Kücken 4 か所・Wuerst 1 か所。

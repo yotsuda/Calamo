@@ -22,7 +22,10 @@ function Norm([string]$bar) {
     return ([regex]::Replace($t, '\s+', ' ')).Trim()
 }
 
-$seeds = Get-ChildItem $SeedRoot -Directory | Where-Object { Test-Path "$($_.FullName)\seed.json" } | Sort-Object Name
+# (a seed reported from a truth's review copy, out\truth-review\<set>\, is the owner's answer to a truth question,
+# not a misreading: its page is a reserve set's or a fair set's, which this reader must not read (ROADMAP §0) -- left out)
+$seeds = Get-ChildItem $SeedRoot -Directory | Where-Object { Test-Path "$($_.FullName)\seed.json" } | Sort-Object Name |
+    Where-Object { (Get-Content "$($_.FullName)\seed.json" -Raw | ConvertFrom-Json).lysWas -notmatch '[\\/]out[\\/]truth-review[\\/]' }
 $read = @{}      # page image's hash -> the reading's folder
 $rows = foreach ($dir in $seeds) {
     $s = Get-Content "$($dir.FullName)\seed.json" -Raw | ConvertFrom-Json
