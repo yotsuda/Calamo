@@ -1,0 +1,20 @@
+// Repro (2026-11-19): a small, black, SOUNDING head on a chord's stem cannot be written.
+// Kuecken Op.47-3 bar 70 (Fr. Kistner 1711): a two-note tremolo between a white chord and a white note; the chord's
+// stem carries one more head, small and black, at the pitch of the tremolo's other end (gis' / e) -- read as that
+// pitch struck once with the chord at the ffp, the tremolo then going between the chord and the note.
+// The nearest the grammar has: the pitch inside the chord at full size (drawn white, sounding on every stroke).
+// cue { } draws small notes but is silent and has a stem of its own; @notehead(...) changes the shape, not the size.
+octave absolute
+time 6/8
+key b major
+part rh { clef treble }
+part lh { clef bass }
+section A {
+  rh {
+    repeat tremolo 24 { <gis cis' gis'>64 gis'64 } |
+  }
+  lh {
+    repeat tremolo 24 { <e, e>64 e64 } |
+  }
+}
+score { staff rh staff lh }
