@@ -1,0 +1,15 @@
+// Repro (2026-11-19): a pedal released at the end of a two-note tremolo. Kuecken Op.47-3 bar 66, left hand (6/8).
+// '@!sustain' after the tremolo's block is an error; on the second note inside it, lysc's MIDI lifts the pedal one 64th
+// into the tremolo (LilyPond: at the written second head, 3/16 in). Needs a lysc with the beat repeat (b3dce0d24).
+octave absolute
+time 6/8
+key b major
+part lh { clef bass }
+
+section A {
+  lh {
+    <fis fis,>16@stemDown@sustain <fis b>64[ dis'64 <fis b>64 dis'64] { <fis b>64[ dis'64 <fis b>64 dis'64] } % % % repeat tremolo 12 { <fis b>64 dis'64@!sustain } |
+  }
+}
+
+score { staff lh }
