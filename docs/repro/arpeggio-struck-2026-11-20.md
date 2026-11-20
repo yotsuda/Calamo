@@ -46,4 +46,4 @@ Kücken Op.47-3（Fr. Kistner 1711）の 6 頁 70 小節の右手（6/8、ロ長
 
 ## 状態
 
-open（REQUESTS.md の 32 の行）
+done（Lily# `de115df63`: `@arpeggio` は既定で `@struck` の音を含めない。Kücken の正解の 70 小節に書いた、2026-11-20）
