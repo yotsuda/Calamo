@@ -44,4 +44,4 @@ Kücken Op.47-3（Fr. Kistner 1711）の 6 頁 70 小節（6/8、ロ長調、**f
 
 ## 状態
 
-open（REQUESTS.md の 31 の行）
+done（Lily# `e3f0310ce` の `@struck`。Kücken の正解の 70 小節に書いた、2026-11-20）

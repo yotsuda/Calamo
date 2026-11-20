@@ -12,7 +12,7 @@ param(
     [string]$Homr = '',                     # also score homr's MusicXML, <Homr>\<set>\pNN.musicxml (run as a program elsewhere: C:\MyProj\omr-compare\scripts\run-homr-fair.ps1)
     [switch]$Reserve,                       # (-Fair) the reserve sets instead (data/fair/<piece>/RESERVE.md): Audiveris and homr only, never this reader
     [string]$Lysc = 'C:\MyProj\LilySharp\LilySharp.Cli\bin\Release\net10.0\lysc.exe', # turns the truth into MusicXML (and draws for -Verify);
-                                            # a newer build when a truth uses what the Release one cannot read yet (Kuecken's beat repeat, 2026-11-19)
+                                            # a newer build when a truth uses what the Release one cannot read yet (Kuecken's beat repeat and @struck, 2026-11-19/20)
     [double]$Upscale = 1.0                  # scale the pages up to this, as far as -MaxPixels allows: Audiveris drops a page whose staff
                                             # spacing is about 10 px ("interline too low", Wuerst's 1500 px wide scan) -- 2.5 makes it 25.
                                             # (pages already made stay as they were under -Reuse: run without it once)
