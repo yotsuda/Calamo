@@ -1,0 +1,24 @@
+// Repro (2026-11-20): a chord repeated in eighths, written once with one stroke on its stem (<...>2.:8), under a slur
+// with one dot for each stroke (six dots in 6/8) -- the strokes played portato. Kuecken Op.47-3 (Fr. Kistner 1711)
+// bar 73 right hand, bars 78-79 left hand; the bars after them (74-76, 82) have the stroke but not the sign.
+// Bar 1: what the grammar has, the stroke alone (no sign).
+// Bar 2: @portato on it -- tried, see the request for what it draws.
+// Bar 3: the same music written out, the meaning of the sign (six eighths, a slur and a dot on each).
+octave absolute
+time 6/8
+key b major
+part rh { clef treble }
+part lh { clef bass }
+section A {
+  rh {
+    <fis b dis' fis'>2.:8 |
+    <fis b dis' fis'>2.:8@portato |
+    <fis b dis' fis'>8@staccato( <fis b dis' fis'>8@staccato <fis b dis' fis'>8@staccato <fis b dis' fis'>8@staccato <fis b dis' fis'>8@staccato <fis b dis' fis'>8@staccato) |
+  }
+  lh {
+    <b, dis fis b>2.:8 |
+    <b, dis fis b>2.:8 |
+    <b, dis fis b>2.:8 |
+  }
+}
+score { staff rh staff lh }
