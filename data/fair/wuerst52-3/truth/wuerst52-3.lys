@@ -4,7 +4,8 @@
 // Heads named against their own staff lines and ledger lines (zoomed; the scan is 1500 px wide with thin, faint staff
 // lines: staves.py needs RULED_DARK=200 RULED_ROW=0.12). This print puts the dot of a head on a line in the space
 // below as often as above, so the dots do not settle a head's step. Lyrics, dynamics, slurs and articulations are not
-// written. A head two voices share is written once (in the voice whose stem the beam or flag belongs to).
+// written. A head two voices share (stems both ways, or one voice's beam and the other's flag) is written in both voices
+// (ROADMAP §0, owner 2026-11-20): bars 0 and 22, the last g' of the right hand's pickup figure.
 // Written to the end (2026-11-18, bars 0-50) and checked against homr (docs/truth-review/wuerst52-3.md; Audiveris reads
 // page 1 only). Page 4's ossia (a small staff
 // above the voice in bars 46-47, "Wer's nur ja") is an alternative and is not written. Bars 22-27 repeat bars 1-6 and
@@ -33,7 +34,7 @@ section A {
     r2. r4 g'8 ||
   }
   rh {
-    voice { g''8 ees''8 g'8 } { g'4 s8 } |
+    voice { g''8 ees''8 g'8 } { g'4 g'8 } |
     voice { c''4. bes'4. r4 r8 } { aes'2. s4. } |
     voice { r2. aes''8 f''8 d''8 } { s2. aes'4. } |
     <f' f''>4. <e' e''>4. r4 r8 |
@@ -116,7 +117,7 @@ section D {
     voice { d''4. ees''4 ees''8 f''4. bes'4. } { <aes' ces''>4. <aes' ces''>4 <aes' ces''>8 <aes' ces''>4. aes'4. } |
     voice { <g' bes'>4. bes'8 f''8 ees''8 <d' b'>4 <ees' c''>8 f'8 d''8 c''8 } { s4. g'4. s4. ees'4. } |
     <d' f'>2. <bes ees'>4 fis'8 g'8 bes'8 ees''8 || pageBreak
-    voice { g''8 ees''8 g'8 c''4. bes'4. r4 r8 } { g'4 s8 aes'2. s4. } ||
+    voice { g''8 ees''8 g'8 c''4. bes'4. r4 r8 } { g'4 g'8 aes'2. s4. } ||
   }
   lh {
     <g, d b>2.~ <g, d b>4 r8 r4 r8 |
