@@ -52,4 +52,4 @@ Kücken Op.47-3（Fr. Kistner 1711）の 6 頁。
 
 ## 状態
 
-open（REQUESTS.md の 33 の行）
+done（Lily# `d0bd67b49`: 打ち直しに付けた `@portato` は弧と打つ回数の点。Kücken の正解の 73・78・79 小節に書いた、2026-11-20）

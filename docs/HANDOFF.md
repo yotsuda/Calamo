@@ -36,7 +36,7 @@
 
 **追記（2026-11-20）**: REQUESTS 31 は Lily# `e3f0310ce` で fixed（和音の 1 音に付ける **`@struck`**＝小さい黒い頭・トレモロの最初の一打だけ鳴る）。正解の 70 小節に `<gis cis' gis'@struck>64 gis'64`・`<e, e@struck>64 e64` と書いた（オーナーが見直し中の写しには触っていない）。Release の lysc（11-18）には無いので、採点は master から作った lysc を `-Lysc` で渡す（scratchpad `lys-737c`。紙と同じ絵を確かめた）。Kücken の採点は正解 2494 音・homr 2204（88.4%）で変わらず。正解と md は見直しが終わるまでコミットしない。
 同日、オーナーの指摘: 70 小節右手の和音に**アルペッジョ**（白い頭 2 つにだけ、`@struck` の gis' にはかからない）。正解に書き落としていた。`@arpeggio` は和音全体にかかり gis' まで伸びる（LilyPond も同じ）ので、オーナーの指示で **REQUESTS 32**（`docs/repro/arpeggio-struck-2026-11-20.md`）を出した。→ Lily# `de115df63` で fixed（`@arpeggio` は既定で `@struck` の音を含めない）。正解に `<gis cis' gis'@struck>64@arpeggio` と書いた。採点に渡す lysc は `de115df63` から作ったもの（scratchpad `lys-de11`）に替えた。
-同日、t4（73 小節の横棒 1 本）: 和音の上の「弧と点 6 つ」（ポルタート、点の数＝打つ回数）が 8 分 6 回と合うので、`2.:8` で正しい。同じ記号は 78・79 小節の左手にも。印は書けないので、オーナーの指示（A）で **REQUESTS 33**（`docs/repro/tremolo-portato-2026-11-20.md`）を出した。回答を待って正解に書く。
+同日、t4（73 小節の横棒 1 本）: 和音の上の「弧と点 6 つ」（ポルタート、点の数＝打つ回数）が 8 分 6 回と合うので、`2.:8` で正しい。同じ記号は 78・79 小節の左手にも。印は書けないので、オーナーの指示（A）で **REQUESTS 33**（`docs/repro/tremolo-portato-2026-11-20.md`）を出した。→ Lily# `d0bd67b49` で fixed。正解の 73・78・79 小節に `2.:8@portato` と書いた。採点に渡す lysc は `d0bd67b49` から作ったもの（scratchpad `lys-d0bd`）に替えた。あわせて Lily# は打ち直しを 1 打ずつ鳴らすようにした（MIDI だけ。採点の MusicXML は変わらない）。
 
 **次の一手**（ROADMAP §0「本線の順番」の言葉で）:
 0. **Kücken の見直しの返事を待つ**（t2・t3 は `@struck` で正解に書き済み）。来たら写し（オーナーの版）と正解を突き合わせ、t1〜t4 を正解に移して `docs/truth-review/kuecken47-3.md` に書き、正解と md をコミットする。そのあと Kücken にも今回の 3 つの手がかりを当てる（`cancels.py` は Kücken で 32 か所出ている）。
