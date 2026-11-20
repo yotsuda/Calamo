@@ -64,7 +64,7 @@ section A {
     <bes' d''>8 <a' c''>8 <g' bes'>8 <a' c''>8 <bes' d''>8 g'8 |
     s2 g'8( c''8~ |
     <g' c'' g''>2) r4 |
-    voice { s4 fis'8 d''8~ <fis' d''>4 } { r8 c'8 c'4~ c'4 } || break
+    voice { s4 fis'8 d''8~ d''4 } { r8 c'8 <c' fis'>4~ <c' fis'>4 } || break
   }
   lh {
     voice { r4 d2 } { g,2. } |
@@ -146,7 +146,7 @@ section B {
     s2. | break
     s2. |
     s2. |
-    s4 e'8( ais'8 g'8 e'8 |
+    voice { s4 e'8( ais'8 g'8 e'8 } { s4. ais'4. } |
     ais'2.) | break
     s2. |
     s2. |
@@ -167,7 +167,7 @@ section B {
     voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } |
     voice { r8 a8 dis'8 a'8 fis'8 dis'8 } { s4 a2 } { <e, c>2. } |
     voice { r8 g8 b8 g'8 fis'8 e'8 } { s4 g2 } { <e, b,>2. } |
-    voice { r8 a8 c'8 fis'8 e'8 c'8 } { <d, c>2. } | break
+    voice { r8 a8 c'8 fis'8 e'8 c'8 } { <c, c>2. } | break
     voice { r8 e8 g8 c'8 b8 g8 } { <b,, b,>2. } |
     voice { r8 fis8 a8 c'8 b8 a8 } { <b,, b,>2. } |
     voice { r8 g8~ <g b>8 g'8 fis'8 dis'8 } { s4 g4 a4 } { <e, b,>2. } |

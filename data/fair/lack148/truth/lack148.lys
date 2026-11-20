@@ -34,7 +34,7 @@ section Piece {
     c''8( bes''8 aes''8 f''8 ges''8 ees''8) |
     r8 des''4( f''4@cresc des'''8 |
     c'''8@!cresc bes''8 f''8 aes''8 ges''8 ees''8) |
-    c''8@text("rallentando")( des''8@decresc aes'8 f'8) tuplet 3/2 { des'8( ees'8@!decresc ges'8 } |
+    voice { c''8@text("rallentando")( des''8@decresc aes'8 f'8) tuplet 3/2 { des'8( ees'8@!decresc ges'8 } } { s2 des'4 } |
     voice { f'4)~ f'8 ees'8 des'4 } { des'4 <ges c'>4( f4) } || clef bass pageBreak
     r8 d4@p ees4 e8 |
     f8( aes8 c'8 g'8) <g des' f'>4 |

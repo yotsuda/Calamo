@@ -107,7 +107,7 @@ section A {
     r2 f2 |
     e2 ees2 |
     <a, d>2@pp <a,, a,>4 r4 | pageBreak
-    voice { r2 d'2 } { s4 a16 fis16 e16 d16 fis4 f4 } { s2 b,2 } |
+    voice { r2 d'2 } { s4 a16 fis16 e16 d16 fis4 f4 } { s2 <b, d>2 } |
     voice { <g c'>4 <a d'>4 <c, c g bes e'>2 } { <c f>2 s2 } ||
   }
 }
@@ -199,7 +199,7 @@ section C {
     <aes,, aes,>2. |
     <bes,, bes,>2. |
     <ces, ces>2 <ces, ces>8 r8 | break
-    aes,4 <ges, bes,>4 <f, b,>4 |
+    voice { aes,4 bes,4 b,4 } { aes,4 ges,4 f,4 } |
     voice { c4 ees4 c4 } { ees,2. } |
     voice { bes,2 ees4 } { ees,2. } |
     voice { ees4 c8 ees8 aes8. s16 } { aes,4 r4 r4 } ||
@@ -271,7 +271,7 @@ section E {
     ees2 ees2 |
     <a, d>2 <a,, a,>4 r4 |
     R1 |
-    voice { r2 d'2 } { s4 a16 fis16 e16 d16 fis4 f4 } { s2 b,2 } | break
+    voice { r2 d'2 } { s4 a16 fis16 e16 d16 fis4 f4 } { s2 <b, d>2 } | break
     voice { <g c'>4 <a d'>4 <c, c g bes e'>2 } { <c f>2 s2 } ||
   }
 }

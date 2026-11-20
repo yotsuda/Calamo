@@ -1,7 +1,9 @@
 // The truth of the fair set (S59) for Woldemar Bargiel, 8 Pianofortestücke Op.41 No.1 (Tempo di Menuetto): written
 // from the Breitkopf & Härtel print (IMSLP #16043, data/fair/bargiel41-1/breitkopf), bar by bar, and checked against
 // the Schirmer print (IMSLP #07475, data/fair/bargiel41-1/schirmer) where the Breitkopf scan was unclear: the same
-// notes, so one truth serves both. Never to debug the reader on.
+// notes but one: bar 46 (counting the upbeat as bar 1), whose first chord is <g bes g'> here and <g bes ees'> in
+// Schirmer, which has its own truth for that (truth-schirmer/, otherwise the same: keep the two alike). Never to
+// debug the reader on.
 // As the print has them: the left hand is silent (no rests printed) where it holds nothing; the pedal's marks under
 // those bars ride on spacers. Bars 25-26 and 58: the flats on aes'/aes'' and the natural on f'' are courtesy signs.
 // Accents and staccatos: the first statement's are written as seen; on the repeats only those seen at a glance.
@@ -56,7 +58,7 @@ section Piece {
     voice { <bes' ees'' g''>4 <f' aes' aes''>8 <ees' g' g''>8 <d' f' f''>8 <ees' g' g''>8 } { bes2. } |
     voice { <aes' d'' aes''>2 <c'' d'' c'''>4 } { f'8 bes8 f'8 bes8 aes'8 bes8~ } |
     voice { <g' bes' ees'' bes''>4@accent) bes8@staccato bes8@staccato bes8@staccato bes8@staccato } { bes4 s2 } | break
-    voice { <g bes ees'>4 <ees'' g''>8( g'8 <ees'' g''>8 g'8 } { s4 bes'8 bes8 bes'8 bes8~ } |
+    voice { <g ees'>4 <ees'' g''>8( g'8 <ees'' g''>8 g'8 } { s4 bes'8 bes8 bes'8 bes8~ } |
     voice { <bes' ees'' g''>4 <f' aes' aes''>8 <ees' g' g''>8 <d' f' f''>8 <ees' g' g''>8 } { bes2. } |
     voice { <aes' d'' aes''>2 <aes' f''>4 } { f'8 bes8 f'8 bes8 d'8 bes8 } |
     voice { <ees' g' ees''>4) s2 } { s2. } |
@@ -64,7 +66,7 @@ section Piece {
     voice { <aes' d'' aes''>2 <f' f''>4) } { <bes f'>4 s2 } |
     <g ees' g'>4 <g' bes' bes''>8( <f' aes' aes''>8 <ees' g' g''>8 <f' aes' aes''>8 |
     voice { <bes' ees'' bes''>2 <g' g''>4) } { <bes g'>4 s2 } | pageBreak
-    voice { <g bes ees'>4 <ees'' g''>8( g'8 <ees'' g''>8 g'8 } { s4 bes'8 bes8 bes'8 bes8~ } |
+    voice { <g bes g'>4 <ees'' g''>8( g'8 <ees'' g''>8 g'8 } { s4 bes'8 bes8 bes'8 bes8~ } |
     voice { <bes' ees'' g''>4 <f' aes' aes''>8 <ees' g' g''>8 <d' f' f''>8 <ees' g' g''>8 } { bes2. } |
     voice { <aes' d'' aes''>2 <aes' f''>4 } { f'8 bes8 f'8 bes8 d'8 bes8 } |
     voice { ees''2) ees''8(@text("dolce") d''8 } { g'2. } |
