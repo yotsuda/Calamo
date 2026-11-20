@@ -151,7 +151,7 @@ section C {
     a'4.~ a'8 r8 d''8 | break
     d''4 cis''8 fis'4 cis''8 |
     cis''4. b'4 b'8 |
-    e''4. b'8 b'8 acciaccatura { ais'8 } b'8 | pageBreak
+    e''4 b'8 b'8 ais'8 b'8 | pageBreak
     cis''4.~ cis''8 r8 fis'8 |
     fis'4 fis'8 fis'4 fis'8 |
     g'4. g'4 r8 |
@@ -254,7 +254,7 @@ section D {
     repeat tremolo 12 { <gis b dis'>64 gis'64 } repeat tremolo 12 { <gis cis' e'>64 gis'64 } |
     repeat tremolo 12 { <fisis ais dis'>64 fisis'64 } repeat tremolo 12 { <ais e'>64 fis'64 } |
     repeat tremolo 24 { <fis b dis'>64 fis'64 } |
-    <gis bis gis'>4:64 <gis dis' gis'>8:64 <gis e' gis'>8:64 <gis b fis'>8:64 <gis cis' e'>8:64 |
+    <gis bis gis'>4:64 <gis dis' gis'>8:64 <gis e' gis'>8:64 <gis bis fis'>8:64 <gis cis' e'>8:64 |
     <b dis'>16 r16 r8 <b' b''>8 <ais' ais''>4 <b' b''>8 | break
     r8 <d'' d'''>8 <cis'' cis'''>8 <cis'' cis'''>8 <b' b''>8 r8 |
     r4 <b' b''>8 <ais' ais''>4 <b' b''>8 |
