@@ -259,10 +259,10 @@ section D {
     r8 <d'' d'''>8 <cis'' cis'''>8 <cis'' cis'''>8 <b' b''>8 r8 |
     r4 <b' b''>8 <ais' ais''>4 <b' b''>8 |
     r8 <dis'' dis'''>8 <cis'' cis'''>8 <cis'' cis'''>8 <bis' bis''>8 r8 |
-    repeat tremolo 24 { <gis cis' gis'>64 gis'64 } |
+    repeat tremolo 24 { <gis cis' gis'@struck>64@arpeggio gis'64 } |
     repeat tremolo 12 { <b dis'>64 fis'64 } repeat tremolo 12 { <b d'>64 f'64 } |
     repeat tremolo 12 { <bis dis'>64 fis'64 } <ais e' fis'>4. | break
-    <fis b dis' fis'>2.:8 |
+    <fis b dis' fis'>2.:8@portato |
     <g b d' g'>2.:8 |
     <fis b dis' fis'>2.:8 |
     <g b d' g'>2.:8 |
@@ -282,11 +282,11 @@ section D {
     repeat tremolo 12 { dis,64 dis64 } repeat tremolo 12 { fis,,64 fis,64 } |
     repeat tremolo 24 { <b,, dis, fis,>64 b,64 } |
     <gis,, gis,>4:64 <bis,, bis,>8:64 <cis, cis>8:64 <dis, dis>8:64 <e, e>8:64 |
-    fis16 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 <fis b>64 dis'64 repeat tremolo 6 { <fis b>64 dis'64 } repeat tremolo 12 { <fis b>64 dis'64 } | break
+    <fis fis,>16@stemDown <fis b>64[ dis'64 <fis b>64 dis'64] { <fis b>64[ dis'64 <fis b>64 dis'64] } % % % repeat tremolo 12 { <fis b>64 dis'64 } | break
     repeat tremolo 24 { <eis gis b>64 d'64 } |
     repeat tremolo 24 { <fis b>64 dis'64 } |
     repeat tremolo 12 { <fisis ais>64 dis'64 } repeat tremolo 12 { <fis bis>64 dis'64 } |
-    repeat tremolo 24 { <e, e>64 e64 } |
+    repeat tremolo 24 { <e, e@struck>64@stemDown e64@stemDown } |
     repeat tremolo 12 { fis,64 fis64 } <gis, gis>4 <g, g>8 |
     <fis, fis>4. <fis, fis>4. | break
     voice { b,4 r8 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 } { b,,4 r8 r4 r8 } |
@@ -294,8 +294,8 @@ section D {
     voice { b,4 r8 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 g,32 fis,32 } { b,,4 r8 r4 r8 } |
     <g,, g,>2. |
     <b,, b,>4. <b, dis fis b>8 <b, dis fis b>8 <b, dis fis b>8 | break
-    <b, dis fis b>2.:8 |
-    <b, dis fis b>2.:8 |
+    <b, dis fis b>2.:8@portato |
+    <b, dis fis b>2.:8@portato |
     <gis, gis>8 <gis b dis'>8 <gis b dis'>8 <e g b e'>8 <e g b e'>8 <e g b e'>8 |
     <b, b>8 r8 fis8 gis4 fis8 |
     dis4 fis,8 gis,8 fis,8 dis,8 |
