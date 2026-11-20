@@ -40,4 +40,4 @@ LilyPond どおりの既定の絵は不具合ではない。
 
 ## 状態
 
-open（REQUESTS.md の 28 の行）
+done（Lily# `970e47f6d` の `layout { tremoloBeams joined }`／`--set tremoloBeams=joined`。再現譜で線が両方の符幹につながることを確かめた、2026-11-20、`out/repro/fixed-2026-11-20-r28/`）
