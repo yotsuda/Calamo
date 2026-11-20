@@ -1,0 +1,19 @@
+// Repro (2026-11-20): an arpeggio beside a chord's held members only, not its @struck one.
+// Kuecken Op.47-3 bar 70 (Fr. Kistner 1711), right hand: the wavy line stands beside the two white heads (gis, cis')
+// and stops below the small black gis' on the same stem (@struck, request 31). The left hand has no arpeggio.
+// What lysc (master 737c8dfb2) does with @arpeggio here: the line runs up beside the small gis' too, and the
+// MusicXML puts <arpeggiate> on the gis' as well.
+octave absolute
+time 6/8
+key b major
+part rh { clef treble }
+part lh { clef bass }
+section A {
+  rh {
+    repeat tremolo 24 { <gis cis' gis'@struck>64@arpeggio gis'64 } |
+  }
+  lh {
+    repeat tremolo 24 { <e, e@struck>64 e64 } |
+  }
+}
+score { staff rh staff lh }
