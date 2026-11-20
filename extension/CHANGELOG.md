@@ -4,6 +4,20 @@ Notable changes to Calamo (formerly Lily# Scan Import) are recorded here, newest
 taken from this file: the topmost section is the version being tagged, and the release
 workflow (`.github/workflows/release.yml`) attaches that section to the GitHub Release.
 
+## 0.7.0
+
+- **Triplets with no number.** Where a bar does not fill as read, each voice that runs too long is read again, and a run of it that makes a triplet is taken as one. A printed tuplet's group must last a whole beat; a 3 printed between the two staves goes to the staff whose bar it fills.
+- **Tuplets on old prints**: a bracket whose hook is missing is traced on the page, a 3 over unbeamed notes groups them with their neighbours, a 3 on a triplet's middle stem under a slur is read, and the short halves of a bracket are no longer taken for letters beside its number.
+- **Minor keys.** A stretch whose notes are clearly in the relative minor is written in the minor key.
+- **Octave lines on old prints**: a bare "8 - - -", a faint italic 8, and a hook with a staccato dot touching its foot.
+- **Slurs across the staves** are written where one stroke joins the two ends. An arc through a stem no longer starts at the stem, and a slur over a doubled tune closes in the voice it opened in.
+- **Fewer false clefs and notes**: a custos at a staff's end, a beat-repeat sign or an arpeggio's wave half-seen as a clef, a dot by a stem's tip taken for a flag, a long upright stroke taken for a rest.
+- **Dots and rests**: a note may take a second dot; a rest's dot set out in line with another voice's dots goes back to the rest; a rest's ledger line off the staff is placed right.
+- **Keys and time signatures**: a flat before a grace note just after the clef is the note's, not a key on that staff alone; the staves of a system agree on their key; where the staves read different lower figures of a time signature, the one the bars fill wins.
+- A grace-sized head as large as the page's other heads is read as a note.
+- Lyrics are written in Lily#'s new form, a `lyrics` track of words alone placed under its staff by the score. Lily# 0.16.0 reads it as before.
+- A new icon: the fermata, in green.
+
 ## 0.6.0
 
 - **Renamed from Lily# Scan Import to Calamo**, the reed pen a copyist writes with: the extension id is now `yotsuda.calamo`. Lily# looks for the new id from 0.16.0, so install the two together; the old extension can then be uninstalled.

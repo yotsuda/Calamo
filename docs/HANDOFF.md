@@ -2,6 +2,21 @@
 
 ゴールとワークストリームは [ROADMAP.md](ROADMAP.md) にある。このファイルは毎セッションの終わりに書き換える。
 
+## Calamo 0.7.0 の準備（版と CHANGELOG）。タグと push はまだ（2026-11-20 深夜、オーナー「v0.7.0 をリリースしたい」）
+
+**現在地**: 版を 0.7.0 にした（`extension/package.json`、`src/Omr/ReadCommand.cs` の `Version`）。`extension/CHANGELOG.md` に 0.7.0 の節を足した（v0.6.0 以降の読み手のコミットから、利用者向けにまとめた）。読み手は版の文字列だけ変えた。検出器は detector42 のまま。
+
+**確かめたこと**:
+- check（規則）: `out/s121/check-release.log` **OK（0 better・nothing worse）**。
+- `tools/pack-extension.ps1` で `out/extension/calamo-win32-x64-0.7.0.vsix`（52.4 MB）を作った。`bin/calamo.json` は 0.7.0。
+- 歌詞の新しい書き方（`lyrics NAME { … }` と score の行 `lyrics NAME`、`sings` なし）は Lily# 0.17.0（未公開）の文法。**公開済みの Lily# 0.16.0 の lysc**（VS Code の拡張の `server\lysc.exe`）でも、今の読み手の `.lys`（lied-boulanger-clairieres02-ms）は誤りなしで描け、歌詞も出た。README と CHANGELOG の「Lily# 0.16.0 以上」はそのままでよい。
+- 評価台は 0.6.0 の 55445 → 今の読み手 55622（`docs/eval-sets.tsv`、11-17）。
+
+**次の一手**（オーナー）:
+1. main（origin より先）を push し、`release.yml` を手動で走らせて（workflow_dispatch）通ることを見る。
+2. `git tag v0.7.0` → `git push origin v0.7.0` で GitHub Release と Marketplace へ。
+3. （任意）実際の VS Code で Lily# から Calamo を呼ぶ通しの操作は、0.6.0 に続きまだ確かめていない。
+
 ## 公平な台の ⑶ の残り（Audiveris と homr が同じ組を読んで正解と割れる小節）を原本で見終えた。**正解の誤り 9 か所・版の違い 1 か所を直し、共有の頭 6 か所を 2 回の書き方にした**。正解 13999 → 14004 音、今の読み手 12522 → **12539（89.5%）**、homr 13085 → **13098（93.5%）**（2026-11-20 夜、前の節の次の一手 0）
 
 **現在地**: 検出器は detector42 のまま。**読み手は 1 行も変えていない**。公平な台の正解 5 曲（Buck・Bargiel・Hildach・Lack・Puget）と `docs/fair-sets.tsv` を変えた。Bargiel に Schirmer 版の正解 `data/fair/bargiel41-1/truth-schirmer/` を新しく置いた（46 小節の 1 音だけ版で違う。2 つの正解はそろえて保つ）。REQUESTS に `fixed` なし、種は全部 triage 済み。
